@@ -515,8 +515,11 @@ struct PrismaTestedModel
 static const PrismaTestedModel s_PrismaTestedModels[] = {
     { "0x92", "Prisma Smart" },
     { "0x91", "Prisma Soft" },
-    {"22" , "prisma25S" },
-    {"23" , "prisma25ST" },
+    { "10"  , "prisma20A" },
+    { "0x0a", "prisma20A" },
+    { "0x0A", "prisma20A" },
+    { "22"  , "prisma25S" },
+    { "23"  , "prisma25ST" },
     { "", ""}
 };
 
@@ -781,6 +784,11 @@ MachineInfo PrismaLoader::PeekInfoFromPrismaLineConfig(const QString & selectedP
     if (info.serial.isEmpty()) {
         qWarning() << "device.xml in" << prismaLineConfigFile.fileName() << "has no DeviceSerialNumber";
         return MachineInfo();
+    }
+
+    QDomNodeList fwList = root.elementsByTagName("FWVersion");
+    if (!fwList.isEmpty() && fwList.item(0).attributes().count() > 0) {
+        info.series = fwList.item(0).attributes().item(0).nodeValue();
     }
 
     // TODO AXT load props

@@ -695,14 +695,31 @@ void Machine::setInfo(MachineInfo inf)
     // Profile::storeMachinesToDatabase() both skip machines that already have a database id.
     // Without this, a stale DB data_version makes Profile::DataFormatError()'s "needs upgrade"
     // prompt reappear on every subsequent launch even after the user has upgraded.
-    if (m_database_id > 0 && info.version != oldVersion) {
+    if (m_database_id > 0) {
         MachineRepository repo;
         MachineData data = repo.findById(m_database_id);
-        if (data.id > 0 && data.dataVersion != info.version) {
-            data.dataVersion = info.version;
-            repo.update(data);
-            qDebug() << "Machine::setInfo(): Persisted version bump for" << info.loadername << info.serial
-                     << "from" << oldVersion << "to" << info.version;
+        if (data.id > 0) {
+            bool needsUpdate = false;
+            if (data.dataVersion != info.version) {
+                data.dataVersion = info.version;
+                needsUpdate = true;
+                qDebug() << "Machine::setInfo(): Persisted version bump for" << info.loadername << info.serial
+                         << "from" << oldVersion << "to" << info.version;
+            }
+            if ((data.model.isEmpty() || data.model.contains("Unknown", Qt::CaseInsensitive)) &&
+                !info.model.isEmpty() && !info.model.contains("Unknown", Qt::CaseInsensitive)) {
+                data.model = info.model;
+                needsUpdate = true;
+                qDebug() << "Machine::setInfo(): Persisted model name update for" << info.loadername << info.serial
+                         << "to" << info.model;
+            }
+            if (data.series.isEmpty() && !info.series.isEmpty()) {
+                data.series = info.series;
+                needsUpdate = true;
+            }
+            if (needsUpdate) {
+                repo.update(data);
+            }
         }
     }
 }
