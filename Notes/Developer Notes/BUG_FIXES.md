@@ -6477,3 +6477,37 @@ session there was stored before `bede825f`.
 
 The accumulator is now `EventDataType`. The event-list path stores the same `sum` into
 `m_cnt`, which is already an `EventDataType` hash, so nothing else changes.
+
+## 2026-09-18 - Prisma LINE config parsing: junk machines, miniz leak, unchecked extracts (#294)
+
+Found while reviewing !43. `PrismaLoader::PeekInfoFromPrismaLineConfig()` initialised its
+result from `newInfo()` (type already `MT_CPAP`) and returned that same object when
+`config.pcfg` could not be opened or was not a valid zip, so `Open()`'s
+`info.type == MT_UNKNOWN` guard never fired for a LINE card. A corrupt or truncated
+`config.pcfg` therefore produced `serial=""`, `model="Unknown Model"`, and `Open()` went on
+to `CreateMachineFromInfo()` -> `SaveToDatabase()`, which only rejects a record when serial
+*and* model are empty - leaving a Prisma machine row with an empty serial in `machines`.
+The SMART branch of `PeekInfoFromConfig()` already returned `MachineInfo()` on failure.
+
+Two more problems in the same function: `mz_zip_reader_end()` was never called after
+`mz_zip_reader_init_mem()`, leaking the reader's heap state on every call; and the result
+of `mz_zip_reader_extract_file_to_heap()` was not NULL-checked, so a zip without
+`mnt/flash/conf/device.xml` built a `QByteArray` from a null pointer and an uninitialised
+size, then parsed an empty document without any diagnostic.
+
+Every failure path (open, zip init, missing `device.xml`, invalid XML, missing
+`DeviceSerialNumber`) now logs a warning and returns `MachineInfo()`, and the reader is
+ended as soon as the member has been extracted.
+
+Two related defects fixed at the same time:
+
+- `PeekInfo()` passed `<card>/config.pscfg` into `PeekInfoFromConfig()`, which appends the
+  config filename itself, so it looked for `<card>/config.pscfg/config.pscfg` and always
+  returned an empty `MachineInfo`. The "CPAP Data Located" prompt therefore never showed a
+  Prisma model/serial, and the "different SD card" warning could never trigger for Prisma.
+  It now passes the card root.
+- `Open()`'s `therapy.pdat` loop had the same unchecked extract: a session with only an
+  event file or only a signal file (`eventFiles[sid]` / `signalFiles[sid]` defaulting to an
+  empty name) or a member that fails to extract produced the same null-pointer
+  `QByteArray`. Missing or unextractable members now yield an empty buffer, which
+  `PrismaImport::run()` already handles, matching the directory-based `ImportDataDir()`.

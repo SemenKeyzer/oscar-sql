@@ -677,15 +677,25 @@ int PrismaLoader::Open(const QString & selectedPath)
         }
         qDebug() << sessions;
 
+        // Extract one archive member, or return an empty QByteArray when it is absent (a session
+        // may have only an event or only a signal file). PrismaImport::run() copes with empty
+        // buffers, exactly as it does for the directory-based import in ImportDataDir().
+        auto extractMember = [&zip_archive](const QString & name) -> QByteArray {
+            if (name.isEmpty()) return QByteArray();
+            size_t uncomp_size = 0;
+            void *extracted = mz_zip_reader_extract_file_to_heap(&zip_archive, name.toLocal8Bit(), &uncomp_size, 0);
+            if (extracted == nullptr) {
+                qWarning() << "Could not extract" << name << "from therapy archive";
+                return QByteArray();
+            }
+            QByteArray data((const char*)extracted, static_cast<qsizetype>(uncomp_size));
+            free(extracted);
+            return data;
+        };
+
         for(auto & sid : sessions) {
-            size_t uncomp_size_events;
-            void *extract_events = mz_zip_reader_extract_file_to_heap(&zip_archive, eventFiles[sid].toLocal8Bit(), &uncomp_size_events, 0);
-            QByteArray eventData((const char*)extract_events, uncomp_size_events);
-            free(extract_events);
-            size_t uncomp_size_signals;
-            void *extract_signals = mz_zip_reader_extract_file_to_heap(&zip_archive, signalFiles[sid].toLocal8Bit(), &uncomp_size_signals, 0);
-            QByteArray signalData((const char*)extract_signals, uncomp_size_signals);
-            free(extract_signals);
+            QByteArray eventData = extractMember(eventFiles.value(sid));
+            QByteArray signalData = extractMember(signalFiles.value(sid));
             queTask(new PrismaImport(this, info,  sid, eventData, signalData));
         }
         mz_zip_reader_end(&zip_archive);
@@ -716,45 +726,62 @@ MachineInfo PrismaLoader::PeekInfo(const QString & selectedPath)
     if (!Detect(selectedPath))
         return MachineInfo();
 
-    return PeekInfoFromConfig(selectedPath + QDir::separator() + PRISMA_SMART_CONFIG_FILE);
+    // PeekInfoFromConfig() expects the card's root folder and locates the config file itself.
+    return PeekInfoFromConfig(selectedPath);
 }
 
-MachineInfo PrismaLoader::PeekInfoFromPrismaLineConfig(const QString & selectedPath){
+MachineInfo PrismaLoader::PeekInfoFromPrismaLineConfig(const QString & selectedPath)
+{
+    // Every failure path returns a default-constructed MachineInfo (type MT_UNKNOWN) so that
+    // Open() rejects the card instead of creating a machine with an empty serial, matching
+    // the Prisma SMART branch of PeekInfoFromConfig().
     QFile prismaLineConfigFile(selectedPath + QDir::separator() + PRISMA_LINE_CONFIG_FILE);
-        MachineInfo info = newInfo();
     if (!prismaLineConfigFile.open(QIODevice::ReadOnly)) {
-        return info;
+        qWarning() << "Prisma LINE config file not readable" << prismaLineConfigFile.fileName();
+        return MachineInfo();
     }
     QByteArray configDataZip = prismaLineConfigFile.readAll();
     prismaLineConfigFile.close();
 
-    mz_bool status;
+    // config.pcfg is a zip archive; the device identity lives in mnt/flash/conf/device.xml.
+    // The reader works directly on configDataZip's buffer, so that must outlive it.
     mz_zip_archive zip_archive;
-
-
     memset(&zip_archive, 0, sizeof(zip_archive));
 
-    status = mz_zip_reader_init_mem(&zip_archive, (const void*)configDataZip.constData(), configDataZip.size(), 0);
-    if (!status)
-    {
-        qDebug() <<  "mz_zip_reader_init_file() failed!";
-        return info;
+    if (!mz_zip_reader_init_mem(&zip_archive, (const void*)configDataZip.constData(), configDataZip.size(), 0)) {
+        qWarning() << "mz_zip_reader_init_mem() failed for" << prismaLineConfigFile.fileName();
+        return MachineInfo();
     }
-    size_t uncomp_size_config;
-    void *extract_config = mz_zip_reader_extract_file_to_heap( &zip_archive, "mnt/flash/conf/device.xml", &uncomp_size_config, 0);
-    QByteArray configData((const char*)extract_config, uncomp_size_config);
+    size_t uncomp_size_config = 0;
+    void *extract_config = mz_zip_reader_extract_file_to_heap(&zip_archive, "mnt/flash/conf/device.xml", &uncomp_size_config, 0);
+    mz_zip_reader_end(&zip_archive);   // the extracted copy is independent of the reader
+    if (extract_config == nullptr) {
+        qWarning() << "mnt/flash/conf/device.xml missing from" << prismaLineConfigFile.fileName();
+        return MachineInfo();
+    }
+    QByteArray configData((const char*)extract_config, static_cast<qsizetype>(uncomp_size_config));
     free(extract_config);
 
     QDomDocument dom;
-    dom.setContent(configData);
+    if (!dom.setContent(configData)) {
+        qWarning() << "device.xml in" << prismaLineConfigFile.fileName() << "is not valid XML";
+        return MachineInfo();
+    }
 
     QDomElement root = dom.documentElement();
     QDomNodeList  configNodelist = root.elementsByTagName("DeviceType");
 
+    MachineInfo info = newInfo();
     info.modelnumber = configNodelist.item(0).attributes().item(0).nodeValue();
     info.model = s_PrismaModelInfo.Name(info.modelnumber);
     configNodelist = dom.elementsByTagName("DeviceSerialNumber");
     info.serial = configNodelist.item(0).attributes().item(0).nodeValue();
+
+    // A device.xml without a serial cannot be matched to a machine record; treat it as unreadable.
+    if (info.serial.isEmpty()) {
+        qWarning() << "device.xml in" << prismaLineConfigFile.fileName() << "has no DeviceSerialNumber";
+        return MachineInfo();
+    }
 
     // TODO AXT load props
     info.properties["cica"] = "mica";
