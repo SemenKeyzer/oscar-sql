@@ -1596,198 +1596,198 @@ Aller aux détails du jour</translation>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="274"/>
         <source>OSCAR 2 Initial Setup</source>
-        <translation type="unfinished">Configuration initiale d&apos;OSCAR 2</translation>
+        <translation>Configuration initiale d&apos;OSCAR 2</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="275"/>
         <source>New Database</source>
-        <translation type="unfinished">Nouvelle base de données</translation>
+        <translation>Nouvelle base de données</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="279"/>
         <source>OSCAR requires a folder to store data and control information.</source>
-        <translation type="unfinished">OSCAR nécessite un dossier pour stocker les données et les informations de contrôle.</translation>
+        <translation>OSCAR a besoin d&apos;un dossier d&apos;y stocker les données et les informations de contrôle.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="280"/>
         <source>We recommend you accept the default name provided.</source>
-        <translation type="unfinished">Nous vous recommandons d&apos;accepter le nom par défaut fourni.</translation>
+        <translation>Nous vous recommandons d&apos;accepter le nom proposé par défaut.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="281"/>
         <source>OSCAR&apos;s data folder can be located anywhere on your computer, with the default being your Documents folder.</source>
-        <translation type="unfinished">Le dossier de données d&apos;OSCAR peut être situé n&apos;importe où sur votre ordinateur, l&apos;emplacement par défaut étant votre dossier Documents.</translation>
+        <translation>Le dossier de données d&apos;OSCAR peut être situé n&apos;importe où sur votre ordinateur ; par défaut, il s&apos;agit de votre dossier Documents.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="282"/>
         <location filename="../oscar/datafolderdialog.cpp" line="287"/>
         <source>We recommend you choose a location that is not managed by a cloud service such as Google Drive, OneDrive, and similar products.</source>
-        <translation type="unfinished">Nous vous recommandons de choisir un emplacement qui n&apos;est pas géré par un service infonuagique tel que Google Drive, OneDrive et produits similaires.</translation>
+        <translation>Nous vous recommandons de choisir un emplacement qui n&apos;est pas géré par aucun service cloud de type Google Drive, OneDrive ou des produits similaires.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="283"/>
         <source>OSCAR 1.x and 2.x cannot use the same data folder as the data structures are different.</source>
-        <translation type="unfinished">OSCAR 1.x et 2.x ne peuvent pas utiliser le même dossier de données, car les structures de données sont différentes.</translation>
+        <translation>OSCAR 1.x et 2.x ne peuvent pas utiliser le même dossier de données, car leurs structures respectives sont très différentes.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="284"/>
         <source>If you have OSCAR 1.x data, you will be able to migrate it to OSCAR 2 in the next step.</source>
-        <translation type="unfinished">Si vous avez des données OSCAR 1.x, vous pourrez les migrer vers OSCAR 2 à l&apos;étape suivante.</translation>
+        <translation>Si vous disposez de données OSCAR 1.x, une migrration vers OSCAR 2 sera possible à l&apos;étape suivante.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="286"/>
         <source>OSCAR will create a new database folder with an empty database.</source>
-        <translation type="unfinished">OSCAR va créer un nouveau dossier de base de données avec une base de données vide.</translation>
+        <translation>OSCAR va créer un nouveau dossier de base de données contenant une base de données vide.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="288"/>
         <source>OSCAR will restart using the new database.</source>
-        <translation type="unfinished">OSCAR va redémarrer en utilisant la nouvelle base de données.</translation>
+        <translation>OSCAR va redémarrer en utilisant la nouvelle base de données.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="289"/>
         <source>You can return to your current database with File ▸ Database ▸ Open or the Recent list.</source>
-        <translation type="unfinished">Vous pouvez retourner à votre base de données actuelle avec Fichier ▸ Base de données ▸ Ouvrir ou la liste des éléments récents.</translation>
+        <translation>Un retour à votre base de données actuelle est possible via Fichier ▸ Base de données ▸ Ouvrir ou la liste des fichiers récents.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="290"/>
         <source>Name the data folder and select the folder location.</source>
-        <translation type="unfinished">Nommez le dossier de données et sélectionnez son emplacement.</translation>
+        <translation>Donnez un nom au dossier de données et sélectionnez son emplacement.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="296"/>
         <source>Data folder name:</source>
-        <translation type="unfinished">Nom du dossier de données :</translation>
+        <translation>Nom du dossier de données :</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="300"/>
         <source>Browse...</source>
-        <translation type="unfinished">Parcourir...</translation>
+        <translation>Parcourir...</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="303"/>
         <source>Folder location:</source>
-        <translation type="unfinished">Emplacement du dossier :</translation>
+        <translation>Emplacement du dossier :</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="312"/>
         <source>Create OSCAR folder</source>
-        <translation type="unfinished">Créer le dossier OSCAR</translation>
+        <translation>Création du dossier OSCAR</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="313"/>
         <source>Create new database</source>
-        <translation type="unfinished">Créer une nouvelle base de données</translation>
+        <translation>Création d&apos;une nouvelle base de données</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="315"/>
         <source>Cancel</source>
-        <translation type="unfinished">Annuler</translation>
+        <translation>Annuler</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="344"/>
         <source>Choose the location for the OSCAR data folder</source>
-        <translation type="unfinished">Choisissez l&apos;emplacement du dossier de données OSCAR</translation>
+        <translation>Choisissez l&apos;emplacement du dossier de données OSCAR</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="354"/>
         <source>Choose a location for the data folder.</source>
-        <translation type="unfinished">Choisissez un emplacement pour le dossier de données.</translation>
+        <translation>Choisissez un emplacement pour le dossier de données OSCAR.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="361"/>
         <source>OSCAR will create:</source>
-        <translation type="unfinished">OSCAR va créer :</translation>
+        <translation>OSCAR va créer :</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="376"/>
         <source>The folder location does not exist.</source>
-        <translation type="unfinished">L&apos;emplacement du dossier n&apos;existe pas.</translation>
+        <translation>L&apos;emplacement du dossier n&apos;existe pas.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="378"/>
         <source>Use Browse to choose an existing folder for the location.</source>
-        <translation type="unfinished">Utilisez Parcourir pour choisir un dossier existant comme emplacement.</translation>
+        <translation>Utilisez « Parcourir » pour choisir un dossier existant comme emplacement.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="388"/>
         <source>This folder contains OSCAR 1.x data. OSCAR 2 cannot use an OSCAR 1.x data folder.</source>
-        <translation type="unfinished">Ce dossier contient des données OSCAR 1.x. OSCAR 2 ne peut pas utiliser un dossier de données OSCAR 1.x.</translation>
+        <translation>Ce dossier contient des données OSCAR 1.x. OSCAR 2 ne peut donc pas l&apos;utiliser comme dossier de données.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="389"/>
         <source>Choose a different folder name or location.</source>
-        <translation type="unfinished">Choisissez un nom de dossier ou un emplacement différent.</translation>
+        <translation>Choisissez un nom et/ou un emplacement différent.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="392"/>
         <source>This folder already contains an OSCAR 2 database.</source>
-        <translation type="unfinished">Ce dossier contient déjà une base de données OSCAR 2.</translation>
+        <translation>Ce dossier contient déjà une base de données OSCAR 2.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="394"/>
         <source>To use it, go back and choose &quot;Find my OSCAR 2 data folder&quot;.</source>
-        <translation type="unfinished">Pour l&apos;utiliser, revenez en arrière et choisissez « Rechercher mon dossier de données OSCAR 2 ».</translation>
+        <translation>Pour l&apos;utiliser, revenez d&apos;1 cran et choisissez « Trouver mon dossier de données OSCAR 2 ».</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="395"/>
         <source>To use it, choose File ▸ Database ▸ Open.</source>
-        <translation type="unfinished">Pour l&apos;utiliser, choisissez Fichier ▸ Base de données ▸ Ouvrir.</translation>
+        <translation>Pour l&apos;utiliser, choisissez Fichier ▸ Base de données ▸ Ouvrir.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="398"/>
         <source>Something with this name already exists in that location, and it is not an empty folder.</source>
-        <translation type="unfinished">Quelque chose portant ce nom existe déjà à cet emplacement, et ce n&apos;est pas un dossier vide.</translation>
+        <translation>Ce nom existe déjà à cet emplacement, et il ne s&apos;agit pas d&apos;un dossier vide.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="399"/>
         <source>OSCAR needs a new or empty folder. Choose a different folder name or location.</source>
-        <translation type="unfinished">OSCAR a besoin d&apos;un dossier nouveau ou vide. Choisissez un nom de dossier ou un emplacement différent.</translation>
+        <translation>OSCAR a besoin d&apos;un nouveau dossier  ou d&apos;un dossier vide. Choisissez soit un nom de dossier différent, soit un autre emplacement différent.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="408"/>
         <source>Cloud-managed location</source>
-        <translation type="unfinished">Emplacement géré par un service infonuagique</translation>
+        <translation>Site géré depuis le cloud</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="409"/>
         <source>The location you chose appears to be managed by %1.</source>
-        <translation type="unfinished">L&apos;emplacement que vous avez choisi semble être géré par %1.</translation>
+        <translation>L&apos;emplacement que vous avez choisi semble être géré par %1.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="410"/>
         <source>Cloud services can change or lock OSCAR&apos;s database while OSCAR is using it, which can corrupt your data.</source>
-        <translation type="unfinished">Les services infonuagiques peuvent modifier ou verrouiller la base de données d&apos;OSCAR pendant qu&apos;OSCAR l&apos;utilise, ce qui peut corrompre vos données.</translation>
+        <translation>Les services cloud peuvent modifier ou verrouiller la base de données d&apos;OSCAR pendant qu&apos;OSCAR l&apos;utilise. Cela pourrait corrompre vos données de manière irrémédiable.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="411"/>
         <source>We recommend a folder that is not synchronised with a cloud service.</source>
-        <translation type="unfinished">Nous recommandons un dossier qui n&apos;est pas synchronisé avec un service infonuagique.</translation>
+        <translation>Un dossier qui n&apos;est pas synchronisé avec un service cloud est vivement recommandé.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="412"/>
         <source>Use this location anyway?</source>
-        <translation type="unfinished">Utiliser cet emplacement quand même ?</translation>
+        <translation>Voulez-vous utiliser cet emplacement malgré l&apos;avertissement précédent ?</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="420"/>
         <source>OSCAR was unable to create the folder.</source>
-        <translation type="unfinished">OSCAR n&apos;a pas pu créer le dossier.</translation>
+        <translation>La création de ce dossier.par OSCAR est impossible.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="421"/>
         <source>Check that you have permission to create folders in this location.</source>
-        <translation type="unfinished">Vérifiez que vous avez la permission de créer des dossiers à cet emplacement.</translation>
+        <translation>Pourriez-vous vérifiez que vous avez bien l&apos;autorisation de créer des dossiers à cet emplacement.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="431"/>
         <source>OSCAR is unable to write to the folder.</source>
-        <translation type="unfinished">OSCAR ne peut pas écrire dans le dossier.</translation>
+        <translation>L&apos;écriture dans ce dossier par OSCAR semble impossible.</translation>
     </message>
     <message>
         <location filename="../oscar/datafolderdialog.cpp" line="432"/>
         <source>Error</source>
-        <translation type="unfinished">Erreur</translation>
+        <translation>Erreur</translation>
     </message>
 </context>
 <context>
@@ -1927,17 +1927,17 @@ Certains fichiers peuvent encore être présents.</translation>
     <message>
         <location filename="../oscar/database/database_manager.cpp" line="205"/>
         <source>No database is open.</source>
-        <translation type="unfinished">Aucune base de données n&apos;est ouverte.</translation>
+        <translation>Aucune base de données n&apos;a été ouverte.</translation>
     </message>
     <message>
         <location filename="../oscar/database/database_manager.cpp" line="208"/>
         <source>The file %1 already exists.</source>
-        <translation type="unfinished">Le fichier %1 existe déjà.</translation>
+        <translation>Le fichier %1 existe déjà.</translation>
     </message>
     <message>
         <location filename="../oscar/database/database_manager.cpp" line="214"/>
         <source>Not enough free space: the copy needs about %1 MB but only %2 MB is available.</source>
-        <translation type="unfinished">Espace libre insuffisant : la copie nécessite environ %1 Mo mais seulement %2 Mo sont disponibles.</translation>
+        <translation>Il n&apos;y a plus assez de place disponible : La copie nécessite environ %1Mo. Seulement %2 Mo sont disponibles.</translation>
     </message>
     <message>
         <location filename="../oscar/database/database_manager.cpp" line="576"/>
@@ -4086,17 +4086,17 @@ Source de données du sommeil : %4</translation>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="3078"/>
         <source>Vitals sources: %1</source>
-        <translation type="unfinished">Sources de signes vitaux : %1</translation>
+        <translation>Données vitales : sources : %1</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="3079"/>
         <source>none</source>
-        <translation type="unfinished">aucune</translation>
+        <translation>Aucun(e)</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="3090"/>
         <source>Ignored vitals from: %1</source>
-        <translation type="unfinished">Signes vitaux ignorés depuis : %1</translation>
+        <translation>Les données vitales provenant de : %1 seront ignorées</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="3094"/>
@@ -4111,12 +4111,12 @@ Source de données du sommeil : %4</translation>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="3255"/>
         <source>The selected folder contains OSCAR 1.x data, which OSCAR 2 cannot open directly.</source>
-        <translation type="unfinished">Le dossier sélectionné contient des données OSCAR 1.x, qu&apos;OSCAR 2 ne peut pas ouvrir directement.</translation>
+        <translation>Le dossier sélectionné contient des données OSCAR 1.x. OSCAR 2 ne peut pas l&apos;ouvrir directement.</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="3256"/>
         <source>To bring that data into OSCAR 2, use File ▸ Profiles ▸ Import from OSCAR...</source>
-        <translation type="unfinished">Pour importer ces données dans OSCAR 2, utilisez Fichier ▸ Profils ▸ Importer depuis OSCAR...</translation>
+        <translation>Pour importer ces données dans OSCAR 2, utilisez Fichier ▸ Profils ▸ Importer depuis OSCAR...</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="3457"/>
@@ -8766,11 +8766,11 @@ Are you sure you want to make these changes?</source>
         <translation>Fisher &amp; Paykel</translation>
     </message>
     <message>
+        <location filename="../oscar/notifyMessageBox.cpp" line="19"/>
         <location filename="../oscar/SleepLib/loader_plugins/icon_loader.h" line="88"/>
         <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.h" line="237"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="67"/>
         <location filename="../oscar/SleepLib/loader_plugins/weinmann_loader.h" line="118"/>
-        <location filename="../oscar/notifyMessageBox.cpp" line="19"/>
         <source></source>
         <translatorcomment>commentaire de contexte</translatorcomment>
         <translation></translation>
@@ -9418,113 +9418,113 @@ Nettoyage en cours, veuillez patientez...</translation>
     <message>
         <location filename="../oscar/main.cpp" line="553"/>
         <source>OSCAR %1 needs to upgrade its database from version %2 to version %3.</source>
-        <translation type="unfinished">OSCAR %1 doit mettre à niveau sa base de données de la version %2 vers la version %3.</translation>
+        <translation>Une mise à jour de la base de données d&apos;OSCAR %1 depuis la version %2 vers la version %3 est nécessaire.</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="557"/>
         <source>Once upgraded, this database &lt;font size=+1&gt;cannot&lt;/font&gt; be opened by earlier versions of OSCAR, and the upgrade cannot be undone.</source>
-        <translation type="unfinished">Une fois mise à niveau, cette base de données &lt;font size=+1&gt;ne peut pas&lt;/font&gt; être ouverte par des versions antérieures d&apos;OSCAR, et la mise à niveau ne peut pas être annulée.</translation>
+        <translation>Une fois mise à niveau, cette base de données &lt;font size=+1&gt;ne pourrat plus&lt;/font&gt; être ouverte par des versions antérieures d&apos;OSCAR. Cette mise à niveau est irréversible.</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="559"/>
         <source>&lt;b&gt;Back up and upgrade&lt;/b&gt; first saves a complete copy of the current database in %1, so you can go back to it if needed.</source>
-        <translation type="unfinished">&lt;b&gt;Sauvegarder et mettre à niveau&lt;/b&gt; enregistre d&apos;abord une copie complète de la base de données actuelle dans %1, afin que vous puissiez y revenir si nécessaire.</translation>
+        <translation>L&apos;option &lt;b&gt;Sauvegarder et mettre à niveau&lt;/b&gt; fait d&apos;abord une copie complète de la base de données actuelle dans %1. Ceci permettra que vous puissiez y revenir si nécessaire.</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="561"/>
         <source>&lt;b&gt;Exit&lt;/b&gt; leaves the database unchanged, so you can back it up yourself before starting OSCAR again.</source>
-        <translation type="unfinished">&lt;b&gt;Quitter&lt;/b&gt; laisse la base de données inchangée, afin que vous puissiez la sauvegarder vous-même avant de redémarrer OSCAR.</translation>
+        <translation>&lt;b&gt;Quitter&lt;/b&gt; laisse la base de données inchangée. Cela vous permettrat d&apos;effectuer vous-même une sauvegarde avant de relancer OSCAR.</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="563"/>
         <source>Are you ready to upgrade?</source>
-        <translation type="unfinished">Êtes-vous prêt à effectuer la mise à niveau ?</translation>
+        <translation>Êtes-vous prêt à passer à la version supérieure ?</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="565"/>
         <source>Database Upgrade Required</source>
-        <translation type="unfinished">Mise à niveau de la base de données requise</translation>
+        <translation>Une mise à niveau de la base de données est nécessaire</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="566"/>
         <source>Back up and upgrade</source>
-        <translation type="unfinished">Sauvegarder et mettre à niveau</translation>
+        <translation>Sauvegarder et mettre à niveau</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="567"/>
         <source>Upgrade</source>
-        <translation type="unfinished">Mettre à niveau</translation>
+        <translation>Mettre à niveau</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="568"/>
         <location filename="../oscar/main.cpp" line="620"/>
         <source>Exit</source>
-        <translation type="unfinished">Quitter</translation>
+        <translation>Quitter</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="583"/>
         <source>Upgrading Database</source>
-        <translation type="unfinished">Mise à niveau de la base de données</translation>
+        <translation>Mise à niveau de la base de données en cours</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="604"/>
         <source>Backing up the database to %1...</source>
-        <translation type="unfinished">Sauvegarde de la base de données vers %1...</translation>
+        <translation>Sauvegarde de la base de données vers %1...</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="616"/>
         <source>Database Backup Failed</source>
-        <translation type="unfinished">Échec de la sauvegarde de la base de données</translation>
+        <translation>Une erreur s&apos;est produite lors de la sauvegarde de la base de données</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="617"/>
         <source>OSCAR could not save a copy of the database:</source>
-        <translation type="unfinished">OSCAR n&apos;a pas pu enregistrer une copie de la base de données :</translation>
+        <translation>OSCAR n&apos;a pas pu enregistrer une copie de la base de données :</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="618"/>
         <source>You can upgrade without a backup, or exit and back up the database yourself first.</source>
-        <translation type="unfinished">Vous pouvez effectuer la mise à niveau sans sauvegarde, ou quitter et sauvegarder la base de données vous-même au préalable.</translation>
+        <translation>Vous pouvez effectuer la mise à niveau sans sauvegarde, ou bien quitter et, au préalable, sauvegarder vous-même la base de données.</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="619"/>
         <source>Upgrade without backup</source>
-        <translation type="unfinished">Mettre à niveau sans sauvegarde</translation>
+        <translation>Mise à niveau sans sauvegarde</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="633"/>
         <source>Upgrading database from version %1 to version %2...</source>
-        <translation type="unfinished">Mise à niveau de la base de données de la version %1 vers la version %2...</translation>
+        <translation>Mise à niveau de la base de données de la version %1 vers la version %2...</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="640"/>
         <source>Upgrading database from version %1 to version %2 (step %3 of %4)...</source>
-        <translation type="unfinished">Mise à niveau de la base de données de la version %1 vers la version %2 (étape %3 sur %4)...</translation>
+        <translation>Mise à niveau de la base de données de la version %1 vers la version %2 (étape %3 sur %4)...</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="651"/>
         <source>OSCAR could not upgrade your database from version %1 to version %2.</source>
-        <translation type="unfinished">OSCAR n&apos;a pas pu mettre à niveau votre base de données de la version %1 vers la version %2.</translation>
+        <translation>OSCAR n&apos;a pas pu mettre à niveau votre base de données de la version %1 vers la version %2.</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="654"/>
         <source>The copy made before the upgrade is unchanged:</source>
-        <translation type="unfinished">La copie effectuée avant la mise à niveau est inchangée :</translation>
+        <translation>Il n&apos;y a pas de changement depuis la denière copie :</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="657"/>
         <source>Each completed step has been kept, and OSCAR will try the remaining steps the next time it starts. If the problem persists, restore the database from a backup or delete oscar.db and re-import your CPAP data.</source>
-        <translation type="unfinished">Chaque étape terminée a été conservée, et OSCAR essaiera les étapes restantes au prochain démarrage. Si le problème persiste, restaurez la base de données à partir d&apos;une sauvegarde ou supprimez oscar.db et réimportez vos données CPAP.</translation>
+        <translation>Chaque étape terminée a été conservée. OSCAR tentera d&apos;exécuter les étapes manquantes lors de son prochain démarrage. Si le problème persiste, restaurez la base de données à partir d&apos;une sauvegarde ou supprimez le fichier oscar.db et réimportez vos données de PPC.</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="659"/>
         <source>OSCAR will now close.</source>
-        <translation type="unfinished">OSCAR va maintenant se fermer.</translation>
+        <translation>OSCAR va maintenant fermer.</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="660"/>
         <source>Database Upgrade Failed</source>
-        <translation type="unfinished">Échec de la mise à niveau de la base de données</translation>
+        <translation>Il y a eu une ou plusieurs erreurs lors de la mise à niveau de la base de données</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="961"/>
@@ -9544,27 +9544,27 @@ Nettoyage en cours, veuillez patientez...</translation>
     <message>
         <location filename="../oscar/main.cpp" line="1032"/>
         <source>Locate your OSCAR 2 data folder</source>
-        <translation type="unfinished">Localisez votre dossier de données OSCAR 2</translation>
+        <translation>Sélectionnez le répertoire contenant les données OSCAR 2</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="1043"/>
         <source>This folder contains OSCAR 1.x data, not OSCAR 2 data.</source>
-        <translation type="unfinished">Ce dossier contient des données OSCAR 1.x, et non des données OSCAR 2.</translation>
+        <translation>Ce dossier contient des données OSCAR 1.x, et non des données OSCAR 2.</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="1044"/>
         <source>This folder does not contain an OSCAR 2 database.</source>
-        <translation type="unfinished">Ce dossier ne contient pas de base de données OSCAR 2.</translation>
+        <translation>Ce dossier ne contient pas de base de données OSCAR 2.</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="1045"/>
         <source>Not an OSCAR 2 data folder</source>
-        <translation type="unfinished">Pas un dossier de données OSCAR 2</translation>
+        <translation>Ce n&apos;est pas un répertoire contenant des données OSCAR 2</translation>
     </message>
     <message>
         <location filename="../oscar/main.cpp" line="1047"/>
         <source>Choose another folder, or Cancel to return to the previous screen.</source>
-        <translation type="unfinished">Choisissez un autre dossier, ou Annuler pour revenir à l&apos;écran précédent.</translation>
+        <translation>Choisissez un autre dossier ou cliquez sur Annuler afin de revenir à l&apos;écran précédent.</translation>
     </message>
     <message>
         <source>If you have been using an older version of OSCAR 1.x,</source>
@@ -9837,7 +9837,7 @@ OSCAR ne connaît pas votre %1 %2 (%3).</translation>
     <message>
         <location filename="../oscar/statistics.cpp" line="2186"/>
         <source>Not available for all devices in this period</source>
-        <translation type="unfinished">Non disponible pour tous les appareils au cours de cette période</translation>
+        <translation>indisponible pour l&apos;ensemble de vos appareils durant cette période</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="1298"/>
@@ -10157,10 +10157,10 @@ OSCAR ne connaît pas votre %1 %2 (%3).</translation>
         <translation>Anomalie du débit</translation>
     </message>
     <message>
+        <location filename="../oscar/mainwindow.cpp" line="3366"/>
         <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="700"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="922"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="1075"/>
-        <location filename="../oscar/mainwindow.cpp" line="3366"/>
         <source>Importing Sessions...</source>
         <translation>Import des sessions...</translation>
     </message>
@@ -10489,8 +10489,8 @@ OSCAR ne connaît pas votre %1 %2 (%3).</translation>
         <translation>Température tuyau chauffant PRS1</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/MinutesAtPressure.cpp" line="716"/>
         <location filename="../oscar/Graphs/gLineChart.cpp" line="1085"/>
+        <location filename="../oscar/Graphs/MinutesAtPressure.cpp" line="716"/>
         <source>Plots Disabled</source>
         <translation>Points désactivés</translation>
     </message>
@@ -10891,12 +10891,134 @@ OSCAR ne connaît pas votre %1 %2 (%3).</translation>
         <translation>Respirations activées par le patient</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/common.cpp" line="946"/>
+        <location filename="../oscar/datafolderdialog.cpp" line="55"/>
+        <source>Enter a name for the data folder.</source>
+        <translation>Saisissez un nom pour le dossier de données.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/datafolderdialog.cpp" line="57"/>
+        <source>A folder name cannot begin or end with a space.</source>
+        <translation>Le nom d&apos;un dossier ne doit, ni commencer, ni se terminer, par un espace.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/datafolderdialog.cpp" line="59"/>
+        <source>&quot;%1&quot; is not a valid folder name.</source>
+        <translation>« %1 » n&apos;est pas un nom de dossier valide.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/datafolderdialog.cpp" line="61"/>
+        <source>A folder name cannot end with a period.</source>
+        <translation>Le nom d&apos;un dossier ne doit pas se terminer par un point.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/datafolderdialog.cpp" line="66"/>
+        <source>A folder name cannot contain any of these characters: %1</source>
+        <translation>Un nom de répertoire ne peut contenir aucun de ces caractères : %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/datafolderdialog.cpp" line="75"/>
+        <source>&quot;%1&quot; is a name reserved by Windows and cannot be used.</source>
+        <translation>« %1 » est un nom réservé par Windows et ne doit pas être utilisé.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/datafolderdialog.cpp" line="211"/>
+        <source>You are seeing this message because either</source>
+        <translation>Vous voyez ce message parce que soit</translation>
+    </message>
+    <message>
+        <location filename="../oscar/datafolderdialog.cpp" line="212"/>
+        <source>This is the first time you have used OSCAR 2.</source>
+        <translation>C&apos;est la première fois que vous utilisez OSCAR 2.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/datafolderdialog.cpp" line="213"/>
+        <source>OSCAR will need to create a data folder for you.</source>
+        <translation>OSCAR va créer un dossier de données pour vous.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/datafolderdialog.cpp" line="214"/>
+        <source>OSCAR 2 could not find the OSCAR 2 data folder you last used.</source>
+        <translation>OSCAR 2 n&apos;a pas pu trouver le dernier dossier de données OSCAR 2 que vous avez utilisé.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/datafolderdialog.cpp" line="215"/>
+        <source>You will need to help OSCAR find the OSCAR 2 data folder.</source>
+        <translation>OSCAR a besoin de votre aide afin qu&apos;il puisse trouver le dossier de données OSCAR 2.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/datafolderdialog.cpp" line="216"/>
+        <source>or</source>
+        <translatorcomment>Je pense que c&apos;est la suite de la phrase : truc soit bidule, soit machin</translatorcomment>
+        <translation>soit</translation>
+    </message>
+    <message>
+        <location filename="../oscar/datafolderdialog.cpp" line="223"/>
+        <source>OSCAR was looking for:</source>
+        <translation>OSCAR recherchait :</translation>
+    </message>
+    <message>
+        <location filename="../oscar/datafolderdialog.cpp" line="230"/>
+        <source>OSCAR 2 Startup</source>
+        <translation>Démarrage d&apos;OSCAR 2</translation>
+    </message>
+    <message>
+        <location filename="../oscar/datafolderdialog.cpp" line="231"/>
+        <source>Create OSCAR 2 data folder</source>
+        <translation>Creation du répertoire de données d&apos;OSCAR 2</translation>
+    </message>
+    <message>
+        <location filename="../oscar/datafolderdialog.cpp" line="232"/>
+        <source>Find my OSCAR 2 data folder</source>
+        <translation>Recherche de mon répertoire de données d&apos;OSCAR 2</translation>
+    </message>
+    <message>
         <location filename="../oscar/datafolderdialog.cpp" line="233"/>
         <location filename="../oscar/datafolderdialog.cpp" line="255"/>
         <location filename="../oscar/main.cpp" line="190"/>
+        <location filename="../oscar/SleepLib/common.cpp" line="946"/>
         <source>Cancel</source>
         <translation>Annuler</translation>
+    </message>
+    <message>
+        <location filename="../oscar/datafolderdialog.cpp" line="246"/>
+        <source>OSCAR 2 uses a different data folder than OSCAR 1.x, so it cannot share the folder used by OSCAR 1.x.</source>
+        <translation>OSCAR 2 utilise un dossier de données différent de celui d&apos;OSCAR 1.x ; il ne peut donc pas partager le dossier utilisé par OSCAR 1.x.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/datafolderdialog.cpp" line="247"/>
+        <source>OSCAR can migrate your OSCAR 1.x data into the new OSCAR 2 data folder.</source>
+        <translation>OSCAR peut migrer vos données OSCAR 1.x vers le nouveau dossier de données OSCAR 2.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/datafolderdialog.cpp" line="248"/>
+        <source>Click Migrate to select the OSCAR 1.x folder that you wish to migrate to your new OSCAR 2 data folder.</source>
+        <translatorcomment>Cliquez sur Migrer pour sélectionner le dossier OSCAR 1.x que vous souhaitez migrer vers votre nouveau dossier de données OSCAR 2.</translatorcomment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../oscar/datafolderdialog.cpp" line="249"/>
+        <source>Your old OSCAR 1.x data folder will not be changed, so you can still run OSCAR 1.x.</source>
+        <translation>Votre ancien dossier de données OSCAR 1.x ne sera pas modifié ; vous pourrez donc toujours l&apos;utiliser pour OSCAR 1.x.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/datafolderdialog.cpp" line="250"/>
+        <source>Cancel removes the new OSCAR 2 data folder and exits OSCAR.</source>
+        <translation>« Annuler » supprime le nouveau dossier de données OSCAR 2 et ferme OSCAR.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/datafolderdialog.cpp" line="252"/>
+        <source>OSCAR 1.x Data Migration</source>
+        <translation>Migration de données de type OSCAR 1.x</translation>
+    </message>
+    <message>
+        <location filename="../oscar/datafolderdialog.cpp" line="253"/>
+        <source>Migrate</source>
+        <translation>Migration</translation>
+    </message>
+    <message>
+        <location filename="../oscar/datafolderdialog.cpp" line="254"/>
+        <source>Skip migration</source>
+        <translation>Ignorer la migration</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/common.cpp" line="1069"/>
@@ -10991,8 +11113,8 @@ OSCAR ne connaît pas votre %1 %2 (%3).</translation>
         <translation>Seuil le plus bas</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/MinutesAtPressure.cpp" line="727"/>
         <location filename="../oscar/Graphs/gOverviewGraph.cpp" line="1247"/>
+        <location filename="../oscar/Graphs/MinutesAtPressure.cpp" line="727"/>
         <source>No Data</source>
         <translation>Pas de données</translation>
     </message>
@@ -11836,8 +11958,8 @@ Début : %2</translation>
         <translation>vREM</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/profiles.cpp" line="883"/>
         <location filename="../oscar/main.cpp" line="556"/>
+        <location filename="../oscar/SleepLib/profiles.cpp" line="883"/>
         <source>Important:</source>
         <translation>Important :</translation>
     </message>
@@ -13153,6 +13275,8 @@ TTIA : %1</translation>
         <translation>Session PPC avec résumé seulement</translation>
     </message>
     <message>
+        <location filename="../oscar/mainwindow.cpp" line="1024"/>
+        <location filename="../oscar/mainwindow.cpp" line="3407"/>
         <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2759"/>
         <location filename="../oscar/SleepLib/loader_plugins/sleepstyle_loader.cpp" line="370"/>
         <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="202"/>
@@ -13161,8 +13285,6 @@ TTIA : %1</translation>
         <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="1360"/>
         <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="1852"/>
         <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="2358"/>
-        <location filename="../oscar/mainwindow.cpp" line="1024"/>
-        <location filename="../oscar/mainwindow.cpp" line="3407"/>
         <source>Finishing up...</source>
         <translation>Finalisation...</translation>
     </message>
@@ -14303,14 +14425,16 @@ Longueur : %1</translation>
         <translation>Yuwell</translation>
     </message>
     <message>
+        <location filename="../oscar/updateparser.cpp" line="224"/>
         <source>%1
 Line %2, column %3</source>
-        <translation type="vanished">%1
+        <translation>%1
 Ligne %2, colonne %3</translation>
     </message>
     <message>
+        <location filename="../oscar/updateparser.cpp" line="237"/>
         <source>Could not parse Updates.xml file.</source>
-        <translation type="vanished">Impossible d&apos;analyser le fichier Updates.xml.</translation>
+        <translation>Impossible d&apos;analyser le fichier Updates.xml.</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="378"/>
@@ -14535,126 +14659,6 @@ Les données Dreem doivent être formatées en tant que fichier CSV délimité p
         <location filename="../oscar/SleepLib/loader_plugins/applehealth_loader.h" line="57"/>
         <source>Watch Sleep</source>
         <translation>Surveillance du sommeil</translation>
-    </message>
-    <message>
-        <location filename="../oscar/datafolderdialog.cpp" line="55"/>
-        <source>Enter a name for the data folder.</source>
-        <translation type="unfinished">Entrez un nom pour le dossier de données.</translation>
-    </message>
-    <message>
-        <location filename="../oscar/datafolderdialog.cpp" line="57"/>
-        <source>A folder name cannot begin or end with a space.</source>
-        <translation type="unfinished">Un nom de dossier ne peut pas commencer ou se terminer par un espace.</translation>
-    </message>
-    <message>
-        <location filename="../oscar/datafolderdialog.cpp" line="59"/>
-        <source>&quot;%1&quot; is not a valid folder name.</source>
-        <translation type="unfinished">« %1 » n&apos;est pas un nom de dossier valide.</translation>
-    </message>
-    <message>
-        <location filename="../oscar/datafolderdialog.cpp" line="61"/>
-        <source>A folder name cannot end with a period.</source>
-        <translation type="unfinished">Un nom de dossier ne peut pas se terminer par un point.</translation>
-    </message>
-    <message>
-        <location filename="../oscar/datafolderdialog.cpp" line="66"/>
-        <source>A folder name cannot contain any of these characters: %1</source>
-        <translation type="unfinished">Un nom de dossier ne peut contenir aucun de ces caractères : %1</translation>
-    </message>
-    <message>
-        <location filename="../oscar/datafolderdialog.cpp" line="75"/>
-        <source>&quot;%1&quot; is a name reserved by Windows and cannot be used.</source>
-        <translation type="unfinished">« %1 » est un nom réservé par Windows et ne peut pas être utilisé.</translation>
-    </message>
-    <message>
-        <location filename="../oscar/datafolderdialog.cpp" line="211"/>
-        <source>You are seeing this message because either</source>
-        <translation type="unfinished">Vous voyez ce message parce que soit</translation>
-    </message>
-    <message>
-        <location filename="../oscar/datafolderdialog.cpp" line="212"/>
-        <source>This is the first time you have used OSCAR 2.</source>
-        <translation type="unfinished">C&apos;est la première fois que vous utilisez OSCAR 2.</translation>
-    </message>
-    <message>
-        <location filename="../oscar/datafolderdialog.cpp" line="213"/>
-        <source>OSCAR will need to create a data folder for you.</source>
-        <translation type="unfinished">OSCAR devra créer un dossier de données pour vous.</translation>
-    </message>
-    <message>
-        <location filename="../oscar/datafolderdialog.cpp" line="214"/>
-        <source>OSCAR 2 could not find the OSCAR 2 data folder you last used.</source>
-        <translation type="unfinished">OSCAR 2 n&apos;a pas pu trouver le dossier de données OSCAR 2 que vous avez utilisé la dernière fois.</translation>
-    </message>
-    <message>
-        <location filename="../oscar/datafolderdialog.cpp" line="215"/>
-        <source>You will need to help OSCAR find the OSCAR 2 data folder.</source>
-        <translation type="unfinished">Vous devrez aider OSCAR à trouver le dossier de données OSCAR 2.</translation>
-    </message>
-    <message>
-        <location filename="../oscar/datafolderdialog.cpp" line="216"/>
-        <source>or</source>
-        <translation type="unfinished">ou</translation>
-    </message>
-    <message>
-        <location filename="../oscar/datafolderdialog.cpp" line="223"/>
-        <source>OSCAR was looking for:</source>
-        <translation type="unfinished">OSCAR cherchait :</translation>
-    </message>
-    <message>
-        <location filename="../oscar/datafolderdialog.cpp" line="230"/>
-        <source>OSCAR 2 Startup</source>
-        <translation type="unfinished">Démarrage d&apos;OSCAR 2</translation>
-    </message>
-    <message>
-        <location filename="../oscar/datafolderdialog.cpp" line="231"/>
-        <source>Create OSCAR 2 data folder</source>
-        <translation type="unfinished">Créer le dossier de données OSCAR 2</translation>
-    </message>
-    <message>
-        <location filename="../oscar/datafolderdialog.cpp" line="232"/>
-        <source>Find my OSCAR 2 data folder</source>
-        <translation type="unfinished">Trouver mon dossier de données OSCAR 2</translation>
-    </message>
-    <message>
-        <location filename="../oscar/datafolderdialog.cpp" line="246"/>
-        <source>OSCAR 2 uses a different data folder than OSCAR 1.x, so it cannot share the folder used by OSCAR 1.x.</source>
-        <translation type="unfinished">OSCAR 2 utilise un dossier de données différent d&apos;OSCAR 1.x, il ne peut donc pas partager le dossier utilisé par OSCAR 1.x.</translation>
-    </message>
-    <message>
-        <location filename="../oscar/datafolderdialog.cpp" line="247"/>
-        <source>OSCAR can migrate your OSCAR 1.x data into the new OSCAR 2 data folder.</source>
-        <translation type="unfinished">OSCAR peut migrer vos données OSCAR 1.x vers le nouveau dossier de données OSCAR 2.</translation>
-    </message>
-    <message>
-        <location filename="../oscar/datafolderdialog.cpp" line="248"/>
-        <source>Click Migrate to select the OSCAR 1.x folder that you wish to migrate to your new OSCAR 2 data folder.</source>
-        <translation type="unfinished">Cliquez sur Migrer pour sélectionner le dossier OSCAR 1.x que vous souhaitez migrer vers votre nouveau dossier de données OSCAR 2.</translation>
-    </message>
-    <message>
-        <location filename="../oscar/datafolderdialog.cpp" line="249"/>
-        <source>Your old OSCAR 1.x data folder will not be changed, so you can still run OSCAR 1.x.</source>
-        <translation type="unfinished">Votre ancien dossier de données OSCAR 1.x ne sera pas modifié, vous pourrez donc toujours utiliser OSCAR 1.x.</translation>
-    </message>
-    <message>
-        <location filename="../oscar/datafolderdialog.cpp" line="250"/>
-        <source>Cancel removes the new OSCAR 2 data folder and exits OSCAR.</source>
-        <translation type="unfinished">Annuler supprime le nouveau dossier de données OSCAR 2 et quitte OSCAR.</translation>
-    </message>
-    <message>
-        <location filename="../oscar/datafolderdialog.cpp" line="252"/>
-        <source>OSCAR 1.x Data Migration</source>
-        <translation type="unfinished">Migration des données OSCAR 1.x</translation>
-    </message>
-    <message>
-        <location filename="../oscar/datafolderdialog.cpp" line="253"/>
-        <source>Migrate</source>
-        <translation type="unfinished">Migrer</translation>
-    </message>
-    <message>
-        <location filename="../oscar/datafolderdialog.cpp" line="254"/>
-        <source>Skip migration</source>
-        <translation type="unfinished">Ignorer la migration</translation>
     </message>
 </context>
 <context>
@@ -17923,68 +17927,84 @@ Fichier → Profils → Restaurer le profil</translation>
 <context>
     <name>UpdaterWindow</name>
     <message>
+        <location filename="../oscar/UpdaterWindow.ui" line="14"/>
         <source>OSCAR Updater</source>
-        <translation type="vanished">Mise à jour OSCAR</translation>
+        <translation>Mise à jour OSCAR</translation>
     </message>
     <message>
+        <location filename="../oscar/UpdaterWindow.ui" line="60"/>
         <source>A new version of $APP is available</source>
-        <translation type="vanished">Nouvelle version d&apos;$APP disponible</translation>
+        <translation>Nouvelle version d&apos;$APP disponible</translation>
     </message>
     <message>
+        <location filename="../oscar/UpdaterWindow.ui" line="106"/>
         <source>Version Information</source>
-        <translation type="vanished">Information de la version</translation>
+        <translation>Information de la version</translation>
     </message>
     <message>
+        <location filename="../oscar/UpdaterWindow.ui" line="117"/>
         <source>Release Notes</source>
-        <translation type="vanished">Notes de publication</translation>
+        <translation>Notes de publication</translation>
     </message>
     <message>
+        <location filename="../oscar/UpdaterWindow.ui" line="142"/>
         <source>Build Notes</source>
-        <translation type="vanished">Notes de génération</translation>
+        <translation>Notes de génération</translation>
     </message>
     <message>
+        <location filename="../oscar/UpdaterWindow.ui" line="195"/>
         <source>Maybe Later</source>
-        <translation type="vanished">Plus tard</translation>
+        <translation>Plus tard</translation>
     </message>
     <message>
+        <location filename="../oscar/UpdaterWindow.ui" line="215"/>
         <source>Upgrade Now</source>
-        <translation type="vanished">Mise à jour immédiate</translation>
+        <translation>Mise à jour immédiate</translation>
     </message>
     <message>
+        <location filename="../oscar/UpdaterWindow.ui" line="250"/>
         <source>Please wait while updates are downloaded and installed...</source>
-        <translation type="vanished">Veuillez attendre la fin du téléchargement et de l&apos;installation...</translation>
+        <translation>Veuillez attendre la fin du téléchargement et de l&apos;installation...</translation>
     </message>
     <message>
+        <location filename="../oscar/UpdaterWindow.ui" line="264"/>
         <source>Updates</source>
-        <translation type="vanished">Mises à jour</translation>
+        <translation>Mises à jour</translation>
     </message>
     <message>
+        <location filename="../oscar/UpdaterWindow.ui" line="304"/>
         <source>Component</source>
-        <translation type="vanished">Composant</translation>
+        <translation>Composant</translation>
     </message>
     <message>
+        <location filename="../oscar/UpdaterWindow.ui" line="309"/>
         <source>Version</source>
-        <translation type="vanished">Version</translation>
+        <translation>Version</translation>
     </message>
     <message>
+        <location filename="../oscar/UpdaterWindow.ui" line="314"/>
         <source>Size</source>
-        <translation type="vanished">Taille</translation>
+        <translation>Taille</translation>
     </message>
     <message>
+        <location filename="../oscar/UpdaterWindow.ui" line="319"/>
         <source>Progress</source>
-        <translation type="vanished">Progression</translation>
+        <translation>Progression</translation>
     </message>
     <message>
+        <location filename="../oscar/UpdaterWindow.ui" line="328"/>
         <source>Log</source>
-        <translation type="vanished">Log</translation>
+        <translation>Log</translation>
     </message>
     <message>
+        <location filename="../oscar/UpdaterWindow.ui" line="374"/>
         <source>Downloading  Installing Updates</source>
-        <translation type="vanished">Application des MàJ</translation>
+        <translation>Application des MàJ</translation>
     </message>
     <message>
+        <location filename="../oscar/UpdaterWindow.ui" line="394"/>
         <source>Finished</source>
-        <translation type="vanished">Fermer</translation>
+        <translation>Fermer</translation>
     </message>
 </context>
 <context>
