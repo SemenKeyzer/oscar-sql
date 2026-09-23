@@ -1103,6 +1103,11 @@ static void mechanismDays(QDate start, QDate end, int & capable, int & total)
 {
     capable = 0;
     total = 0;
+    // A profile with no CPAP days — a newly created one, or one whose data has been purged —
+    // gives invalid dates here. QDate().addDays(1) is still invalid and an invalid date
+    // compares equal to another (both carry julian day 0), so the loop below would spin
+    // forever instead of ending. GitLab #297.
+    if (!start.isValid() || !end.isValid()) return;
     for (QDate date = start; date <= end; date = date.addDays(1)) {
         Day * day = p_profile->GetGoodDay(date, MT_CPAP);
         if (!day) continue;
@@ -1848,9 +1853,13 @@ QString Statistics::UpdateRecordsBox()
                      "</head><body>";
 
     Machine * cpap = p_profile->GetMachine(MT_CPAP);
-    if (cpap) {
-        QDate first = p_profile->FirstDay(MT_CPAP);
-        QDate last = p_profile->LastDay(MT_CPAP);
+    QDate firstCpapDay = p_profile->FirstDay(MT_CPAP);
+    QDate lastCpapDay = p_profile->LastDay(MT_CPAP);
+    // A device with no days left (all purged, or added but never imported) gives invalid
+    // dates, which the day loops below cannot terminate on — see mechanismDays(). GitLab #297.
+    if (cpap && firstCpapDay.isValid() && lastCpapDay.isValid()) {
+        QDate first = firstCpapDay;
+        QDate last = lastCpapDay;
         bool rdi = p_profile->general->calculateRDI();
         QString ahitxt = rdi ? STR_TR_RDI : STR_TR_AHI;
 

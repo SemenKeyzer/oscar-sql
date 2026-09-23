@@ -6575,3 +6575,31 @@ debug log. Making properties persist is a separate change.
 The speculative `"0x0a"`/`"0x0A"` entries were dropped from `s_PrismaTestedModels`: LINE
 devices report `DeviceType` as a decimal string, and the hex ids belong to the Firefly
 platform's JSON `devid`, so those entries could never match.
+
+## 2026-09-22 - New profile creation hung OSCAR in an infinite date loop (#297)
+
+Clicking Finish in the new-profile wizard left OSCAR unresponsive with one core pinned.
+The debug log stopped after `DoctorInfoRepository: Updated doctor_info record id <n>` and
+never reached `Statistics::GenerateHTML: entered`, which placed the hang between the end of
+`Profile::saveExtendedDataToDatabase()` and the first line of `Statistics::GenerateHTML()`.
+The only computation in that window is the `Statistics` constructor, which calls
+`anyMechanismDays(p_profile->FirstDay(MT_CPAP), p_profile->LastDay(MT_CPAP))`.
+
+A brand-new profile has no CPAP days, so both dates come back invalid. `mechanismDays()`
+iterates `for (QDate date = start; date <= end; date = date.addDays(1))`, and
+`QDate().addDays(1)` is itself invalid: every invalid QDate carries julian day 0, so
+`date <= end` stays true and `date` never advances. The loop spins forever - one thread at
+100%, the GUI thread never returning to the event loop, hence "not responding" rather than a
+crash. `NewProfile` calls `MainWindow::GenerateStatistics()` on Finish, so every new profile
+hit it; so would any profile whose CPAP days had all been purged.
+
+Introduced with the OAHI/CAHI capability gating (#261, `46ac5bcd`) - `mechanismDays()` was
+new there and is the only one of the statistics day loops not already behind a
+`FirstDay()`/`LastDay()` validity check.
+
+`mechanismDays()` now returns immediately when either date is invalid. The same unguarded
+pattern in `Statistics::UpdateRecordsBox()` was guarded at the same time: its loops sit
+behind `if (cpap)`, which is satisfied by a device record that has no days left, so a purged
+or never-imported device would hang there the same way. With the guard, an empty profile
+renders the normal "no data" statistics page - `GenerateCPAPUsage()` already returns an empty
+string when no device has days, and `GenerateHTML()` turns that into `htmlNoData()`.
