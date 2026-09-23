@@ -447,7 +447,7 @@ MachineInfo SefamLoader::PeekInfo(const QString &path)
 
         // Firmware version, for diagnostics on untested models.
         const QString fw = ini.value("Create Info/Version").toString().trimmed();
-        if (!fw.isEmpty()) { info.properties[QStringLiteral("Firmware")] = fw; }
+        if (!fw.isEmpty()) { info.properties[QStringLiteral("firmware")] = fw; }
         break;
     }
     if (info.modelnumber.isEmpty()) {
@@ -732,7 +732,7 @@ int SefamLoader::Open(const QString &path)
              << "model" << info.model
              << "serial" << info.serial
              << "modelcode" << info.properties.value(QStringLiteral("ModelCode"))
-             << "firmware" << info.properties.value(QStringLiteral("Firmware"));
+             << "firmware" << info.properties.value(QStringLiteral("firmware"));
 
     m_ctx->CreateMachineFromInfo(info);
     Machine *mach = p_profile->CreateMachine(info);
