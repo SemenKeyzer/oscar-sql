@@ -1518,7 +1518,14 @@ bool Machine::SaveToDatabase()
         return true;  // Already saved
     }
 
-    if (info.serial.isEmpty() && info.model.isEmpty()) {
+    // A CPAP with neither serial nor model means the loader failed to identify the card, so no
+    // record is created. Oximetry, position, sleep-stage and journal importers may legitimately
+    // supply neither (e.g. a Somnopose CSV without the optional model=/serial= headers): these
+    // are the single-instance types Profile::CreateMachine() recognises, one machine per
+    // loader, identified by (serial "", loader, profile).
+    const bool singleInstance = (info.type == MT_OXIMETER) || (info.type == MT_POSITION)
+                             || (info.type == MT_SLEEPSTAGE) || (info.type == MT_JOURNAL);
+    if (info.loadername.isEmpty() || (!singleInstance && info.serial.isEmpty() && info.model.isEmpty())) {
         qWarning() << "Machine::SaveToDatabase(): Cannot save machine without serial or model";
         return false;
     }

@@ -6511,3 +6511,26 @@ Two related defects fixed at the same time:
   empty name) or a member that fails to extract produced the same null-pointer
   `QByteArray`. Missing or unextractable members now yield an empty buffer, which
   `PrismaImport::run()` already handles, matching the directory-based `ImportDataDir()`.
+
+## 2026-09-22 - Somnopose imports stored no event data; graphs showed "Plots Disabled" (#296)
+
+After importing a Somnopose CSV, the Inclination and Orientation graphs showed "Plots
+Disabled", while OSCAR 1.7.1 plotted them. The session had `session_channels` rows but no
+`event_lists` rows.
+
+`Machine::SaveToDatabase()` refused to create a machine record when serial *and* model were
+both empty. The Somnopose `model=`/`serial=` headers are optional, and the loader copies
+them over `newInfo()`'s defaults even when absent, so a typical CSV yields a machine with
+neither. The loader's `mach->Save()` therefore skipped every session. `Profile::StoreMachines()`
+then created the machine row (it has no such guard), and the session summary was written
+when the profile closed, but by then the event lists had been released, so no event data
+was ever stored.
+
+The guard now applies only to machines that are not single-instance: oximetry, position,
+sleep-stage and journal machines (the types `Profile::CreateMachine()` treats as one per
+loader) may be saved with empty serial and model, identified by (serial "", loader,
+profile). CPAP machines keep the guard against junk rows from unidentified cards (#294).
+A loader name is now also required.
+
+Existing Somnopose data imported by the affected build has no event data and must be
+purged and re-imported (re-importing alone skips the already-present session).
