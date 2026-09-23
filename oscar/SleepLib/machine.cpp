@@ -679,9 +679,61 @@ qint64 Machine::correctionMs(QDate night) const
     return total;
 }
 
+/*! \brief Copy the identity fields of \a info into an existing machines record.
+    \param data      The record as currently stored; updated in place.
+    \param info      The identity the loader (or the database) has just supplied.
+    \param machineId OSCAR's internal machine ID, or 0 when it is not yet known.
+    \return true when at least one column changed and \a data must be written back.
+
+    A field is only overwritten when the incoming value is non-empty, so a loader that
+    supplies nothing for a column (an oximeter with no serial, a device whose series the
+    loader does not know) leaves the stored value alone.  Anything else that differs wins:
+    a model name corrected by a loader update replaces the stored one whatever it said,
+    which the earlier "only replace an empty or 'Unknown' model" rule could not do for
+    placeholders such as ResMed's "Resmed ???".
+
+    This is the single place that decides what gets written back, shared by
+    Machine::setInfo() and Machine::SaveToDatabase() so the two cannot diverge. */
+static bool applyIdentityTo(MachineData & data, const MachineInfo & info, MachineID machineId)
+{
+    bool changed = false;
+
+    auto setIfChanged = [&changed](QString & stored, const QString & incoming) {
+        if (incoming.isEmpty() || stored == incoming) return;
+        stored = incoming;
+        changed = true;
+    };
+
+    setIfChanged(data.brand,        info.brand);
+    setIfChanged(data.model,        info.model);
+    setIfChanged(data.modelNumber,  info.modelnumber);
+    setIfChanged(data.serialNumber, info.serial);
+    setIfChanged(data.series,       info.series);
+
+    // A machine ID of 0 means "not assigned yet", and a data version of 0 means the loader
+    // does not declare one; neither should overwrite a good stored value.
+    if (machineId != 0 && data.machineId != machineId) {
+        data.machineId = machineId;
+        changed = true;
+    }
+    if (info.version != 0 && data.dataVersion != info.version) {
+        data.dataVersion = info.version;
+        changed = true;
+    }
+
+    return changed;
+}
+
+/*! \brief True when \a a and \a b differ in any field applyIdentityTo() would write. */
+static bool identityDiffers(const MachineInfo & a, const MachineInfo & b)
+{
+    return a.brand   != b.brand   || a.model  != b.model   || a.modelnumber != b.modelnumber
+        || a.serial  != b.serial  || a.series != b.series  || a.version     != b.version;
+}
+
 void Machine::setInfo(MachineInfo inf)
 {
-    int oldVersion = info.version;
+    const MachineInfo oldInfo = info;
 
     MachineInfo merged = inf;
     if (info.purgeDate.isValid()) merged.purgeDate = info.purgeDate;
@@ -691,33 +743,23 @@ void Machine::setInfo(MachineInfo inf)
     // Some loaders (ResMed, BMC, BMCG3X, ...) look up an already-loaded Machine and call
     // setInfo() on it directly, bypassing Profile::CreateMachine(); others reuse an existing
     // Machine object through CreateMachine()'s dedup branches. Either way, nothing else writes
-    // a version bump back to the database: ImportContext::CreateMachineFromInfo() and
+    // an identity change back to the database: ImportContext::CreateMachineFromInfo() and
     // Profile::storeMachinesToDatabase() both skip machines that already have a database id.
     // Without this, a stale DB data_version makes Profile::DataFormatError()'s "needs upgrade"
-    // prompt reappear on every subsequent launch even after the user has upgraded.
-    if (m_database_id > 0) {
+    // prompt reappear on every subsequent launch even after the user has upgraded, and a model
+    // name the loader has learned since the record was written is discarded at shutdown.
+    //
+    // The in-memory comparison comes first so that the common case — re-importing a device
+    // whose identity has not changed — costs nothing instead of a SELECT per machine.
+    if (m_database_id > 0 && identityDiffers(oldInfo, info)) {
         MachineRepository repo;
         MachineData data = repo.findById(m_database_id);
         if (data.id > 0) {
-            bool needsUpdate = false;
-            if (data.dataVersion != info.version) {
-                data.dataVersion = info.version;
-                needsUpdate = true;
-                qDebug() << "Machine::setInfo(): Persisted version bump for" << info.loadername << info.serial
-                         << "from" << oldVersion << "to" << info.version;
-            }
-            if ((data.model.isEmpty() || data.model.contains("Unknown", Qt::CaseInsensitive)) &&
-                !info.model.isEmpty() && !info.model.contains("Unknown", Qt::CaseInsensitive)) {
-                data.model = info.model;
-                needsUpdate = true;
-                qDebug() << "Machine::setInfo(): Persisted model name update for" << info.loadername << info.serial
-                         << "to" << info.model;
-            }
-            if (data.series.isEmpty() && !info.series.isEmpty()) {
-                data.series = info.series;
-                needsUpdate = true;
-            }
-            if (needsUpdate) {
+            const int storedVersion = data.dataVersion;
+            if (applyIdentityTo(data, info, m_id)) {
+                qDebug() << "Machine::setInfo(): Persisting identity update for" << info.loadername
+                         << info.serial << "model" << data.model
+                         << "data version" << storedVersion << "->" << data.dataVersion;
                 repo.update(data);
             }
         }
@@ -1595,20 +1637,11 @@ bool Machine::SaveToDatabase()
         // Update machine_id and any info fields that may have changed since the record
         // was first written (e.g. series corrected after a loader bug fix, machineId changed
         // after a rebuild-from-backup, or serial updated after a 1.x migration).
-        bool needsUpdate = (existing.machineId    != m_id)
-                        || (existing.series        != info.series)
-                        || (existing.model         != info.model)
-                        || (existing.modelNumber   != info.modelnumber)
-                        || (existing.serialNumber  != info.serial);
-        if (needsUpdate) {
-            MachineData updateData = existing;
-            updateData.machineId    = m_id;
-            updateData.serialNumber = info.serial;
-            updateData.series       = info.series;
-            updateData.model        = info.model;
-            updateData.modelNumber  = info.modelnumber;
+        MachineData updateData = existing;
+        if (applyIdentityTo(updateData, info, m_id)) {
             qDebug() << "Machine::SaveToDatabase(): Updating machine record for" << info.serial
-                     << "series:" << existing.series << "->" << info.series;
+                     << "series:" << existing.series << "->" << updateData.series
+                     << "model:" << existing.model << "->" << updateData.model;
             repo.update(updateData);
         }
 

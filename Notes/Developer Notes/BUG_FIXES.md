@@ -6534,3 +6534,44 @@ A loader name is now also required.
 
 Existing Somnopose data imported by the affected build has no event data and must be
 purged and re-imported (re-importing alone skips the already-present session).
+
+## 2026-09-22 - Machine identity changes were never written back to the database (!43)
+
+Review follow-up to the contributed prisma20A support. `Machine::setInfo()` only ever
+updated the in-memory `MachineInfo`, so anything a loader learned after a machine's record
+was first written was discarded at shutdown and re-read stale on the next launch: a model
+name added to a loader's tested-models table (the prisma20A case), a corrected series, and
+the data version — the last of which made `Profile::DataFormatError()`'s "needs upgrade"
+prompt reappear on every launch even after the user had upgraded. Nothing else covers it:
+`ImportContext::CreateMachineFromInfo()` and `Profile::storeMachinesToDatabase()` both skip
+machines that already have a database id, and `Machine::SaveToDatabase()`'s existing-record
+branch is only reached before `m_database_id` is set.
+
+The contributed fix updated the model only when the stored value was empty or contained the
+literal "Unknown", which never matched other loaders' placeholders - ResMed writes
+`"Resmed ???"` (`resmed_loader.cpp:68`) - and could not correct a stored model that was
+simply wrong, such as the Lumis 150 misidentified as an S9. It also duplicated, with
+different rules, the identity-update logic already in `SaveToDatabase()`.
+
+Both sites now share `applyIdentityTo()`, which overwrites brand, model, model number,
+serial and series whenever the incoming value is non-empty and differs, plus machine id and
+data version when those are non-zero and differ. Non-empty-wins means a loader that supplies
+nothing for a column leaves the stored value alone; dropping the "Unknown" test means any
+corrected name is persisted whatever the old one said. `setInfo()` compares the incoming
+`MachineInfo` against the previous one first, so the common case - re-importing a device
+whose identity has not changed - costs no database round trip.
+
+Also in the same review: the Prisma loader recorded the device firmware in
+`MachineInfo::series`. `series` is a lookup key - it selects the device pixmap
+(`Machine::getPixmap()`) and is matched against in the SD-card warnings
+(`welcome.cpp:58`) - so a version string there would rule out ever keying a Prisma icon off
+it. Firmware now goes to `info.properties["firmware"]`, spelled as in
+`bmcg3x_loader.cpp:52`, and joins `FWVersion` with `FWRevision` so it reads `5.07.0002` as
+the vendor's prismaTS report shows it. Note that loader-set properties are currently not
+persisted at all: `SaveToDatabase()` writes `{"capabilities":N}` over the column for a new
+record and does not touch it for an existing one, so the value lives only in memory and the
+debug log. Making properties persist is a separate change.
+
+The speculative `"0x0a"`/`"0x0A"` entries were dropped from `s_PrismaTestedModels`: LINE
+devices report `DeviceType` as a decimal string, and the hex ids belong to the Firefly
+platform's JSON `devid`, so those entries could never match.

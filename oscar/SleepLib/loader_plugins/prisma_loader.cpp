@@ -515,9 +515,9 @@ struct PrismaTestedModel
 static const PrismaTestedModel s_PrismaTestedModels[] = {
     { "0x92", "Prisma Smart" },
     { "0x91", "Prisma Soft" },
+    // The LINE models are identified by the decimal DeviceType string in device.xml;
+    // the hex ids above come from the Firefly platform's JSON "devid" field instead.
     { "10"  , "prisma20A" },
-    { "0x0a", "prisma20A" },
-    { "0x0A", "prisma20A" },
     { "22"  , "prisma25S" },
     { "23"  , "prisma25ST" },
     { "", ""}
@@ -786,9 +786,24 @@ MachineInfo PrismaLoader::PeekInfoFromPrismaLineConfig(const QString & selectedP
         return MachineInfo();
     }
 
-    QDomNodeList fwList = root.elementsByTagName("FWVersion");
-    if (!fwList.isEmpty() && fwList.item(0).attributes().count() > 0) {
-        info.series = fwList.item(0).attributes().item(0).nodeValue();
+    // Firmware belongs in properties, not in series: series is a lookup key (it selects the
+    // device pixmap and is matched against in the card warnings), so a version string there
+    // would make it impossible to ever key a Prisma icon off it.  device.xml splits the
+    // version across two elements — FWVersion "5.07" and FWRevision "0002" — which the
+    // vendor's prismaTS report shows joined as "FW 5.07.0002".
+    auto firstAttribute = [&root](const QString & tag) -> QString {
+        QDomNodeList list = root.elementsByTagName(tag);
+        if (list.isEmpty() || list.item(0).attributes().count() == 0) return QString();
+        return list.item(0).attributes().item(0).nodeValue();
+    };
+    QString firmware = firstAttribute("FWVersion");
+    const QString fwRevision = firstAttribute("FWRevision");
+    if (!firmware.isEmpty() && !fwRevision.isEmpty()) {
+        firmware += "." + fwRevision;
+    }
+    if (!firmware.isEmpty()) {
+        // Key spelled as in bmcg3x_loader.cpp, which reads it back to flag untested firmware.
+        info.properties["firmware"] = firmware;
     }
 
     // TODO AXT load props
