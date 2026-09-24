@@ -112,9 +112,13 @@ bool Journal::BackupJournal(QString filename)
     DEBUGFC Q(first) Q(last);
 
 
+    // A profile with no days returns invalid dates here. addDays() on an invalid QDate
+    // stays invalid and invalid dates compare equal, so without this guard the loop
+    // never ends. The export then contains no days.
+    const bool haveRange = first.isValid() && last.isValid();
     QDate date = first.addDays(-1);
     int days_saved = 0 ;
-    do {
+    while (haveRange && date < last) {
         date = date.addDays(1);
 
         Day * journal = p_profile->GetDay(date, MT_JOURNAL);
@@ -203,7 +207,7 @@ bool Journal::BackupJournal(QString filename)
             }
         days_saved++;
         stream.writeEndElement(); // day
-    } while (date <= last);
+    }
     // //stream.writeAttribute("DaysSaved", QString::number(days_saved));
 
     stream.writeEndElement(); // Journal

@@ -6603,3 +6603,22 @@ behind `if (cpap)`, which is satisfied by a device record that has no days left,
 or never-imported device would hang there the same way. With the guard, an empty profile
 renders the normal "no data" statistics page - `GenerateCPAPUsage()` already returns an empty
 string when no device has days, and `GenerateHTML()` turns that into `htmlNoData()`.
+
+## 2026-09-24 - Export Journal hung on a profile with no days (#299)
+
+File > Export Journal on a profile with no days at all spun forever with one core pinned,
+even when the save dialog was cancelled. `Journal::BackupJournal()` walked
+`FirstDay(MT_JOURNAL)`..`LastDay(MT_JOURNAL)` with a `do ... while (date <= last)` loop;
+with no days both dates are invalid, `QDate().addDays(1)` stays invalid and invalid dates
+compare equal, so the loop never ended - the same defect as #297. A profile with days but
+no journal entries was not affected, because `FirstDay(MT_JOURNAL)` then falls back to the
+(valid) last day. Cancelling did not help because the caller passed the empty filename
+straight to `BackupJournal()`, which only looks at the filename after the loop.
+
+The loop is now a `while (haveRange && date < last)`, skipped when either date is invalid,
+so an empty profile exports an empty journal. The change also drops the old loop's extra
+pass past `last`. `MainWindow::on_actionExport_Journal_triggered()` now returns when the
+save dialog is cancelled. The same unguarded pattern in `MainWindow::FreeSessions()` and
+`DailySummaryRepository::calculateRange()` (neither currently called) was guarded as well.
+
+Found by code reading during an effort-level comparison; not reproduced at runtime.

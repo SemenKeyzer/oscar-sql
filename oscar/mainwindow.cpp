@@ -2839,6 +2839,11 @@ void MainWindow::FreeSessions()
     Day *day;
     QDate current = daily->getDate();
 
+    // Invalid dates (profile with no days) never advance and compare equal: don't loop.
+    if (!first.isValid() || !date.isValid()) {
+        return;
+    }
+
     do {
         day = p_profile->GetDay(date, MT_CPAP);
 
@@ -3816,6 +3821,9 @@ void MainWindow::on_actionExport_Journal_triggered()
     folder += QDir::separator() + tr("%1's Journal").arg(p_profile->user->userName()) + ".xml";
 
     QString filename = QFileDialog::getSaveFileName(this, tr("Choose where to save journal"), folder, tr("XML Files (*.xml)"), nullptr, nativeDialogOption());
+    if (filename.isEmpty()) {
+        return;     // user cancelled the save dialog
+    }
 
     if (Journal::BackupJournal(filename) ) {
 		QFileInfo fi(filename);

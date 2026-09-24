@@ -394,7 +394,12 @@ bool DailySummaryRepository::calculateRange(qint64 profileId, const QDate& start
         qWarning() << "DailySummaryRepository::calculateRange - No active profile";
         return false;
     }
-    
+    // Invalid dates never advance and compare equal, so the loop below would never end.
+    if (!startDate.isValid() || !endDate.isValid()) {
+        qWarning() << "DailySummaryRepository::calculateRange - Invalid date range";
+        return false;
+    }
+
     int successCount = 0;
     int totalDays = startDate.daysTo(endDate) + 1;
     
