@@ -801,6 +801,10 @@ int main(int argc, char *argv[]) {
     }
 
     QApplication mainapp(argc, argv);
+    // The application name above keeps its historical " 2.0" because it keys the QSettings
+    // store and AppDataLocation; changing it would orphan existing settings. The name users
+    // see (e.g. appended to window titles on Linux) covers every 2.x release.
+    QGuiApplication::setApplicationDisplayName(getAppName() + " 2");
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     mainapp.styleHints()->setColorScheme(Qt::ColorScheme::Light);
 #endif
