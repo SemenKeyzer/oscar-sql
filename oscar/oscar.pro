@@ -315,6 +315,7 @@ SOURCES += \
     devicetimecorrectiondialog.cpp \
     timealignmentwelcomedialog.cpp \
     driftanalysisdialog.cpp \
+    timealignsession.cpp \
     driftplotwidget.cpp \
     backupdialog.cpp \
     restoredialog.cpp \
@@ -502,6 +503,7 @@ HEADERS  += \
     devicetimecorrectiondialog.h \
     timealignmentwelcomedialog.h \
     driftanalysisdialog.h \
+    timealignsession.h \
     driftplotwidget.h \
     backupdialog.h \
     restoredialog.h \
@@ -832,7 +834,8 @@ test {
         tests/eventstabtests.cpp \
         tests/zeotests.cpp \
         tests/applehealthtests.cpp \
-        tests/machinetests.cpp
+        tests/machinetests.cpp \
+        tests/timealignsessiontests.cpp
 
     HEADERS += \
         tests/AutoTest.h \
@@ -849,7 +852,8 @@ test {
         tests/eventstabtests.h \
         tests/zeotests.h \
         tests/applehealthtests.h \
-        tests/machinetests.h
+        tests/machinetests.h \
+        tests/timealignsessiontests.h
 }
 
 macx {
