@@ -1925,6 +1925,25 @@ void MainWindow::on_actionTime_Corrections_triggered()
     m_correctionDialog->activateWindow();
 }
 
+void MainWindow::openTimeCorrections(Machine *mach)
+{
+    on_actionTime_Corrections_triggered();
+    if (m_correctionDialog && mach) m_correctionDialog->selectMachine(mach);
+}
+
+void MainWindow::refreshTimeCorrectionsDialog()
+{
+    // setDate() would silently drop an unsaved edit on the same date, so leave such a dialog alone.
+    if (m_correctionDialog && daily && !m_correctionDialog->hasStagedChange()) {
+        m_correctionDialog->setDate(daily->getDate());
+    }
+}
+
+bool MainWindow::timeCorrectionsDialogHasStagedChange() const
+{
+    return m_correctionDialog && m_correctionDialog->hasStagedChange();
+}
+
 void MainWindow::on_actionDrift_Analysis_triggered()
 {
     if (!p_profile) {

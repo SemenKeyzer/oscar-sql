@@ -20,6 +20,7 @@
 #include <QRadioButton>
 #include <QVBoxLayout>
 #include <QtMath>
+#include <QTreeWidgetItemIterator>
 
 static const qint64 kLargeOffsetThresholdMs = 15LL * 60 * 1000;
 
@@ -184,6 +185,19 @@ Machine* DeviceTimeCorrectionDialog::currentMachine() const
     QVariant v = item->data(0, Qt::UserRole);
     if (!v.isValid()) return nullptr;
     return reinterpret_cast<Machine*>(v.value<quintptr>());
+}
+
+void DeviceTimeCorrectionDialog::selectMachine(Machine* mach)
+{
+    if (!mach) return;
+    const quintptr wanted = reinterpret_cast<quintptr>(mach);
+    for (QTreeWidgetItemIterator it(ui->deviceSidebar); *it; ++it) {
+        const QVariant v = (*it)->data(0, Qt::UserRole);
+        if (v.isValid() && v.value<quintptr>() == wanted) {
+            ui->deviceSidebar->setCurrentItem(*it);
+            return;
+        }
+    }
 }
 
 void DeviceTimeCorrectionDialog::refreshTitleArea(Machine* mach)

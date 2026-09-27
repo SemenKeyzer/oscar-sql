@@ -29,6 +29,10 @@ public:
     ~DeviceTimeCorrectionDialog();
 
     void setDate(const QDate& date);
+    //! \brief Selects \a mach in the device list if it is listed for the current date.
+    void selectMachine(Machine* mach);
+    //! \brief True while a correction is being edited but not yet saved.
+    bool hasStagedChange() const { return m_hasStagedChange; }
 
 signals:
     void correctionsChanged();

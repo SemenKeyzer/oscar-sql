@@ -34,6 +34,7 @@
 #include "Graphs/gLineChart.h"
 #include "sessionbar.h"
 #include "mytextbrowser.h"
+#include "timealignsession.h"
 class SaveGraphLayoutSettings;
 
 
@@ -43,6 +44,7 @@ namespace Ui {
 
 class MainWindow;
 class DailySearchTab;
+class TimeAlignBar;
 class gFlagsGroup;
 
 
@@ -149,6 +151,12 @@ public:
         */
     void Unload(QDate date=QDate());
 
+    /*! \fn finishAlign(bool allowCancel)
+        \brief Leaves time-alignment mode, asking whether to save an unsaved shift.
+        \param allowCancel offer Cancel (for actions that can be abandoned, like changing the date)
+        \return false only when the user chose Cancel */
+    bool finishAlign(bool allowCancel);
+
     void setSidebarVisible(bool visible);
     void setCalendarVisible(bool visible);
 
@@ -180,6 +188,19 @@ public slots:
 
 private slots:
     void on_ReloadDay();
+
+    void onAlignButtonClicked(bool checked);
+    void onAlignRequestedForGraph(gGraph *graph);
+    void onAlignDeviceChosen(Machine *mach);
+    void onAlignOffsetChanged(qint64 ms);
+    void onAlignNudge(qint64 deltaMs);
+    void onAlignDragStarted();
+    void onAlignDragMoved(double rawDeltaMs, double msPerPx);
+    void onAlignDragFinished();
+    void onAlignSameAsLastNight();
+    void onAlignMoreOptions();
+    void onAlignSave();
+    void onAlignCancel();
 
     /*! \fn on_calendar_currentPageChanged(int year, int month);
         \brief Scans through all days for this month, updating the day colors for the calendar object
@@ -380,6 +401,19 @@ private:
     QString getLeftSidebar (bool honorPieChart);
 
     QHash<QString, gGraph *> graphlist;
+
+    // Time alignment of non-CPAP devices (Align bar)
+    QList<Machine *> alignCandidates(Day *day) const;
+    QSet<QString> alignTargetGraphs(Machine *mach, Day *day) const;
+    void startAlign(Machine *mach);
+    void stopAlign();
+    void afterAlignSaved();
+    void refreshAlignStatus();
+    void updateAlignButton(Day *day);
+    QPushButton *alignButton = nullptr;
+    TimeAlignBar *m_alignBar = nullptr;
+    TimeAlignSession *m_alignSession = nullptr;
+    qint64 m_alignDragBaseMs = 0;
 
     QHash<QString,QPushButton *> GraphToggles;
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)  || defined (NEEDS_WORK)

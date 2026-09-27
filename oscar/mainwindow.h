@@ -139,6 +139,13 @@ class MainWindow : public QMainWindow
     //! \brief Returns the Daily Tab object
     Daily *getDaily() { return daily; }
 
+    //! \brief Opens Data > Time Corrections with \a mach selected (nullptr keeps the dialog's choice).
+    void openTimeCorrections(Machine *mach);
+    //! \brief Re-reads corrections in an open Time Corrections dialog that has no unsaved edit.
+    void refreshTimeCorrectionsDialog();
+    //! \brief True while the Time Corrections dialog is open with an unsaved change.
+    bool timeCorrectionsDialogHasStagedChange() const;
+
     //! \brief Returns the Overview Tab object
     Overview *getOverview() { return overview; }
 

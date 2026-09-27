@@ -57,6 +57,8 @@
 #include "Graphs/gYAxis.h"
 #include "Graphs/gSegmentChart.h"
 #include "Graphs/gStatsLine.h"
+#include "timealignbar.h"
+#include <QSignalBlocker>
 #include "Graphs/gdailysummary.h"
 #include "Graphs/MinutesAtPressure.h"
 
@@ -642,6 +644,43 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     ui->JournalNotes->installEventFilter(this);
 //    qDebug() << "Finished making new Daily object";
 //    sleep(3);
+    // Time alignment: the Align bar above the graphs and the Align button on the bottom bar
+    m_alignSession = new TimeAlignSession(nullptr, this);
+    m_alignBar = new TimeAlignBar(this);
+    m_alignBar->hide();
+    ui->verticalLayout_3->insertWidget(ui->verticalLayout_3->indexOf(ui->graphMainArea), m_alignBar);
+
+    alignButton = new QPushButton(tr("Align"), this);
+    alignButton->setCheckable(true);
+    alignButton->setToolTip(tr("Line up an oximeter or other device with the CPAP data for this night"));
+    alignButton->hide();
+    if (auto *bar = qobject_cast<QBoxLayout *>(ui->frame->layout())) {
+        bar->insertWidget(bar->indexOf(ui->graphHelp), alignButton);
+    }
+    connect(alignButton, &QPushButton::clicked, this, &Daily::onAlignButtonClicked);
+
+    connect(m_alignSession, &TimeAlignSession::offsetChanged, this, &Daily::onAlignOffsetChanged);
+    connect(m_alignBar, &TimeAlignBar::deviceChosen, this, &Daily::onAlignDeviceChosen);
+    connect(m_alignBar, &TimeAlignBar::nudgeRequested, this, &Daily::onAlignNudge);
+    connect(m_alignBar, &TimeAlignBar::sameAsLastNightRequested, this, &Daily::onAlignSameAsLastNight);
+    connect(m_alignBar, &TimeAlignBar::moreOptionsRequested, this, &Daily::onAlignMoreOptions);
+    connect(m_alignBar, &TimeAlignBar::saveRequested, this, &Daily::onAlignSave);
+    connect(m_alignBar, &TimeAlignBar::cancelRequested, this, &Daily::onAlignCancel);
+    connect(GraphView, &gGraphView::alignDragStarted, this, &Daily::onAlignDragStarted);
+    connect(GraphView, &gGraphView::alignDragMoved, this, &Daily::onAlignDragMoved);
+    connect(GraphView, &gGraphView::alignDragFinished, this, &Daily::onAlignDragFinished);
+    connect(GraphView, &gGraphView::alignNudge, this, &Daily::onAlignNudge);
+    connect(GraphView, &gGraphView::alignAccept, this, &Daily::onAlignSave);
+    connect(GraphView, &gGraphView::alignCancel, this, &Daily::onAlignCancel);
+    connect(GraphView, &gGraphView::alignRequestedForGraph, this, &Daily::onAlignRequestedForGraph);
+    GraphView->setAlignMenuPredicate([this](gGraph *g) {
+        Day *day = p_profile ? p_profile->GetDay(previous_date) : nullptr;
+        for (Machine *mach : alignCandidates(day)) {
+            if (alignTargetGraphs(mach, day).contains(g->name())) return true;
+        }
+        return false;
+    });
+
     saveGraphLayoutSettings=nullptr;
     dailySearchTab = new DailySearchTab(this,ui->searchTab,ui->tabWidget);
     htmlLsbSectionHeaderInit(false);
@@ -791,6 +830,11 @@ void Daily::Link_clicked(const QUrl &url)
 
 void Daily::ReloadGraphs()
 {
+    // The graphs are about to be rebuilt; a pending preview cannot survive that.
+    if (m_alignSession && m_alignSession->isActive()) {
+        m_alignSession->cancel();
+        stopAlign();
+    }
     PERF_TIMER_SCOPE("ReloadGraphs");
 
 //    qDebug() << "Start ReloadGraphs  Daily object";
@@ -1190,6 +1234,14 @@ void Daily::on_calendar_selectionChanged()
 void Daily::on_ReloadDay()
 {
     static volatile bool inReload = false;
+
+    // Every date change (calendar click, day arrows, LoadDate) arrives here.
+    if (m_alignSession && m_alignSession->isActive() && previous_date.isValid()
+            && (ui->calendar->selectedDate() != previous_date) && !finishAlign(true)) {
+        QSignalBlocker block(ui->calendar);
+        ui->calendar->setSelectedDate(previous_date);
+        return;
+    }
 
     if (inReload) {
         qDebug() << "Daily::on_ReloadDay(): attempt to renter on_ReloadDay()";
@@ -2236,6 +2288,7 @@ void Daily::Load(QDate date)
 
 
     UpdateEventsTree(ui->treeWidget, day);
+    updateAlignButton(day);
 
     // FIXME:
     // Generating entire statistics because bookmarks may have changed.. (This updates the side panel too)
@@ -2628,6 +2681,8 @@ void Daily::deleteJournalSession(Session *journal, QDate date)
 
 void Daily::Unload(QDate date)
 {
+    finishAlign(false);   // profile close, import, purge and app exit cannot be cancelled
+
     if (!date.isValid()) {
         date = getDate();
         if (!date.isValid()) {
@@ -3594,4 +3649,252 @@ void Daily::on_layout_clicked() {
     if (saveGraphLayoutSettings) {
         saveGraphLayoutSettings->triggerLayout(GraphView);
     }
+}
+
+// ---------------------------------------------------------------------------
+// Time alignment (Align bar)
+// ---------------------------------------------------------------------------
+
+QList<Machine *> Daily::alignCandidates(Day *day) const
+{
+    QList<Machine *> result;
+    if (!day) return result;
+    for (Session *sess : day->sessions) {
+        Machine *mach = sess ? sess->machine() : nullptr;
+        if (!mach || (mach->type() == MT_CPAP) || !Machine::isCorrectableType(mach->type())) continue;
+        if ((mach->getDatabaseId() <= 0) || result.contains(mach)) continue;
+        result.append(mach);
+    }
+    // Oximeters first: they are the usual reason to align.
+    std::stable_partition(result.begin(), result.end(), [](Machine *m) { return m->type() == MT_OXIMETER; });
+    return result;
+}
+
+QSet<QString> Daily::alignTargetGraphs(Machine *mach, Day *day) const
+{
+    QSet<QString> names;
+    if (!mach || !day) return names;
+    for (auto it = graphlist.constBegin(); it != graphlist.constEnd(); ++it) {
+        if (!it.value()) continue;
+        const ChannelID code = schema::channel[it.key()].id();
+        if (code == 0) continue;   // not a channel graph (event flags, pie, ...)
+        for (Session *sess : day->sessions) {
+            if (sess && (sess->machine() == mach) && sess->channelExists(code)) {
+                names.insert(it.value()->name());
+                break;
+            }
+        }
+    }
+    return names;
+}
+
+void Daily::updateAlignButton(Day *day)
+{
+    if (alignButton) alignButton->setVisible(!alignCandidates(day).isEmpty());
+}
+
+void Daily::startAlign(Machine *mach)
+{
+    Day *day = p_profile ? p_profile->GetDay(previous_date) : nullptr;
+    if (!day || !mach) {
+        stopAlign();
+        return;
+    }
+    if (mainwin && mainwin->timeCorrectionsDialogHasStagedChange()) {
+        QMessageBox::information(this, tr("Align Device Time"),
+            tr("Save or cancel the change in the Time Corrections window first."));
+        stopAlign();
+        return;
+    }
+    if (!m_alignSession->begin(mach, previous_date)) {
+        stopAlign();
+        return;
+    }
+    m_alignBar->setDevices(alignCandidates(day), mach);
+    m_alignBar->setOffset(m_alignSession->offsetMs());
+    m_alignBar->setSameAsLastNightEnabled(m_alignSession->previousNightOffset().has_value());
+    refreshAlignStatus();
+    m_alignBar->show();
+    {
+        QSignalBlocker block(alignButton);
+        alignButton->setChecked(true);
+    }
+    GraphView->setAlignMode(true, alignTargetGraphs(mach, day));
+}
+
+// Leaves the mode; the session must already be committed or cancelled.
+void Daily::stopAlign()
+{
+    m_alignSession->end();
+    GraphView->setAlignMode(false);
+    m_alignBar->hide();
+    {
+        QSignalBlocker block(alignButton);
+        alignButton->setChecked(false);
+    }
+    redrawWithZoom();
+}
+
+void Daily::afterAlignSaved()
+{
+    stopAlign();
+    if (Day *day = p_profile ? p_profile->GetDay(previous_date) : nullptr) {
+        UpdateEventsTree(ui->treeWidget, day);   // event times include the correction
+    }
+    if (mainwin) mainwin->refreshTimeCorrectionsDialog();
+}
+
+bool Daily::finishAlign(bool allowCancel)
+{
+    if (!m_alignSession || !m_alignSession->isActive()) return true;
+    if (m_alignSession->isDirty()) {
+        QMessageBox::StandardButtons buttons = QMessageBox::Save | QMessageBox::Discard;
+        if (allowCancel) buttons |= QMessageBox::Cancel;
+        const auto answer = QMessageBox::question(this, tr("Align Device Time"),
+            tr("Save the time shift of %1 for %2?")
+                .arg(TimeAlignBar::deviceLabel(m_alignSession->machine()),
+                     QLocale().toString(m_alignSession->night(), QLocale::ShortFormat)),
+            buttons, QMessageBox::Save);
+        if (answer == QMessageBox::Cancel) return false;
+        if (answer == QMessageBox::Save) {
+            if (m_alignSession->commit()) {
+                afterAlignSaved();
+                return true;
+            }
+            QMessageBox::warning(this, tr("Align Device Time"), tr("Couldn't save the time correction."));
+            if (allowCancel) return false;
+        }
+    }
+    m_alignSession->cancel();
+    stopAlign();
+    return true;
+}
+
+void Daily::refreshAlignStatus()
+{
+    if (!m_alignSession->isActive()) return;
+    QStringList notes;
+    TimeAlignBar::Severity severity = TimeAlignBar::Severity::Info;
+    Day *day = p_profile ? p_profile->GetDay(previous_date) : nullptr;
+    if (day && !day->machine(MT_CPAP)) {
+        notes << tr("No CPAP data this night to align against.");
+    }
+    const qint64 other = m_alignSession->otherCorrectionsMs();
+    if (other != 0) {
+        notes << tr("Other corrections also apply: %1").arg(TimeAlignSession::formatOffset(other));
+    }
+    if (qAbs(m_alignSession->offsetMs()) > TimeAlignSession::kLargeOffsetMs) {
+        notes << tr("Large offset - check the device clock or use a date-range correction.");
+        severity = TimeAlignBar::Severity::Warning;
+    }
+    if (notes.isEmpty()) {
+        notes << tr("Drag the framed graphs or use the buttons. Arrow keys: 10 s, Shift+arrow: 1 min.");
+    }
+    m_alignBar->setStatus(notes.join(QStringLiteral("  ")), severity);
+}
+
+void Daily::onAlignButtonClicked(bool checked)
+{
+    if (!checked) {
+        if (!finishAlign(true)) {
+            QSignalBlocker block(alignButton);
+            alignButton->setChecked(true);
+        }
+        return;
+    }
+    const QList<Machine *> candidates = alignCandidates(p_profile ? p_profile->GetDay(previous_date) : nullptr);
+    if (candidates.isEmpty()) {
+        QSignalBlocker block(alignButton);
+        alignButton->setChecked(false);
+        return;
+    }
+    startAlign(candidates.first());
+}
+
+void Daily::onAlignRequestedForGraph(gGraph *graph)
+{
+    Day *day = p_profile ? p_profile->GetDay(previous_date) : nullptr;
+    for (Machine *mach : alignCandidates(day)) {
+        if (!alignTargetGraphs(mach, day).contains(graph->name())) continue;
+        if (m_alignSession->machine() == mach) return;             // already aligning it
+        if (m_alignSession->isActive() && !finishAlign(true)) return;
+        startAlign(mach);
+        return;
+    }
+}
+
+void Daily::onAlignDeviceChosen(Machine *mach)
+{
+    Machine *current = m_alignSession->machine();
+    if (!mach || (mach == current)) return;
+    if (!finishAlign(true)) {
+        Day *day = p_profile ? p_profile->GetDay(previous_date) : nullptr;
+        m_alignBar->setDevices(alignCandidates(day), current);    // put the picker back
+        return;
+    }
+    startAlign(mach);
+}
+
+void Daily::onAlignOffsetChanged(qint64 ms)
+{
+    m_alignBar->setOffset(ms);
+    refreshAlignStatus();
+    GraphView->timedRedraw(0);
+}
+
+void Daily::onAlignNudge(qint64 deltaMs)
+{
+    if (!m_alignSession->isActive()) return;
+    m_alignSession->nudge(deltaMs);
+    redrawWithZoom();
+}
+
+void Daily::onAlignDragStarted()
+{
+    m_alignDragBaseMs = m_alignSession->offsetMs();
+}
+
+void Daily::onAlignDragMoved(double rawDeltaMs, double msPerPx)
+{
+    if (!m_alignSession->isActive()) return;
+    m_alignSession->setOffsetMs(m_alignDragBaseMs + TimeAlignSession::snapDelta(rawDeltaMs, msPerPx));
+    const qint64 now = m_alignSession->offsetMs();
+    GraphView->showAlignLabel(tr("%1  (Δ %2)")
+        .arg(TimeAlignSession::formatOffset(now), TimeAlignSession::formatOffset(now - m_alignDragBaseMs)));
+}
+
+void Daily::onAlignDragFinished()
+{
+    redrawWithZoom();   // the device's first/last times moved: recompute the graph bounds
+}
+
+void Daily::onAlignSameAsLastNight()
+{
+    if (const auto previous = m_alignSession->previousNightOffset()) {
+        m_alignSession->setOffsetMs(*previous);
+        redrawWithZoom();
+    }
+}
+
+void Daily::onAlignMoreOptions()
+{
+    Machine *mach = m_alignSession->machine();
+    if (!finishAlign(true)) return;
+    if (mainwin) mainwin->openTimeCorrections(mach);
+}
+
+void Daily::onAlignSave()
+{
+    if (!m_alignSession->isActive()) return;
+    if (!m_alignSession->commit()) {
+        QMessageBox::warning(this, tr("Align Device Time"), tr("Couldn't save the time correction."));
+        return;
+    }
+    afterAlignSaved();
+}
+
+void Daily::onAlignCancel()
+{
+    if (m_alignSession->isActive()) m_alignSession->cancel();
+    stopAlign();
 }
