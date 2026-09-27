@@ -19,7 +19,7 @@ QList<SerialOximeter *> GetOxiLoaders()
 
     Q_FOREACH(MachineLoader * loader, loaders) {
         SerialOximeter * oxi = qobject_cast<SerialOximeter *>(loader);
-        oxiloaders.push_back(oxi);
+        if (oxi) oxiloaders.push_back(oxi);    // an oximeter loader that is not a SerialOximeter would crash callers
     }
 
     return oxiloaders;

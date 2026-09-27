@@ -395,6 +395,8 @@ SOURCES += \
     SleepLib/loader_plugins/md300w1_loader.cpp \
     SleepLib/loader_plugins/contec_ble_protocol.cpp \
     SleepLib/loader_plugins/contec_ble_downloader.cpp \
+    SleepLib/loader_plugins/contec_ble_import.cpp \
+    SleepLib/loader_plugins/contec_ble_loader.cpp \
     SleepLib/loader_plugins/mseries_loader.cpp \
     SleepLib/loader_plugins/prisma_loader.cpp \
     SleepLib/loader_plugins/vrem_loader.cpp \
@@ -607,6 +609,8 @@ HEADERS  += \
     SleepLib/loader_plugins/md300w1_loader.h \
     SleepLib/loader_plugins/contec_ble_protocol.h \
     SleepLib/loader_plugins/contec_ble_downloader.h \
+    SleepLib/loader_plugins/contec_ble_import.h \
+    SleepLib/loader_plugins/contec_ble_loader.h \
     logger.h \
     SleepLib/loader_plugins/weinmann_loader.h \
     Graphs/gdailysummary.h \
