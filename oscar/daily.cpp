@@ -2690,7 +2690,13 @@ void Daily::Unload(QDate date)
             return;
         }
     }
+    saveJournal(date);
+}
 
+// Stores the journal notes of \a date. Also used on its own when the notes editor loses focus,
+// which must not end time alignment (Unload does).
+void Daily::saveJournal(QDate date)
+{
     // Update the journal notes
     set_JournalNotesHtml(date, ui->JournalNotes->toHtml());
     Session *journal = GetJournalSession(date);
@@ -2947,6 +2953,8 @@ void Daily::on_JournalNotesUnderline_clicked()
 
 void Daily::on_prevDayButton_clicked()
 {
+    // These leave the day before on_ReloadDay runs, so ask about an unsaved shift here.
+    if (!finishAlign(true)) return;
     if (previous_date.isValid()) {
          Unload(previous_date);
     }
@@ -2970,7 +2978,7 @@ bool Daily::eventFilter(QObject *object, QEvent *event)
         // Trigger immediate save of journal when we focus out from it so we never
         // lose any journal entry text...
         if (previous_date.isValid()) {
-            Unload(previous_date);
+            saveJournal(previous_date);
         }
     }
     return false;
@@ -2978,6 +2986,8 @@ bool Daily::eventFilter(QObject *object, QEvent *event)
 
 void Daily::on_nextDayButton_clicked()
 {
+    // These leave the day before on_ReloadDay runs, so ask about an unsaved shift here.
+    if (!finishAlign(true)) return;
     if (previous_date.isValid()) {
          Unload(previous_date);
     }
@@ -3011,6 +3021,8 @@ void Daily::on_calButton_toggled(bool checked)
 
 void Daily::on_todayButton_clicked()
 {
+    // These leave the day before on_ReloadDay runs, so ask about an unsaved shift here.
+    if (!finishAlign(true)) return;
     if (previous_date.isValid()) {
          Unload(previous_date);
     }
@@ -3701,6 +3713,7 @@ void Daily::startAlign(Machine *mach)
         return;
     }
     if (mainwin && mainwin->timeCorrectionsDialogHasStagedChange()) {
+        GraphView->releaseKeyboard();   // see finishAlign()
         QMessageBox::information(this, tr("Align Device Time"),
             tr("Save or cancel the change in the Time Corrections window first."));
         stopAlign();
@@ -3748,6 +3761,9 @@ bool Daily::finishAlign(bool allowCancel)
 {
     if (!m_alignSession || !m_alignSession->isActive()) return true;
     if (m_alignSession->isDirty()) {
+        // The graph view grabs the keyboard while the mouse is over it; keys meant for the
+        // message box would otherwise reach the graph view (Enter = save again, Esc = cancel).
+        GraphView->releaseKeyboard();
         QMessageBox::StandardButtons buttons = QMessageBox::Save | QMessageBox::Discard;
         if (allowCancel) buttons |= QMessageBox::Cancel;
         const auto answer = QMessageBox::question(this, tr("Align Device Time"),
@@ -3887,6 +3903,7 @@ void Daily::onAlignSave()
 {
     if (!m_alignSession->isActive()) return;
     if (!m_alignSession->commit()) {
+        GraphView->releaseKeyboard();   // see finishAlign()
         QMessageBox::warning(this, tr("Align Device Time"), tr("Couldn't save the time correction."));
         return;
     }

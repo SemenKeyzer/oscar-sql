@@ -150,6 +150,8 @@ public:
         \param QDate date
         */
     void Unload(QDate date=QDate());
+    //! \brief Stores the journal notes of \a date (without leaving the day)
+    void saveJournal(QDate date);
 
     /*! \fn finishAlign(bool allowCancel)
         \brief Leaves time-alignment mode, asking whether to save an unsaved shift.
