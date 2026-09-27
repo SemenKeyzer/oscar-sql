@@ -316,6 +316,7 @@ SOURCES += \
     timealignmentwelcomedialog.cpp \
     driftanalysisdialog.cpp \
     timealignsession.cpp \
+    timealignbar.cpp \
     driftplotwidget.cpp \
     backupdialog.cpp \
     restoredialog.cpp \
@@ -504,6 +505,7 @@ HEADERS  += \
     timealignmentwelcomedialog.h \
     driftanalysisdialog.h \
     timealignsession.h \
+    timealignbar.h \
     driftplotwidget.h \
     backupdialog.h \
     restoredialog.h \
