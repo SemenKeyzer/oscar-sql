@@ -157,8 +157,9 @@
 - Отрисовка в режиме: пунктирная рамка + ⇄ у целевых графиков; во время жеста — плашка
   у курсора с текстом, который задаёт владелец (`setAlignDragLabel(QString)`), рисуется
   поверх графиков в `renderGraphs`.
-- Клавиши (`keyPressEvent`): в режиме `←/→`, `Shift+←/→`, `Enter/Return`, `Esc`
-  перехватываются и превращаются в сигналы; вне режима — без изменений.
+- Клавиши: в режиме `←/→`, `Shift+←/→`, `Enter/Return` перехватываются в `keyPressEvent`,
+  `Esc` — в `keyReleaseEvent` (там gGraphView обрабатывает Esc как «назад по истории зума»,
+  иначе отмена выравнивания заодно сбросила бы зум); вне режима — без изменений.
 - Контекстное меню: `populateMenu(g)` добавляет «Align device time…», если владелец
   разрешил для графика (`setAlignMenuPredicate(std::function<bool(gGraph*)>)`),
   по выбору — сигнал `alignRequestedForGraph(gGraph*)`.
@@ -181,8 +182,10 @@
   - смена даты: все пути (календарь мышью, ←/→ дня, `LoadDate`) сходятся в
     `Daily::on_ReloadDay()` — проверка в его начале, до `Unload(previous_date)`; при Cancel
     выделение календаря возвращается на `previous_date` с заблокированными сигналами;
-  - смена профиля и закрытие приложения: вызов из соответствующих мест `MainWindow`
-    (`closeEvent`, смена профиля); Cancel прерывает действие;
+  - смена профиля, закрытие приложения, импорт/очистка данных: все эти пути вызывают
+    `Daily::Unload()`, где задаётся вопрос **только Save / Discard** — эти действия
+    в `MainWindow` (`closeEvent`, `CloseProfile`) не умеют прерываться, поэтому Cancel там
+    не предлагается (уточнение при составлении плана);
   - смена устройства в combo полосы — тот же вопрос.
 - «More options…»: требует Save/Discard, затем `MainWindow::on_actionTime_Corrections_triggered()`
   с выбором устройства (нужен метод диалога `selectMachine(Machine*)`).
@@ -200,7 +203,8 @@ Cancel ─► TimeAlignSession.cancel ─► Machine::reloadCorrectionsFromDb �
 | Ситуация | Поведение |
 |---|---|
 | Ошибка записи при Save | Сообщение «Couldn't save the time correction.»; режим открыт, значение сохранено; лог через `qCritical`/`checkQueryError` (как в репозитории) |
-| Смена даты/профиля/устройства/выход с несохранённым | Save / Discard / Cancel; Discard → `cancel()`; Cancel прерывает действие |
+| Смена даты/устройства с несохранённым | Save / Discard / Cancel; Discard → `cancel()`; Cancel прерывает действие |
+| Выход/смена профиля/импорт/очистка с несохранённым | Save / Discard (прервать эти действия нельзя) |
 | \|сдвиг\| > 3 ч | Предупреждение «Large offset — check the device clock or use a date-range correction.» |
 | Предел | ±12 ч; кнопки/перетаскивание дальше не двигают |
 | Сдвиг вернули в 0 и Save | Однодневная строка мягко удаляется (`upsertOffset(..., 0)`) |
