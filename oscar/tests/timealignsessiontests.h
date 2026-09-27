@@ -31,6 +31,7 @@ private slots:
     void testSnapDelta();
     void testFormatOffset();
     void testRepositoryStoreRoundTrip();
+    void testAlignHitRectExcludesPinnedArea();
     void cleanupTestCase();
 
 private:

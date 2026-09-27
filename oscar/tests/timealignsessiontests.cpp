@@ -10,6 +10,7 @@
 #include "timealignsession.h"
 #include "SleepLib/machine.h"
 #include "database/database_manager.h"
+#include "Graphs/gGraphView.h"
 
 #include <QCoreApplication>
 #include <QDir>
@@ -346,6 +347,19 @@ void TimeAlignSessionTests::testRepositoryStoreRoundTrip()
 
     QVERIFY(store.upsertOffset(machineId, QStringLiteral("2026-09-24"), 0));
     QVERIFY(store.findActive(machineId).isEmpty());
+}
+
+// Scrolling graphs slide under the pinned ones at the top of the view: the part hidden there
+// must be neither draggable nor framed.
+void TimeAlignSessionTests::testAlignHitRectExcludesPinnedArea()
+{
+    const QSize view(800, 600);
+    const QRect plot(100, 50, 600, 200);   // y 50..249
+
+    QCOMPARE(gGraphView::alignHitRect(plot, false, 120, view), QRect(100, 120, 600, 130));
+    QVERIFY(gGraphView::alignHitRect(QRect(100, 0, 600, 100), false, 120, view).isEmpty());
+    QCOMPARE(gGraphView::alignHitRect(plot, true, 120, view), plot);   // pinned graphs are on top
+    QCOMPARE(gGraphView::alignHitRect(QRect(100, 500, 600, 200), false, 0, view), QRect(100, 500, 600, 100));
 }
 
 void TimeAlignSessionTests::cleanupTestCase()

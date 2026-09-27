@@ -1472,6 +1472,7 @@ bool gGraphView::renderGraphs(QPainter &painter)
         pinned_height += h + graphSpacer;
     }
 
+    m_alignPinnedHeight = int(ceil(pinned_height));
     py += pinned_height; // start drawing at the end of pinned space
 
     // Draw non pinned graphs
@@ -2330,6 +2331,7 @@ void gGraphView::setAlignMode(bool on, const QSet<QString>& targetGraphNames)
     m_alignMode = on;
     m_alignTargets = on ? targetGraphNames : QSet<QString>();
     m_alignDragging = false;
+    m_alignEscPressed = false;
     m_alignPainted.clear();
     m_tooltip->cancel();
     if (!on) setCursor(Qt::ArrowCursor);
@@ -2351,13 +2353,22 @@ gGraph *gGraphView::alignGraphAt(const QPoint &pos) const
     return nullptr;
 }
 
+QRect gGraphView::alignHitRect(const QRect &plotRect, bool pinned, int pinnedHeight, const QSize &viewSize)
+{
+    const QRect visible = pinned
+        ? QRect(QPoint(0, 0), viewSize)
+        : QRect(0, pinnedHeight, viewSize.width(), viewSize.height() - pinnedHeight);
+    return plotRect.intersected(visible);
+}
+
 void gGraphView::noteAlignTarget(gGraph *g)
 {
     if (!m_alignMode || !m_alignTargets.contains(g->name())) return;
     // g->left/right hold the plot-area margins computed by the paint() that just ran.
     const QRect &r = g->m_rect;
-    m_alignPainted.append(qMakePair(g, QRect(r.left() + g->left, r.top(),
-                                             r.width() - g->left - g->right, r.height())));
+    const QRect plot(r.left() + g->left, r.top(), r.width() - g->left - g->right, r.height());
+    const QRect hit = alignHitRect(plot, g->isPinned(), m_alignPinnedHeight, QSize(width(), height()));
+    if (!hit.isEmpty()) m_alignPainted.append(qMakePair(g, hit));
 }
 
 void gGraphView::paintAlignFrames(QPainter &painter)
@@ -3201,9 +3212,12 @@ void gGraphView::mouseReleaseEvent(QMouseEvent *event)
 void gGraphView::keyReleaseEvent(QKeyEvent *event)
 {
     // Esc normally steps back through the zoom history here; in alignment mode it cancels
-    // the alignment instead (and must not also change the zoom).
+    // the alignment instead (and must not also change the zoom). A release without a press
+    // on this view is the tail of an Esc that closed a dialog: ignore it.
     if (m_alignMode && (event->key() == Qt::Key_Escape)) {
-        emit alignCancel();
+        const bool pressedHere = m_alignEscPressed;
+        m_alignEscPressed = false;
+        if (pressedHere) emit alignCancel();
         event->accept();
         return;
     }
@@ -3547,7 +3561,7 @@ void gGraphView::keyPressEvent(QKeyEvent *event)
         case Qt::Key_Right:  emit alignNudge(step);  event->accept(); return;
         case Qt::Key_Return:
         case Qt::Key_Enter:  emit alignAccept();     event->accept(); return;
-        case Qt::Key_Escape: event->accept(); return;   // acted on in keyReleaseEvent
+        case Qt::Key_Escape: m_alignEscPressed = true; event->accept(); return;   // acted on in keyReleaseEvent
         default: break;
         }
     }

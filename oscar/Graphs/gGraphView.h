@@ -598,6 +598,9 @@ class gGraphView
     void showAlignLabel(const QString& text);
     //! \brief Decides for which graphs the context menu offers "Align device time...".
     void setAlignMenuPredicate(std::function<bool(gGraph*)> predicate) { m_alignMenuPredicate = std::move(predicate); }
+    //! \brief The part of a graph's plot area that is actually visible and grabbable: scrolling
+    //!        (unpinned) graphs are hidden under the \a pinnedHeight pixels of pinned graphs.
+    static QRect alignHitRect(const QRect &plotRect, bool pinned, int pinnedHeight, const QSize &viewSize);
 
     QMenu * limits_menu;
     QMenu * lines_menu;
@@ -729,6 +732,8 @@ class gGraphView
     bool m_alignMode = false;
     QSet<QString> m_alignTargets;
     QList<QPair<gGraph *, QRect>> m_alignPainted;   //!< plot rects of target graphs painted in the last frame
+    int m_alignPinnedHeight = 0;                     //!< height of the pinned area in the last frame
+    bool m_alignEscPressed = false;                  //!< Esc went down on this view (not in a dialog)
     bool m_alignDragging = false;
     int m_alignDragStartX = 0;
     double m_alignMsPerPx = 0.0;
