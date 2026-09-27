@@ -393,6 +393,7 @@ SOURCES += \
     SleepLib/loader_plugins/icon_loader.cpp \
     SleepLib/loader_plugins/intellipap_loader.cpp \
     SleepLib/loader_plugins/md300w1_loader.cpp \
+    SleepLib/loader_plugins/contec_ble_protocol.cpp \
     SleepLib/loader_plugins/mseries_loader.cpp \
     SleepLib/loader_plugins/prisma_loader.cpp \
     SleepLib/loader_plugins/vrem_loader.cpp \
@@ -601,6 +602,7 @@ HEADERS  += \
     SleepLib/xmlreplay.h \
     SleepLib/serialoximeter.h \
     SleepLib/loader_plugins/md300w1_loader.h \
+    SleepLib/loader_plugins/contec_ble_protocol.h \
     logger.h \
     SleepLib/loader_plugins/weinmann_loader.h \
     Graphs/gdailysummary.h \
@@ -832,7 +834,8 @@ test {
         tests/eventstabtests.cpp \
         tests/zeotests.cpp \
         tests/applehealthtests.cpp \
-        tests/machinetests.cpp
+        tests/machinetests.cpp \
+        tests/contecbleprotocoltests.cpp
 
     HEADERS += \
         tests/AutoTest.h \
@@ -849,7 +852,8 @@ test {
         tests/eventstabtests.h \
         tests/zeotests.h \
         tests/applehealthtests.h \
-        tests/machinetests.h
+        tests/machinetests.h \
+        tests/contecbleprotocoltests.h
 }
 
 macx {
