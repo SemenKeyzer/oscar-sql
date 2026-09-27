@@ -25,6 +25,8 @@ enum OximeterImportMode {
     IM_UNDEFINED = 0, IM_LIVE, IM_RECORDING, IM_FILE
 };
 
+class BluetoothOximeterPage;
+
 class OximeterImport : public QDialog
 {
     Q_OBJECT
@@ -77,6 +79,8 @@ private slots:
     void chooseSession();
 
     void on_chooseSessionButton_clicked();
+    void onBluetoothImportClicked();
+    void onBluetoothFinished(bool importedSomething);
 
     void on_oximeterType_currentIndexChanged(int index);
 
@@ -119,6 +123,7 @@ private:
 
     bool selecting_session;
     QList<int> chosen_sessions;
+    BluetoothOximeterPage *m_btPage = nullptr;
 };
 
 #endif // OXIMETERIMPORT_H

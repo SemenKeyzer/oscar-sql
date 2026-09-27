@@ -26,6 +26,9 @@
 #include "ui_oximeterimport.h"
 #include "SleepLib/calcs.h"
 #include "SleepLib/oximetry_session_builder.h"
+#ifdef HAVE_BLUETOOTH
+#include "bluetoothoximeterpage.h"
+#endif
 #include "mainwindow.h"
 
 extern MainWindow * mainwin;
@@ -161,6 +164,17 @@ OximeterImport::OximeterImport(QWidget *parent) :
     on_oximeterType_currentIndexChanged(oxitype);
     ui->cms50DeviceName->setEnabled(false);
     ui->cms50SyncTime->setChecked(p_profile->oxi->syncOximeterClock());
+#ifdef HAVE_BLUETOOTH
+    m_btPage = new BluetoothOximeterPage(this);
+    ui->stackedWidget->addWidget(m_btPage);
+    connect(m_btPage, &BluetoothOximeterPage::finished, this, &OximeterImport::onBluetoothFinished);
+    auto *btButton = new QPushButton(tr("Import over Bluetooth from a Contec oximeter (CMS50FW, CMS50D-BT, ...)"),
+                                     ui->importSelectionPage);
+    btButton->setMinimumHeight(ui->directImportButton->minimumHeight());
+    btButton->setToolTip(tr("Turn on Bluetooth in the oximeter's menu and close the Contec phone app first."));
+    ui->verticalLayout_6->insertWidget(ui->verticalLayout_6->indexOf(ui->directImportButton), btButton);
+    connect(btButton, &QPushButton::clicked, this, &OximeterImport::onBluetoothImportClicked);
+#endif
 
 
 }
@@ -808,6 +822,9 @@ void OximeterImport::updateLiveDisplay()
 void OximeterImport::on_cancelButton_clicked()
 {
 	qDebug() << "oximod - Cancel button clicked";
+#ifdef HAVE_BLUETOOTH
+    if (m_btPage && m_btPage->isBusy()) m_btPage->cancel();
+#endif
     if (oximodule && oximodule->isStreaming()) {
         oximodule->closeDevice();
         oximodule->trashRecords();
@@ -1119,4 +1136,24 @@ void OximeterImport::on_cms50DeviceName_textEdited(const QString &arg1)
 void OximeterImport::on_textBrowser_anchorClicked(const QUrl &arg1)
 {
     QDesktopServices::openUrl(arg1);
+}
+
+void OximeterImport::onBluetoothImportClicked()
+{
+#ifdef HAVE_BLUETOOTH
+    ui->stackedWidget->setCurrentWidget(m_btPage);
+    ui->nextButton->setVisible(false);
+    ui->retryButton->setVisible(false);
+    m_btPage->start();
+#endif
+}
+
+void OximeterImport::onBluetoothFinished(bool importedSomething)
+{
+    if (importedSomething) {
+        mainwin->EnableTabs(true);
+        mainwin->getDaily()->LoadDate(mainwin->getDaily()->getDate());
+        mainwin->getOverview()->ReloadGraphs();
+    }
+    accept();
 }

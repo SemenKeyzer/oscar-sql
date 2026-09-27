@@ -32,8 +32,8 @@ QT += core gui network xml printsupport serialport sql widgets help concurrent
 qtHaveModule(bluetooth):!no_bluetooth {
     QT += bluetooth
     DEFINES += HAVE_BLUETOOTH
-    SOURCES += SleepLib/loader_plugins/contec_ble_link.cpp
-    HEADERS += SleepLib/loader_plugins/contec_ble_link.h
+    SOURCES += SleepLib/loader_plugins/contec_ble_link.cpp bluetoothoximeterpage.cpp
+    HEADERS += SleepLib/loader_plugins/contec_ble_link.h bluetoothoximeterpage.h
 } else {
     message("Building without Bluetooth oximeter import")
 }
