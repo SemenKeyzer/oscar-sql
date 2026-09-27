@@ -423,6 +423,7 @@ SOURCES += \
     SleepLib/progressdialog.cpp \
     SleepLib/schema.cpp \
     SleepLib/serialoximeter.cpp \
+    SleepLib/oximetry_session_builder.cpp \
     SleepLib/session.cpp \
     SleepLib/thirdparty/miniz.c \
     SleepLib/xmlreplay.cpp \
@@ -602,6 +603,7 @@ HEADERS  += \
     SleepLib/deviceconnection.h \
     SleepLib/xmlreplay.h \
     SleepLib/serialoximeter.h \
+    SleepLib/oximetry_session_builder.h \
     SleepLib/loader_plugins/md300w1_loader.h \
     SleepLib/loader_plugins/contec_ble_protocol.h \
     SleepLib/loader_plugins/contec_ble_downloader.h \
@@ -839,7 +841,8 @@ test {
         tests/machinetests.cpp \
         tests/contecbleprotocoltests.cpp \
         tests/fakecontecdevice.cpp \
-        tests/contecbledownloadertests.cpp
+        tests/contecbledownloadertests.cpp \
+        tests/contecbleimporttests.cpp
 
     HEADERS += \
         tests/AutoTest.h \
@@ -859,7 +862,8 @@ test {
         tests/machinetests.h \
         tests/contecbleprotocoltests.h \
         tests/fakecontecdevice.h \
-        tests/contecbledownloadertests.h
+        tests/contecbledownloadertests.h \
+        tests/contecbleimporttests.h
 }
 
 macx {
