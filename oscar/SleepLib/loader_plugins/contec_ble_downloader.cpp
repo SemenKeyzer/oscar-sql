@@ -220,7 +220,8 @@ void ContecBleDownloader::onTimeout()
         m_state = State::Ready;
         emit eraseFinished(false);
         return;
-    case State::Idle: case State::Ready: case State::RetryPause: case State::Failed: case State::Cancelled:
+    case State::Idle: case State::Ready: case State::RetryPause: case State::Delivering:
+    case State::Failed: case State::Cancelled:
         return;
     default:
         fail(tr("The oximeter didn't answer in time."));
@@ -347,6 +348,7 @@ void ContecBleDownloader::finishRecord()
     m_timer.stop();
     ++m_done;
     const Record done = m_record;
+    m_state = State::Delivering;   // late packets of this record are dropped while it is stored
     emit recordDownloaded(done);
     if (stopped()) return;
     emit progress(m_done, m_total);

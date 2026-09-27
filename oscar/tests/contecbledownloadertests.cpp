@@ -292,6 +292,26 @@ void ContecBleDownloaderTests::testLinkLostFails()
     QVERIFY(!c.finished);
 }
 
+// A growing record can leave packets in flight; one may be handled while the record is being
+// stored (if anything pumps events there). It must be ignored, not read past the channel list.
+void ContecBleDownloaderTests::testExtraPacketWhileDeliveringIsIgnored()
+{
+    FakeContecDevice dev;
+    addTwoRecords(dev);
+    dev.extraPackets = 1;
+    ContecBleDownloader d;
+    Collected c;
+    collect(d, c);
+    QObject::connect(&d, &ContecBleDownloader::recordDownloaded, [](const Record &) {
+        QCoreApplication::processEvents();
+    });
+    d.start(&dev, QStringLiteral("SpO202"));
+    QTRY_VERIFY_WITH_TIMEOUT(c.finished || !c.error.isEmpty(), 5000);
+    QVERIFY2(c.error.isEmpty(), qPrintable(c.error));
+    QCOMPARE(c.records.size(), 2);
+    QCOMPARE(c.records[1].pulse, dev.records[1].pulse);
+}
+
 void ContecBleDownloaderTests::cleanupTestCase()
 {
     delete m_app;

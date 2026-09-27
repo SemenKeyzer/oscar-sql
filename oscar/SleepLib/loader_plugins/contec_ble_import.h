@@ -41,8 +41,9 @@ struct EraseInput {
     int headersOnDevice = 0;
     QDateTime lastRecordEnd;        //!< latest start + samples seconds (oximeter clock)
     QDateTime downloadStarted;
+    bool clockTrusted = false;      //!< OSCAR has set the oximeter clock before
 };
-enum class EraseVerdict { Erase, Disabled, NothingToErase, DownloadIncomplete, NotAllSaved, StillRecording };
+enum class EraseVerdict { Erase, Disabled, NothingToErase, DownloadIncomplete, NotAllSaved, StillRecording, ClockNotSynced };
 EraseVerdict canErase(const EraseInput &in);
 
 } // namespace ContecBle

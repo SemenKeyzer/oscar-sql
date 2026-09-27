@@ -66,7 +66,7 @@ signals:
 
 private:
     enum class State { Idle, WaitId, WaitInfo, WaitSeed, WaitStorage, WaitPrepare, WaitStorageRetry,
-                       WaitCount, WaitFormats, WaitHeader, ReadChannel, RetryPause, Ready,
+                       WaitCount, WaitFormats, WaitHeader, ReadChannel, RetryPause, Delivering, Ready,
                        WaitSetTime, WaitErase, Failed, Cancelled };
 
     void send(const QByteArray &cmd);

@@ -25,6 +25,9 @@ private slots:
     void testImporterImportsNewRecord();
     void testImporterReplacesShorterRecord();
     void testImporterRefusesSecondOximeterOnANight();
+    void testImporterKeepsOldSessionWhenReplacementIsRejected();
+    void testImporterReportsDatabaseFailure();
+    void testImporterReportsMissingSamples();
     void cleanupTestCase();
 private:
     QCoreApplication *m_app = nullptr;

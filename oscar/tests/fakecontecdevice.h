@@ -36,6 +36,7 @@ public:
     int silentOnceCommand = -1;      //!< ignore this command header the first time only
     int corruptChannel = 0;          //!< corrupt packet corruptPacket of this channel once
     int corruptPacket = -1;
+    int extraPackets = 0;            //!< packets sent after the last one a record needs
 
     QList<QByteArray> commands;      //!< every command received (decrypted in secure mode)
     bool sawEncryptedCommand = false;

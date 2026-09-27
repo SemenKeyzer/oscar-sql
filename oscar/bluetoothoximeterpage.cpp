@@ -183,6 +183,7 @@ void BluetoothOximeterPage::onLinkReady()
     mach->setModel(m_model);
     m_importer.reset(new ContecBleImporter(mach));
     m_downloadStarted = QDateTime::currentDateTime();
+    m_clockTrusted = p_profile->oxi->bleClockSynced();   // records are stamped before this run's sync
 
     m_downloader = new ContecBleDownloader(this);
     m_downloader->setWantRecord([this](const RecordHeader &h) { return wantRecord(h); });
@@ -274,6 +275,7 @@ void BluetoothOximeterPage::onDownloadFinished()
 
 void BluetoothOximeterPage::onClockSet(bool ok)
 {
+    if (ok) p_profile->oxi->setBleClockSynced(true);
     m_clockText = ok ? tr("The oximeter clock was set to this computer's time.")
                      : tr("The oximeter didn't confirm the new clock time.");
     afterClock();
@@ -288,6 +290,7 @@ void BluetoothOximeterPage::afterClock()
     in.headersOnDevice = m_headersOnDevice;
     in.lastRecordEnd = m_lastRecordEnd;
     in.downloadStarted = m_downloadStarted;
+    in.clockTrusted = m_clockTrusted;
     switch (canErase(in)) {
     case EraseVerdict::Erase:
         m_downloader->allowDestructive(true);
@@ -301,6 +304,11 @@ void BluetoothOximeterPage::afterClock()
         break;
     case EraseVerdict::StillRecording:
         m_eraseText = tr("The oximeter was not erased because it seems to be still recording.");
+        break;
+    case EraseVerdict::ClockNotSynced:
+        m_eraseText = tr("The oximeter was not erased because OSCAR can't yet tell whether it is still "
+                         "recording. Keep \"%1\" checked; erasing works from the next import on.")
+                          .arg(m_syncClock->text());
         break;
     case EraseVerdict::Disabled:
     case EraseVerdict::NothingToErase:
@@ -332,6 +340,11 @@ void BluetoothOximeterPage::finish(const QString &error)
 {
     m_busy = false;
     stopDevice();
+    for (int i = 0; i < m_rows.size(); ++i) {   // an interrupted download leaves rows waiting
+        if (!m_rows[i].pending) continue;
+        m_rows[i].pending = false;               // outcome stays NotDownloaded
+        updateTableRow(i);
+    }
     if (error.isEmpty()) setStep(StepCount, true);   // on an error the reached step stays marked
     m_progress->hide();
     m_summary->setText(summaryText(error));

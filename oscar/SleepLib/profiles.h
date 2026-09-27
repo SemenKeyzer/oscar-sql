@@ -346,6 +346,7 @@ const QString STR_OS_SyncOximeterClock = "SyncOximeterClock";
 const QString STR_OS_OximeterType = "OximeterType";
 const QString STR_OS_SkipOxiIntroScreen = "SkipOxiIntroScreen";
 const QString STR_OS_BleEraseAfterImport = "BleEraseAfterImport";
+const QString STR_OS_BleClockSynced = "BleClockSynced";
 
 const QString STR_OS_SPO2DropDuration = "SPO2DropDuration";
 const QString STR_OS_SPO2DropPercentage = "SPO2DropPercentage";
@@ -544,6 +545,7 @@ class OxiSettings : public PrefSettings
         initPref(STR_OS_OximeterType, 0);
         initPref(STR_OS_SkipOxiIntroScreen, false);
         initPref(STR_OS_BleEraseAfterImport, false);
+        initPref(STR_OS_BleClockSynced, false);
 
         // Initialize Changeable via GUI parameters with default values
         initPref(STR_OS_SPO2DropDuration, defaultValue_OS_SPO2DropDuration);
@@ -578,6 +580,8 @@ class OxiSettings : public PrefSettings
     int oximeterType() const { return getPref(STR_OS_OximeterType).toInt(); }
     bool skipOxiIntroScreen() const { return getPref(STR_OS_SkipOxiIntroScreen).toBool(); }
     bool bleEraseAfterImport() const { return getPref(STR_OS_BleEraseAfterImport).toBool(); }
+    //! OSCAR has set a Bluetooth oximeter's clock at least once, so its record times can be trusted.
+    bool bleClockSynced() const { return getPref(STR_OS_BleClockSynced).toBool(); }
 
     double spO2DropDuration() const { return getPref(STR_OS_SPO2DropDuration).toDouble(); }
     double spO2DropPercentage() const { return getPref(STR_OS_SPO2DropPercentage).toDouble(); }
@@ -598,6 +602,7 @@ class OxiSettings : public PrefSettings
     void setPulseChangeBPM(double bpm) { setPref(STR_OS_PulseChangeBPM, bpm); }
     void setSkipOxiIntroScreen(bool skip) { setPref(STR_OS_SkipOxiIntroScreen, skip); }
     void setBleEraseAfterImport(bool erase) { setPref(STR_OS_BleEraseAfterImport, erase); }
+    void setBleClockSynced(bool synced) { setPref(STR_OS_BleClockSynced, synced); }
     void setSpO2DropPercentage(double percentage) {
         setPref(STR_OS_SPO2DropPercentage, percentage);
     }

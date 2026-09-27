@@ -164,7 +164,7 @@ void FakeContecDevice::sendPackets(int channel, int m, int offset)
     if (m < 1 || m > records.size()) return;
     const QVector<int> &values = (channel == ChSpO2) ? records[m - 1].spo2 : records[m - 1].pulse;
     const int packets = (values.size() + 20) / 21;
-    for (int pkt = offset; pkt < packets; ++pkt) {
+    for (int pkt = offset; pkt < packets + extraPackets; ++pkt) {
         QByteArray p(30, '\0');
         p[0] = char(0xED);
         p[1] = char(0x03);

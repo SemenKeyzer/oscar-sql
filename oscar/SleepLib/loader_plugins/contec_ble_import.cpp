@@ -13,6 +13,7 @@
 #include "SleepLib/oximetry_session_builder.h"
 #include "SleepLib/profiles.h"
 #include "SleepLib/session.h"
+#include "database/event_list_repository.h"
 
 namespace ContecBle {
 
@@ -57,6 +58,9 @@ EraseVerdict canErase(const EraseInput &in)
         if (o != Outcome::Imported && o != Outcome::Updated && o != Outcome::AlreadyPresent)
             return EraseVerdict::NotAllSaved;
     }
+    // Record times are on the oximeter's clock; until OSCAR has set it once they can't be
+    // compared with ours, so a recording still in progress could look finished.
+    if (!in.clockTrusted) return EraseVerdict::ClockNotSynced;
     // The oximeter keeps writing while the sensor is on; erasing now would lose the tail.
     if (in.lastRecordEnd.isValid() && in.lastRecordEnd > in.downloadStarted.addSecs(-300))
         return EraseVerdict::StillRecording;
@@ -122,31 +126,42 @@ Outcome ContecBleImporter::save(const Record &r, Decision d)
     const SessionID sid = SessionID(start.toUTC().toSecsSinceEpoch());
     const qint64 startMs = qint64(sid) * 1000;
 
+    // The shorter copy is set aside, not destroyed: it goes back if the longer one isn't stored.
+    // Its database row is reused by the replacement (rows are keyed by device and session id).
+    Session *old = nullptr;
     if (d == Decision::ReplaceShorter) {
-        if (Session *old = m_mach->sessionlist.value(sid, nullptr)) {
-            old->Destroy();
-            delete old;
-        }
+        old = m_mach->sessionlist.value(sid, nullptr);
+        if (old) m_mach->unlinkSession(old);
     }
+    auto reject = [&](Session *sess, Outcome o) {
+        m_mach->unlinkSession(sess);
+        delete sess;
+        if (old) m_mach->AddSession(old, true);
+        return o;
+    };
 
     Session *sess = new Session(m_mach, sid);
     sess->really_set_first(startMs);
     const qint64 lastMs = addOximetryEvents(sess, startMs, recs, 1000, r.header.hasPI);
     finishOximetrySession(sess, lastMs, r.header.hasPI);
     if (!m_mach->AddSession(sess)) {
-        delete sess;
-        return Outcome::SaveFailed;
+        return reject(sess, Outcome::SaveFailed);
     }
     // A day holds one oximeter: Day::addSession refuses a second one without telling the caller.
     if (sess->night().isValid()) {
         Day *day = p_profile->GetDay(sess->night());
         if (!day || !day->sessions.contains(sess)) {
-            m_mach->unlinkSession(sess);
-            delete sess;
-            return Outcome::ConflictOtherOximeter;
+            return reject(sess, Outcome::ConflictOtherOximeter);
         }
     }
     m_mach->Save();
+    // Machine::Save() only logs a session it couldn't write; a stored one has a row and is clean.
+    // Session::Store() doesn't report a failed sample write at all, so look for the samples too.
+    if (sess->sessionRowId() <= 0 || sess->IsChanged()
+            || EventListRepository().countBySession(sess->sessionRowId()) == 0) {
+        return reject(sess, Outcome::SaveFailed);
+    }
+    delete old;
     m_mach->SaveSummaryCache();
     p_profile->StoreMachines();
     return d == Decision::ReplaceShorter ? Outcome::Updated : Outcome::Imported;

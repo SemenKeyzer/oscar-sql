@@ -28,6 +28,7 @@ private slots:
     void testStorageFallsBackToPrepare();
     void testNoRecords();
     void testLinkLostFails();
+    void testExtraPacketWhileDeliveringIsIgnored();
     void cleanupTestCase();
 private:
     QCoreApplication *m_app = nullptr;

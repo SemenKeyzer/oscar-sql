@@ -94,6 +94,7 @@ private:
     QString m_deviceName;
     QString m_model;
     QDateTime m_downloadStarted;
+    bool m_clockTrusted = false;
     QDateTime m_lastRecordEnd;
     int m_headersOnDevice = 0;
     bool m_downloadCompleted = false;

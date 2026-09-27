@@ -22,6 +22,7 @@
 
 #include <QCoreApplication>
 #include <QDir>
+#include <QSqlQuery>
 #include <QTemporaryDir>
 
 using namespace ContecBle;
@@ -171,6 +172,7 @@ void ContecBleImportTests::testCanErase()
     ok.headersOnDevice = 3;
     ok.downloadStarted = QDateTime(QDate(2026, 9, 27), QTime(9, 0, 0));
     ok.lastRecordEnd = ok.downloadStarted.addSecs(-301);
+    ok.clockTrusted = true;
     QCOMPARE(canErase(ok), EraseVerdict::Erase);
 
     EraseInput e = ok; e.eraseEnabled = false;
@@ -189,6 +191,9 @@ void ContecBleImportTests::testCanErase()
     }
     e = ok; e.lastRecordEnd = ok.downloadStarted.addSecs(-120);
     QCOMPARE(canErase(e), EraseVerdict::StillRecording);
+    // Until OSCAR has set the oximeter clock once, its record times can't be compared with ours.
+    e = ok; e.clockTrusted = false;
+    QCOMPARE(canErase(e), EraseVerdict::ClockNotSynced);
 }
 
 void ContecBleImportTests::testEraseSettingDefaultsOff()
@@ -255,5 +260,51 @@ void ContecBleImportTests::testImporterRefusesSecondOximeterOnANight()
     QCOMPARE(imp.decide(r.header), Decision::ConflictOtherOximeter);
     // Even if asked to import, the session must not be left behind in the device.
     QCOMPARE(imp.save(r, Decision::Import), Outcome::ConflictOtherOximeter);
+    QVERIFY(!mach->sessionlist.contains(SessionID(start.toUTC().toSecsSinceEpoch())));
+}
+
+// A longer copy that OSCAR refuses (here: older than the ignore date) must not cost the stored one.
+void ContecBleImportTests::testImporterKeepsOldSessionWhenReplacementIsRejected()
+{
+    Machine *mach = p_profile->CreateMachine(ContecBleLoader::infoForModel(QStringLiteral("CMS50FW")));
+    ContecBleImporter imp(mach);
+    const QDateTime start(QDate(2026, 8, 20), QTime(22, 0, 0));
+    QCOMPARE(imp.save(record(start, 600), Decision::Import), Outcome::Imported);
+    p_profile->session->setIgnoreOlderSessions(true);
+    p_profile->session->setIgnoreOlderSessionsDate(start.date().addDays(7));
+    const Outcome o = imp.save(record(start, 900), Decision::ReplaceShorter);
+    p_profile->session->setIgnoreOlderSessions(false);
+    QCOMPARE(o, Outcome::SaveFailed);
+    const SessionID sid = SessionID(start.toUTC().toSecsSinceEpoch());
+    QVERIFY(mach->sessionlist.contains(sid));
+    QCOMPARE(mach->sessionlist[sid]->realLast(), qint64(sid) * 1000 + 599 * 1000);
+}
+
+// Machine::Save() only logs a failed write; the import must notice and not report the record as stored.
+void ContecBleImportTests::testImporterReportsDatabaseFailure()
+{
+    Machine *mach = p_profile->CreateMachine(ContecBleLoader::infoForModel(QStringLiteral("CMS50FW")));
+    ContecBleImporter imp(mach);
+    const QDateTime start(QDate(2026, 8, 30), QTime(23, 0, 0));
+    DatabaseManager::instance().close();
+    const Outcome o = imp.save(record(start, 600), Decision::Import);
+    QVERIFY(DatabaseManager::instance().initialize(m_tempDir->path() + QStringLiteral("/oscar.db")));
+    QCOMPARE(o, Outcome::SaveFailed);
+    QVERIFY(!mach->sessionlist.contains(SessionID(start.toUTC().toSecsSinceEpoch())));
+}
+
+// Session::Store() ignores a failed event write: the row is saved and the session looks clean,
+// but the night's samples are missing. That must not count as imported (it would unlock erase).
+void ContecBleImportTests::testImporterReportsMissingSamples()
+{
+    Machine *mach = p_profile->CreateMachine(ContecBleLoader::infoForModel(QStringLiteral("CMS50FW")));
+    ContecBleImporter imp(mach);
+    const QDateTime start(QDate(2026, 9, 5), QTime(23, 0, 0));
+    QSqlQuery q(DatabaseManager::instance().database());
+    QVERIFY(q.exec(QStringLiteral("CREATE TRIGGER test_block_samples BEFORE INSERT ON event_lists "
+                                  "BEGIN SELECT RAISE(ABORT, 'blocked by test'); END")));
+    const Outcome o = imp.save(record(start, 600), Decision::Import);
+    QVERIFY(q.exec(QStringLiteral("DROP TRIGGER test_block_samples")));
+    QCOMPARE(o, Outcome::SaveFailed);
     QVERIFY(!mach->sessionlist.contains(SessionID(start.toUTC().toSecsSinceEpoch())));
 }
