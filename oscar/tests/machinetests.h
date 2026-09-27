@@ -18,5 +18,9 @@ private slots:
     void testReportedChannelsFromEventLists();
     void testReportedChannelsFromCounts();
     void testEmptyListDoesNotReport();
+    void testRowFromDataCopiesFields();
+    void testRowFromDataStripsLegacyDriftSentinel();
+    void testCorrectionMsSumsRowsInRange();
+    void testCorrectionMsAppliesDriftRow();
 };
 DECLARE_TEST(MachineTests)

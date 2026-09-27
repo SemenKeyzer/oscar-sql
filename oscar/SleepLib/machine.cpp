@@ -634,23 +634,26 @@ void Machine::rebuildCorrections(const QList<TimeCorrectionRow>& rows)
     m_correctionCache.clear();
 }
 
+TimeCorrectionRow Machine::rowFromData(const DeviceTimeCorrectionData& d)
+{
+    TimeCorrectionRow r;
+    r.dateFrom = QDate::fromString(d.dateFrom, Qt::ISODate);
+    r.dateTo   = d.dateTo.isEmpty() ? QDate() : QDate::fromString(d.dateTo, Qt::ISODate);
+    r.type     = d.type;
+    r.offsetMs = d.offsetMs;
+    r.c0Ms     = d.c0Ms;
+    // Backward compat: drift rows were previously stored with c1 = slope + 1.0.
+    // Detect old format (c1 >= 1.0 on a drift row) and strip the sentinel.
+    r.c1 = (d.type == "drift" && d.c1 >= 1.0) ? d.c1 - 1.0 : d.c1;
+    return r;
+}
+
 void Machine::reloadCorrectionsFromDb(Machine* mach)
 {
     DeviceTimeCorrectionRepository repo;
-    QList<DeviceTimeCorrectionData> dbRows = repo.findActive(mach->getDatabaseId());
     QList<TimeCorrectionRow> rows;
-    rows.reserve(dbRows.size());
-    for (const auto& d : dbRows) {
-        TimeCorrectionRow r;
-        r.dateFrom = QDate::fromString(d.dateFrom, Qt::ISODate);
-        r.dateTo   = d.dateTo.isEmpty() ? QDate() : QDate::fromString(d.dateTo, Qt::ISODate);
-        r.type     = d.type;
-        r.offsetMs = d.offsetMs;
-        r.c0Ms     = d.c0Ms;
-        // Backward compat: drift rows were previously stored with c1 = slope + 1.0.
-        // Detect old format (c1 >= 1.0 on a drift row) and strip the sentinel.
-        r.c1 = (d.type == "drift" && d.c1 >= 1.0) ? d.c1 - 1.0 : d.c1;
-        rows.append(r);
+    for (const auto& d : repo.findActive(mach->getDatabaseId())) {
+        rows.append(rowFromData(d));
     }
     mach->rebuildCorrections(rows);
 }

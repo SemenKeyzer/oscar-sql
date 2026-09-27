@@ -88,6 +88,7 @@ protected:
     Machine * mach;
 };
 
+struct DeviceTimeCorrectionData;
 class MachineLoader;    // forward
 
 /*! \class Machine
@@ -229,6 +230,9 @@ class Machine
     void rebuildCorrections(const QList<TimeCorrectionRow>& rows);
     //! \brief Reload corrections from DB and rebuild the in-memory cache.
     static void reloadCorrectionsFromDb(Machine* mach);
+    //! \brief Converts a device_time_corrections row to the in-memory form used by correctionMs().
+    //!        Strips the legacy drift sentinel (drift rows were once stored with c1 = slope + 1.0).
+    static TimeCorrectionRow rowFromData(const DeviceTimeCorrectionData& d);
     static bool isCorrectableType(MachineType type) {
         return type != MT_JOURNAL && type != MT_UNKNOWN && type != MT_UNCATEGORIZED;
     }

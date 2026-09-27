@@ -417,13 +417,8 @@ void DeviceTimeCorrectionDialog::previewStaged(Machine* mach)
                d.dateFrom == previewFrom &&
                (previewTo.isEmpty() ? d.dateTo.isEmpty() : d.dateTo == previewTo));
         if (exclude) continue;
-        TimeCorrectionRow r;
-        r.dateFrom = QDate::fromString(d.dateFrom, Qt::ISODate);
-        r.dateTo   = d.dateTo.isEmpty() ? QDate() : QDate::fromString(d.dateTo, Qt::ISODate);
-        r.offsetMs = d.offsetMs;
-        r.c0Ms     = d.c0Ms;
-        r.c1       = d.c1;
-        rows.append(r);
+        // Shared conversion: keeps the row type, so drift rows preview as drift, not as offsets.
+        rows.append(Machine::rowFromData(d));
     }
 
     if (m_staged.offsetMs != 0) {
