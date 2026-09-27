@@ -39,6 +39,26 @@ const EdVector kEdVectors[] = {
       { 201, 55, 33, 120, 233, 114, 212, 16, 206, 88, 62, 154, 174, 25, 94, 255, 109, 252, 43, 192, 225 } },
 };
 
+// Secure-frame vectors from the vendor Java code: key, iv, plain command, F4 frame,
+// and the payload of the same frame when read back as an 0x84 answer.
+struct SecureVector { const char *key, *iv, *plain, *frame, *rx; };
+const SecureVector kSecureVectors[] = {
+    { "359d41baf78afe0de1bbe7ae28c0450c", "e43c084f4bbb2bf1839dee466d020100", "0b73392f3023583b61647f751337385f7731661613", "f4156177670035453333723935502f3b345a61040c205f36185e1d0001020c", "0b73392f3023583b61647f751337385f7731661613" },
+    { "f450279849599b56dd53b3351a572b40", "f27f72d37f347b5d9979162cfa020100", "236052490a4a0b606604282d196801", "f40f7605010b051e3c6931107e072e365400795700010223", "236052490a4a0b606604282d196801" },
+    { "1192ed6a754300c523675af9b6c4a514", "cacaa1b6a736738853ee067b87020100", "1c794c691851302f112e3737533a", "f40e6a6f0020581312486a601f593f275b54120001022c", "1c794c691851302f112e3737533a" },
+    { "79092bb2831b0279bb5070f331dc1178", "6481868c3667cbd3ed4091091e020100", "6a643a612350192c167b6e3d3e4635", "f40f120c013f6f39372d4c34152f536e236f3b1600010258", "6a643a612350192c167b6e3d3e4635" },
+    { "a917160239c103a2db67f4c18eef29b3", "2fa68ba1aa5db9501dfbfb1177020100", "2f256f13", "f40408196a3a2b0001026b", "2f256f13" },
+};
+const char *const kF3Vector = "f310187e031a091b112a3253051a091b112a32530522";
+// Produced by the reference Python port, which was checked 300/300 against the vendor ARM code.
+struct KdfVector { const char *seed; const char *salt; const char *out; };
+const KdfVector kKdfVectors[] = {
+    { "000102030405060708090a0b0c0d0e0f", "50F     ", "007a97ac9fc5bff73417aad07f2eb7ca" },
+    { "ffffffffffffffffffffffffffffffff", "SpO202", "7cd6d1d0f1dad5ea6211d6f5a2bafeca" },
+    { "1a091b112a325305061a091b112a3253", "ABCDEFGH", "6bd6f7c7dafd82a3d761cb57b6d8e672" },
+    { "80017f33009910ee0506070809a0b0c0", "", "c0a11c44c3e1aaae91c682c7cfdb688d" },
+};
+
 } // namespace
 
 void ContecBleProtocolTests::testCommandBytes()
@@ -193,4 +213,62 @@ void ContecBleProtocolTests::testCodeDecoderAcrossPackets()
                               96, 95, 96, 94, 96, 93, 92, 96, 91, 96, 90, 96, 89, 96}));
     QCOMPARE(b, QVector<int>({88, 87, 87, 86, 86, 100, 100, 99, 97, 97, 99, 100, 98, 98, 99, 100, 100, 99, 98, 99,
                               99, 98, 97, 97, 96, 96, 100, 96, 96, 100, 99, 99, 100, 100}));
+}
+
+void ContecBleProtocolTests::testKdfMatchesReference()
+{
+    for (const KdfVector &v : kKdfVectors) {
+        QCOMPARE(kdf(hex(v.seed), QByteArray(v.salt)), hex(v.out));
+    }
+}
+
+void ContecBleProtocolTests::testSecureFramesMatchVendorCode()
+{
+    for (const SecureVector &v : kSecureVectors) {
+        Keys keys;
+        keys.keyTx = keys.keyRx = hex(v.key);
+        keys.ivTx = keys.ivRx = hex(v.iv);
+        const QByteArray f4 = buildF4(hex(v.plain), keys);
+        QCOMPARE(f4, hex(v.frame));
+        QByteArray as84 = f4;
+        as84[0] = char(0x84);
+        QCOMPARE(frameLength(as84), as84.size());   // F4 from a device is a 3-byte ack; 84 carries the length
+        QCOMPARE(open84(as84, keys), hex(v.rx));
+    }
+}
+
+void ContecBleProtocolTests::testF3FromVendorVector()
+{
+    const QByteArray a = hex(kF3Vector);
+    const QByteArray seed = unpack7(a.mid(2, 3), a.mid(5, 16));
+    QCOMPARE(buildF3(seed), a);
+    QCOMPARE(seedFrom83(a), seed);
+}
+
+void ContecBleProtocolTests::testAppSeedLayout()
+{
+    const QByteArray s = appSeed(QDateTime(QDate(2026, 9, 27), QTime(18, 5, 7, 300)));
+    QByteArray expected;
+    for (int v : {26, 9, 27, 18 | 0x80, 5 | 0x80, 7, 300 & 0x7F, 300 >> 7,
+                  26 | 0x80, 9 | 0x80, 27 | 0x80, 18 | 0x80, 5 | 0x80, 7 | 0x80, (300 & 0x7F) | 0x80, (300 >> 7) | 0x80})
+        expected.append(char(v));
+    QCOMPARE(s, expected);
+    const QByteArray f3 = buildF3(s);
+    QCOMPARE(f3.size(), 22);
+    QCOMPARE(f3.left(2), hex("f310"));
+    for (int i = 2; i < f3.size(); ++i) QVERIFY(quint8(f3[i]) < 0x80);
+    QCOMPARE(seedFrom83(f3), s);
+}
+
+// Java's CTR increments the whole 128-bit IV: the second block of a stream that starts at
+// ...00ff must equal a stream that starts at ...0100.
+void ContecBleProtocolTests::testAesCtrCarriesAcrossTheWholeIv()
+{
+    const QByteArray key = hex("000102030405060708090a0b0c0d0e0f");
+    const QByteArray zeros(32, '\0');
+    const QByteArray a = aesCtr(zeros, key, hex("000000000000000000000000000000ff"));
+    const QByteArray b = aesCtr(QByteArray(16, '\0'), key, hex("00000000000000000000000000000100"));
+    QCOMPARE(a.size(), 32);
+    QCOMPARE(a.mid(16), b);
+    QCOMPARE(aesCtr(a, key, hex("000000000000000000000000000000ff")), zeros);   // CTR is its own inverse
 }

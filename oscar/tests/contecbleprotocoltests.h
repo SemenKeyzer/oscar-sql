@@ -24,5 +24,10 @@ private slots:
     void testRecordHeaderAndMidnight();
     void testEdVectorsMatchVendorCode();
     void testCodeDecoderAcrossPackets();
+void testKdfMatchesReference();
+void testSecureFramesMatchVendorCode();
+void testF3FromVendorVector();
+void testAppSeedLayout();
+void testAesCtrCarriesAcrossTheWholeIv();
 };
 DECLARE_TEST(ContecBleProtocolTests)

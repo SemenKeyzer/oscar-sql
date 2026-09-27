@@ -8,6 +8,12 @@
 
 #include "contec_ble_protocol.h"
 
+#include "SleepLib/thirdparty/botan_all.h"
+#include <QDebug>
+#include <cstring>
+#include <memory>
+#include <algorithm>
+
 namespace ContecBle {
 
 namespace {
@@ -347,6 +353,123 @@ QVector<int> CodeDecoder::feed(const QByteArray &f)
         }
     }
     return out;
+}
+
+QByteArray kdf(const QByteArray &seed16, const QByteArray &salt)
+{
+    quint8 k[8] = { 0xC3, 0xED, 0xF3, 0x80, 0x80, 0x95, 0xD2, 0x89 };
+    for (int i = 0; i < salt.size(); ++i) {
+        const int c = at(salt, i);
+        k[i % 8] ^= (i & 1) ? quint8(c) : quint8(~(c << 1) & 0xFF);
+    }
+    QByteArray out(16, '\0');
+    for (int i = 0; i < 16 && i < seed16.size(); ++i) {
+        const int a = at(seed16, i);
+        const int kk = k[(i >> 1) & 7];
+        const int v = (i & 1) == 0 ? ((kk ^ (a >> 1)) ^ ((kk / (i + 1)) + a))
+                                   : ((a + (kk >> 1)) ^ kk);
+        out[i] = char(v & 0xFF);
+    }
+    return out;
+}
+
+QByteArray aesCtr(const QByteArray &data, const QByteArray &key16, const QByteArray &iv16)
+{
+    if (key16.size() != 16 || iv16.size() != 16) return QByteArray();
+    try {
+        std::unique_ptr<Botan::BlockCipher> aes = Botan::BlockCipher::create("AES-128");
+        if (!aes) return QByteArray();
+        aes->set_key(reinterpret_cast<const uint8_t *>(key16.constData()), size_t(key16.size()));
+        uint8_t counter[16];
+        std::memcpy(counter, iv16.constData(), 16);
+        uint8_t stream[16];
+        QByteArray out(data.size(), '\0');
+        for (int off = 0; off < data.size(); off += 16) {
+            aes->encrypt_n(counter, stream, 1);
+            for (int i = 0; i < 16 && off + i < data.size(); ++i) {
+                out[off + i] = char(at(data, off + i) ^ stream[i]);
+            }
+            for (int j = 15; j >= 0; --j) {       // 128-bit big-endian increment
+                if (++counter[j] != 0) break;
+            }
+        }
+        return out;
+    } catch (const std::exception &e) {
+        qWarning() << "ContecBle::aesCtr failed:" << e.what();
+        return QByteArray();
+    }
+}
+
+QByteArray appSeed(const QDateTime &now)
+{
+    const QDate d = now.date();
+    const QTime t = now.time();
+    const int yy = (d.year() - 2000) & 0x7F, mo = d.month(), dd = d.day();
+    const int hh = t.hour() | 0x80, mi = t.minute() | 0x80, ss = t.second();
+    const int ms = t.msec();
+    const int msl = ms & 0x7F, msh = (ms >> 7) & 0x7F;
+    QByteArray s;
+    for (int v : { yy, mo, dd, hh, mi, ss, msl, msh,
+                   yy | 0x80, mo | 0x80, dd | 0x80, hh, mi, ss | 0x80, msl | 0x80, msh | 0x80 })
+        s.append(char(v));
+    return s;
+}
+
+QByteArray buildF3(const QByteArray &seed16)
+{
+    QByteArray hi, lo;
+    pack7(seed16, hi, lo);
+    QByteArray body;
+    body.append(char(0xF3));
+    body.append(char(0x10));
+    body += hi + lo;
+    return body + char(checksum(body));
+}
+
+QByteArray seedFrom83(const QByteArray &f)
+{
+    return unpack7(f.mid(2, 3), f.mid(5, 16));
+}
+
+void deriveRx(const QByteArray &seedApp, const QByteArray &salt, QByteArray &key, QByteArray &iv)
+{
+    QByteArray reversed(salt);
+    std::reverse(reversed.begin(), reversed.end());
+    key = kdf(seedApp, salt);
+    iv = kdf(seedApp, reversed);
+}
+
+void deriveTx(const QByteArray &seedDev, const QByteArray &salt, QByteArray &key, QByteArray &iv)
+{
+    QByteArray reversed(salt);
+    std::reverse(reversed.begin(), reversed.end());
+    key = kdf(seedDev, salt);
+    iv = kdf(seedDev, reversed).left(13) + QByteArray::fromHex("020100");
+}
+
+QByteArray buildF4(const QByteArray &cmd, const Keys &keys)
+{
+    const QByteArray c = aesCtr(cmd, keys.keyTx, keys.ivTx.left(13) + QByteArray::fromHex("020100"));
+    QByteArray hi, lo;
+    pack7(c + QByteArray::fromHex("000102"), hi, lo);
+    QByteArray body;
+    body.append(char(0xF4));
+    body.append(char(c.size()));
+    body += hi + lo;
+    return body + char(checksum(body));
+}
+
+QByteArray open84(const QByteArray &f, const Keys &keys)
+{
+    const int n = at(f, 1) & 0x7F;
+    const int nh = (n + 3 + 6) / 7;
+    const QByteArray raw = unpack7(f.mid(2, nh), f.mid(2 + nh, n + 3));
+    if (raw.size() < n + 3) return QByteArray();
+    QByteArray iv = keys.ivRx.left(13);
+    iv.append(raw[n + 2]);
+    iv.append(raw[n + 1]);
+    iv.append(raw[n]);
+    return aesCtr(raw.left(n), keys.keyRx, iv);
 }
 
 } // namespace ContecBle

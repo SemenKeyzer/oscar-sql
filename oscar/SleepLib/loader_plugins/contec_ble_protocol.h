@@ -129,6 +129,31 @@ struct Record {
     QVector<int> pi;
 };
 
+// ---- Secure mode (variant A, protocol version > 13): AES-128-CTR with keys derived from open data.
+// Implemented from the vendor app; not yet verified on a device with protocol version > 13.
+
+//! The vendor key/IV derivation (liblib_encryptkeyiv.so getEncryptArray).
+QByteArray kdf(const QByteArray &seed16, const QByteArray &salt);
+//! AES-128 in CTR mode with the whole 16-byte IV as a big-endian counter (Java AES/CTR/NoPadding).
+QByteArray aesCtr(const QByteArray &data, const QByteArray &key16, const QByteArray &iv16);
+//! 16-byte app seed built from the clock exactly like the vendor app.
+QByteArray appSeed(const QDateTime &now);
+//! Key-exchange frame F3 10 hi[3] lo[16] cs (22 bytes, sent in clear).
+QByteArray buildF3(const QByteArray &seed16);
+//! Device seed from its 22-byte 0x83 answer.
+QByteArray seedFrom83(const QByteArray &f);
+
+struct Keys {
+    QByteArray keyTx, ivTx;   //!< encrypt commands (F4)
+    QByteArray keyRx, ivRx;   //!< decrypt answers (84)
+};
+void deriveRx(const QByteArray &seedApp, const QByteArray &salt, QByteArray &key, QByteArray &iv);
+void deriveTx(const QByteArray &seedDev, const QByteArray &salt, QByteArray &key, QByteArray &iv);
+//! Wraps a plain command into a secure F4 frame.
+QByteArray buildF4(const QByteArray &cmd, const Keys &keys);
+//! Decrypts a secure 0x84 frame into a byte stream of ordinary frames.
+QByteArray open84(const QByteArray &f, const Keys &keys);
+
 } // namespace ContecBle
 
 #endif // CONTEC_BLE_PROTOCOL_H
