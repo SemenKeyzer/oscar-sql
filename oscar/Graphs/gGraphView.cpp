@@ -559,6 +559,9 @@ gGraphView::gGraphView(QWidget *parent, gGraphView *shared, QWidget *caller)
     popout_action = context_menu->addAction(QObject::tr("Pop out Graph"), this, SLOT(popoutGraph()));
 
     snap_action = context_menu->addAction(QString(), this, SLOT(onSnapshotGraphToggle()));
+    align_action = context_menu->addAction(tr("Align device time..."), this, SLOT(onAlignAction()));
+    align_action->setToolTip(tr("Shift this device's time for this night to line it up with the CPAP data."));
+    align_action->setVisible(false);
     context_menu->addSeparator();
 
     zoom100_action = context_menu->addAction(tr("100% zoom level"), this, SLOT(resetZoom()));
@@ -1434,6 +1437,7 @@ bool gGraphView::renderGraphs(QPainter &painter)
     //#endif
     //threaded=false;
     if (height() < 40) return false;
+    m_alignPainted.clear();
 
     if (m_scaleY < 0.0000001) {
         updateScale();
@@ -1513,6 +1517,7 @@ bool gGraphView::renderGraphs(QPainter &painter)
     // Physically draw the unpinned graphs
     for (const auto & g : m_drawlist) {
         g->paint(painter, QRegion(g->m_rect));
+        noteAlignTarget(g);
     }
     m_drawlist.clear();
 
@@ -1581,6 +1586,7 @@ bool gGraphView::renderGraphs(QPainter &painter)
 #endif
         for (const auto & g : m_drawlist) {
             g->paint(painter, QRegion(g->m_rect));
+            noteAlignTarget(g);
         }
         m_drawlist.clear();
 
@@ -1592,6 +1598,7 @@ bool gGraphView::renderGraphs(QPainter &painter)
 
     //    lines->setSize(linesize);
 
+    paintAlignFrames(painter);
     AppSetting->usePixmapCaching() ? DrawTextQueCached(painter) :DrawTextQue(painter);
     //glDisable(GL_TEXTURE_2D);
     //glDisable(GL_DEPTH_TEST);
@@ -1895,6 +1902,11 @@ void gGraphView::mouseMoveEvent(QMouseEvent *event)
 
     m_mouse = QPoint(x, y);
 
+    if (m_alignDragging) {
+        emit alignDragMoved(double(x - m_alignDragStartX) * m_alignMsPerPx, m_alignMsPerPx);
+        return;
+    }
+
     if (m_sizer_dragging) { // Resize handle being dragged
         float my = y - m_sizer_point.y();
         //qDebug() << "Sizer moved vertically" << m_sizer_index << my*m_scaleY;
@@ -2137,6 +2149,9 @@ void gGraphView::mouseMoveEvent(QMouseEvent *event)
             py += h + graphSpacer;
         }
 
+    if (m_alignMode && !m_button_down && alignGraphAt(m_mouse)) {
+        setCursor(Qt::SizeHorCursor);
+    }
 }
 
 Layer * gGraphView::findLayer(gGraph * graph, LayerType type)
@@ -2305,9 +2320,66 @@ void MinMaxWidget::createLayout()
     this->setLayout(layout);
 }
 
+void gGraphView::onAlignAction()
+{
+    if (m_alignMenuGraph) emit alignRequestedForGraph(m_alignMenuGraph);
+}
+
+void gGraphView::setAlignMode(bool on, const QSet<QString>& targetGraphNames)
+{
+    m_alignMode = on;
+    m_alignTargets = on ? targetGraphNames : QSet<QString>();
+    m_alignDragging = false;
+    m_alignPainted.clear();
+    m_tooltip->cancel();
+    if (!on) setCursor(Qt::ArrowCursor);
+    timedRedraw(0);
+}
+
+void gGraphView::showAlignLabel(const QString& text)
+{
+    m_tooltip->display(text, m_mouse.x() + 16, m_mouse.y() - 28, TT_AlignLeft, 60000, true);
+    timedRedraw(0);
+}
+
+gGraph *gGraphView::alignGraphAt(const QPoint &pos) const
+{
+    // Pinned graphs are painted after the scrolling ones, so the last match is the one on top.
+    for (int i = m_alignPainted.size() - 1; i >= 0; --i) {
+        if (m_alignPainted[i].second.contains(pos)) return m_alignPainted[i].first;
+    }
+    return nullptr;
+}
+
+void gGraphView::noteAlignTarget(gGraph *g)
+{
+    if (!m_alignMode || !m_alignTargets.contains(g->name())) return;
+    // g->left/right hold the plot-area margins computed by the paint() that just ran.
+    const QRect &r = g->m_rect;
+    m_alignPainted.append(qMakePair(g, QRect(r.left() + g->left, r.top(),
+                                             r.width() - g->left - g->right, r.height())));
+}
+
+void gGraphView::paintAlignFrames(QPainter &painter)
+{
+    if (!m_alignMode) return;
+    painter.save();
+    painter.setPen(QPen(QColor(24, 95, 165), 2, Qt::DashLine));
+    painter.setBrush(Qt::NoBrush);
+    for (const auto &painted : m_alignPainted) {
+        const QRect &r = painted.second;
+        painter.drawRect(r.adjusted(1, 1, -1, -1));
+        painter.drawText(r.left() + 6, r.top() + 16, QString(QChar(0x21C4)));   // ⇄
+    }
+    painter.restore();
+}
+
 void gGraphView::populateMenu(gGraph * graph)
 {
     QAction * action;
+
+    m_alignMenuGraph = graph;
+    align_action->setVisible(m_alignMenuPredicate && !graph->isSnapshot() && m_alignMenuPredicate(graph));
 
     if (graph->isSnapshot()) {
         snap_action->setText(tr("Remove Clone"));
@@ -2802,6 +2874,19 @@ void gGraphView::mousePressEvent(QMouseEvent *event)
         int y = event->position().y();
     #endif
 
+    if (m_alignMode && (event->button() == Qt::LeftButton)) {
+        if (gGraph *g = alignGraphAt(QPoint(x, y))) {
+            const int plotWidth = qMax(1, g->m_rect.width() - g->left - g->right);
+            m_alignMsPerPx = double(g->max_x - g->min_x) / double(plotWidth);
+            m_alignDragStartX = x;
+            m_alignDragging = true;
+            m_tooltip->cancel();
+            setCursor(Qt::SizeHorCursor);
+            emit alignDragStarted();
+            return;
+        }
+    }
+
     float h, pinned_height = 0, py = 0;
 
     bool done = false;
@@ -2992,6 +3077,14 @@ void gGraphView::mouseReleaseEvent(QMouseEvent *event)
         int y = event->position().y();
     #endif
 
+    if (m_alignDragging) {
+        m_alignDragging = false;
+        m_tooltip->cancel();
+        emit alignDragFinished();
+        timedRedraw(0);
+        return;
+    }
+
     float h, py = 0, pinned_height = 0;
     bool done = false;
 
@@ -3107,6 +3200,14 @@ void gGraphView::mouseReleaseEvent(QMouseEvent *event)
 
 void gGraphView::keyReleaseEvent(QKeyEvent *event)
 {
+    // Esc normally steps back through the zoom history here; in alignment mode it cancels
+    // the alignment instead (and must not also change the zoom).
+    if (m_alignMode && (event->key() == Qt::Key_Escape)) {
+        emit alignCancel();
+        event->accept();
+        return;
+    }
+
     if (m_metaselect && !(event->modifiers() & Qt::AltModifier)) {
         #if QT_VERSION < QT_VERSION_CHECK(6,0,0)
             QMouseEvent mevent(QEvent::MouseButtonRelease, 
@@ -3439,6 +3540,18 @@ void gGraphView::getSelectionTimes(qint64 & start, qint64 & end)
 
 void gGraphView::keyPressEvent(QKeyEvent *event)
 {
+    if (m_alignMode) {
+        const qint64 step = (event->modifiers() & Qt::ShiftModifier) ? 60000 : 10000;
+        switch (event->key()) {
+        case Qt::Key_Left:   emit alignNudge(-step); event->accept(); return;
+        case Qt::Key_Right:  emit alignNudge(step);  event->accept(); return;
+        case Qt::Key_Return:
+        case Qt::Key_Enter:  emit alignAccept();     event->accept(); return;
+        case Qt::Key_Escape: event->accept(); return;   // acted on in keyReleaseEvent
+        default: break;
+        }
+    }
+
     m_metaselect = event->modifiers() & Qt::AltModifier;
     if (m_metaselect && ((event->key() == Qt::Key_B) || (event->key() == 8747))) {
         if (mainwin->getDaily()->graphView() == this) {

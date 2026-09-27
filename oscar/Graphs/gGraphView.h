@@ -30,6 +30,8 @@
 #include <QElapsedTimer>
 #include <QGestureEvent>
 #include <QPinchGesture>
+#include <QSet>
+#include <functional>
 
 #ifndef BROKEN_OPENGL_BUILD
 #if QT_VERSION < QT_VERSION_CHECK(5,4,0)
@@ -586,6 +588,17 @@ class gGraphView
     Layer * findLayer(gGraph * graph, LayerType type);
 
     void populateMenu(gGraph *);
+
+    //! \brief Turns time-alignment mode on or off. In this mode a left-drag on a graph named in
+    //!        \a targetGraphNames reports a horizontal shift (alignDrag* signals) instead of
+    //!        selecting/zooming; arrow keys, Enter and Esc report alignNudge/alignAccept/alignCancel.
+    void setAlignMode(bool on, const QSet<QString>& targetGraphNames = QSet<QString>());
+    bool alignMode() const { return m_alignMode; }
+    //! \brief Shows \a text next to the mouse pointer (used while an alignment drag is in progress).
+    void showAlignLabel(const QString& text);
+    //! \brief Decides for which graphs the context menu offers "Align device time...".
+    void setAlignMenuPredicate(std::function<bool(gGraph*)> predicate) { m_alignMenuPredicate = std::move(predicate); }
+
     QMenu * limits_menu;
     QMenu * lines_menu;
     QMenu * plots_menu;
@@ -709,6 +722,20 @@ class gGraphView
     bool m_graph_dragging;
     int m_graph_index;
 
+    // Time-alignment mode (see setAlignMode())
+    gGraph *alignGraphAt(const QPoint &pos) const;
+    void noteAlignTarget(gGraph *g);
+    void paintAlignFrames(QPainter &painter);
+    bool m_alignMode = false;
+    QSet<QString> m_alignTargets;
+    QList<QPair<gGraph *, QRect>> m_alignPainted;   //!< plot rects of target graphs painted in the last frame
+    bool m_alignDragging = false;
+    int m_alignDragStartX = 0;
+    double m_alignMsPerPx = 0.0;
+    std::function<bool(gGraph*)> m_alignMenuPredicate;
+    QAction *align_action = nullptr;
+    gGraph *m_alignMenuGraph = nullptr;
+
     qint64 pinch_min, pinch_max;
 
     //! \brief List of all queue text to draw.. not sure why I didn't use a vector here.. Might of been a leak issue
@@ -768,6 +795,13 @@ class gGraphView
     void updateRange(double,double);
     void GraphsChanged();
     void XBoundsChanged(qint64 ,qint64);
+    void alignDragStarted();
+    void alignDragMoved(double rawDeltaMs, double msPerPx);
+    void alignDragFinished();
+    void alignNudge(qint64 deltaMs);
+    void alignAccept();
+    void alignCancel();
+    void alignRequestedForGraph(gGraph *graph);
 
   public slots:
     //! \brief Callback from the ScrollBar, to change scroll position
@@ -796,6 +830,7 @@ protected slots:
     void onPlotsClicked(QAction *);
     void onOverlaysClicked(QAction *);
     void onSnapshotGraphToggle();
+    void onAlignAction();
 };
 
 extern const quint16 gVversion;   //!< Current .shg layout format version (defined in gGraphView.cpp)
