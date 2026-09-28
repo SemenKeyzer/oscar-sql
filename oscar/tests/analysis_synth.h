@@ -9,6 +9,9 @@
 #ifndef ANALYSIS_SYNTH_H
 #define ANALYSIS_SYNTH_H
 
+#include <QPair>
+
+#include "SleepLib/analysis/flow_analyzer.h"
 #include "SleepLib/analysis/signal_utils.h"
 
 //! Builders of synthetic 1 Hz SpO2/pulse grids for the analysis tests. Values are rounded
@@ -26,6 +29,12 @@ void ramp(analysis::Grid &g, int from, int to, float a, float b);
 //! A dip from the level at \a at: falls by \a drop over \a fall s, holds \a hold s,
 //! recovers over \a rise s.
 void dip(analysis::Grid &g, int at, float drop, int fall, int hold, int rise);
+
+//! Sinusoidal breathing at \a fs Hz with a \a period s breath (inspiration positive):
+//! consecutive (seconds, amplitude) segments; the phase runs on across them. \a drift
+//! adds a slow offset of that size (period 300 s), like a device's leak compensation.
+analysis::FlowChunk breathing(double fs, double period, const QVector<QPair<double, double>> &segments,
+                              double drift = 0, qint64 start = kStart);
 
 } // namespace synth
 
