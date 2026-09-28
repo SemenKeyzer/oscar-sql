@@ -489,6 +489,8 @@ private:
     void closeTimeCorrectionDialogs();
     //! After an import was rolled back: drops what it left in memory.
     void discardRolledBackImport();
+    //! Enables the menu actions that act on the open profile only while one is open.
+    void updateProfileActions();
     QTime logtime;
     QSystemTrayIcon *systray;
     QMenu *systraymenu;

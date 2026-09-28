@@ -305,6 +305,7 @@ void MainWindow::SetupGUI()
     ui->overviewButton->setDisabled(true);
     ui->statisticsButton->setDisabled(true);
     ui->importButton->setDisabled(true);
+    updateProfileActions();
 #ifdef helpless
     ui->helpButton->setVisible(false);
 #endif
@@ -504,6 +505,23 @@ MainWindow::~MainWindow()
 void MainWindow::log(QString text)
 {
     logger->appendClean(text);
+}
+
+void MainWindow::updateProfileActions()
+{
+    // Without an open profile these handlers (and the dialogs they open) would
+    // dereference a null p_profile or a Daily view that does not exist. Restore,
+    // Import OSCAR Data and the database actions stay available: they are how a
+    // profile gets there.
+    const bool open = (p_profile != nullptr);
+    ui->menu_Data->menuAction()->setEnabled(open);
+    ui->action_Import_Data->setEnabled(open);
+    ui->action_Edit_Profile->setEnabled(open);
+    ui->actionPrint_Report->setEnabled(open);
+    ui->menuExp_ort_CSV_Data->menuAction()->setEnabled(open);
+    ui->menuJournals->menuAction()->setEnabled(open);
+    ui->actionBackup_Profile->setEnabled(open);
+    ui->actionShare_Profile->setEnabled(open);
 }
 
 void MainWindow::EnableTabs(bool b)
@@ -856,6 +874,7 @@ bool MainWindow::OpenProfile(QString profileName)
     progress->close();
     delete progress;
     scOpen.check();
+    updateProfileActions();
 
     if (updateChecker != nullptr)
         updateChecker->showMessage();
@@ -898,6 +917,7 @@ void MainWindow::CloseProfile()
         p_profile->removeLock();
         p_profile = nullptr;
     }
+    updateProfileActions();
 
     // Reset the title bar to its no-profile state. OpenProfile() overwrites this
     // immediately when switching to another profile.
