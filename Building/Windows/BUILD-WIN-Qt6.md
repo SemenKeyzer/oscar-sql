@@ -1,7 +1,7 @@
 Creating OSCAR development environment on Windows, compiling, and building installers
 =====================================================================================
 
-This document is intended to be a brief description of how to install the necessary components to build OSCAR and create installers for Windows 64-bit using Qt6. This document was written when Qt 6.9.3 was current and may become dated with future releases of Qt. (See BUILD-WIN-515.md for Qt5 and 32-bit Windows.)
+This document is intended to be a brief description of how to install the necessary components to build OSCAR and create installers for Windows 64-bit using Qt6. This document was written when Qt 6.9.3 was current and may become dated with future releases of Qt. (BUILD-WIN.md describes the old Qt5 and 32-bit Windows setup; OSCAR 2 needs Qt 6.)
 
 There are three sections to this documentation.
 

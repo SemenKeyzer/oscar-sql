@@ -14,16 +14,19 @@ Portions of OSCAR are copyright (c) 2019-2026 The OSCAR Team <oscar@oscar-team.o
 
 Minimum Requirements: 
 -------------------
-All systems need a C++ compiler and linker and the QT platform download.
+All systems need a C++17 compiler and linker and Qt 6 (6.10 is recommended).
 
-Windows Building: See Building/Windows/BUILD-WIN.md
+Windows Building: See Building/Windows/BUILD-WIN-Qt6.md
 -----------------
 
 MacOS Building: See Building/MacOS/BUILD-mac.md
 ---------------
 
-Linux Building: See Building/Linux/BUILD-Linux.md
+Linux Building: See Building/Linux/BUILD_Linux.md
 ---------------
+
+Developer documentation: start with Notes/README.md
+------------------------
 
 Software Licensing Information
 ------------------------------

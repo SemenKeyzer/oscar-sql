@@ -1,6 +1,9 @@
 Creating OSCAR development environment on Windows, compiling, and building installers
 =====================================================================================
 
+> **Outdated for OSCAR 2:** this guide covers Qt5 and 32-bit Windows. OSCAR 2 requires Qt 6 —
+> use [BUILD-WIN-Qt6.md](BUILD-WIN-Qt6.md).
+
 This document is intended to be a brief description of how to install the necessary components to build OSCAR and create installers for Windows 32-bit and 64-bit versions.
 
 All references in the deploy.bat file are relative, so it should run with Oscar-code installed at any location.
