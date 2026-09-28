@@ -25,6 +25,29 @@
 
 using namespace ContecBle;
 
+namespace {
+
+QString startText(const RecordHeader &h)
+{
+    const QDateTime start = h.start();
+    if (!start.isValid()) return BluetoothOximeterPage::tr("invalid");
+    return QLocale().toString(start.date(), QLocale::ShortFormat) + QStringLiteral(" ")
+         + start.time().toString(QStringLiteral("HH:mm:ss"));
+}
+
+QString lengthText(int s)
+{
+    return QString::asprintf("%d:%02d:%02d", s / 3600, (s / 60) % 60, s % 60);
+}
+
+const char *const kChannelNames[] = {
+    QT_TRANSLATE_NOOP("BluetoothOximeterPage", "SpO2"),
+    QT_TRANSLATE_NOOP("BluetoothOximeterPage", "Pulse"),
+    QT_TRANSLATE_NOOP("BluetoothOximeterPage", "PI"),
+};
+
+} // namespace
+
 BluetoothOximeterPage::BluetoothOximeterPage(QWidget *parent)
     : QWidget(parent)
 {
@@ -42,6 +65,11 @@ BluetoothOximeterPage::BluetoothOximeterPage(QWidget *parent)
     for (int i = 0; i < StepCount; ++i) {
         m_stepLabels[i] = new QLabel(this);
         layout->addWidget(m_stepLabels[i]);
+        if (i == StepDownload) {
+            m_channelLabel = new QLabel(this);
+            m_channelLabel->setContentsMargins(24, 0, 0, 0);
+            layout->addWidget(m_channelLabel);
+        }
     }
 
     m_deviceList = new QListWidget(this);
@@ -51,6 +79,13 @@ BluetoothOximeterPage::BluetoothOximeterPage(QWidget *parent)
 
     m_progress = new QProgressBar(this);
     layout->addWidget(m_progress);
+    m_detailLabel = new QLabel(this);
+    layout->addWidget(m_detailLabel);
+    m_signalLabel = new QLabel(this);
+    m_signalLabel->setWordWrap(true);
+    m_signalLabel->setStyleSheet(QStringLiteral(
+        "QLabel { background-color: #fff3cd; color: #664d03; padding: 4px 6px; border-radius: 4px; }"));
+    layout->addWidget(m_signalLabel);
 
     m_syncClock = new QCheckBox(tr("Set the oximeter clock to this computer's time"), this);
     m_syncClock->setChecked(p_profile->oxi->syncOximeterClock());
@@ -66,6 +101,8 @@ BluetoothOximeterPage::BluetoothOximeterPage(QWidget *parent)
 
     m_table = new QTableWidget(0, 3, this);
     m_table->setHorizontalHeaderLabels({ tr("Start"), tr("Length"), tr("Result") });
+    m_table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+    m_table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
     m_table->horizontalHeader()->setStretchLastSection(true);
     m_table->verticalHeader()->setVisible(false);
     m_table->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -76,14 +113,6 @@ BluetoothOximeterPage::BluetoothOximeterPage(QWidget *parent)
     m_summary->setWordWrap(true);
     layout->addWidget(m_summary);
 
-    auto *buttons = new QHBoxLayout;
-    buttons->addStretch(1);
-    m_retryButton = new QPushButton(tr("Retry"), this);
-    m_doneButton = new QPushButton(tr("Done"), this);
-    buttons->addWidget(m_retryButton);
-    buttons->addWidget(m_doneButton);
-    layout->addLayout(buttons);
-
     m_scanner = new ContecBleScanner(this);
     connect(m_scanner, &ContecBleScanner::finished, this, &BluetoothOximeterPage::onScanFinished);
     connect(m_scanner, &ContecBleScanner::failed, this, &BluetoothOximeterPage::onFailed);
@@ -91,8 +120,6 @@ BluetoothOximeterPage::BluetoothOximeterPage(QWidget *parent)
         const int row = m_deviceList->currentRow();
         if (row >= 0 && row < m_found.size()) connectTo(m_found.at(row));
     });
-    connect(m_retryButton, &QPushButton::clicked, this, &BluetoothOximeterPage::start);
-    connect(m_doneButton, &QPushButton::clicked, this, [this]() { emit finished(m_importedAny); });
 }
 
 BluetoothOximeterPage::~BluetoothOximeterPage()
@@ -122,15 +149,16 @@ void BluetoothOximeterPage::start()
     m_deviceList->hide();
     m_connectButton->hide();
     m_progress->hide();
-    m_retryButton->hide();
-    m_doneButton->hide();
+    hideDownloadDetails();
     m_headersOnDevice = 0;
+    m_currentRow = -1;
     m_downloadCompleted = false;
     m_importedAny = false;
     m_lastRecordEnd = QDateTime();
     m_clockText.clear();
     m_eraseText.clear();
     m_stepTexts[StepScan] = tr("Searching for oximeters...");
+    m_stepTexts[StepRead] = tr("Reading the record list...");
     m_stepTexts[StepDownload] = tr("Downloading new records...");
     m_busy = true;
     setStep(StepScan);
@@ -178,6 +206,7 @@ void BluetoothOximeterPage::onLinkReady()
     if (!m_busy) return;
     m_stepTexts[StepScan] = tr("Connected to %1 (%2)").arg(m_deviceName, m_model);
     setStep(StepRead);
+    m_summary->setText(tr("Keep the oximeter close to the computer until the import finishes."));
     Machine *mach = p_profile->CreateMachine(ContecBleLoader::infoForModel(m_model));
     mach->setBrand(QObject::tr("Contec"));
     mach->setModel(m_model);
@@ -189,7 +218,8 @@ void BluetoothOximeterPage::onLinkReady()
     m_downloader->setWantRecord([this](const RecordHeader &h) { return wantRecord(h); });
     connect(m_downloader, &ContecBleDownloader::recordCountKnown, this, &BluetoothOximeterPage::onRecordCount);
     connect(m_downloader, &ContecBleDownloader::recordDownloaded, this, &BluetoothOximeterPage::onRecordDownloaded);
-    connect(m_downloader, &ContecBleDownloader::progress, this, &BluetoothOximeterPage::onProgress);
+    connect(m_downloader, &ContecBleDownloader::channelProgress, this, &BluetoothOximeterPage::onChannelProgress);
+    connect(m_downloader, &ContecBleDownloader::retrying, this, &BluetoothOximeterPage::onRetrying);
     connect(m_downloader, &ContecBleDownloader::downloadFinished, this, &BluetoothOximeterPage::onDownloadFinished);
     connect(m_downloader, &ContecBleDownloader::clockSet, this, &BluetoothOximeterPage::onClockSet);
     connect(m_downloader, &ContecBleDownloader::eraseFinished, this, &BluetoothOximeterPage::onEraseFinished);
@@ -228,18 +258,114 @@ bool BluetoothOximeterPage::wantRecord(const RecordHeader &h)
         const QDateTime end = start.addSecs(h.samples);
         if (!m_lastRecordEnd.isValid() || end > m_lastRecordEnd) m_lastRecordEnd = end;
     }
+    const int index = m_rows.size();
     m_rows.append(row);
-    addTableRow(row);
+    setTableRow(index, row);
+    m_stepTexts[StepRead] = recordListText();
+    const int total = qMax(m_headersOnDevice, index + 1);
+    if (row.pending) {
+        m_currentRow = index;
+        m_stepTexts[StepDownload] = tr("Downloading record %1 of %2 (%3, %4)")
+                                        .arg(index + 1).arg(total).arg(startText(h), lengthText(h.samples));
+        m_progress->setValue(0);
+        m_progress->show();
+        m_detailLabel->clear();
+        m_recordClock.start();
+    } else {
+        m_stepTexts[StepDownload] = tr("Checking record %1 of %2...").arg(index + 1).arg(total);
+    }
+    setStep(StepDownload);
     return row.pending;
+}
+
+QString BluetoothOximeterPage::recordListText() const
+{
+    int fresh = 0, present = 0, skipped = 0;
+    for (const Row &row : m_rows) {
+        if (row.decision == Decision::Import || row.decision == Decision::ReplaceShorter) ++fresh;
+        else if (row.decision == Decision::AlreadyPresent) ++present;
+        else ++skipped;
+    }
+    QString text = m_headersOnDevice == 0 ? tr("No records on the oximeter")
+                 : m_headersOnDevice == 1 ? tr("1 record on the oximeter")
+                 : tr("%1 records on the oximeter").arg(m_headersOnDevice);
+    if (!m_rows.isEmpty()) {
+        text += QStringLiteral(": ") + tr("%1 new, %2 already in OSCAR").arg(fresh).arg(present);
+        if (skipped > 0) text += QStringLiteral(", ") + tr("%1 skipped").arg(skipped);
+    }
+    return text;
 }
 
 void BluetoothOximeterPage::onRecordCount(int count)
 {
     m_headersOnDevice = count;
-    setStep(StepDownload);
-    m_progress->setRange(0, qMax(count, 1));
+    m_stepTexts[StepRead] = recordListText();
+    for (int i = m_table->rowCount(); i < count; ++i) {   // every record gets its line up front
+        m_table->insertRow(i);
+        m_table->setItem(i, 0, new QTableWidgetItem(QStringLiteral("-")));
+        m_table->setItem(i, 1, new QTableWidgetItem(QStringLiteral("-")));
+        m_table->setItem(i, 2, new QTableWidgetItem(tr("Waiting")));
+    }
+    m_progress->setRange(0, 1000);
     m_progress->setValue(0);
-    m_progress->show();
+    setStep(count > 0 ? StepDownload : StepSave);
+}
+
+void BluetoothOximeterPage::onChannelProgress(int, int index, int count, int done, int total)
+{
+    if (!m_busy || m_currentRow < 0 || m_currentRow >= m_rows.size() || count <= 0 || total <= 0) return;
+    const qint64 recordTotal = qint64(count) * total;
+    const qint64 recordDone = qint64(index) * total + done;
+    const int permille = int(recordDone * 1000 / recordTotal);
+    m_progress->setValue(permille);
+    Row &row = m_rows[m_currentRow];
+    if (row.pending && row.percent != permille / 10) {
+        row.percent = permille / 10;
+        updateTableRow(m_currentRow);
+    }
+
+    QStringList parts;
+    for (int i = 0; i < count && i < 3; ++i) {
+        const QString name = tr(kChannelNames[i]);
+        if (i < index) parts << name + QStringLiteral(" ") + QChar(0x2713);
+        else if (i == index) parts << tr("%1 %2%").arg(name).arg(done * 100 / total);
+        else parts << tr("%1 waiting").arg(name);
+    }
+    m_channelLabel->setText(parts.join(QStringLiteral("   ")));
+    m_channelLabel->show();
+
+    QString detail = tr("%1: %2 of %3 samples").arg(tr(kChannelNames[qMin(index, 2)]),
+                                                     QLocale().toString(done), QLocale().toString(total));
+    const int secs = secondsLeft(recordTotal - recordDone, recordDone, m_recordClock.elapsed());
+    if (secs >= 0) {
+        const bool more = m_currentRow + 1 < m_headersOnDevice;
+        const int mins = (secs + 59) / 60;
+        QString left;
+        if (secs < 60) left = more ? tr("less than a minute left for this record") : tr("less than a minute left");
+        else if (mins < 60) left = (more ? tr("about %1 min left for this record") : tr("about %1 min left")).arg(mins);
+        else left = (more ? tr("about %1 h %2 min left for this record") : tr("about %1 h %2 min left"))
+                        .arg(mins / 60).arg(mins % 60);
+        detail += QStringLiteral("   ") + QChar(0x00B7) + QStringLiteral("   ") + left;
+    }
+    m_detailLabel->setText(detail);
+    m_detailLabel->show();
+    if (done > 0 && m_signalClock.isValid() && m_signalClock.elapsed() > 5000) m_signalLabel->hide();
+}
+
+void BluetoothOximeterPage::onRetrying(int attempt, int maxAttempts)
+{
+    if (!m_busy) return;
+    m_signalLabel->setText(tr("Weak signal, repeating part of the data (attempt %1 of %2). "
+                              "Keep the oximeter close to the computer.").arg(attempt).arg(maxAttempts));
+    m_signalLabel->show();
+    m_signalClock.start();
+}
+
+void BluetoothOximeterPage::hideDownloadDetails()
+{
+    m_channelLabel->hide();
+    m_detailLabel->hide();
+    m_signalLabel->hide();
 }
 
 void BluetoothOximeterPage::onRecordDownloaded(const Record &r)
@@ -248,6 +374,7 @@ void BluetoothOximeterPage::onRecordDownloaded(const Record &r)
         Row &row = m_rows[i];
         if (!row.pending || row.header.l != r.header.l || row.header.m != r.header.m) continue;
         row.pending = false;
+        row.percent = -1;
         row.outcome = m_importer->save(r, row.decision);
         if (row.outcome == Outcome::ConflictOtherOximeter) row.otherDevice = m_importer->otherOximeterName(r.header);
         if (row.outcome == Outcome::Imported || row.outcome == Outcome::Updated) m_importedAny = true;
@@ -256,16 +383,18 @@ void BluetoothOximeterPage::onRecordDownloaded(const Record &r)
     }
 }
 
-void BluetoothOximeterPage::onProgress(int done, int total)
-{
-    m_progress->setValue(done);
-    m_stepTexts[StepDownload] = tr("Downloading new records... (%1 of %2)").arg(done).arg(total);
-    setStep(StepDownload);
-}
-
 void BluetoothOximeterPage::onDownloadFinished()
 {
     if (!m_busy) return;
+    int fresh = 0;
+    for (const Row &row : m_rows) {
+        if (row.decision == Decision::Import || row.decision == Decision::ReplaceShorter) ++fresh;
+    }
+    m_stepTexts[StepDownload] = fresh == 0 ? tr("No new records to download")
+                              : fresh == 1 ? tr("Downloaded 1 new record")
+                              : tr("Downloaded %1 new records").arg(fresh);
+    hideDownloadDetails();
+    m_progress->hide();
     setStep(StepSave);
     m_downloadCompleted = true;
     m_importer->finish();
@@ -345,11 +474,14 @@ void BluetoothOximeterPage::finish(const QString &error)
         m_rows[i].pending = false;               // outcome stays NotDownloaded
         updateTableRow(i);
     }
+    for (int i = m_rows.size(); i < m_table->rowCount(); ++i) {   // never reached
+        if (QTableWidgetItem *item = m_table->item(i, 2)) item->setText(tr("Not downloaded"));
+    }
+    hideDownloadDetails();
     if (error.isEmpty()) setStep(StepCount, true);   // on an error the reached step stays marked
     m_progress->hide();
     m_summary->setText(summaryText(error));
-    m_retryButton->setVisible(!error.isEmpty());
-    m_doneButton->show();
+    emit ended(!error.isEmpty());
 }
 
 void BluetoothOximeterPage::stopDevice()
@@ -367,19 +499,13 @@ void BluetoothOximeterPage::stopDevice()
     }
 }
 
-void BluetoothOximeterPage::addTableRow(const Row &row)
+void BluetoothOximeterPage::setTableRow(int index, const Row &row)
 {
-    const int r = m_table->rowCount();
-    m_table->insertRow(r);
-    const QDateTime start = row.header.start();
-    const QString when = start.isValid()
-        ? QLocale().toString(start.date(), QLocale::ShortFormat) + QStringLiteral(" ") + start.time().toString(QStringLiteral("HH:mm:ss"))
-        : tr("invalid");
-    const int s = row.header.samples;
-    m_table->setItem(r, 0, new QTableWidgetItem(when));
-    m_table->setItem(r, 1, new QTableWidgetItem(QString::asprintf("%d:%02d:%02d", s / 3600, (s / 60) % 60, s % 60)));
-    m_table->setItem(r, 2, new QTableWidgetItem(outcomeText(row)));
-    m_table->scrollToBottom();
+    while (m_table->rowCount() <= index) m_table->insertRow(m_table->rowCount());
+    m_table->setItem(index, 0, new QTableWidgetItem(startText(row.header)));
+    m_table->setItem(index, 1, new QTableWidgetItem(lengthText(row.header.samples)));
+    m_table->setItem(index, 2, new QTableWidgetItem(outcomeText(row)));
+    m_table->scrollToItem(m_table->item(index, 0));
 }
 
 void BluetoothOximeterPage::updateTableRow(int index)
@@ -389,7 +515,7 @@ void BluetoothOximeterPage::updateTableRow(int index)
 
 QString BluetoothOximeterPage::outcomeText(const Row &row) const
 {
-    if (row.pending) return tr("Downloading...");
+    if (row.pending) return row.percent >= 0 ? tr("Downloading %1%").arg(row.percent) : tr("Downloading...");
     switch (row.outcome) {
     case Outcome::Imported: return tr("Imported");
     case Outcome::Updated: return tr("Updated (was shorter)");

@@ -29,6 +29,12 @@ signals:
     void linkLost();
 };
 
+namespace ContecBle {
+/*! Seconds left for \a samplesLeft samples at the speed measured so far (\a samplesDone in
+    \a elapsedMs), rounded up; -1 while there is too little to measure. */
+int secondsLeft(qint64 samplesLeft, qint64 samplesDone, qint64 elapsedMs);
+}
+
 /*! \class ContecBleDownloader
     \brief Runs a Contec variant-A session: handshake, optional key exchange, then every stored
     record the owner wants. Asynchronous (QTimer, no blocking waits). Never erases anything
@@ -59,6 +65,10 @@ signals:
     void recordCountKnown(int count);
     void recordDownloaded(const ContecBle::Record &record);
     void progress(int done, int total);
+    //! Samples of the current record's channel \a index (of \a count) received so far.
+    void channelProgress(int channel, int index, int count, int samplesDone, int samplesTotal);
+    //! A packet is being requested again (weak signal); \a attempt counts from 1.
+    void retrying(int attempt, int maxAttempts);
     void downloadFinished();
     void clockSet(bool ok);
     void eraseFinished(bool ok);

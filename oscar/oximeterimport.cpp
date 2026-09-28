@@ -167,7 +167,18 @@ OximeterImport::OximeterImport(QWidget *parent) :
 #ifdef HAVE_BLUETOOTH
     m_btPage = new BluetoothOximeterPage(this);
     ui->stackedWidget->addWidget(m_btPage);
-    connect(m_btPage, &BluetoothOximeterPage::finished, this, &OximeterImport::onBluetoothFinished);
+    connect(m_btPage, &BluetoothOximeterPage::ended, this, &OximeterImport::onBluetoothEnded);
+    // Retry and Done live in the wizard's own button row, sized like its other buttons.
+    m_btRetryButton = new QPushButton(tr("Retry"), ui->frame_2);
+    m_btDoneButton = new QPushButton(tr("Done"), ui->frame_2);
+    for (QPushButton *b : { m_btRetryButton, m_btDoneButton }) {
+        b->setMinimumWidth(ui->cancelButton->minimumWidth());
+        b->setSizePolicy(ui->cancelButton->sizePolicy());
+        b->hide();
+        ui->buttonLayout->addWidget(b);
+    }
+    connect(m_btRetryButton, &QPushButton::clicked, this, &OximeterImport::onBluetoothImportClicked);
+    connect(m_btDoneButton, &QPushButton::clicked, this, [this]() { onBluetoothFinished(m_btPage->importedAny()); });
     auto *btButton = new QPushButton(tr("Import over Bluetooth from a Contec oximeter (CMS50FW, CMS50D-BT, ...)"),
                                      ui->importSelectionPage);
     btButton->setMinimumHeight(ui->directImportButton->minimumHeight());
@@ -1144,7 +1155,24 @@ void OximeterImport::onBluetoothImportClicked()
     ui->stackedWidget->setCurrentWidget(m_btPage);
     ui->nextButton->setVisible(false);
     ui->retryButton->setVisible(false);
+    ui->informationButton->setVisible(false);   // leaving the page would hide a running import
+    ui->cancelButton->setVisible(true);
+    m_btRetryButton->hide();
+    m_btDoneButton->hide();
     m_btPage->start();
+#endif
+}
+
+void OximeterImport::onBluetoothEnded(bool canRetry)
+{
+#ifdef HAVE_BLUETOOTH
+    ui->cancelButton->setVisible(false);          // nothing is left to cancel; Done closes the wizard
+    m_btRetryButton->setVisible(canRetry);
+    m_btDoneButton->show();
+    m_btDoneButton->setDefault(true);
+    m_btDoneButton->setFocus();
+#else
+    Q_UNUSED(canRetry)
 #endif
 }
 

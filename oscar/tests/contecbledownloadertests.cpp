@@ -312,6 +312,71 @@ void ContecBleDownloaderTests::testExtraPacketWhileDeliveringIsIgnored()
     QCOMPARE(c.records[1].pulse, dev.records[1].pulse);
 }
 
+// Progress inside a record keeps the page moving during a long night: every channel starts at 0
+// and climbs to the record's sample count.
+void ContecBleDownloaderTests::testChannelProgressClimbsToEachChannelTotal()
+{
+    FakeContecDevice dev;
+    addTwoRecords(dev);
+    ContecBleDownloader d;
+    Collected c;
+    collect(d, c);
+    struct Step { int channel, index, count, done, total; };
+    QList<Step> seen;
+    QObject::connect(&d, &ContecBleDownloader::channelProgress,
+                     [&seen](int ch, int index, int count, int done, int total) {
+        seen.append({ ch, index, count, done, total });
+    });
+    d.start(&dev, QStringLiteral("SpO202"));
+    QTRY_VERIFY_WITH_TIMEOUT(c.finished || !c.error.isEmpty(), 5000);
+    QVERIFY2(c.error.isEmpty(), qPrintable(c.error));
+    QVERIFY(!seen.isEmpty());
+    QCOMPARE(seen.first().done, 0);
+    QList<QPair<int, int>> completed;             // (channel, total) as each channel finishes
+    int last = -1;
+    for (const Step &s : seen) {
+        QCOMPARE(s.count, 2);                     // no PI in these records
+        QCOMPARE(s.channel, s.index == 0 ? int(ChSpO2) : int(ChPulse));
+        QVERIFY(s.done <= s.total);
+        if (s.done == 0) last = 0;
+        else { QVERIFY(s.done > last); last = s.done; }
+        if (s.done == s.total) completed.append({ s.channel, s.total });
+    }
+    const QList<QPair<int, int>> expected { { ChSpO2, 50 }, { ChPulse, 50 }, { ChSpO2, 30 }, { ChPulse, 30 } };
+    QCOMPARE(completed, expected);
+}
+
+// A repeated packet is reported, so the page can say the signal is weak instead of looking stuck.
+void ContecBleDownloaderTests::testRetryIsReported()
+{
+    FakeContecDevice dev;
+    addTwoRecords(dev);
+    dev.corruptChannel = ChSpO2;
+    dev.corruptPacket = 1;
+    ContecBleDownloader d;
+    d.setRetryPause(20);
+    Collected c;
+    collect(d, c);
+    QList<QPair<int, int>> retries;
+    QObject::connect(&d, &ContecBleDownloader::retrying, [&retries](int attempt, int maxAttempts) {
+        retries.append({ attempt, maxAttempts });
+    });
+    d.start(&dev, QStringLiteral("SpO202"));
+    QTRY_VERIFY_WITH_TIMEOUT(c.finished || !c.error.isEmpty(), 5000);
+    QVERIFY2(c.error.isEmpty(), qPrintable(c.error));
+    const QList<QPair<int, int>> expected { { 1, 5 } };
+    QCOMPARE(retries, expected);
+}
+
+void ContecBleDownloaderTests::testSecondsLeft()
+{
+    QCOMPARE(secondsLeft(1000, 1000, 10000), 10);   // 100 samples/s, 1000 to go
+    QCOMPARE(secondsLeft(1, 1000, 10000), 1);       // rounds up
+    QCOMPARE(secondsLeft(0, 500, 5000), 0);
+    QCOMPARE(secondsLeft(1000, 1000, 2000), -1);    // too early to measure the speed
+    QCOMPARE(secondsLeft(1000, 0, 10000), -1);      // nothing received yet
+}
+
 void ContecBleDownloaderTests::cleanupTestCase()
 {
     delete m_app;

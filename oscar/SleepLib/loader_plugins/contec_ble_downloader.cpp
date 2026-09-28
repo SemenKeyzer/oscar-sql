@@ -286,6 +286,8 @@ void ContecBleDownloader::startChannel()
     m_decoder = CodeDecoder();
     send(cmdChannel(m_format, m_channels.at(m_channelIndex), m_record.header.l, m_record.header.m, 0));
     expect(State::ReadChannel);
+    if (stopped()) return;
+    emit channelProgress(m_channels.at(m_channelIndex), m_channelIndex, m_channels.size(), 0, m_record.header.samples);
 }
 
 void ContecBleDownloader::onChannelPacket(const QByteArray &f)
@@ -301,6 +303,9 @@ void ContecBleDownloader::onChannelPacket(const QByteArray &f)
     else if (m_format == FmtOriginal) m_samples += parseEdOriginal(f);
     else m_samples += m_decoder.feed(f);
     ++m_packet;
+    emit channelProgress(ch, m_channelIndex, m_channels.size(),
+                         qMin(int(m_samples.size()), m_record.header.samples), m_record.header.samples);
+    if (stopped()) return;
     if (m_samples.size() < m_record.header.samples) {
         m_timer.start(m_responseTimeoutMs);
         return;
@@ -324,6 +329,8 @@ void ContecBleDownloader::retryChannel()
         return;
     }
     qDebug() << "ContecBLE retry: channel" << ch << "packet" << m_packet << "attempt" << m_attempt;
+    emit retrying(m_attempt, kMaxAttempts);
+    if (stopped()) return;
     send(cmdChannelAbort(ch, m_record.header.l, m_record.header.m));
     if (stopped()) return;
     m_timer.stop();
@@ -362,4 +369,10 @@ void ContecBleDownloader::finishDownload()
     m_timer.stop();
     m_state = State::Ready;
     emit downloadFinished();
+}
+
+int ContecBle::secondsLeft(qint64 samplesLeft, qint64 samplesDone, qint64 elapsedMs)
+{
+    if (samplesDone <= 0 || elapsedMs < 3000) return -1;
+    return int((samplesLeft * elapsedMs + samplesDone * 1000 - 1) / (samplesDone * 1000));
 }

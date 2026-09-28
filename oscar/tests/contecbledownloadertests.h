@@ -29,6 +29,9 @@ private slots:
     void testNoRecords();
     void testLinkLostFails();
     void testExtraPacketWhileDeliveringIsIgnored();
+    void testChannelProgressClimbsToEachChannelTotal();
+    void testRetryIsReported();
+    void testSecondsLeft();
     void cleanupTestCase();
 private:
     QCoreApplication *m_app = nullptr;
