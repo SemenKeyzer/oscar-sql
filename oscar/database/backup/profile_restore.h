@@ -8,7 +8,8 @@
  *
  * A restore operation:
  *   1. Validates the .oscar package (checksums, manifest structure).
- *   2. Checks schema version compatibility (exact match required for v13+).
+ *   2. Checks schema version compatibility (backup schema must be between
+ *      MIN_RESTORE_SCHEMA_VERSION and CURRENT_SCHEMA_VERSION).
  *   3. Detects username conflicts with existing profiles.
  *   4. Resolves conflicts according to the configured strategy.
  *   5. Remaps all auto-increment IDs to avoid collisions with existing rows.

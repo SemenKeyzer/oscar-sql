@@ -670,7 +670,7 @@ bool DatabaseSchema::createProfilePreferencesTable(QSqlDatabase& db)
  * Returns: true if successful, false otherwise
  *
  * The sessions table stores core session metadata and timing information.
- * Waveform data continues to be stored in separate files.
+ * Waveform and event data live in event_lists / event_data.
  */
 bool DatabaseSchema::createSessionsTable(QSqlDatabase& db)
 {

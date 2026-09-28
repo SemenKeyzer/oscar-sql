@@ -16,7 +16,7 @@
 - Eliminates file synchronization issues between database and .001 files
 - Daily summaries enable lightning-fast reports without loading sessions
 
-**Migration:** Existing .001 files are read once during upgrade, then data is migrated to event_data table and .001 files can be deleted.
+**Migration:** OSCAR 2 never reads `.000`/`.001` files at runtime. OSCAR 1.x data is converted once by the profile importer (first-run migration or *File → Profiles → Import from OSCAR…*, `oscar/profileimporter.cpp`), which loads the old files and stores sessions and events in the database.
 
 ---
 
@@ -63,7 +63,7 @@ The event_lists and event_data tables (new in v8) provide revolutionary database
 **What Changed:**
 - **Eliminates .001 files** - All waveform/event data now stored in database BLOBs
 - **Two new tables**: event_lists (metadata) and event_data (binary data)
-- **Compressed storage** - qCompress level 9 achieves 40-60% compression
+- **Compressed storage** - `qCompress` level 6 (`EventDataRepository::compressIfBeneficial`): only blobs of 500 bytes or more, kept compressed only when that saves more than 10%; the *Compress session data* preference turns it off
 - **Transactional integrity** - All data protected by ACID transactions
 - **Simpler data model** - Single database file instead of database + thousands of .001 files
 
@@ -76,10 +76,10 @@ The event_lists and event_data tables (new in v8) provide revolutionary database
 - **Checksum verification** - CRC16 checksums ensure data integrity
 
 **Migration Strategy:**
-- **Automatic** - Existing .001 files read once on first load after upgrade
-- **Data preserved** - All waveform/event data migrated to event_data table
-- **Backward compatible** - Can still read old .001 files if database migration fails
-- **File cleanup** - After successful migration, .001 files can be safely deleted
+- **One-time conversion** - OSCAR 1.x `.000`/`.001` files are converted by the profile importer; the runtime file-loading code is disabled (`session.cpp`)
+- **Data preserved** - All waveform/event data is written to the event_data table
+- **No runtime fallback** - A session whose events are missing from the database is not re-read from files; re-import the SD card (the card backup kept by OSCAR works) to recover it
+- **Original files untouched** - The OSCAR 1.x data folder is left as it was
 
 **Storage Efficiency:**
 - Compression ratio: 40-60% (comparable to .001 format)
@@ -93,7 +93,7 @@ The event_lists and event_data tables (new in v8) provide revolutionary database
 - Query flexibility: Can now query waveform metadata without loading full data
 - Transaction safety: Significantly improved vs file-based storage
 
-**Note**: Re-import CPAP data after upgrade to migrate from .001 files to database storage.
+**Note**: To bring OSCAR 1.x data into OSCAR 2, use the profile importer; re-importing SD cards also works.
 
 ---
 

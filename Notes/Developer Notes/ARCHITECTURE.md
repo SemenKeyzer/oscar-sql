@@ -1,6 +1,6 @@
 # OSCAR Architecture Guide
 
-**Last updated:** 2026-04-13
+**Last updated:** 2026-09-28
 **Purpose:** Help developers (and AI assistants) understand how the pieces fit together.
 
 ---
@@ -332,16 +332,27 @@ Each database table has a corresponding repository class in `oscar/database/`:
 | `EventDataRepository` | `event_data` | Waveform/event BLOB storage |
 | `RespiratoryEventsRepository` | `respiratory_events` | Individual respiratory events |
 | `DailySummaryRepository` | `daily_summaries` | Pre-calculated daily stats |
-| `ChannelRepository` | `channel_options` | Channel display preferences |
+| `ChannelOptionsRepository` | `channel_options` | Channel display preferences |
 | `UserInfoRepository` | `user_info` | Personal information |
 | `DoctorInfoRepository` | `doctor_info` | Doctor information |
 | `PreferencesRepository` | `profile_preferences` | Key-value profile settings |
-| `ReportRepository` | `reports`, `report_contents` | CSV export report definitions |
-| `ReportTreeRepository` | `report_tree` | Hierarchical report tree |
+| `SessionSlicesRepository` | `session_slices` | Mask-on/off periods inside a session |
+| `SessionChannelValuesRepository` | `session_channel_values` | Value/time histograms for weighted averages |
+| `ChannelRepository` | `channels` | Per-profile channel settings (enabled, colour, thresholds) |
+| `DeviceTimeCorrectionRepository` | `device_time_corrections` | Non-destructive per-device time corrections |
+| `AppPreferencesRepository` | `app_preferences` | Application-wide settings (replaced `Preferences.xml` in v14) |
+| `GraphLayoutsRepository` | `graph_layouts` | Saved graph layouts (replaced `.shg` files in v14) |
+| `ReportRepository`, `ReportContentsRepository` | `reports`, `report_contents` | Legacy flat report definitions |
+| `ReportTreeRepository` | `report_tree` | Hierarchical report tree (CSV export reports) |
 
 ### Schema Versioning
 
-Current schema version: **13** (see `database_schema.h`). The policy since v12 is **no-migration**: if the schema version doesn't match, the database is recreated from scratch. Schema history is in `Notes/DATABASE_SCHEMA_REFERENCE.md`.
+Current schema version: **19** (`DatabaseSchema::CURRENT_SCHEMA_VERSION` in `database_schema.h`).
+
+- Upgrades are **incremental**: `DatabaseSchema` holds one migration step per version pair, from v13 upward (`migrateV13ToV14` … `migrateV18ToV19`), each in its own transaction. A database older than v13 has no upgrade path.
+- `DatabaseManager::initialize()` opens an outdated database **without** upgrading it; `main.cpp` warns the user, offers a whole-database copy (`DatabaseManager::snapshotTo`, `VACUUM INTO`) and only then runs `upgradeSchema()` on a worker thread.
+- `.oscar` backups from schema `MIN_RESTORE_SCHEMA_VERSION` (12) up to the current version can be restored.
+- Schema history and table reference: `Notes/Database/DATABASE_SCHEMA.md`.
 
 ---
 
@@ -350,7 +361,7 @@ Current schema version: **13** (see `database_schema.h`). The policy since v12 i
 ### Two-Level Architecture
 
 1. **Application-wide** (`p_pref` global, `Preferences` class)
-   - Stored in `Preferences.xml` in the data folder
+   - Stored in the `app_preferences` table since schema v14 (OSCAR 1.x `Preferences.xml` is migrated once by `ProfileImporter`)
    - Wrapped by `AppSetting` (`AppWideSetting` class) for typed access
    - Contains: language, UI settings, graph settings, etc.
 
@@ -433,7 +444,9 @@ main.cpp
 | Backup/Restore | `oscar/database/backup/profile_backup.{h,cpp}`, `profile_restore.{h,cpp}` |
 | Network/Cloud | `oscar/network/cloud_uploader.h`, etc. |
 | Journal | `oscar/SleepLib/journal.{h,cpp}` |
-| CSV export | `oscar/exportcsv.{h,cpp}`, `oscar/reportmanager.{h,cpp}` |
+| Time corrections | `oscar/devicetimecorrectiondialog.*`, `oscar/driftanalysisdialog.*`, `oscar/timealignsession.*`, `oscar/timealignbar.*`, `Machine::correctionMs()` |
+| Oximetry import | `oscar/oximeterimport.*`, `oscar/bluetoothoximeterpage.*`, `oscar/SleepLib/oximetry_session_builder.*` |
+| CSV export | `oscar/exports/report_exporter.{h,cpp}` (report tree), `oscar/exports/exportcsv.{h,cpp}` (1.x-style), `oscar/reportmanager.{h,cpp}` |
 | Profile import | `oscar/profileimporter.{h,cpp}` |
 | Build config | `oscar/oscar.pro` |
 
@@ -465,3 +478,12 @@ Profile::calcAvg(channel, machineType, startDate, endDate)
 ```
 
 The Statistics page and Overview charts use these Profile-level calculation methods.
+
+### Device Time Corrections
+
+Corrections (time zone, travel, DST, clock reset, manual offset, clock drift) live in `device_time_corrections` and are applied **at read time**; stored session and event timestamps are never rewritten.
+
+- `Machine::correctionMs(night)` sums the active rows for a night (cached per night; `rebuildCorrections()` / `reloadCorrectionsFromDb()` refresh the cache).
+- `Session::first()/last()` add `correctionMs()`; graph layers (`gLineChart`, `gFlagsLine`, `gLineOverlay`, …) add it when drawing. Raw `EventList` times stay in device time.
+- A correction does not move a session to another day (`Machine::AddSession` picks the day at load time) and does not refresh `daily_summaries`.
+- The Daily view can align a device's clock directly on the graphs (`TimeAlignSession` + `TimeAlignBar` + the align mode of `gGraphView`); the result is an ordinary single-night `offset` row.

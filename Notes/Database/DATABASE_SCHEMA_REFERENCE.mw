@@ -1,14 +1,14 @@
 <span id="oscar-database-schema-reference"></span>
 = OSCAR Database Schema Reference =
 
-'''Version:''' Schema Version 18 '''Last Updated:''' 2026 Q3 '''Database Type:''' SQLite
+'''Version:''' Schema Version 19 '''Last Updated:''' 2026 Q3 '''Database Type:''' SQLite
 
 -----
 
 <span id="overview"></span>
 == Overview ==
 
-The OSCAR database uses SQLite to store user profiles, machine configurations, session data, and preferences. This document provides a complete reference for all tables, fields, and relationships in schema version 18.
+The OSCAR database uses SQLite to store user profiles, machine configurations, session data, and preferences. This document provides a complete reference for all tables, fields, and relationships in schema version 19.
 
 '''Key Design Principles:''' - '''Profile-centric''': All data organized around user profiles - '''Machine tracking''': Each profile can have multiple CPAP and oximetry devices - '''Session storage''': Detailed session metadata with waveform/event data in database ⚡ NEW IN v8 - '''Daily summaries''': Pre-calculated daily statistics for fast reporting - '''Profile ID denormalization''': session_settings, session_channels, session_summaries, event_lists, and respiratory_events carry profile_id for query performance 🔧 NEW IN v12 - '''Report tree''': Hierarchical report tree with system and user nodes, loaded from .orf file 🌲 NEW IN v13 - '''Flexible preferences''': Key-value storage for settings - '''Cascade deletes''': Removing a profile removes all associated data - '''Database-only mode''': Waveform and event data stored in database BLOBs (replaces .001 files) ⚡ NEW IN v8 - '''Migration policy''': Schema version mismatch requires migration after v13.
 
@@ -94,6 +94,10 @@ The OSCAR database uses SQLite to store user profiles, machine configurations, s
 | 18
 | 2026 Q3
 | 📊 '''NEW FEATURE''': Central / Obstructive hypopnea split. Added <code>obstructive_hypopnea_count</code>, <code>central_hypopnea_count</code>, <code>all_apnea_count</code> (INTEGER) and <code>oahi</code>, <code>cahi</code> (REAL) to both <code>session_summaries</code> and <code>daily_summaries</code>. <code>all_apnea_count</code> closes a pre-existing gap — <code>CPAP_AllApnea</code> contributes to AHI but was never stored, so SQL sums could not reproduce the app's AHI for devices reporting an undifferentiated apnea. Purely additive; pre-v18 rows read 0 in all five columns and are '''not''' backfilled.
+|-
+| 19
+| 2026 Q3
+| 🔧 '''SEMANTICS''': Summary metrics that do not apply are now <code>NULL</code>, not <code>0</code>, in <code>session_summaries</code> and <code>daily_summaries</code>: event counts for channels the device has never reported, <code>oahi</code>/<code>cahi</code> unless the device splits hypopneas by mechanism, <code>rdi</code> unless it reports RERA, and pressure/leak/oximetry statistics a row has no data for. No column changes. The #285 index recompute moved here from v18. Zero-count OH/CH <code>session_channels</code> rows of devices that never scored either are removed. <code>daily_summaries</code> rows of profiles whose CPAP devices disagree on some channel are regenerated on next open. A v18 backup restored into v19 keeps its <code>0</code>s.
 |}
 
 -----

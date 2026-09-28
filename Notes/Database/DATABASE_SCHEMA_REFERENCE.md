@@ -1,5 +1,5 @@
 # OSCAR Database Schema Reference
-**Version:** Schema Version 18
+**Version:** Schema Version 19
 **Last Updated:** 2026 Q3
 **Database Type:** SQLite
 
@@ -7,7 +7,7 @@
 
 ## Overview
 
-The OSCAR database uses SQLite to store user profiles, machine configurations, session data, and preferences. This document provides a complete reference for all tables, fields, and relationships in schema version 18.
+The OSCAR database uses SQLite to store user profiles, machine configurations, session data, and preferences. This document provides a complete reference for all tables, fields, and relationships in schema version 19.
 
 **Key Design Principles:**
 - **Profile-centric**: All data organized around user profiles
