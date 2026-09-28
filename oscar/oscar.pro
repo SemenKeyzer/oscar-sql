@@ -458,6 +458,7 @@ SOURCES += \
     database/app_preferences_repository.cpp \
     database/graph_layouts_repository.cpp \
     database/session_repository.cpp \
+    database/analysis_daily_repository.cpp \
     database/session_settings_repository.cpp \
     database/session_channels_repository.cpp \
     database/session_channel_values_repository.cpp \
@@ -665,6 +666,7 @@ HEADERS  += \
     database/app_preferences_repository.h \
     database/graph_layouts_repository.h \
     database/session_repository.h \
+    database/analysis_daily_repository.h \
     database/session_settings_repository.h \
     database/session_channels_repository.h \
     database/session_channel_values_repository.h \

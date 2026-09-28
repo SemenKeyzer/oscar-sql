@@ -21,7 +21,9 @@
 #include "SleepLib/profiles.h"
 #include "SleepLib/schema.h"
 #include "SleepLib/session.h"
+#include "database/analysis_daily_repository.h"
 #include "database/database_manager.h"
+#include "database/database_schema.h"
 #include "database/profile_repository.h"
 #include "database/session_channels_repository.h"
 #include "database/session_settings_repository.h"
@@ -319,4 +321,144 @@ void AnalysisIntegrationTests::testStampIsStoredAsText()
     QCOMPARE(row.jsonValue, SessionStamp::read(&sess).toJson());
     QVERIFY(sess.StoreSetting(AN_Stamp));   // again: an update, not a second row
     QCOMPARE(SessionSettingsRepository().findBySession(sess.sessionRowId()).size(), 1);
+}
+
+namespace {
+
+AnalysisDailyData sampleDay(qint64 profileId, const QDate &date)
+{
+    AnalysisDailyData d;
+    d.profileId = profileId;
+    d.date = date;
+    d.algoVersion = kAnalysisAlgoVersion;
+    d.paramsHash = QStringLiteral("0123456789abcdef");
+    d.inputsHash = QStringLiteral("fedcba9876543210");
+    d.hasFlow = true;
+    d.flowSeconds = 25200;
+    d.flowRateHz = 25;
+    d.nObstructiveApnea = 7;
+    d.nCentralApnea = 3;
+    d.nHypopneaAasm3 = 11;
+    d.flSum = 123.5;
+    d.hypopneaRule = int(HypopneaRule::Aasm3);
+    d.hasOximetry = true;
+    d.oxiSeconds = 24000;
+    d.oxiScope = QStringLiteral("night");
+    d.hasCpap = true;
+    d.nDesat3 = 12;
+    d.spo2Hist = QVector<int>(51, 0);
+    d.spo2Hist[46] = 20000;
+    d.spo2Hist[40] = 4000;
+    d.spo2Nadir = 84;
+    d.linkedDesatArea = 310.5;
+    return d;
+}
+
+bool isNull(qint64 profileId, const QDate &date, const char *column)
+{
+    QSqlQuery q(DatabaseManager::instance().database());
+    q.prepare(QStringLiteral("SELECT %1 IS NULL FROM analysis_daily WHERE profile_id = ? AND date = ?").arg(column));
+    q.addBindValue(profileId);
+    q.addBindValue(date.toString(Qt::ISODate));
+    return q.exec() && q.next() && q.value(0).toBool();
+}
+
+} // namespace
+
+void AnalysisIntegrationTests::testDailyRowRoundTrip()
+{
+    AnalysisDailyRepository repo;
+    const QDate date(2026, 3, 1);
+    QVERIFY(repo.upsert(sampleDay(m_profileId, date)));
+
+    const AnalysisDailyData d = repo.find(m_profileId, date);
+    QVERIFY(d.id > 0);
+    QCOMPARE(d.date, date);
+    QCOMPARE(d.algoVersion, kAnalysisAlgoVersion);
+    QCOMPARE(d.inputsHash, QStringLiteral("fedcba9876543210"));
+    QVERIFY(d.computedAt.isValid());
+    QVERIFY(d.hasFlow);
+    QCOMPARE(d.flowSeconds, 25200);
+    QCOMPARE(d.nObstructiveApnea, 7);
+    QCOMPARE(d.nHypopneaAasm3, 11);
+    QCOMPARE(d.flSum, 123.5);
+    QVERIFY(d.hasOximetry);
+    QCOMPARE(d.oxiScope, QStringLiteral("night"));
+    QCOMPARE(d.spo2Hist.size(), 51);
+    QCOMPARE(d.spo2Hist[46], 20000);
+    QCOMPARE(d.linkedDesatArea, 310.5);
+
+    // groups that do not apply are NULL, not 0
+    QVERIFY(!d.hasComparison);
+    QVERIFY(!d.hasPulse);
+    QVERIFY(!d.hasOffsetHint);
+    QVERIFY(isNull(m_profileId, date, "cmp_matched"));
+    QVERIFY(isNull(m_profileId, date, "pulse_hist"));
+    QVERIFY(isNull(m_profileId, date, "oxi_offset_hint_ms"));
+    QVERIFY(!isNull(m_profileId, date, "flow_s"));
+
+    // a day without oximetry keeps its flow and has no oximetry columns
+    AnalysisDailyData flowOnly = sampleDay(m_profileId, date.addDays(1));
+    flowOnly.hasOximetry = false;
+    QVERIFY(repo.upsert(flowOnly));
+    QVERIFY(!repo.find(m_profileId, date.addDays(1)).hasOximetry);
+    QVERIFY(isNull(m_profileId, date.addDays(1), "n_desat3"));
+    QVERIFY(isNull(m_profileId, date.addDays(1), "linked_desat_area"));
+
+    QVERIFY(repo.removeRange(m_profileId, date, date.addDays(1)));
+}
+
+void AnalysisIntegrationTests::testDailyRowReplacesSameDay()
+{
+    AnalysisDailyRepository repo;
+    const QDate date(2026, 3, 10);
+    QVERIFY(repo.upsert(sampleDay(m_profileId, date)));
+    AnalysisDailyData again = sampleDay(m_profileId, date);
+    again.nObstructiveApnea = 2;
+    again.inputsHash = QStringLiteral("1111111111111111");
+    QVERIFY(repo.upsert(again));
+
+    const QList<AnalysisDailyData> rows = repo.findRange(m_profileId, date, date);
+    QCOMPARE(rows.size(), 1);
+    QCOMPARE(rows.first().nObstructiveApnea, 2);
+    QCOMPARE(rows.first().inputsHash, QStringLiteral("1111111111111111"));
+    QVERIFY(repo.remove(m_profileId, date));
+    QCOMPARE(repo.find(m_profileId, date).id, qint64(0));
+}
+
+void AnalysisIntegrationTests::testDailyRowRangeAndRemove()
+{
+    AnalysisDailyRepository repo;
+    const QDate first(2026, 4, 1);
+    for (int i = 3; i >= 0; --i) QVERIFY(repo.upsert(sampleDay(m_profileId, first.addDays(i))));
+
+    QList<AnalysisDailyData> rows = repo.findRange(m_profileId, first, first.addDays(3));
+    QCOMPARE(rows.size(), 4);
+    for (int i = 0; i < rows.size(); ++i) QCOMPARE(rows[i].date, first.addDays(i));
+
+    QVERIFY(repo.removeRange(m_profileId, first.addDays(1), first.addDays(2)));
+    rows = repo.findRange(m_profileId, first, first.addDays(3));
+    QCOMPARE(rows.size(), 2);
+    QCOMPARE(rows[0].date, first);
+    QCOMPARE(rows[1].date, first.addDays(3));
+    QCOMPARE(repo.findRange(m_profileId + 1, first, first.addDays(3)).size(), 0);
+    QVERIFY(repo.removeRange(m_profileId, first, first.addDays(3)));
+}
+
+void AnalysisIntegrationTests::testMigrationAddsAnalysisDaily()
+{
+    QSqlDatabase db = DatabaseManager::instance().database();
+    QCOMPARE(DatabaseSchema::getSchemaVersion(db), DatabaseSchema::CURRENT_SCHEMA_VERSION);
+
+    // back to a v19 database, then upgrade
+    QSqlQuery q(db);
+    QVERIFY(q.exec(QStringLiteral("DROP TABLE analysis_daily")));
+    QVERIFY(q.exec(QStringLiteral("UPDATE schema_version SET version = 19")));
+    QVERIFY(!db.tables().contains(QStringLiteral("analysis_daily")));
+
+    QVERIFY(DatabaseSchema::upgradeSchema(db, 19));
+    QCOMPARE(DatabaseSchema::getSchemaVersion(db), 20);
+    QVERIFY(db.tables().contains(QStringLiteral("analysis_daily")));
+    QVERIFY(AnalysisDailyRepository().upsert(sampleDay(m_profileId, QDate(2026, 5, 1))));
+    QVERIFY(AnalysisDailyRepository().remove(m_profileId, QDate(2026, 5, 1)));
 }

@@ -82,6 +82,7 @@
 #include "devicetimecorrectiondialog.h"
 #include "timealignmentwelcomedialog.h"
 #include "driftanalysisdialog.h"
+#include "database/analysis_daily_repository.h"
 #include "database/device_time_correction_repository.h"
 #include "aboutdialog.h"
 #include "newprofile.h"
@@ -2611,6 +2612,7 @@ void MainWindow::purgeDay(MachineType type)
             bool recalculated = day && summaryRepo.calculateAndStoreFromDay(day, profileData.id);
             if (!recalculated)
                 summaryRepo.invalidateDate(profileData.id, date);
+            AnalysisDailyRepository().remove(profileData.id, date);
         }
     }
 
@@ -2707,11 +2709,13 @@ void MainWindow::on_actionPurgeRangeOfDays_triggered()
         ProfileData profileData = profileRepo.findByUsername(p_profile->user->userName());
         if (profileData.id > 0) {
             DailySummaryRepository summaryRepo;
+            AnalysisDailyRepository analysisRepo;
             for (const QDate &d : purgedDates) {
                 Day *day = p_profile->GetDay(d, MT_UNKNOWN);
                 bool recalculated = day && summaryRepo.calculateAndStoreFromDay(day, profileData.id);
                 if (!recalculated)
                     summaryRepo.invalidateDate(profileData.id, d);
+                analysisRepo.remove(profileData.id, d);
             }
         }
     }
@@ -2890,6 +2894,7 @@ void MainWindow::purgeMachine(Machine * mach)
             if (profileData.id > 0) {
                 DailySummaryRepository summaryRepo;
                 summaryRepo.invalidateRange(profileData.id, firstDay, lastDay);
+                AnalysisDailyRepository().removeRange(profileData.id, firstDay, lastDay);
             }
         }
         p_profile->calculateDailySummaries();
@@ -3912,6 +3917,7 @@ void MainWindow::on_actionPurgeCurrentDaysOximetry_triggered()
                 if (!recalculated) {
                     summaryRepo.invalidateDate(profileData.id, date);
                 }
+                AnalysisDailyRepository().remove(profileData.id, date);
             }
         }
 

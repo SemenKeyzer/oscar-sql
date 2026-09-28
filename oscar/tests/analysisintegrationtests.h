@@ -28,6 +28,10 @@ private slots:
     void testStoreChannelEventsLeavesWaveform();
     void testPartialSessionIsNeverStoredInFull();
     void testStampIsStoredAsText();
+    void testDailyRowRoundTrip();
+    void testDailyRowReplacesSameDay();
+    void testDailyRowRangeAndRemove();
+    void testMigrationAddsAnalysisDaily();
 
 private:
     class QCoreApplication *m_app = nullptr;

@@ -40,6 +40,11 @@ public:
      * Increment this when schema changes. Used to determine if
      * database upgrades are needed.
      *
+     * Version 20: OSCAR's own sleep analysis
+     * - Added analysis_daily: one row per profile-day with the analysis' counts and
+     *   seconds (flow, comparison with the device, oximetry, pulse). Derived data,
+     *   not exported in backups; a group of columns is NULL when it does not apply.
+     *
      * Version 19: NULL for summary metrics that do not apply (GitLab #261)
      * - No column changes. session_summaries and daily_summaries now store NULL, not 0,
      *   for counts of channels the device has never reported, for oahi/cahi unless the
@@ -98,7 +103,7 @@ public:
      * - Added type field to channels
      * - Removed events_file and summary_file from sessions (no longer needed)
      */
-    static const int CURRENT_SCHEMA_VERSION = 19;
+    static const int CURRENT_SCHEMA_VERSION = 20;
 
     /*!
      * \brief Oldest schema version that can be restored into the current database.
@@ -234,6 +239,12 @@ private:
 
     // Migration from v18 to v19
     static bool migrateV18ToV19(QSqlDatabase& db);
+
+    // Sleep analysis per profile-day (schema version 20)
+    static bool createAnalysisDailyTable(QSqlDatabase& db);
+
+    // Migration from v19 to v20
+    static bool migrateV19ToV20(QSqlDatabase& db);
 
     static bool createIndexes(QSqlDatabase& db);
     static bool setSchemaVersion(QSqlDatabase& db, int version);

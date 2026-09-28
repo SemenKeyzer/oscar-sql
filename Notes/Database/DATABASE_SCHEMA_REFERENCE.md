@@ -1,5 +1,5 @@
 # OSCAR Database Schema Reference
-**Version:** Schema Version 19
+**Version:** Schema Version 20
 **Last Updated:** 2026 Q3
 **Database Type:** SQLite
 
@@ -7,7 +7,7 @@
 
 ## Overview
 
-The OSCAR database uses SQLite to store user profiles, machine configurations, session data, and preferences. This document provides a complete reference for all tables, fields, and relationships in schema version 19.
+The OSCAR database uses SQLite to store user profiles, machine configurations, session data, and preferences. This document provides a complete reference for all tables, fields, and relationships in schema version 20.
 
 **Key Design Principles:**
 - **Profile-centric**: All data organized around user profiles
@@ -46,6 +46,7 @@ The OSCAR database uses SQLite to store user profiles, machine configurations, s
 | 17 | 2026 Q3 | 🕐 **NEW FEATURE**: Added `device_time_corrections` table for per-device per-night time corrections (timezone, travel, dst, reset, offset, drift). |
 | 18 | 2026 Q3 | 📊 **NEW FEATURE**: Central / Obstructive hypopnea split. Added `obstructive_hypopnea_count`, `central_hypopnea_count`, `all_apnea_count` (INTEGER) and `oahi`, `cahi` (REAL) to both `session_summaries` and `daily_summaries`. `all_apnea_count` closes a pre-existing gap — `CPAP_AllApnea` contributes to AHI but was never stored, so SQL sums could not reproduce the app's AHI for devices reporting an undifferentiated apnea. Purely additive; pre-v18 rows read 0 in all five columns and are **not** backfilled. |
 | 19 | 2026 Q3 | 🔧 **SEMANTICS**: Summary metrics that do not apply are now `NULL`, not `0`, in `session_summaries` and `daily_summaries`: event counts for channels the device has never reported, `oahi`/`cahi` unless the device splits hypopneas by mechanism, `rdi` unless it reports RERA, and pressure/leak/oximetry statistics a row has no data for. No column changes. The #285 index recompute moved here from v18. Zero-count OH/CH `session_channels` rows of devices that never scored either are removed. `daily_summaries` rows of profiles whose CPAP devices disagree on some channel are regenerated on next open. A v18 backup restored into v19 keeps its `0`s. |
+| 20 | 2026 Q3 | 🔬 **NEW FEATURE**: Added `analysis_daily` — OSCAR's own sleep analysis per profile-day (counts and seconds for flow events, comparison with the device, oximetry and pulse). Derived data: not exported in backups, recalculated on demand. Purely additive. |
 
 ---
 
@@ -617,6 +618,72 @@ CREATE UNIQUE INDEX idx_graph_layouts_current
 **data:** Raw `QDataStream` binary payload identical to old `.shg` file format (magic `0x41756728`, version 5+).
 
 **Seeding:** On first launch after upgrade, legacy `layoutSettings/*.shg` files and per-profile `daily.shg`/`overview.shg` files are imported, then deleted.
+
+---
+
+### 21. analysis_daily 🔬 **NEW IN v20 — OSCAR's own sleep analysis**
+One row per profile-day of OSCAR's own analysis of the night ("second opinion"): its
+apnea/hypopnea/RERA counts from the flow waveform, a comparison with the device's events,
+and oximetry and pulse statistics. **Derived data:** not exported in `.oscar` backups and
+recalculated when missing or outdated (`algo_version`, `params_hash` or `inputs_hash`
+differ from the current ones). Purging days or a device deletes the rows of those dates.
+
+Counts and seconds are stored rather than indices, so any period aggregates exactly
+(sum of counts / sum of hours). A group of columns is `NULL` when it does not apply that
+day: no flow (`flow_s` … `hypopnea_rule`), nothing to compare (`dev_*`, `cmp_*`), no
+oximetry (`oxi_s` … `zone_severe_s`), no pulse (`pulse_*` … `tachy_s`), no offset hint.
+
+```sql
+CREATE TABLE analysis_daily (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    profile_id INTEGER NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    date TEXT NOT NULL,                       -- OSCAR day, yyyy-MM-dd
+    algo_version INTEGER NOT NULL,
+    params_hash TEXT NOT NULL,                -- day-scoring parameters
+    inputs_hash TEXT NOT NULL,                -- the day's sessions, stage 1 stamps, time corrections
+    computed_at TEXT NOT NULL,
+    -- flow
+    flow_s INTEGER, flow_rate_hz REAL,        -- seconds of valid flow, its sample rate
+    unscoreable_s INTEGER,                    -- of which not scoreable (gaps, leaks, weak signal)
+    n_oa INTEGER, n_ca INTEGER, n_a INTEGER, n_oh INTEGER, n_ch INTEGER, n_h INTEGER,
+    n_rera INTEGER, n_unconfirmable INTEGER,
+    n_h_aasm3 INTEGER, n_h_cms4 INTEGER, n_h_flow INTEGER,   -- hypopneas under each rule
+    fl_time_s INTEGER, fl_sum REAL, n_fl_breaths INTEGER, pb_time_s INTEGER,
+    hypopnea_rule INTEGER,                    -- rule applied: 0 Auto, 1 AASM 3 %, 2 CMS 4 %, 3 Flow only
+    -- comparison with the device's events
+    dev_apnea INTEGER, dev_hypopnea INTEGER, dev_rera INTEGER,
+    cmp_matched INTEGER, cmp_device_only INTEGER, cmp_analysis_only INTEGER, cmp_type_mismatch INTEGER,
+    -- oximetry
+    oxi_s INTEGER, oxi_scope TEXT,            -- 'night' or 'cpap'
+    oxi_source TEXT, has_cpap INTEGER NOT NULL DEFAULT 0,
+    n_desat3 INTEGER, n_desat4 INTEGER,
+    spo2_hist TEXT,                           -- JSON array: seconds at each SpO2 % from 50 to 100
+    spo2_sum REAL, spo2_median REAL, spo2_nadir REAL,
+    desat_area REAL, linked_desat_area REAL,  -- %·s
+    n_unexplained_desat INTEGER, n_cyclic INTEGER, cyclic_s INTEGER,
+    n_zones INTEGER, zone_s INTEGER, zone_severe_s INTEGER,
+    -- pulse
+    pulse_s INTEGER, pulse_sum REAL, pulse_sq_sum REAL, pulse_min REAL, pulse_max REAL,
+    pulse_hist TEXT,                          -- JSON array: seconds at each bpm from 30 to 220
+    n_pulse_rise INTEGER, dhr_sum REAL, n_dhr INTEGER, brady_s INTEGER, tachy_s INTEGER,
+    -- other
+    oxi_offset_hint_ms INTEGER,               -- suggested oximeter clock offset; NULL = none
+    extra_json TEXT,
+    UNIQUE(profile_id, date)
+)
+```
+
+**Example** — the analysis' AHI per night next to the device's (its hours are the
+flow time less the unscoreable time):
+```sql
+SELECT a.date,
+       ROUND((a.n_oa + a.n_ca + a.n_a + a.n_h) * 3600.0 / (a.flow_s - a.unscoreable_s), 1) AS analysis_ahi,
+       d.ahi AS device_ahi
+FROM analysis_daily a
+JOIN daily_summaries d ON d.profile_id = a.profile_id AND d.date = a.date
+WHERE a.flow_s - a.unscoreable_s > 0
+ORDER BY a.date;
+```
 
 ---
 

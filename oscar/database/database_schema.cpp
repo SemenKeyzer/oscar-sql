@@ -153,6 +153,12 @@ bool DatabaseSchema::createSchema(QSqlDatabase& db)
         return false;
     }
 
+    // OSCAR's own sleep analysis, one row per profile-day (schema version 20)
+    if (!createAnalysisDailyTable(db)) {
+        qCritical() << "DatabaseSchema: Failed to create analysis_daily table";
+        return false;
+    }
+
     // Create indexes
     if (!createIndexes(db)) {
         qCritical() << "DatabaseSchema: Failed to create indexes";
@@ -237,6 +243,7 @@ bool DatabaseSchema::upgradeSchema(QSqlDatabase& db, int fromVersion,
         { 16, &migrateV16ToV17 },
         { 17, &migrateV17ToV18 },
         { 18, &migrateV18ToV19 },
+        { 19, &migrateV19ToV20 },
     };
     const int stepsAvailable = int(sizeof(steps) / sizeof(steps[0]));
 
@@ -1952,5 +1959,135 @@ bool DatabaseSchema::migrateV18ToV19(QSqlDatabase& db)
     }
 
     qDebug() << "DatabaseSchema: Migration v18->v19 complete";
+    return true;
+}
+
+/*
+ * Create the analysis_daily table (schema version 20)
+ *
+ * One row per profile-day of OSCAR's own sleep analysis. Derived data: it is not
+ * exported in backups and is recalculated when missing or outdated. Counts and
+ * seconds are stored rather than indices so that any period aggregates exactly.
+ * A group of columns is NULL when it does not apply that day (no flow, no
+ * oximetry, no pulse, nothing to compare).
+ */
+bool DatabaseSchema::createAnalysisDailyTable(QSqlDatabase& db)
+{
+    QSqlQuery q(db);
+    if (!q.exec(R"(
+        CREATE TABLE IF NOT EXISTS analysis_daily (
+            id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+            profile_id          INTEGER NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+            date                TEXT    NOT NULL,
+            algo_version        INTEGER NOT NULL,
+            params_hash         TEXT    NOT NULL,
+            inputs_hash         TEXT    NOT NULL,
+            computed_at         TEXT    NOT NULL,
+
+            flow_s              INTEGER,
+            flow_rate_hz        REAL,
+            unscoreable_s       INTEGER,
+            n_oa                INTEGER,
+            n_ca                INTEGER,
+            n_a                 INTEGER,
+            n_oh                INTEGER,
+            n_ch                INTEGER,
+            n_h                 INTEGER,
+            n_rera              INTEGER,
+            n_unconfirmable     INTEGER,
+            n_h_aasm3           INTEGER,
+            n_h_cms4            INTEGER,
+            n_h_flow            INTEGER,
+            fl_time_s           INTEGER,
+            fl_sum              REAL,
+            n_fl_breaths        INTEGER,
+            pb_time_s           INTEGER,
+            hypopnea_rule       INTEGER,
+
+            dev_apnea           INTEGER,
+            dev_hypopnea        INTEGER,
+            dev_rera            INTEGER,
+            cmp_matched         INTEGER,
+            cmp_device_only     INTEGER,
+            cmp_analysis_only   INTEGER,
+            cmp_type_mismatch   INTEGER,
+
+            oxi_s               INTEGER,
+            oxi_scope           TEXT,
+            oxi_source          TEXT,
+            has_cpap            INTEGER NOT NULL DEFAULT 0,
+            n_desat3            INTEGER,
+            n_desat4            INTEGER,
+            spo2_hist           TEXT,
+            spo2_sum            REAL,
+            spo2_median         REAL,
+            spo2_nadir          REAL,
+            desat_area          REAL,
+            linked_desat_area   REAL,
+            n_unexplained_desat INTEGER,
+            n_cyclic            INTEGER,
+            cyclic_s            INTEGER,
+            n_zones             INTEGER,
+            zone_s              INTEGER,
+            zone_severe_s       INTEGER,
+
+            pulse_s             INTEGER,
+            pulse_sum           REAL,
+            pulse_sq_sum        REAL,
+            pulse_min           REAL,
+            pulse_max           REAL,
+            pulse_hist          TEXT,
+            n_pulse_rise        INTEGER,
+            dhr_sum             REAL,
+            n_dhr               INTEGER,
+            brady_s             INTEGER,
+            tachy_s             INTEGER,
+
+            oxi_offset_hint_ms  INTEGER,
+            extra_json          TEXT,
+
+            UNIQUE(profile_id, date)
+        )
+    )")) {
+        qCritical() << "DatabaseSchema: Failed to create analysis_daily:" << q.lastError().text();
+        DatabaseManager::instance().checkQueryError("DatabaseSchema::createAnalysisDailyTable", q);
+        return false;
+    }
+    return true;
+}
+
+/*
+ * Migrate database from schema version 19 to 20
+ *
+ * Adds the analysis_daily table. Purely additive; the rows are computed on demand.
+ */
+bool DatabaseSchema::migrateV19ToV20(QSqlDatabase& db)
+{
+    qDebug() << "DatabaseSchema: Migrating v19 -> v20";
+
+    if (!db.transaction()) {
+        qCritical() << "DatabaseSchema: migrateV19ToV20: failed to start transaction";
+        return false;
+    }
+
+    if (!createAnalysisDailyTable(db)) {
+        qCritical() << "DatabaseSchema: migrateV19ToV20: createAnalysisDailyTable failed";
+        db.rollback();
+        return false;
+    }
+
+    if (!setSchemaVersion(db, 20)) {
+        qCritical() << "DatabaseSchema: migrateV19ToV20: setSchemaVersion failed";
+        db.rollback();
+        return false;
+    }
+
+    if (!db.commit()) {
+        qCritical() << "DatabaseSchema: migrateV19ToV20: commit failed";
+        db.rollback();
+        return false;
+    }
+
+    qDebug() << "DatabaseSchema: Migration v19->v20 complete";
     return true;
 }
