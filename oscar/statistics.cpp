@@ -223,7 +223,7 @@ QDate firstGoodDay() {
     QDate first1  = p_profile->FirstGoodDay(MT_OXIMETER);
     if (!first2.isValid()) return first1;
     if (!first1.isValid()) return first2;
-    return qMax(first2,first1);
+    return qMin(first2,first1);   // the earliest: qMax cut the other device's first days off
 }
 
 QDate lastGoodDay() {
@@ -2292,8 +2292,15 @@ void Statistics::updateReportDate() {
         if (!first.isValid()) return;
         if (!last.isValid()) return;
         if (last == lastdate  && first == firstdate) return;
-        p_profile->general->setStatReportRangeStart(first);
-        p_profile->general->setStatReportRangeEnd(last);
+        // New data, or the profile was just opened: the standard and monthly reports
+        // move to the latest day. A date range the user chose is kept, only brought back
+        // inside the data; it used to be replaced by the whole range each time.
+        QDate rangeStart = p_profile->general->statReportRangeStart();
+        QDate rangeEnd   = p_profile->general->statReportRangeEnd();
+        if (!rangeStart.isValid() || rangeStart < first || rangeStart > last) rangeStart = first;
+        if (!rangeEnd.isValid() || rangeEnd > last || rangeEnd < rangeStart) rangeEnd = last;
+        p_profile->general->setStatReportRangeStart(rangeStart);
+        p_profile->general->setStatReportRangeEnd(rangeEnd);
         p_profile->general->setStatReportDate(last);
         lastdate = last;
         firstdate = first;
