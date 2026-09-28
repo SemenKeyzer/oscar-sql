@@ -13,6 +13,7 @@
 
 
 #include <cmath>
+#include <QSet>
 #include <QVector>
 #include "SleepLib/profiles.h"
 #include "gFlagsLine.h"
@@ -84,12 +85,16 @@ void gFlagsGroup::SetDay(Day *d)
     m_rebuild_cpap = !m_sessions.isEmpty() && (availableChans.size() == 0);
 
     if (m_rebuild_cpap) {
-        QHash<ChannelID, schema::Channel *> chans;
+        // No channel summary for this day: collect the flag channels from the loaded
+        // events instead. (The list was then replaced by the keys of a hash nothing
+        // filled, so these days showed no flag lines at all.)
+        QSet<ChannelID> seen;
 
         for (const auto & sess : m_day->sessions) {
             for (auto it=sess->eventlist.begin(), end=sess->eventlist.end(); it != end; ++it) {
                 ChannelID code = it.key();
-                if (chans.contains(code)) continue;
+                if (seen.contains(code)) continue;
+                seen.insert(code);
 
                 schema::Channel * chan = &schema::channel[code];
 
@@ -104,7 +109,6 @@ void gFlagsGroup::SetDay(Day *d)
                 }
             }
         }
-        availableChans = chans.keys();
     }
 
     delete_flag_lines();
