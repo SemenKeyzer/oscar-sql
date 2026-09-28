@@ -161,6 +161,24 @@ public:
     static QString blobToHex(const QByteArray& blob);
 
     /*!
+     * \brief Escape and format a single column value for use in SQL.
+     *
+     * Rules applied (in order):
+     *  1. If value is SQL NULL → returns \c "NULL"
+     *  2. If \a isBlobColumn is true → returns \c "X'<hex>'"
+     *  3. If the QVariant type is QByteArray → returns \c "X'<hex>'"
+     *  4. If the type is an integer type → returns the decimal integer
+     *  5. If the type is a floating-point type → returns full-precision real
+     *  6. Otherwise → single-quoted text; backslashes, line breaks and
+     *     single-quotes escaped so every statement stays on one line
+     *
+     * \param value       Column value from QSqlQuery::value().
+     * \param isBlobColumn  True if this column is in the BLOB list.
+     * \return SQL literal suitable for embedding in a VALUES clause.
+     */
+    QString escapeValue(const QVariant& value, bool isBlobColumn) const;
+
+    /*!
      * \brief Decode a hex string back to a byte array.
      *
      * The string may contain upper- or lower-case hex characters and
@@ -204,22 +222,6 @@ private:
                                     const class QSqlQuery& query,
                                     const QStringList& blobColumns) const;
 
-    /*!
-     * \brief Escape and format a single column value for use in SQL.
-     *
-     * Rules applied (in order):
-     *  1. If value is SQL NULL → returns \c "NULL"
-     *  2. If \a isBlobColumn is true → returns \c "X'<hex>'"
-     *  3. If the QVariant type is QByteArray → returns \c "X'<hex>'"
-     *  4. If the type is an integer type → returns the decimal integer
-     *  5. If the type is a floating-point type → returns full-precision real
-     *  6. Otherwise → single-quoted text with internal single-quotes doubled
-     *
-     * \param value       Column value from QSqlQuery::value().
-     * \param isBlobColumn  True if this column is in the BLOB list.
-     * \return SQL literal suitable for embedding in a VALUES clause.
-     */
-    QString escapeValue(const QVariant& value, bool isBlobColumn) const;
 
     QString              m_errorMessage;    ///< Last error description.
     QMap<QString,QString> m_placeholders;  ///< Column → placeholder map.

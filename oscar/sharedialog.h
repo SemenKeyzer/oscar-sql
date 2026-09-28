@@ -18,6 +18,9 @@
 
 #include <QDate>
 #include <QDialog>
+#include <QTemporaryDir>
+
+#include <memory>
 
 class DropboxUploader;
 class GoogleDriveUploader;
@@ -187,6 +190,7 @@ private:
     OneDriveUploader*     m_oneDriveUploader    = nullptr;
     ProfileBackup*        m_backup              = nullptr; ///< Active backup object (non-owning; parent owns).
     QString               m_tempFilePath;                  ///< Temp .oscar file for cloud uploads.
+    std::unique_ptr<QTemporaryDir> m_uploadDir;             ///< Private folder holding m_tempFilePath.
     QString               m_lastFilePath;                  ///< Path of last file created (for open folder).
     bool                  m_warningAcknowledged = false;   ///< True once the sharing warning is accepted.
     bool                  m_uploadInProgress    = false;

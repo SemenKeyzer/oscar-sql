@@ -440,7 +440,12 @@ bool ShareDialog::showSharingWarning()
         tr("You are about to share a file containing your sleep therapy data.\n\n"
            "\u2022 The file contains session data, events, and machine settings\n"
            "  for the selected date range\n"
-           "\u2022 Personal information (name, DOB, contact details) will be removed\n\n"
+           "\u2022 Personal information (name, date of birth, contact and doctor details,\n"
+           "  journal notes, the profile name and folder paths) will be removed; device\n"
+           "  serial numbers are replaced\n"
+           "\u2022 When you upload to a cloud service, anyone who has the link can download\n"
+           "  the file without signing in, and the link does not expire. To stop sharing,\n"
+           "  delete the file from your cloud storage.\n\n"
            "Make sure you trust the recipient before sharing this data."),
         &warn);
     body->setWordWrap(true);
@@ -506,6 +511,7 @@ void ShareDialog::cleanupTempFile()
         QFile::remove(m_tempFilePath);
         m_tempFilePath.clear();
     }
+    m_uploadDir.reset();   // removes the private folder
 }
 
 QDate ShareDialog::getLastDataDate() const
@@ -660,12 +666,21 @@ void ShareDialog::on_shareButton_clicked()
     } else {
         // Temporary file for cloud upload — use the same meaningful filename
         // as the File destination so the name in Dropbox etc. is readable.
+        // It goes into a fresh private folder rather than the shared temp folder,
+        // where another user could read it or plant a file of the same name.
         const QString filename = buildShareFilename();
-        m_tempFilePath = QDir::tempPath() + "/" + filename;
-        // Remove any leftover file at this path before writing.
-        QFile::remove(m_tempFilePath);
+        m_uploadDir.reset(new QTemporaryDir(QDir::tempPath() + QStringLiteral("/oscar_share_XXXXXX")));
+        if (!m_uploadDir->isValid()) {
+            QMessageBox::critical(this, tr("Share Profile"),
+                                  tr("Could not create a temporary folder for the upload."));
+            m_uploadDir.reset();
+            setUiLocked(false);
+            ui->progressBar->setVisible(false);
+            return;
+        }
+        m_tempFilePath = m_uploadDir->filePath(filename);
 
-        backup->setOutputPath(QDir::tempPath());
+        backup->setOutputPath(m_uploadDir->path());
         backup->setFilename(filename);
     }
 

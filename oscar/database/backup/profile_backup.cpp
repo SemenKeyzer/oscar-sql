@@ -19,6 +19,8 @@
 #include "../../version.h"
 #include "../../zip.h"
 #include "../../SleepLib/preferences.h"
+#include "../../SleepLib/profiles.h"
+#include "../../SleepLib/machine_common.h"
 
 // p_pref is the global Preferences object (defined in SleepLib/profiles.cpp).
 // We need it to resolve the canonical Profiles directory path, using the same
@@ -41,6 +43,9 @@ extern Preferences *p_pref;
 #include <QTemporaryDir>
 #include <QTextStream>
 #include <QDebug>
+#include <QRegularExpression>
+
+#include <functional>
 
 // ---------------------------------------------------------------------------
 //  File-scope helpers
@@ -88,26 +93,39 @@ static QString hashSqlDirectory(const QString& dirPath)
 }
 
 /*!
+ * \brief Returns the value to export for one column of one row in privacy mode.
+ *
+ * \param column  Column name.
+ * \param value   Stored value.
+ * \param row     The whole row (positioned), for transforms that need other columns.
+ * \return The value to write; a null QVariant is written as NULL.
+ */
+using PrivacyTransform = std::function<QVariant(const QString& column,
+                                                const QVariant& value,
+                                                const QSqlQuery& row)>;
+
+/*!
  * \brief Write a privacy-redacted SQL INSERT file for a single table.
  *
- * All columns listed in \a nullColumns are written as NULL.  The
- * \c profile_id column (if present) is written as the @PROFILE_ID@ placeholder.
- * All other columns are exported verbatim.
+ * Each value passes through \a transform before it is written.  \c profile_id
+ * is always written as the \c @PROFILE_ID@ restore placeholder.  Values are
+ * formatted by SqlExporter::escapeValue(), exactly like a normal export, so that
+ * backslashes and line breaks survive the round trip through restore.
  *
  * \param db          Live database connection.
  * \param tableName   Table to read.
  * \param whereClause SQL WHERE body (no keyword).
- * \param nullColumns Column names to replace with NULL.
+ * \param transform   Per-value redaction.
  * \param outputFile  Destination .sql file path.
  * \return true on success.
  */
 static bool exportPrivacyTable(QSqlDatabase& db,
                                 const QString& tableName,
                                 const QString& whereClause,
-                                const QStringList& nullColumns,
+                                const PrivacyTransform& transform,
                                 const QString& outputFile)
 {
-    qDebug() << "profile_backup::exportPrivacyTable entered";
+    qDebug() << "profile_backup::exportPrivacyTable entered" << tableName;
     QSqlQuery query(db);
     if (!query.exec(QString("SELECT * FROM %1 WHERE %2").arg(tableName, whereClause))) {
         qWarning() << "exportPrivacyTable:" << tableName << query.lastError().text();
@@ -128,13 +146,8 @@ static bool exportPrivacyTable(QSqlDatabase& db,
     for (int i = 0; i < colCount; ++i) {
         colNames << rec.fieldName(i);
     }
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-    const QSet<QString> nullSet(nullColumns.begin(), nullColumns.end());
-#else
-    QSet<QString> nullSet;
-    for (const QString& s : nullColumns) nullSet.insert(s);
-#endif
 
+    const SqlExporter formatter;
     while (query.next()) {
         QStringList vals;
         for (int i = 0; i < colCount; ++i) {
@@ -142,29 +155,8 @@ static bool exportPrivacyTable(QSqlDatabase& db,
             if (col == QLatin1String("profile_id")) {
                 // Restore placeholder — written without quotes, not as a SQL literal.
                 vals << QStringLiteral("@PROFILE_ID@");
-            } else if (nullSet.contains(col)) {
-                vals << QStringLiteral("NULL");
             } else {
-                const QVariant v = query.value(i);
-                if (v.isNull()) {
-                    vals << QStringLiteral("NULL");
-                } else {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-                    const int tid = v.typeId();
-#else
-                    const int tid = static_cast<int>(v.type());
-#endif
-                    if (tid == QMetaType::Int     || tid == QMetaType::LongLong ||
-                        tid == QMetaType::UInt    || tid == QMetaType::ULongLong) {
-                        vals << v.toString();
-                    } else if (tid == QMetaType::Double || tid == QMetaType::Float) {
-                        vals << QString::number(v.toDouble(), 'g', 17);
-                    } else {
-                        QString s = v.toString();
-                        s.replace(QLatin1Char('\''), QLatin1String("''"));
-                        vals << QLatin1Char('\'') + s + QLatin1Char('\'');
-                    }
-                }
+                vals << formatter.escapeValue(transform(col, query.value(i), query), false);
             }
         }
         out << "INSERT INTO " << tableName
@@ -174,113 +166,67 @@ static bool exportPrivacyTable(QSqlDatabase& db,
     return true;
 }
 
+//! PrivacyTransform that blanks \a nullColumns and keeps everything else.
+static PrivacyTransform blankColumns(const QStringList& nullColumns)
+{
+    const QSet<QString> nullSet(nullColumns.begin(), nullColumns.end());
+    return [nullSet](const QString& col, const QVariant& value, const QSqlQuery&) {
+        return nullSet.contains(col) ? QVariant() : value;
+    };
+}
+
+//! True if \a value looks like a file-system path on this or another computer.
+static bool looksLikeLocalPath(const QString& value)
+{
+    static const QRegularExpression pathLike(
+        QStringLiteral("^(/|~|\\\\\\\\|[A-Za-z]:[\\\\/])"));
+    return pathLike.match(value).hasMatch();
+}
+
 /*!
  * \brief Write a privacy-redacted SQL INSERT file for the profile_preferences table.
  *
- * Rows whose \c key column matches a known personal-data key have their
- * \c value written as NULL.  The \c profile_id column is written as the
- * \@PROFILE_ID\@ placeholder.  All other rows and columns are exported verbatim.
- *
- * \param db          Live database connection.
- * \param whereClause SQL WHERE body (no keyword).
- * \param outputFile  Destination .sql file path.
- * \return true on success.
+ * Blanks the value of rows that hold personal data: the user and doctor details,
+ * the user name, and folder paths ("Last…Path" keys, or any value that looks
+ * like a path — these contain the computer account name).
  */
 static bool exportPrivacyPreferences(QSqlDatabase& db,
                                       const QString& whereClause,
                                       const QString& outputFile)
 {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     static const QSet<QString> kPersonalKeys = {
         // UserInfo keys (STR_UI_*)
         QStringLiteral("FirstName"),   QStringLiteral("LastName"),
         QStringLiteral("DOB"),         QStringLiteral("Address"),
         QStringLiteral("Phone"),       QStringLiteral("EmailAddress"),
         QStringLiteral("Country"),     QStringLiteral("Height"),
-        QStringLiteral("Gender"),
+        QStringLiteral("Gender"),      QStringLiteral("UserName"),
         // DoctorInfo keys (STR_DI_*) — also stored in profile_preferences via PrefSettings
         QStringLiteral("DoctorName"),  QStringLiteral("DoctorPhone"),
         QStringLiteral("DoctorEmail"), QStringLiteral("DoctorPractice"),
         QStringLiteral("DoctorAddress"), QStringLiteral("DoctorPatientID")
     };
-#else
-    static const QSet<QString> kPersonalKeys = []() {
-        QSet<QString> s;
-        s << QStringLiteral("FirstName")   << QStringLiteral("LastName")
-          << QStringLiteral("DOB")         << QStringLiteral("Address")
-          << QStringLiteral("Phone")       << QStringLiteral("EmailAddress")
-          << QStringLiteral("Country")     << QStringLiteral("Height")
-          << QStringLiteral("Gender")
-          << QStringLiteral("DoctorName")  << QStringLiteral("DoctorPhone")
-          << QStringLiteral("DoctorEmail") << QStringLiteral("DoctorPractice")
-          << QStringLiteral("DoctorAddress") << QStringLiteral("DoctorPatientID");
-        return s;
-    }();
-#endif
 
-    QSqlQuery query(db);
-    if (!query.exec(
-            QString("SELECT * FROM profile_preferences WHERE %1").arg(whereClause))) {
-        qWarning() << "exportPrivacyPreferences:" << query.lastError().text();
-        return false;
-    }
+    const PrivacyTransform transform =
+        [](const QString& col, const QVariant& value, const QSqlQuery& row) -> QVariant {
+            if (col != QLatin1String("value")) return value;
+            const QString key = row.value(QStringLiteral("key")).toString();
+            const bool personal = kPersonalKeys.contains(key)
+                || (key.startsWith(QLatin1String("Last")) && key.endsWith(QLatin1String("Path")))
+                || looksLikeLocalPath(value.toString());
+            return personal ? QVariant() : value;
+        };
+    return exportPrivacyTable(db, QStringLiteral("profile_preferences"), whereClause,
+                              transform, outputFile);
+}
 
-    QFile file(outputFile);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        qWarning() << "exportPrivacyPreferences: cannot open" << outputFile;
-        return false;
-    }
-
-    QTextStream out(&file);
-    const QSqlRecord rec = query.record();
-    const int colCount   = rec.count();
-
-    QStringList colNames;
-    for (int i = 0; i < colCount; ++i) {
-        colNames << rec.fieldName(i);
-    }
-    const int keyCol = colNames.indexOf(QStringLiteral("key"));
-    const int valCol = colNames.indexOf(QStringLiteral("value"));
-
-    while (query.next()) {
-        const QString rowKey    = (keyCol >= 0) ? query.value(keyCol).toString() : QString();
-        const bool    blankThis = kPersonalKeys.contains(rowKey);
-
-        QStringList vals;
-        for (int i = 0; i < colCount; ++i) {
-            const QString& col = colNames.at(i);
-            if (col == QLatin1String("profile_id")) {
-                vals << QStringLiteral("@PROFILE_ID@");
-            } else if (i == valCol && blankThis) {
-                vals << QStringLiteral("NULL");
-            } else {
-                const QVariant v = query.value(i);
-                if (v.isNull()) {
-                    vals << QStringLiteral("NULL");
-                } else {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-                    const int tid = v.typeId();
-#else
-                    const int tid = static_cast<int>(v.type());
-#endif
-                    if (tid == QMetaType::Int     || tid == QMetaType::LongLong ||
-                        tid == QMetaType::UInt    || tid == QMetaType::ULongLong) {
-                        vals << v.toString();
-                    } else if (tid == QMetaType::Double || tid == QMetaType::Float) {
-                        vals << QString::number(v.toDouble(), 'g', 17);
-                    } else {
-                        QString s = v.toString();
-                        s.replace(QLatin1Char('\''), QLatin1String("''"));
-                        vals << QLatin1Char('\'') + s + QLatin1Char('\'');
-                    }
-                }
-            }
-        }
-        out << "INSERT INTO profile_preferences"
-            << " (" << colNames.join(", ")
-            << ") VALUES (" << vals.join(", ") << ");\n";
-    }
-    return true;
+//! Stable stand-in for a device serial number in shared packages.
+static QString pseudonymSerial(const QString& serial)
+{
+    if (serial.isEmpty()) return serial;
+    return QStringLiteral("anon-")
+         + QString::fromLatin1(QCryptographicHash::hash(serial.toUtf8(), QCryptographicHash::Sha256)
+                                   .toHex().left(10));
 }
 
 // ---------------------------------------------------------------------------
@@ -627,9 +573,16 @@ bool ProfileBackup::exportProfileMetadata(const QString& tempDir)
     const QString dbDir = tempDir + QStringLiteral("/database");
     qDebug() << "ProfileBackup::exportProfileMetadata for dir" << dbDir;
 
-    // profiles — keyed by id, no profile_id column.
+    // profiles — keyed by id, no profile_id column.  In privacy mode the user
+    // name (often the person's real name) and the folder built from it are
+    // replaced by a neutral name; restore rebuilds the folder from the name.
     {
         SqlExporter exp;
+        if (m_privacyMode) {
+            exp.setColumnPlaceholders({
+                {"username",    "'" + privacyUsername() + "'"},
+                {"data_folder", "'%PROFDIR%/" + privacyUsername() + "'"}});
+        }
         const QString where = QString("id = %1").arg(m_profileId);
         if (!exp.exportTable("profiles", where, dbDir + "/profiles.sql")) {
             m_errorMessage = QString("Failed to export profiles: %1").arg(exp.errorMessage());
@@ -645,9 +598,9 @@ bool ProfileBackup::exportProfileMetadata(const QString& tempDir)
         QSqlDatabase db = DatabaseManager::instance().database();
         const QStringList nullCols = {
             "dob", "first_name", "last_name", "address", "phone",
-            "email", "country", "height", "gender"
+            "email", "country", "height", "gender", "password_hash"
         };
-        if (!exportPrivacyTable(db, "user_info", pidWhere, nullCols,
+        if (!exportPrivacyTable(db, "user_info", pidWhere, blankColumns(nullCols),
                                 dbDir + "/user_info.sql")) {
             m_errorMessage = QStringLiteral("Failed to export user_info (privacy mode)");
             return false;
@@ -668,7 +621,7 @@ bool ProfileBackup::exportProfileMetadata(const QString& tempDir)
         const QStringList nullCols = {
             "name", "phone", "email", "practice_name", "address", "patient_id"
         };
-        if (!exportPrivacyTable(db, "doctor_info", pidWhere, nullCols,
+        if (!exportPrivacyTable(db, "doctor_info", pidWhere, blankColumns(nullCols),
                                 dbDir + "/doctor_info.sql")) {
             m_errorMessage = QStringLiteral("Failed to export doctor_info (privacy mode)");
             return false;
@@ -759,14 +712,36 @@ bool ProfileBackup::exportProfileMetadata(const QString& tempDir)
 bool ProfileBackup::exportMachinesAndSessions(const QString& tempDir)
 {
     const QString dbDir = tempDir + QStringLiteral("/database");
-    const QString dateFilter = buildSessionDateFilter();
 
     // ---- machines ---------------------------------------------------------
-    {
+    // Without SD card data the package has no use for real serial numbers, so a
+    // privacy package replaces them (and any copy inside the properties JSON)
+    // with stable stand-ins.  With SD card data they must stay: the card folders
+    // are named after them, and the card files carry the serial number anyway.
+    if (m_privacyMode && !m_includeSDData) {
+        QSqlDatabase db = DatabaseManager::instance().database();
+        const PrivacyTransform transform =
+            [](const QString& col, const QVariant& value, const QSqlQuery& row) -> QVariant {
+                const QString serial = row.value(QStringLiteral("serial_number")).toString();
+                if (col == QLatin1String("serial_number")) {
+                    return value.isNull() ? value : QVariant(pseudonymSerial(serial));
+                }
+                if (col == QLatin1String("properties") && !value.isNull() && !serial.isEmpty()) {
+                    QString props = value.toString();
+                    props.replace(serial, pseudonymSerial(serial));
+                    return props;
+                }
+                return value;
+            };
+        if (!exportPrivacyTable(db, "machines", machineWhereClause(), transform,
+                                dbDir + "/machines.sql")) {
+            m_errorMessage = QStringLiteral("Failed to export machines (privacy mode)");
+            return false;
+        }
+    } else {
         SqlExporter exp;
         exp.setColumnPlaceholders({{"profile_id", "@PROFILE_ID@"}});
-        const QString where = QString("profile_id = %1").arg(m_profileId);
-        if (!exp.exportTable("machines", where, dbDir + "/machines.sql")) {
+        if (!exp.exportTable("machines", machineWhereClause(), dbDir + "/machines.sql")) {
             m_errorMessage = QString("Failed to export machines: %1").arg(exp.errorMessage());
             return false;
         }
@@ -777,8 +752,8 @@ bool ProfileBackup::exportMachinesAndSessions(const QString& tempDir)
     {
         SqlExporter dtcExp;   // no placeholders
         const QString dtcWhere =
-            QString("machine_id IN (SELECT id FROM machines WHERE profile_id = %1)")
-            .arg(m_profileId);
+            QString("machine_id IN (SELECT id FROM machines WHERE %1)")
+            .arg(machineWhereClause());
         if (!dtcExp.exportTable("device_time_corrections", dtcWhere,
                                 dbDir + "/device_time_corrections.sql")) {
             m_errorMessage = QString("Failed to export device_time_corrections: %1")
@@ -790,15 +765,7 @@ bool ProfileBackup::exportMachinesAndSessions(const QString& tempDir)
 
     // ---- sessions ---------------------------------------------------------
     // sessions has no profile_id column; machine_id references machines.id (PK).
-    QString sessionWhere =
-        QString("machine_id IN (SELECT id FROM machines WHERE profile_id = %1)")
-        .arg(m_profileId);
-    if (!dateFilter.isEmpty()) {
-        sessionWhere += QStringLiteral(" AND ") + dateFilter;
-    }
-    if (!m_includeDisabled) {
-        sessionWhere += QStringLiteral(" AND enabled = 1");
-    }
+    const QString sessionWhere = sessionWhereClause();
     {
         SqlExporter exp;   // no placeholders — sessions has no profile_id
         if (!exp.exportTable("sessions", sessionWhere, dbDir + "/sessions.sql")) {
@@ -956,28 +923,20 @@ bool ProfileBackup::createManifest(const QString& tempDir, QJsonObject& manifest
                              .arg(profileQ.lastError().text());
         return false;
     }
-    const QString username   = profileQ.value(0).toString();
-    const QString dataFolder = profileQ.value(1).toString();
+    const QString username   = m_privacyMode ? privacyUsername() : profileQ.value(0).toString();
+    const QString dataFolder = m_privacyMode ? QStringLiteral("%PROFDIR%/") + privacyUsername()
+                                             : profileQ.value(1).toString();
     const QString status     = profileQ.value(2).toString();
 
     // --- Session WHERE (same as used during export) ------------------------
-    const QString dateFilter = buildSessionDateFilter();
-    QString sessionWhere =
-        QString("machine_id IN (SELECT id FROM machines WHERE profile_id = %1)")
-        .arg(m_profileId);
-    if (!dateFilter.isEmpty()) {
-        sessionWhere += QStringLiteral(" AND ") + dateFilter;
-    }
-    if (!m_includeDisabled) {
-        sessionWhere += QStringLiteral(" AND enabled = 1");
-    }
+    const QString sessionWhere = sessionWhereClause();
 
     // --- Statistics --------------------------------------------------------
     int machinesCount = 0;
     {
         QSqlQuery q(db);
-        if (q.exec(QString("SELECT COUNT(*) FROM machines WHERE profile_id = %1")
-                       .arg(m_profileId)) && q.next()) {
+        if (q.exec(QString("SELECT COUNT(*) FROM machines WHERE %1")
+                       .arg(machineWhereClause())) && q.next()) {
             machinesCount = q.value(0).toInt();
         }
     }
@@ -1064,42 +1023,73 @@ bool ProfileBackup::createManifest(const QString& tempDir, QJsonObject& manifest
  */
 bool ProfileBackup::createPackage(const QString& tempDir)
 {
+    // Write to a side file and move it into place only when the archive is
+    // complete.  Writing straight to m_backupPath would truncate an existing
+    // backup of the same name at once, and a cancelled or failed run (a full
+    // disk while adding SD card data) would leave a partial package behind that
+    // still looks valid.
+    const QString partPath = m_backupPath + QStringLiteral(".part");
+    QFile::remove(partPath);
+
     ZipFile zip;
-    if (!zip.Open(m_backupPath)) {
+    if (!zip.Open(partPath)) {
         m_errorMessage = QString("Cannot create backup package: %1").arg(m_backupPath);
         return false;
     }
+    auto fail = [&](const QString& message) {
+        zip.Close();
+        QFile::remove(partPath);
+        m_errorMessage = message;
+        return false;
+    };
 
     const QString manifestPath = tempDir + QStringLiteral("/manifest.json");
     if (!zip.AddFile(manifestPath, QStringLiteral("manifest.json"))) {
-        zip.Close();
-        m_errorMessage = QStringLiteral("Failed to add manifest.json to package");
-        return false;
+        return fail(QStringLiteral("Failed to add manifest.json to package"));
     }
 
     const QString dbPath = tempDir + QStringLiteral("/database");
     if (!zip.AddDirectory(dbPath, QStringLiteral("database"))) {
-        zip.Close();
-        m_errorMessage = QStringLiteral("Failed to add database directory to package");
-        return false;
+        return fail(QStringLiteral("Failed to add database directory to package"));
     }
 
     // Add the profile's on-disk SD card data (only for "Everything" backups).
     if (m_includeSDData && !m_profileDataDir.isEmpty() && QDir(m_profileDataDir).exists()) {
         emit progressChanged(92, QStringLiteral("Adding SD card data (may take several minutes)..."));
         if (!zip.AddDirectory(m_profileDataDir, QStringLiteral("sddata"))) {
-            zip.Close();
-            m_errorMessage = QStringLiteral("Failed to add SD card data to package");
-            return false;
+            return fail(QStringLiteral("Failed to add SD card data to package"));
         }
+    }
+    if (checkCancelled()) {
+        return fail(m_errorMessage);
     }
 
     zip.Close();
 
-    if (!QFile::exists(m_backupPath)) {
+    if (!QFile::exists(partPath)) {
         m_errorMessage = QString("Package file was not created: %1").arg(m_backupPath);
         return false;
     }
+
+    // Replace any earlier file of the same name only now, keeping it until the
+    // new one is in place.
+    const QString oldPath = m_backupPath + QStringLiteral(".old");
+    const bool hadOld = QFile::exists(m_backupPath);
+    if (hadOld) {
+        QFile::remove(oldPath);
+        if (!QFile::rename(m_backupPath, oldPath)) {
+            QFile::remove(partPath);
+            m_errorMessage = QString("Could not replace the existing file %1").arg(m_backupPath);
+            return false;
+        }
+    }
+    if (!QFile::rename(partPath, m_backupPath)) {
+        if (hadOld) QFile::rename(oldPath, m_backupPath);
+        QFile::remove(partPath);
+        m_errorMessage = QString("Could not write the package file %1").arg(m_backupPath);
+        return false;
+    }
+    if (hadOld) QFile::remove(oldPath);
     return true;
 }
 
@@ -1191,18 +1181,56 @@ QString ProfileBackup::buildSessionDateFilter() const
         return QString();
     }
 
+    // An OSCAR day starts at the profile's day-split time (noon unless changed in
+    // Preferences).  The open profile's setting is used when it is the one being
+    // exported; otherwise the default applies.
+    QTime split(12, 0, 0);
+    if (p_profile && p_profile->session && p_profile->getDatabaseId() == m_profileId) {
+        split = p_profile->session->daySplitTime();
+    }
+
     QStringList parts;
     if (m_startDate.isValid()) {
-        // OSCAR day startDate begins at noon local time on that calendar date.
-        const qint64 epoch = QDateTime(m_startDate, QTime(12, 0, 0), Qt::LocalTime).toMSecsSinceEpoch();
+        const qint64 epoch = QDateTime(m_startDate, split, Qt::LocalTime).toMSecsSinceEpoch();
         parts << QString("start_time >= %1").arg(epoch);
     }
     if (m_endDate.isValid()) {
-        // OSCAR day endDate ends at noon local time the following calendar day.
-        const qint64 epoch = QDateTime(m_endDate.addDays(1), QTime(12, 0, 0), Qt::LocalTime).toMSecsSinceEpoch();
+        // The last day ends at the split time on the following calendar day.
+        const qint64 epoch = QDateTime(m_endDate.addDays(1), split, Qt::LocalTime).toMSecsSinceEpoch();
         parts << QString("start_time < %1").arg(epoch);
     }
     return parts.join(QStringLiteral(" AND "));
+}
+
+QString ProfileBackup::machineWhereClause() const
+{
+    QString where = QString("profile_id = %1").arg(m_profileId);
+    if (m_privacyMode) {
+        // The journal holds free-text notes, bookmarks, weight and the like:
+        // personal, and never needed to look at someone's therapy data.
+        where += QString(" AND machine_type <> %1").arg(int(MT_JOURNAL));
+    }
+    return where;
+}
+
+QString ProfileBackup::sessionWhereClause() const
+{
+    QString where = QString("machine_id IN (SELECT id FROM machines WHERE %1)")
+                        .arg(machineWhereClause());
+    const QString dateFilter = buildSessionDateFilter();
+    if (!dateFilter.isEmpty()) {
+        where += QStringLiteral(" AND ") + dateFilter;
+    }
+    if (!m_includeDisabled) {
+        where += QStringLiteral(" AND enabled = 1");
+    }
+    return where;
+}
+
+QString ProfileBackup::privacyUsername() const
+{
+    // Matches the "p<id>" used in share file names.
+    return QStringLiteral("p%1").arg(m_profileId);
 }
 
 /*!

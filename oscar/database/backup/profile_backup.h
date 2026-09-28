@@ -379,6 +379,22 @@ private:
     QString buildSessionDateFilter() const;
 
     /*!
+     * \brief WHERE body selecting the machines to export (the journal machine is
+     *        left out in privacy mode).
+     */
+    QString machineWhereClause() const;
+
+    /*!
+     * \brief WHERE body selecting the sessions to export: the exported machines,
+     *        the date range, and the enabled flag.  Used for the export and for
+     *        the manifest counts, so the two always agree.
+     */
+    QString sessionWhereClause() const;
+
+    //! Neutral profile name written into privacy-mode packages instead of the real one.
+    QString privacyUsername() const;
+
+    /*!
      * \brief Resolve the profile's on-disk data directory path.
      *
      * Queries the profile username from the database and returns the canonical
