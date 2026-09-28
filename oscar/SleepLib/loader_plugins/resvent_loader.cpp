@@ -198,6 +198,7 @@ constexpr int kMainHeaderSize = 0x24;
 constexpr int kDescriptionHeaderSize = 0x20;
 constexpr int kChunkDurationInSecOffset = 0x10;
 constexpr int kDescriptionCountOffset = 0x12;
+constexpr qint64 kMaxUsageSeconds = 24 * 60 * 60;    // longer usages are damaged records
 constexpr int kDescriptionSamplesByChunk = 0x1e;
 constexpr double kMilliGain = 0.001;
 constexpr double kHundredthGain = 0.01;
@@ -301,7 +302,7 @@ void ResventLoader::readConfigFile(const QString & configFile, QMap<QString,QStr
         while (!f.atEnd()) {
             QString line = f.readLine().trimmed();
             const auto elems = line.split("=");
-            Q_ASSERT(elems.size() == 2);
+            if (elems.size() != 2) continue;    // not a key=value line (damaged or blank)
             QString key=elems[0].simplified();
             QString value=elems[1].simplified();
             auto it = hash.insert(key,value);
@@ -360,16 +361,25 @@ QVector<QDate> ResventLoader::GetSessionsDate(const QString& dirpath) {
             return;
         }
 
-        const int year = std::stoi(year_month_folder_name.left(4).toStdString());
-        const int month = std::stoi(year_month_folder_name.right(2).toStdString());
+        // Folder names come from the card: parse without exceptions and skip
+        // anything that is not a number (std::stoi threw and ended the import).
+        bool okYear = false, okMonth = false;
+        const int year = year_month_folder_name.left(4).toInt(&okYear);
+        const int month = year_month_folder_name.right(2).toInt(&okMonth);
+        if (!okYear || !okMonth) {
+            return;
+        }
 
         const auto year_month_folder_path = records_path + QDir::separator() + year_month_folder_name;
         QDir year_month_folder(year_month_folder_path);
         const auto session_folders = year_month_folder.entryList(QStringList(), QDir::Dirs|QDir::NoDotAndDotDot, QDir::Name);
         std::for_each(session_folders.cbegin(), session_folders.cend(), [&](const QString& day_folder){
-            const auto day = std::stoi(day_folder.toStdString());
-
-            sessions_date.push_back(QDate(year, month, day));
+            bool okDay = false;
+            const int day = day_folder.toInt(&okDay);
+            const QDate date(year, month, day);
+            if (okDay && date.isValid()) {
+                sessions_date.push_back(date);
+            }
         });
     });
     return sessions_date;
@@ -446,12 +456,17 @@ void ResventLoader::LoadEvents(const QString& session_folder_path, Session* sess
         const auto date_time_elems = elems.at(1).split("=");
         const auto duration_elems = elems.at(2).split("=");
 
-        Q_ASSERT(event_type_elems.size() == 2);
-        Q_ASSERT(date_time_elems.size() == 2);
-        Q_ASSERT(duration_elems.size() == 2);
-        auto event_type = static_cast<EventType>(std::stoi(event_type_elems[1].toStdString()));
-        auto duration = std::stoi(duration_elems[1].toStdString());
-        auto date_time = QDateTime::fromSecsSinceEpoch(std::stoi(date_time_elems[1].toStdString()));
+        if (event_type_elems.size() != 2 || date_time_elems.size() != 2 || duration_elems.size() != 2) {
+            continue;   // damaged line
+        }
+        bool okType = false, okDuration = false, okTime = false;
+        auto event_type = static_cast<EventType>(event_type_elems[1].toInt(&okType));
+        auto duration = duration_elems[1].toInt(&okDuration);
+        const qint64 secs = date_time_elems[1].toLongLong(&okTime);
+        if (!okType || !okDuration || !okTime) {
+            continue;   // e.g. "DT=" with nothing after it; std::stoi threw here
+        }
+        auto date_time = QDateTime::fromSecsSinceEpoch(secs);
 
         EventData eventData({event_type, date_time, duration});
         VerifyEvent(eventData);
@@ -543,6 +558,13 @@ void ResventLoader::ReadWaveFormsHeaders(QFile& f, QVector<ChunkData>& wave_form
     const auto chunk_duration_in_sec = read_from_file<uint16_t>(f);
     f.seek(kDescriptionCountOffset);
     const auto description_count = read_from_file<uint16_t>(f);
+    wave_forms.clear();
+    // An empty or damaged file (e.g. 0 bytes after a power loss) has no usable
+    // header: without a chunk duration there is no sample rate to work with.
+    if (chunk_duration_in_sec == 0 || description_count == 0) {
+        qWarning() << "Resvent: no usable waveform header in" << f.fileName();
+        return;
+    }
     wave_forms.resize(description_count);
 
     for (unsigned int i = 0; i < description_count; i++) {
@@ -552,6 +574,11 @@ void ResventLoader::ReadWaveFormsHeaders(QFile& f, QVector<ChunkData>& wave_form
         f.seek(description_header_offset + kDescriptionSamplesByChunk);
         const auto samples_by_chunk = read_from_file<uint16_t>(f);
 
+        if (samples_by_chunk == 0) {
+            qWarning() << "Resvent: waveform description without samples in" << f.fileName();
+            wave_forms.clear();
+            return;
+        }
         wave_forms[i].sample_rate = 1.0 * samples_by_chunk / chunk_duration_in_sec;
         wave_forms[i].event_list = GetEventList(name, session, wave_forms[i].sample_rate);
         wave_forms[i].samples_by_chunk = samples_by_chunk;
@@ -574,6 +601,9 @@ void ResventLoader::LoadOtherWaveForms(const QString& session_folder_path, Sessi
         if (!initialized) {
             ReadWaveFormsHeaders(f, wave_forms, session, usage);
             initialized = true;
+        }
+        if (wave_forms.isEmpty()) {
+            return;     // no usable header
         }
         f.seek(kMainHeaderSize + wave_forms.size() * kDescriptionHeaderSize);
 
@@ -609,19 +639,15 @@ void ResventLoader::LoadOtherWaveForms(const QString& session_folder_path, Sessi
         }
     });
 
-    QVector<qint16> chunk;
+    // Waveforms that end before the usage does are left short.  They used to be
+    // padded with zero samples up to the end of the usage, which pulled the
+    // pressure, flow and leak statistics down and drew a flat line at zero.
     for (int i = 0; i < wave_forms.size(); i++) {
         const auto& wave_form = wave_forms[i];
         const auto expected_samples = usage.start_time.msecsTo(usage.end_time) / 1000.0 * wave_form.sample_rate;
         if (wave_form.total_samples_by_chunk < expected_samples) {
-            chunk.resize(expected_samples - wave_form.total_samples_by_chunk);
-            if (wave_form.event_list) {
-                int offset = 0;
-                std::for_each(chunk.cbegin(), chunk.cend(), [&](const qint16& value){
-                    wave_form.event_list->AddEvent(wave_form.start_time + offset + kDateTimeOffset - timezoneOffset(), value );
-                    offset += 1000.0 / wave_form.sample_rate;
-                });
-            }
+            qDebug() << "Resvent: waveform ends" << (expected_samples - wave_form.total_samples_by_chunk)
+                     << "samples before the end of usage" << usage.number;
         }
     }
 }
@@ -641,6 +667,9 @@ void ResventLoader::LoadWaveForms(const QString& session_folder_path, Session* s
         if (!initialized) {
             ReadWaveFormsHeaders(f, wave_forms, session, usage);
             initialized = true;
+        }
+        if (wave_forms.isEmpty()) {
+            return;     // no usable header
         }
         f.seek(kMainHeaderSize + wave_forms.size() * kDescriptionHeaderSize);
 
@@ -670,16 +699,15 @@ void ResventLoader::LoadWaveForms(const QString& session_folder_path, Session* s
         }
     });
 
-    QVector<qint16> chunk;
+    // Waveforms that end before the usage does are left short.  They used to be
+    // padded with zero samples up to the end of the usage, which pulled the
+    // pressure, flow and leak statistics down and drew a flat line at zero.
     for (int i = 0; i < wave_forms.size(); i++) {
         const auto& wave_form = wave_forms[i];
         const auto expected_samples = usage.start_time.msecsTo(usage.end_time) / 1000.0 * wave_form.sample_rate;
         if (wave_form.total_samples_by_chunk < expected_samples) {
-            chunk.resize(expected_samples - wave_form.total_samples_by_chunk);
-            if (wave_form.event_list) {
-                const auto duration = chunk.size() * 1000.0 / wave_form.sample_rate;
-                wave_form.event_list->AddWaveform(wave_form.start_time + kDateTimeOffset - timezoneOffset(), chunk.data(), chunk.size(), duration);
-            }
+            qDebug() << "Resvent: waveform ends" << (expected_samples - wave_form.total_samples_by_chunk)
+                     << "samples before the end of usage" << usage.number;
         }
     }
 }
@@ -747,37 +775,45 @@ ResVentUsageData ResventLoader::ReadUsage(const QString& session_folder_path, co
         QString line = f.readLine().trimmed();
 
         const auto elems = line.split("=");
-        Q_ASSERT(elems.size() == 2);
+        if (elems.size() != 2) continue;        // damaged or blank line
+
+        // Values come from the card: a non-number is skipped, not thrown.
+        bool ok = false;
+        const qint64 value = elems[1].toLongLong(&ok);
+        if (!ok) continue;
 
         if (elems[0] == "secStart") {
-            usage_data.start_time = QDateTime::fromSecsSinceEpoch(std::stoi(elems[1].toStdString()));
+            usage_data.start_time = QDateTime::fromSecsSinceEpoch(value);
         }
         else if (elems[0] == "secUsed") {
-            usage_data.end_time = QDateTime::fromSecsSinceEpoch(usage_data.start_time.toSecsSinceEpoch() + std::stoi(elems[1].toStdString()));
+            // A usage longer than a day is a damaged record; it would also size
+            // the waveform buffers below (billions of samples).
+            if (value < 0 || value > kMaxUsageSeconds) continue;
+            usage_data.end_time = QDateTime::fromSecsSinceEpoch(usage_data.start_time.toSecsSinceEpoch() + value);
         }
         else if (elems[0] == "cntAHI") {
-            usage_data.countAHI = std::stoi(elems[1].toStdString());
+            usage_data.countAHI = int(value);
         }
         else if (elems[0] == "cntOAI") {
-            usage_data.countOAI = std::stoi(elems[1].toStdString());
+            usage_data.countOAI = int(value);
         }
         else if (elems[0] == "cntCAI") {
-            usage_data.countCAI = std::stoi(elems[1].toStdString());
+            usage_data.countCAI = int(value);
         }
         else if (elems[0] == "cntAI") {
-            usage_data.countAI = std::stoi(elems[1].toStdString());
+            usage_data.countAI = int(value);
         }
         else if (elems[0] == "cntHI") {
-            usage_data.countHI = std::stoi(elems[1].toStdString());
+            usage_data.countHI = int(value);
         }
         else if (elems[0] == "cntRERA") {
-            usage_data.countRERA = std::stoi(elems[1].toStdString());
+            usage_data.countRERA = int(value);
         }
         else if (elems[0] == "cntSNI") {
-            usage_data.countSNI = std::stoi(elems[1].toStdString());
+            usage_data.countSNI = int(value);
         }
         else if (elems[0] == "cntBreath") {
-            usage_data.countBreath = std::stoi(elems[1].toStdString());
+            usage_data.countBreath = int(value);
         }
     }
 
@@ -818,12 +854,14 @@ int ResventLoader::LoadSession(const QString& dirpath, const QDate& session_date
     SessionID sessionId = (baseDate.daysTo(session_date)) * 64; // leave space for N sessions.
     for (auto usage : different_usage)
     {
-        if (machine->SessionExists(sessionId)) {
-            // session alreadt exists
-            //return base;
-            continue;
+        // Each usage of the day has the next id, whether or not it was imported
+        // before; skipping without advancing checked every later usage against
+        // the same id, so naps added after an earlier import were never imported.
+        const SessionID thisId = sessionId++;
+        if (machine->SessionExists(thisId)) {
+            continue;   // session already exists
         }
-        Session* session = new Session(machine, sessionId++);
+        Session* session = new Session(machine, thisId);
         session->SetChanged(true);
         session->really_set_first(usage.start_time.toMSecsSinceEpoch() + kDateTimeOffset - timezoneOffset());
         session->really_set_last(usage.end_time.toMSecsSinceEpoch() + kDateTimeOffset - timezoneOffset());
