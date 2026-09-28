@@ -68,9 +68,18 @@ struct FlowResult {
 
     int flowSeconds = 0;           //!< analysable time: flow present and scoreable
     int unscoreableSeconds = 0;
+    double flSum = 0;              //!< sum of the flow limitation scores ...
+    int flBreaths = 0;             //!< ... of this many scored breaths outside events
 
     int count(bool apnea) const;
+    int flowLimitationSeconds() const;
+    int periodicSeconds() const;
 };
+
+//! Flow limitation score 0-1 of one inspiration from its shape (spec §3.3.5): a flat top,
+//! a dip in the middle ("M") or an early peak with a plateau ("chair"). \a insp are the
+//! inspiratory flow samples (positive). Exposed for tests.
+float flowLimitationScore(const QVector<float> &insp);
 
 //! Analyses the flow waveform of one CPAP session. \a excluded are spans the device marks
 //! as unusable (large leak, artifacts); \a pulse (may be null) helps the apnea

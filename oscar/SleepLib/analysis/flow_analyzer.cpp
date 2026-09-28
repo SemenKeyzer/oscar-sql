@@ -12,6 +12,65 @@
 
 namespace analysis {
 
+float flowLimitationScore(const QVector<float> &insp)
+{
+    const int n = insp.size();
+    if (n < 4) return kNoData;
+    const float pif = *std::max_element(insp.begin(), insp.end());
+    if (!(pif > 0)) return kNoData;
+
+    // time normalised to tau in [0, 1], flow to u = x / PIF, 32 points
+    constexpr int kPoints = 32;
+    float u[kPoints];
+    for (int k = 0; k < kPoints; ++k) {
+        const double pos = double(k) / (kPoints - 1) * (n - 1);
+        const int i = int(pos);
+        const double f = pos - i;
+        const float a = insp[i], b = insp[qMin(n - 1, i + 1)];
+        u[k] = float((a + (b - a) * f) / pif);
+    }
+    auto tau = [](int k) { return double(k) / (kPoints - 1); };
+    auto clamp01 = [](double v) { return float(qBound(0.0, v, 1.0)); };
+
+    // Flat top: share of the middle of inspiration near the peak (a sine: about 0.6).
+    int mid = 0, flat = 0;
+    for (int k = 0; k < kPoints; ++k) {
+        if (tau(k) < 0.2 || tau(k) > 0.8) continue;
+        ++mid;
+        if (u[k] >= 0.85f) ++flat;
+    }
+    const float plateau = clamp01((double(flat) / qMax(1, mid) - 0.6) / 0.35);
+
+    // "M": a dip in the middle between two peaks.
+    int minK = -1;
+    float minV = 2;
+    for (int k = 0; k < kPoints; ++k) {
+        if (tau(k) >= 0.25 && tau(k) <= 0.75 && u[k] < minV) { minV = u[k]; minK = k; }
+    }
+    float dip = 0;
+    if (minK > 0 && minK < kPoints - 1) {
+        const float left = *std::max_element(u, u + minK);
+        const float right = *std::max_element(u + minK + 1, u + kPoints);
+        if (left >= 0.9f && right >= 0.9f && minV <= 0.8f) dip = clamp01((0.95 - minV) / 0.25);
+    }
+
+    // "Chair": an early peak, then a level plateau well below it.
+    float chair = 0;
+    const int peakK = int(std::max_element(u, u + kPoints) - u);
+    if (tau(peakK) <= 0.3) {
+        double st = 0, su = 0, stt = 0, stu = 0;
+        int m = 0;
+        for (int k = 0; k < kPoints; ++k) {
+            if (tau(k) < 0.4 || tau(k) > 0.8) continue;
+            st += tau(k); su += u[k]; stt += tau(k) * tau(k); stu += tau(k) * u[k]; ++m;
+        }
+        const double mean = su / m;
+        const double slope = (m * stu - st * su) / (m * stt - st * st);
+        if (mean >= 0.5 && mean <= 0.85 && std::fabs(slope) <= 0.5) chair = clamp01(1 - std::fabs(slope) / 0.5);
+    }
+    return qMax(plateau, qMax(dip, chair));
+}
+
 namespace {
 
 constexpr double kMinHz = 4;          // below this the flow is not analysed at all
@@ -126,6 +185,9 @@ void segmentBreaths(const Proc &c, QVector<Breath> &out)
         for (int j = r; j < f; ++j) vi += qMax(0.0f, c.x[j]);
         b.vi = float(vi / c.fs);
         b.amplitude = b.pif - b.pef;
+        if (c.fs >= kFlHz && (f - r) / c.fs >= 0.6) {
+            b.fl = flowLimitationScore(QVector<float>(xs.begin() + r, xs.begin() + f));
+        }
         out.append(b);
     }
 }
@@ -152,6 +214,132 @@ float peakToPeak(const Proc &c, qint64 from, qint64 to)
 
 float median(QVector<float> v) { return percentile(std::move(v), 50); }
 
+bool overlapsAny(const QVector<Span> &spans, qint64 start, qint64 end)
+{
+    for (const Span &sp : spans) {
+        if (start < sp.end && end > sp.start) return true;
+    }
+    return false;
+}
+
+int spanSeconds(const QVector<Span> &spans)
+{
+    qint64 ms = 0;
+    for (const Span &sp : spans) ms += sp.end - sp.start;
+    return int(ms / 1000);
+}
+
+// Consecutive breaths: no pause between them.
+bool follows(const Breath &prev, const Breath &next) { return next.start - prev.end <= 500; }
+
+// Runs of >= 3 flow-limited breaths, or >= 10 s of them (spec §3.3.5).
+QVector<Span> flowLimitationSpans(const QVector<Breath> &breaths, const QVector<Span> &blocked, double threshold)
+{
+    QVector<Span> out;
+    QVector<const Breath *> run;
+    auto flush = [&]() {
+        if (!run.isEmpty() && (run.size() >= 3 || run.last()->end - run.first()->start >= 10000)) {
+            out.append(Span { run.first()->start, run.last()->end, float(run.size()) });
+        }
+        run.clear();
+    };
+    for (const Breath &b : breaths) {
+        const bool limited = hasData(b.fl) && b.fl >= threshold && !overlapsAny(blocked, b.start, b.end);
+        if (!limited) { flush(); continue; }
+        if (!run.isEmpty() && !follows(*run.last(), b)) flush();
+        run.append(&b);
+    }
+    flush();
+    return out;
+}
+
+// RERA-like episodes (spec §3.3.7): >= 2 consecutive breaths over >= 10 s, each flow
+// limited or smaller than the one before, ended by a breath >= 1.5x their mean amplitude.
+QVector<Span> flowReras(const QVector<Breath> &breaths, const QVector<Span> &blocked, double threshold)
+{
+    QVector<Span> out;
+    QVector<int> run;
+    for (int k = 0; k < breaths.size(); ++k) {
+        const Breath &b = breaths[k];
+        const bool free = !overlapsAny(blocked, b.start, b.end);
+        const bool contiguous = !run.isEmpty() && follows(breaths[run.last()], b);
+        const bool limited = hasData(b.fl) && b.fl >= threshold;
+        const bool shrinking = k > 0 && follows(breaths[k - 1], b) && b.amplitude < 0.95f * breaths[k - 1].amplitude;
+        const bool qualifies = free && (limited || shrinking);
+
+        if (qualifies && (run.isEmpty() || contiguous)) { run.append(k); continue; }
+
+        if (run.size() >= 2 && contiguous && free) {
+            const qint64 dur = breaths[run.last()].end - breaths[run.first()].start;
+            double mean = 0;
+            for (int i : run) mean += breaths[i].amplitude;
+            mean /= run.size();
+            if (dur >= 10000 && b.amplitude >= 1.5 * mean) out.append(Span { breaths[run.first()].start, b.start, 0 });
+        }
+        run.clear();
+        if (qualifies) run.append(k);
+    }
+    return out;
+}
+
+// Periodic breathing from the envelope (spec §3.3.8): 600 s windows every 60 s whose
+// autocorrelation peaks >= 0.5 at a lag of 30-100 s and whose envelope swings by >= 50 %.
+QVector<Span> periodicBreathing(const Grid &E)
+{
+    constexpr int kWin = 600, kStep = 60, kLagMin = 30, kLagMax = 100;
+    struct Window { int start; int lag; };
+    QVector<Window> windows;
+    QVector<float> v(kWin);
+    QVector<double> d(kWin);
+    for (int w = 0; w + kWin <= E.size(); w += kStep) {
+        int missing = 0;
+        double sum = 0;
+        for (int i = 0; i < kWin; ++i) {
+            v[i] = E.v[w + i];
+            if (hasData(v[i])) sum += v[i]; else ++missing;
+        }
+        if (missing > kWin / 5) continue;
+        const double mean = sum / (kWin - missing);
+        for (float &x : v) if (!hasData(x)) x = float(mean);
+        const float p90 = percentile(v, 90), p10 = percentile(v, 10);
+        if (!(p90 > 0) || (p90 - p10) / p90 < 0.5f) continue;
+        double var = 0;
+        for (int i = 0; i < kWin; ++i) { d[i] = v[i] - mean; var += d[i] * d[i]; }
+        if (var <= 0) continue;
+        double best = 0;
+        int bestLag = 0;
+        for (int lag = kLagMin; lag <= kLagMax; ++lag) {
+            double acc = 0;
+            for (int i = 0; i + lag < kWin; ++i) acc += d[i] * d[i + lag];
+            if (acc / var > best) { best = acc / var; bestLag = lag; }
+        }
+        if (best >= 0.5) windows.append(Window { w, bestLag });
+    }
+
+    QVector<Span> out;
+    int count = 0;
+    double lagSum = 0;
+    auto close = [&]() {
+        if (count && out.last().end - out.last().start >= 600000) out.last().value = float(lagSum / count);
+        else if (count) out.removeLast();
+        count = 0;
+        lagSum = 0;
+    };
+    for (const Window &win : windows) {
+        const qint64 a = E.timeAt(win.start), b = E.timeAt(win.start + kWin);
+        if (count && a <= out.last().end) {
+            out.last().end = b;
+        } else {
+            close();
+            out.append(Span { a, b, 0 });
+        }
+        ++count;
+        lagSum += win.lag;
+    }
+    close();
+    return out;
+}
+
 void mergeSpans(QVector<Span> &spans)
 {
     std::sort(spans.begin(), spans.end(), [](const Span &a, const Span &b) { return a.start < b.start; });
@@ -169,6 +357,9 @@ int FlowResult::count(bool apnea) const
 {
     return int(std::count_if(events.begin(), events.end(), [apnea](const FlowEvent &e) { return e.apnea == apnea; }));
 }
+
+int FlowResult::flowLimitationSeconds() const { return spanSeconds(flowLimitation); }
+int FlowResult::periodicSeconds() const { return spanSeconds(periodic); }
 
 FlowResult analyzeFlow(const QVector<FlowChunk> &chunkIn, const QVector<Span> &excluded,
                        const Grid *pulse, const Grid *obstructLevel, const FlowParams &params)
@@ -359,6 +550,18 @@ FlowResult analyzeFlow(const QVector<FlowChunk> &chunkIn, const QVector<Span> &e
         }
         return false;
     }), result.events.end());
+
+    // ---- 3.3.5, 3.3.7, 3.3.8 flow limitation, RERA-like episodes, periodic breathing
+    QVector<Span> blocked = uns;   // breaths inside events or unscoreable time do not count
+    for (const FlowEvent &ev : result.events) blocked.append(Span { ev.start, ev.end, 0 });
+    for (const Breath &b : result.breaths) {
+        if (!hasData(b.fl) || overlapsAny(blocked, b.start, b.end)) continue;
+        result.flSum += b.fl;
+        ++result.flBreaths;
+    }
+    result.flowLimitation = flowLimitationSpans(result.breaths, blocked, params.flThreshold);
+    result.reras = flowReras(result.breaths, blocked, params.flThreshold);
+    result.periodic = periodicBreathing(E);
 
     return result;
 }

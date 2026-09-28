@@ -36,6 +36,25 @@ void dip(analysis::Grid &g, int at, float drop, int fall, int hold, int rise);
 analysis::FlowChunk breathing(double fs, double period, const QVector<QPair<double, double>> &segments,
                               double drift = 0, qint64 start = kStart);
 
+//! Inspiratory shapes on tau in [0, 1] with a peak of 1.
+double sineShape(double tau);    //!< normal
+double flatShape(double tau);    //!< flat top: a sine clipped at 70 %, rescaled
+double mShape(double tau);       //!< a dip in the middle
+double chairShape(double tau);   //!< early peak, then a plateau at 70 %
+
+//! One synthetic breath: \a seconds long, inspiration shaped by \a shape over the first
+//! half, a sine expiration over the second; flow scaled by \a amplitude.
+struct SynthBreath {
+    double seconds = 4;
+    double amplitude = 1;
+    double (*shape)(double) = sineShape;
+};
+
+//! The flow of \a breaths one after another at \a fs Hz.
+analysis::FlowChunk breathSequence(double fs, const QVector<SynthBreath> &breaths, qint64 start = kStart);
+//! \a count identical breaths.
+QVector<SynthBreath> repeat(int count, SynthBreath breath);
+
 } // namespace synth
 
 #endif // ANALYSIS_SYNTH_H

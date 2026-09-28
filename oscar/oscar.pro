@@ -854,7 +854,8 @@ test {
         tests/analysissignaltests.cpp \
         tests/analysis_synth.cpp \
         tests/oxianalyzertests.cpp \
-        tests/flowanalyzertests.cpp
+        tests/flowanalyzertests.cpp \
+        tests/flowfeaturetests.cpp
 
     HEADERS += \
         tests/AutoTest.h \
@@ -880,6 +881,7 @@ test {
         tests/fakecontecdevice.h \
         tests/contecbledownloadertests.h \
         tests/contecbleimporttests.h \
+        tests/flowfeaturetests.h \
         tests/flowanalyzertests.h \
         tests/oxianalyzertests.h \
         tests/analysis_synth.h \
