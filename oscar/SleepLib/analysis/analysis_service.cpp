@@ -33,10 +33,12 @@ void AnalysisService::reloadSettings()
     setActiveParams(m_params);
     m_cacheLoaded = false;
     m_rows.clear();
+    m_outdatedCount = -1;
 }
 
 void AnalysisService::reset()
 {
+    m_outdatedCount = -1;
     m_cacheLoaded = false;
     m_cacheProfile = 0;
     m_rows.clear();
@@ -57,6 +59,7 @@ void AnalysisService::ensureCache()
 
 void AnalysisService::reloadCache()
 {
+    m_outdatedCount = -1;
     m_cacheLoaded = false;
     ensureCache();
 }
@@ -111,12 +114,21 @@ QList<QDate> AnalysisService::daysToUpdate(bool pendingOnly)
 
 QList<QDate> AnalysisService::pendingDays()
 {
+    m_outdatedCount = -1;   // asked for after data changed
     return daysToUpdate(true);
 }
 
 QList<QDate> AnalysisService::outdatedDays()
 {
-    return daysToUpdate(false);
+    const QList<QDate> days = daysToUpdate(false);
+    m_outdatedCount = int(days.size());
+    return days;
+}
+
+int AnalysisService::outdatedCount()
+{
+    if (m_outdatedCount < 0) outdatedDays();
+    return m_outdatedCount;
 }
 
 bool AnalysisService::updateDay(const QDate &date)
@@ -145,6 +157,7 @@ int AnalysisService::updateDays(const QList<QDate> &dates, const std::function<b
         ++done;
     }
     if (progress) progress(done, dates.size());
+    m_outdatedCount = -1;
     if (!changed.isEmpty()) emit daysChanged(changed);
     return done;
 }
@@ -156,6 +169,7 @@ DayResult AnalysisService::dayResult(Day *day, QString *oxiSource)
     const DayAnalysis a = analyzeDay(day, m_params, true);
     if (a.scored) {
         refreshRow(day->date());
+        m_outdatedCount = -1;
         emit daysChanged({ day->date() });
         if (oxiSource) *oxiSource = a.oxiSource;
         return a.result;

@@ -756,9 +756,12 @@ void AnalysisIntegrationTests::testAnalysisServiceKeepsDaysCurrent()
     service.reloadSettings();
     QCOMPARE(activeParams().flow.minEventSec, 20.0);   // handed on to the loaders
     QVERIFY(service.pendingDays().isEmpty());
+    QCOMPARE(service.outdatedCount(), 1);
     QCOMPARE(service.outdatedDays(), QList<QDate>({ date }));
     QCOMPARE(service.updateDays({ date }, [](int, int) { return false; }), 0);   // cancelled
+    QCOMPARE(service.outdatedCount(), 1);
     QCOMPARE(service.updateDays(service.outdatedDays()), 1);
+    QCOMPARE(service.outdatedCount(), 0);
     QVERIFY(service.outdatedDays().isEmpty());
 
     // the day for display

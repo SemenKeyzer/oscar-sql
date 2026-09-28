@@ -56,6 +56,8 @@ class AnalysisService : public QObject
     QList<QDate> pendingDays();
     //! Every day whose analysis is missing or outdated, stage 1 included.
     QList<QDate> outdatedDays();
+    //! outdatedDays().size(), kept until something may have changed it (for notices).
+    int outdatedCount();
 
     //! Brings a day up to date (stage 1 of its sessions where needed, then the day);
     //! removes the stored row of a day left without anything to analyse. Returns
@@ -90,6 +92,7 @@ class AnalysisService : public QObject
     qint64 m_cacheProfile = 0;
     bool m_cacheLoaded = false;
     QMap<QDate, AnalysisDailyData> m_rows;
+    int m_outdatedCount = -1;   //!< -1: not known
 };
 
 } // namespace analysis

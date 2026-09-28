@@ -134,6 +134,13 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     m_analysis = new analysis::AnalysisService(this);
+    // New or changed analysis rows: the Overview's analysis charts read them from the cache.
+    connect(m_analysis, &analysis::AnalysisService::daysChanged, this, [this]() {
+        if (overview) {
+            overview->graphView()->dataChanged();
+            overview->updateAnalysisNotice();
+        }
+    });
 
     {
         QAction *searchIcon = ui->filterBookmarks->addAction(

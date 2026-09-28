@@ -36,6 +36,8 @@
 #include "Graphs/gAHIChart.h"
 #include "Graphs/gUsageChart.h"
 #include "Graphs/gTTIAChart.h"
+#include "Graphs/gAnalysisCharts.h"
+#include "SleepLib/analysis/analysis_service.h"
 #include "cprogressbar.h"
 #include "saveGraphLayoutSettings.h"
 
@@ -72,6 +74,16 @@ Overview::Overview(QWidget *parent, gGraphView *shared) :
     chartsToBeMonitored.clear();
     chartsEmpty.clear();;
     ui->setupUi(this);
+
+    // "Analysis is outdated for N days - Recalculate"
+    m_analysisNotice = new QLabel(this);
+    m_analysisNotice->setTextFormat(Qt::RichText);
+    m_analysisNotice->hide();
+    ui->horizontalLayout->insertWidget(ui->horizontalLayout->indexOf(ui->graphHelp), m_analysisNotice);
+    connect(m_analysisNotice, &QLabel::linkActivated, this, [this]() {
+        if (mainwin) mainwin->updateAnalysis(true);
+        ReloadGraphs();
+    });
 
     // Set Date controls locale to 4 digit years
     QLocale locale = QLocale::system();
@@ -304,6 +316,14 @@ void Overview::CreateAllGraphs() {
     TTIA->AddLayer(ttia);
     //chartsToBeMonitored.insert(ttia,TTIA);
 
+    // OSCAR's own analysis, from the analysis_daily rows; charts without data hide
+    for (gAnalysisChart::Kind kind : gAnalysisChart::kinds()) {
+        gGraph *G = createGraph(gAnalysisChart::code(kind), gAnalysisChart::title(kind), gAnalysisChart::units(kind));
+        gAnalysisChart *ac = new gAnalysisChart(kind);
+        G->AddLayer(ac);
+        chartsToBeMonitored.insert(ac, G);
+    }
+
     // Add graphs for all channels that have been marked in Preferences Dialog as wanting a graph
     QHash<ChannelID, schema::Channel *>::iterator chit;
     QHash<ChannelID, schema::Channel *>::iterator chit_end = schema::channel.channels.end();
@@ -461,8 +481,20 @@ void Overview::on_RangeUpdate(double minx, double /* maxx */)
     }
 }
 
+void Overview::updateAnalysisNotice()
+{
+    analysis::AnalysisService *service = mainwin ? mainwin->analysisService() : nullptr;
+    const int outdated = service && p_profile ? service->outdatedCount() : 0;
+    m_analysisNotice->setVisible(outdated > 0);
+    if (outdated > 0) {
+        m_analysisNotice->setText(tr("Analysis is outdated for %n day(s).", "", outdated)
+                                  + QStringLiteral(" <a href='recalculate'>%1</a>").arg(tr("Recalculate")));
+    }
+}
+
 void Overview::ReloadGraphs()
 {
+    updateAnalysisNotice();
     GraphView->setDay(nullptr);
     updateCube();
 

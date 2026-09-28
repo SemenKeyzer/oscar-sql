@@ -376,6 +376,7 @@ SOURCES += \
     Graphs/gspacer.cpp \
     Graphs/gStatsLine.cpp \
     Graphs/gSummaryChart.cpp \
+    Graphs/gAnalysisCharts.cpp \
     Graphs/gTTIAChart.cpp \
     Graphs/gUsageChart.cpp \
     Graphs/gXAxis.cpp \
@@ -569,6 +570,7 @@ HEADERS  += \
     Graphs/gStatsLine.h \
     Graphs/gSummaryChart.h \
     Graphs/gAHIChart.h \
+    Graphs/gAnalysisCharts.h \
     Graphs/gTTIAChart.h \
     Graphs/gUsageChart.h \
     Graphs/gSessionTimesChart.h \

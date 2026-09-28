@@ -80,6 +80,8 @@ class Overview : public QWidget
 
     //! \brief Recalculates Overview chart info
     void ReloadGraphs();
+    //! Shows how many days' sleep analysis is outdated, with a link to recalculate them.
+    void updateAnalysisNotice();
 
     //! \brief Resets font in date display
     void ResetFont();
@@ -151,6 +153,7 @@ class Overview : public QWidget
     void on_graphHelp_clicked();
 
   private:
+    class QLabel *m_analysisNotice = nullptr;
     void CreateAllGraphs();
     void timedUpdateOverview(int ms=0);
 
