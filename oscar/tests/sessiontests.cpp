@@ -7,6 +7,7 @@
  * for more details. */
 
 #include <QFile>
+#include <QTest>
 #include "sessiontests.h"
 #include "SleepLib/day.h"
 
@@ -247,7 +248,7 @@ void SessionToYaml(QString filepath, Session* session, bool ok)
     QFile file(filepath);
     if (!file.open(QFile::WriteOnly | QFile::Truncate)) {
         qDebug() << filepath;
-        Q_ASSERT(false);
+        QFAIL("could not open the output file");
     }
     QTextStream out(&file);
 

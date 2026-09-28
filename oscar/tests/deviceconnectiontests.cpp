@@ -21,39 +21,39 @@ void DeviceConnectionTests::testSerialPortInfoSerialization()
     // With VID and PID
     const QString tag = R"(<serial portName="cu.SLAB_USBtoUART" systemLocation="/dev/cu.SLAB_USBtoUART" description="CP210x USB to UART Bridge Controller" manufacturer="Silicon Labs" serialNumber="0001" vendorIdentifier="0x10C4" productIdentifier="0xEA60"/>)";
     SerialPortInfo info = SerialPortInfo(tag);
-    Q_ASSERT(info.isNull() == false);
-    Q_ASSERT(info.portName() == "cu.SLAB_USBtoUART");
-    Q_ASSERT(info.systemLocation() == "/dev/cu.SLAB_USBtoUART");
-    Q_ASSERT(info.description() == "CP210x USB to UART Bridge Controller");
-    Q_ASSERT(info.manufacturer() == "Silicon Labs");
-    Q_ASSERT(info.serialNumber() == "0001");
-    Q_ASSERT(info.hasVendorIdentifier());
-    Q_ASSERT(info.hasProductIdentifier());
-    Q_ASSERT(info.vendorIdentifier() == 0x10C4);
-    Q_ASSERT(info.productIdentifier() == 0xEA60);
+    QVERIFY(info.isNull() == false);
+    QVERIFY(info.portName() == "cu.SLAB_USBtoUART");
+    QVERIFY(info.systemLocation() == "/dev/cu.SLAB_USBtoUART");
+    QVERIFY(info.description() == "CP210x USB to UART Bridge Controller");
+    QVERIFY(info.manufacturer() == "Silicon Labs");
+    QVERIFY(info.serialNumber() == "0001");
+    QVERIFY(info.hasVendorIdentifier());
+    QVERIFY(info.hasProductIdentifier());
+    QVERIFY(info.vendorIdentifier() == 0x10C4);
+    QVERIFY(info.productIdentifier() == 0xEA60);
     serialized = info;
-    Q_ASSERT(serialized == tag);
+    QVERIFY(serialized == tag);
     
     // Without VID or PID
     const QString tag2 = R"(<serial portName="cu.Bluetooth-Incoming-Port" systemLocation="/dev/cu.Bluetooth-Incoming-Port" description="incoming port - Bluetooth-Incoming-Port" manufacturer="" serialNumber=""/>)";
     SerialPortInfo info2 = SerialPortInfo(tag2);
-    Q_ASSERT(info2.isNull() == false);
-    Q_ASSERT(info2.portName() == "cu.Bluetooth-Incoming-Port");
-    Q_ASSERT(info2.systemLocation() == "/dev/cu.Bluetooth-Incoming-Port");
-    Q_ASSERT(info2.description() == "incoming port - Bluetooth-Incoming-Port");
-    Q_ASSERT(info2.manufacturer() == "");
-    Q_ASSERT(info2.serialNumber() == "");
-    Q_ASSERT(info2.hasVendorIdentifier() == false);
-    Q_ASSERT(info2.hasProductIdentifier() == false);
+    QVERIFY(info2.isNull() == false);
+    QVERIFY(info2.portName() == "cu.Bluetooth-Incoming-Port");
+    QVERIFY(info2.systemLocation() == "/dev/cu.Bluetooth-Incoming-Port");
+    QVERIFY(info2.description() == "incoming port - Bluetooth-Incoming-Port");
+    QVERIFY(info2.manufacturer() == "");
+    QVERIFY(info2.serialNumber() == "");
+    QVERIFY(info2.hasVendorIdentifier() == false);
+    QVERIFY(info2.hasProductIdentifier() == false);
     serialized = info2;
-    Q_ASSERT(serialized == tag2);
+    QVERIFY(serialized == tag2);
 
     // Empty
     const QString tag3 = R"(<serial/>)";
     SerialPortInfo info3 = SerialPortInfo(tag3);
-    Q_ASSERT(info3.isNull() == true);
+    QVERIFY(info3.isNull() == true);
     serialized = info3;
-    Q_ASSERT(serialized == tag3);
+    QVERIFY(serialized == tag3);
 }
 
 void DeviceConnectionTests::testSerialPortScanning()
@@ -69,15 +69,15 @@ void DeviceConnectionTests::testSerialPortScanning()
     qDebug().noquote() << string;
 
     devices.replay(string);
-    Q_ASSERT(list1 == SerialPortInfo::availablePorts());
-    Q_ASSERT(list2 == SerialPortInfo::availablePorts());
-    Q_ASSERT(list2 == SerialPortInfo::availablePorts());  // replaying past the recording should return the final state
+    QVERIFY(list1 == SerialPortInfo::availablePorts());
+    QVERIFY(list2 == SerialPortInfo::availablePorts());
+    QVERIFY(list2 == SerialPortInfo::availablePorts());  // replaying past the recording should return the final state
     devices.replay(nullptr);  // turn off replay
     auto list3 = SerialPortInfo::availablePorts();
 
     // Test file-based recording/playback
     QTemporaryFile recording;
-    Q_ASSERT(recording.open());
+    QVERIFY(recording.open());
     devices.record(&recording);
     list1 = SerialPortInfo::availablePorts();
     list2 = SerialPortInfo::availablePorts();
@@ -85,9 +85,9 @@ void DeviceConnectionTests::testSerialPortScanning()
 
     recording.seek(0);
     devices.replay(&recording);
-    Q_ASSERT(list1 == SerialPortInfo::availablePorts());
-    Q_ASSERT(list2 == SerialPortInfo::availablePorts());
-    Q_ASSERT(list2 == SerialPortInfo::availablePorts());  // replaying past the recording should return the final state
+    QVERIFY(list1 == SerialPortInfo::availablePorts());
+    QVERIFY(list2 == SerialPortInfo::availablePorts());
+    QVERIFY(list2 == SerialPortInfo::availablePorts());  // replaying past the recording should return the final state
     devices.replay(nullptr);  // turn off replay
     list3 = SerialPortInfo::availablePorts();
 }
@@ -98,7 +98,7 @@ void DeviceConnectionTests::testSerialPortScanning()
 static void testDownload(const QString & loaderName)
 {
     SerialOximeter * oxi = qobject_cast<SerialOximeter*>(lookupLoader(loaderName));
-    Q_ASSERT(oxi);
+    QVERIFY(oxi);
 
     if (oxi->openDevice()) {
         bool open = true;
@@ -148,13 +148,13 @@ void DeviceConnectionTests::testOximeterConnection()
     QString portName = "cu.SLAB_USBtoUART";
     {
         QScopedPointer<DeviceConnection> conn(devices.openConnection("serial", portName));
-        Q_ASSERT(conn);
-        Q_ASSERT(devices.openConnection("serial", portName) == nullptr);
+        QVERIFY(conn);
+        QVERIFY(devices.openConnection("serial", portName) == nullptr);
     }
     {
         QScopedPointer<SerialPortConnection> conn(devices.openSerialPortConnection(portName));
-        Q_ASSERT(conn);
-        Q_ASSERT(devices.openSerialPortConnection(portName) == nullptr);
+        QVERIFY(conn);
+        QVERIFY(devices.openSerialPortConnection(portName) == nullptr);
     }
     // legacy API
     SerialPort port;
@@ -170,13 +170,13 @@ void DeviceConnectionTests::testOximeterConnection()
     */
     
     QFile out("test.xml");
-    Q_ASSERT(out.open(QFile::ReadWrite));
+    QVERIFY(out.open(QFile::ReadWrite));
     devices.record(&out);
 
     QFile file("cms50f37.xml");
     if (!file.exists()) {
         qDebug() << "Recording oximeter connection";
-        Q_ASSERT(file.open(QFile::ReadWrite));
+        QVERIFY(file.open(QFile::ReadWrite));
         devices.record(&file);
         testDownload(cms50f37_class_name);
         devices.record(nullptr);
@@ -184,7 +184,7 @@ void DeviceConnectionTests::testOximeterConnection()
     }
 
     qDebug() << "Replaying oximeter connection";
-    Q_ASSERT(file.open(QFile::ReadOnly));
+    QVERIFY(file.open(QFile::ReadOnly));
     devices.replay(&file);
     testDownload(cms50f37_class_name);
     devices.replay(nullptr);

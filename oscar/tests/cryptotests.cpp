@@ -20,8 +20,8 @@ void CryptoTests::testAES256()
 
     QByteArray plaintext;
     CryptoResult result = decrypt_aes256(key, ciphertext, plaintext);
-    Q_ASSERT(result == OK);
-    Q_ASSERT(plaintext == expected_plaintext);
+    QVERIFY(result == OK);
+    QVERIFY(plaintext == expected_plaintext);
 }
 
 
@@ -75,13 +75,13 @@ void CryptoTests::testAES256GCM()
 
         QByteArray plaintext;
         CryptoResult result = decrypt_aes256_gcm(key, iv, ciphertext, tag, plaintext);
-        Q_ASSERT(result == OK);
-        Q_ASSERT(plaintext == expected_plaintext);
+        QVERIFY(result == OK);
+        QVERIFY(plaintext == expected_plaintext);
         
         tag = QByteArray::fromHex(s_AES256GCMVectors[(i+1) % s_AES256GCMVectorCount].tag);
         result = decrypt_aes256_gcm(key, iv, ciphertext, tag, plaintext);
-        Q_ASSERT(result == InvalidTag);
-        Q_ASSERT(plaintext == empty);
+        QVERIFY(result == InvalidTag);
+        QVERIFY(plaintext == empty);
     }
 }
 
@@ -99,9 +99,9 @@ void CryptoTests::testAES256GCMencrypt()
         QByteArray ciphertext;
         QByteArray tag;
         CryptoResult result = encrypt_aes256_gcm(key, iv, plaintext, ciphertext, tag);
-        Q_ASSERT(result == OK);
-        Q_ASSERT(ciphertext == expected_ciphertext);
-        Q_ASSERT(tag == expected_tag);
+        QVERIFY(result == OK);
+        QVERIFY(ciphertext == expected_ciphertext);
+        QVERIFY(tag == expected_tag);
     }
 }
 
@@ -119,8 +119,8 @@ void CryptoTests::testPBKDF2_SHA256()
     
     QByteArray derived_key(expected_key.size(), 0);
     CryptoResult result = pbkdf2_sha256(passphrase, salt, iterations, derived_key);
-    Q_ASSERT(result == OK);
-    Q_ASSERT(derived_key == expected_key);
+    QVERIFY(result == OK);
+    QVERIFY(derived_key == expected_key);
 }
 
 
@@ -142,7 +142,7 @@ void CryptoTests::testPRS1Benchmarks()
 
         QByteArray plaintext;
         CryptoResult result = decrypt_aes256_gcm(key, iv, ciphertext, tag, plaintext);
-        Q_ASSERT(result == OK);
+        QVERIFY(result == OK);
     }
     int elapsed = time.restart();
     qDebug() << "AESGCM x" << AES_ITERATIONS << "=" << elapsed << "ms," << ((float)elapsed / AES_ITERATIONS) << "ms/file";
@@ -154,7 +154,7 @@ void CryptoTests::testPRS1Benchmarks()
         QByteArray salt("salt");
         QByteArray derived_key(32, 0);
         CryptoResult result = pbkdf2_sha256(passphrase, salt, 10000, derived_key);
-        Q_ASSERT(result == OK);
+        QVERIFY(result == OK);
     }
     elapsed = time.restart();
     qDebug() << "PBKDF2 x" << PBKDF2_ITERATIONS << "=" << elapsed << "ms," << ((float)elapsed / PBKDF2_ITERATIONS) << "ms/file";

@@ -79,20 +79,20 @@ void PRS1Tests::testMachineSupport()
         { "FamilyVersion", "9" },
     };
     
-    Q_ASSERT(s_PRS1ModelInfo.IsSupported(5, 3));
-    Q_ASSERT(!s_PRS1ModelInfo.IsSupported(5, 9));
-    Q_ASSERT(!s_PRS1ModelInfo.IsSupported(9, 9));
-    Q_ASSERT(s_PRS1ModelInfo.IsTested("550P", 0, 2));
-    Q_ASSERT(s_PRS1ModelInfo.IsTested("550P", 0, 3));
-    Q_ASSERT(s_PRS1ModelInfo.IsTested("760P", 0, 4));
-    Q_ASSERT(s_PRS1ModelInfo.IsTested("700X110", 0, 6));
-    Q_ASSERT(!s_PRS1ModelInfo.IsTested("700X999", 0, 6));
+    QVERIFY(s_PRS1ModelInfo.IsSupported(5, 3));
+    QVERIFY(!s_PRS1ModelInfo.IsSupported(5, 9));
+    QVERIFY(!s_PRS1ModelInfo.IsSupported(9, 9));
+    QVERIFY(s_PRS1ModelInfo.IsTested("550P", 0, 2));
+    QVERIFY(s_PRS1ModelInfo.IsTested("550P", 0, 3));
+    QVERIFY(s_PRS1ModelInfo.IsTested("760P", 0, 4));
+    QVERIFY(s_PRS1ModelInfo.IsTested("700X110", 0, 6));
+    QVERIFY(!s_PRS1ModelInfo.IsTested("700X999", 0, 6));
     
-    Q_ASSERT(s_PRS1ModelInfo.IsTested(tested));
-    Q_ASSERT(!s_PRS1ModelInfo.IsTested(supported));
-    Q_ASSERT(s_PRS1ModelInfo.IsSupported(tested));
-    Q_ASSERT(s_PRS1ModelInfo.IsSupported(supported));
-    Q_ASSERT(!s_PRS1ModelInfo.IsSupported(unsupported));
+    QVERIFY(s_PRS1ModelInfo.IsTested(tested));
+    QVERIFY(!s_PRS1ModelInfo.IsTested(supported));
+    QVERIFY(s_PRS1ModelInfo.IsSupported(tested));
+    QVERIFY(s_PRS1ModelInfo.IsSupported(supported));
+    QVERIFY(!s_PRS1ModelInfo.IsSupported(unsupported));
 }
 
 
@@ -367,7 +367,7 @@ void parseAndEmitChunkYaml(const QString & path)
             // Otherwise append, allowing session chunks to be split among multiple files.
             if (!file.open(QFile::WriteOnly | (written.contains(outpath) ? QFile::Append : QFile::Truncate))) {
                 qDebug() << outpath;
-                Q_ASSERT(false);
+                QFAIL("could not open the output file");
             }
             QTextStream out(&file);
 
