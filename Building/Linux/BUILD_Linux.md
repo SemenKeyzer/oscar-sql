@@ -52,7 +52,15 @@ The tests are a separate build of the same project (target `test`, built with Ad
     $ cd build-test
     $ qmake6 CONFIG+=test ../OSCAR-code/oscar/oscar.pro
     $ make -j$(nproc)
-    $ QT_QPA_PLATFORM=offscreen ./test
+    $ QT_QPA_PLATFORM=offscreen ASAN_OPTIONS=detect_leaks=0 ./test
+
+The exit code is non-zero when a test fails. LeakSanitizer reports some known leaks at exit,
+which also make it non-zero; `ASAN_OPTIONS=detect_leaks=0` leaves only the test results (memory
+errors still stop the run). CI runs the same steps, see `.github/workflows/build.yml`.
 
 Loader and Daily-view tests that need sample card data read it from `./testdata/`, which is
-not in the repository; without it those tests fail (currently EventsTabTests).
+not in the repository; without it the loader tests have nothing to compare and EventsTabTests
+is skipped.
+
+Compiler warnings are errors (`-Werror`), except deprecation warnings, which newer Qt
+releases keep adding.

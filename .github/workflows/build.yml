@@ -1,0 +1,101 @@
+# Builds OSCAR and runs the unit tests on every push and pull request.
+#
+# Warnings are errors in this project (oscar.pro), so a build that passes here is
+# also warning-free with this compiler.
+
+name: Build and test
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux-apt:
+    # The Qt packaged with Ubuntu 24.04 (6.4): the oldest Qt the project builds with.
+    name: Linux, Qt 6.4 (Ubuntu 24.04 packages)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt and build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential qt6-base-dev qt6-base-dev-tools qt6-tools-dev qt6-tools-dev-tools \
+            qt6-l10n-tools libqt6serialport6-dev libqt6opengl6-dev libqt6sql6-sqlite \
+            qt6-connectivity-dev libglu1-mesa-dev libx11-dev zlib1g-dev libudev-dev
+
+      - name: Build OSCAR
+        run: |
+          mkdir build && cd build
+          qmake6 ../oscar/oscar.pro
+          make -j"$(nproc)"
+
+      - name: Build tests
+        run: |
+          mkdir build-test && cd build-test
+          qmake6 CONFIG+=test ../oscar/oscar.pro
+          make -j"$(nproc)"
+
+      - name: Run tests
+        working-directory: build-test
+        env:
+          QT_QPA_PLATFORM: offscreen
+          TZ: UTC
+          # Known leaks at exit (global singletons) would otherwise fail the run;
+          # AddressSanitizer still stops on memory errors.
+          ASAN_OPTIONS: detect_leaks=0
+        run: ./test
+
+  linux-qt-latest:
+    # The recommended Qt. Experimental: a newer Qt can add warnings or behaviour
+    # changes that have not been looked at yet, so a failure here does not fail
+    # the workflow.
+    name: Linux, Qt 6.10 (experimental)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential libglu1-mesa-dev libx11-dev libxkbcommon-dev zlib1g-dev libudev-dev
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.10.*'
+          modules: 'qtserialport qtconnectivity'
+          cache: true
+
+      - name: Build OSCAR
+        run: |
+          mkdir build && cd build
+          qmake ../oscar/oscar.pro
+          make -j"$(nproc)"
+
+      - name: Build tests
+        run: |
+          mkdir build-test && cd build-test
+          qmake CONFIG+=test ../oscar/oscar.pro
+          make -j"$(nproc)"
+
+      - name: Run tests
+        working-directory: build-test
+        env:
+          QT_QPA_PLATFORM: offscreen
+          TZ: UTC
+          ASAN_OPTIONS: detect_leaks=0
+        run: ./test
