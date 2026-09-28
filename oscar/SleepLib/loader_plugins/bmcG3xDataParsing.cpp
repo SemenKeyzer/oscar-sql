@@ -842,7 +842,9 @@ BmcDateSession BmcG3xData::ReadDateSession(QDate aDate)
     dateSession.DurationMinutes  = std::max(1, static_cast<int>(
         dayEntry->StartTimestamp.secsTo(dayEntry->EndTimestamp) / 60));
     dateSession.MachineInfo      = ReadMachineInfo();
-    std::memset(&dateSession.MacineSettings, 0, sizeof(BmcMachineSettings));
+    // MacineSettings keeps its default initializers: zeroing it with memset (as
+    // before) was undefined for its QDate and turned the -1 "not known" trigger and
+    // rise time settings into real values (0 = Auto / Min).
     dateSession.MacineSettings.Mode = BmcMode::CPAP;
 
     // ---- Phase 1: Parse EVT stream ----
