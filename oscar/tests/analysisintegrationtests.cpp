@@ -14,8 +14,10 @@
 #include <cmath>
 
 #include "SleepLib/analysis/analysis_channels.h"
+#include "SleepLib/analysis/day_analysis.h"
 #include "SleepLib/analysis/session_analysis.h"
 #include "SleepLib/appsettings.h"
+#include "SleepLib/day.h"
 #include "SleepLib/machine.h"
 #include "SleepLib/preferences.h"
 #include "SleepLib/profiles.h"
@@ -203,6 +205,21 @@ void AnalysisIntegrationTests::testStageOneWritesFlowChannelsAndStamp()
     const SessionStamp st = SessionStamp::read(&sess);
     QCOMPARE(st.flowVersion, kAnalysisAlgoVersion);
     QCOMPARE(st.flowHash, params.flowHash());
+    QVERIFY(st.flowAnalyzed);
+    QCOMPARE(st.flowRateHz, 25.0);
+    QVERIFY(st.flScored);
+    QVERIFY(st.flowSeconds > 500);
+    QVERIFY(st.flBreaths > 100);
+    QVERIFY(st.flSum > 0);
+    const SessionStamp back = [&] {   // the totals survive the JSON round trip
+        Session copy(&mach, 2);
+        copy.settings[AN_Stamp] = st.toJson();
+        return SessionStamp::read(&copy);
+    }();
+    QCOMPARE(back.flowSeconds, st.flowSeconds);
+    QCOMPARE(back.flBreaths, st.flBreaths);
+    QCOMPARE(back.unscoreableSeconds, st.unscoreableSeconds);
+    QVERIFY(back.flScored);
     QVERIFY(!stageOneNeeded(&sess, params).any());
     QVERIFY(analyzeSession(&sess, params, true).isEmpty());   // up to date: nothing to do
 
@@ -461,4 +478,198 @@ void AnalysisIntegrationTests::testMigrationAddsAnalysisDaily()
     QVERIFY(db.tables().contains(QStringLiteral("analysis_daily")));
     QVERIFY(AnalysisDailyRepository().upsert(sampleDay(m_profileId, QDate(2026, 5, 1))));
     QVERIFY(AnalysisDailyRepository().remove(m_profileId, QDate(2026, 5, 1)));
+}
+
+namespace {
+
+const QDate kNightDate(2023, 11, 14);   // synth::kStart's night
+
+// A CPAP session whose flow falls to 40 % for six breaths at about 400 s: a hypopnea
+// candidate with a 60 % reduction.
+Session *hypopneaSession(Machine *mach, SessionID id, qint64 machineRow)
+{
+    Session *sess = new Session(mach, id);
+    const FlowChunk c = synth::breathSequence(25, [] {
+        QVector<synth::SynthBreath> seq = synth::repeat(100, synth::SynthBreath());
+        seq += synth::repeat(6, synth::SynthBreath { 4, 0.4, synth::sineShape });
+        seq += synth::repeat(60, synth::SynthBreath());
+        return seq;
+    }());
+    QVector<qint16> raw;
+    for (float v : c.samples) raw.append(qint16(std::lround(v * 100)));
+    EventList *el = sess->AddEventList(CPAP_FlowRate, EVL_Waveform, 0.01f, 0, 0, 0, c.rateMs);
+    el->AddWaveform(c.start, raw.data(), raw.size(), qint64(raw.size() * c.rateMs));
+    sess->really_set_first(c.start);
+    sess->really_set_last(c.start + qint64(raw.size() * c.rateMs));
+    sess->setSessionRowId(insertRow(QStringLiteral("INSERT INTO sessions (session_id, machine_id, start_time, end_time, duration) "
+                                                   "VALUES (?, ?, ?, ?, 664)"), { id, machineRow, sess->first(), sess->last() }));
+    return sess;
+}
+
+// An oximetry session: SpO2 96 %, down to 92 % from 425 s to 445 s.
+Session *oximetrySession(Machine *mach, SessionID id, qint64 machineRow)
+{
+    Session *sess = new Session(mach, id);
+    EventList *el = sess->AddEventList(OXI_SPO2, EVL_Event);
+    const qint64 t0 = synth::kStart;
+    el->AddEvent(t0, 96);
+    el->AddEvent(t0 + 425000, 94);
+    el->AddEvent(t0 + 428000, 92);
+    el->AddEvent(t0 + 445000, 94);
+    el->AddEvent(t0 + 448000, 96);
+    el->AddEvent(t0 + 900000, 96);
+    sess->really_set_first(t0);
+    sess->really_set_last(t0 + 900000);
+    sess->setSessionRowId(insertRow(QStringLiteral("INSERT INTO sessions (session_id, machine_id, start_time, end_time, duration) "
+                                                   "VALUES (?, ?, ?, ?, 900)"), { id, machineRow, sess->first(), sess->last() }));
+    return sess;
+}
+
+int hypopneaCount(Session &sess)
+{
+    return eventCount(sess, AN_Hypopnea) + eventCount(sess, AN_ObstructiveHypopnea) + eventCount(sess, AN_CentralHypopnea);
+}
+
+} // namespace
+
+void AnalysisIntegrationTests::testDayAnalysisScoresAndStores()
+{
+    const qint64 oxiRow = insertRow(QStringLiteral("INSERT INTO machines (profile_id, machine_id, loader_name, machine_type, serial_number) "
+                                                   "VALUES (?, 3002, 'TestOxi', ?, 'OX1')"), { m_profileId, int(MT_OXIMETER) });
+    QVERIFY(oxiRow > 0);
+    Machine cpap(p_profile, 40);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Machine oxi(p_profile, 41);
+    oxi.info.type = MT_OXIMETER;
+    oxi.setDatabaseId(oxiRow);
+    Day day;
+    day.setDate(kNightDate);
+    Session *cs = hypopneaSession(&cpap, 60, m_machineRow);
+    Session *os = oximetrySession(&oxi, 61, oxiRow);
+    day.addSession(cs);
+    day.addSession(os);
+
+    AnalysisParams params;
+    AnalysisDailyRepository repo;
+    QVERIFY(dayOutdated(&day, params, repo.find(m_profileId, kNightDate)));
+
+    DayAnalysis a = analyzeDay(&day, params);
+    QVERIFY(a.scored);
+    QVERIFY(a.stored);
+    QVERIFY(!stageOneNeeded(cs, params).any());   // stage 1 ran first ...
+    QVERIFY(!stageOneNeeded(os, params).any());
+    QVERIFY(!SessionSettingsRepository().findBySetting(cs->sessionRowId(), AN_Stamp).jsonValue.isEmpty());   // ... and was stored
+    QCOMPARE(hypopneaCount(*cs), 1);
+    QCOMPARE(eventCount(*cs, AN_Desaturation), 0);   // oximetry channels go to the oximeter's session
+    QCOMPARE(eventCount(*os, AN_Desaturation), 1);
+
+    AnalysisDailyData row = repo.find(m_profileId, kNightDate);
+    QVERIFY(row.id > 0);
+    QVERIFY(row.hasFlow);
+    QVERIFY(row.flowSeconds > 500);
+    QCOMPARE(row.nObstructiveHypopnea + row.nCentralHypopnea + row.nHypopnea, 1);
+    QCOMPARE(row.nHypopneaAasm3, 1);
+    QCOMPARE(row.nUnconfirmable, 0);
+    QVERIFY(row.hasOximetry);
+    QVERIFY(row.hasCpap);
+    QCOMPARE(row.nDesat3, 1);
+    QCOMPARE(row.oxiScope, QStringLiteral("night"));
+    QVERIFY(row.hasComparison);
+    QCOMPARE(row.cmpAnalysisOnly, 1);   // the device scored nothing
+    QCOMPARE(row.inputsHash, dayInputsHash(&day, params));
+    QCOMPARE(row.paramsHash, params.dayHash());
+
+    // the hypopnea channel went to the database without the waveform
+    {
+        Session stored(&cpap, 60);
+        stored.setSessionRowId(cs->sessionRowId());
+        QVERIFY(stored.LoadEventsFromDatabase(QSet<ChannelID> { AN_Hypopnea, AN_ObstructiveHypopnea, AN_CentralHypopnea }));
+        QCOMPARE(hypopneaCount(stored), 1);
+    }
+
+    // current: nothing to do
+    QVERIFY(!dayOutdated(&day, params, row));
+    a = analyzeDay(&day, params);
+    QVERIFY(a.upToDate);
+    QVERIFY(!a.scored);
+
+    // The oximeter's clock is corrected by 2 minutes: the desaturation no longer follows
+    // the reduction, and AASM 3 % no longer confirms it.
+    oxi.rebuildCorrections({ TimeCorrectionRow { kNightDate, QDate(), QStringLiteral("offset"), 120000, 0, 0.0 } });
+    QCOMPARE(os->correctionMs(), qint64(120000));
+    QVERIFY(dayOutdated(&day, params, repo.find(m_profileId, kNightDate)));
+    a = analyzeDay(&day, params);
+    QVERIFY(a.scored);
+    QCOMPARE(hypopneaCount(*cs), 0);
+    row = repo.find(m_profileId, kNightDate);
+    QCOMPARE(row.nHypopneaAasm3, 0);
+    QCOMPARE(row.nHypopneaFlow, 1);
+    QVERIFY(row.hasOximetry);
+
+    // ... Flow only does
+    params.day.rule = HypopneaRule::FlowOnly;
+    QVERIFY(dayOutdated(&day, params, row));
+    QVERIFY(analyzeDay(&day, params).stored);
+    QCOMPARE(hypopneaCount(*cs), 1);
+    QCOMPARE(repo.find(m_profileId, kNightDate).hypopneaRule, int(HypopneaRule::FlowOnly));
+
+    // a disabled session leaves the day
+    os->setEnabled(false);
+    QCOMPARE(analysableSessions(&day).size(), 1);
+    QVERIFY(dayOutdated(&day, params, repo.find(m_profileId, kNightDate)));
+    QVERIFY(analyzeDay(&day, params).stored);
+    QVERIFY(!repo.find(m_profileId, kNightDate).hasOximetry);
+
+    // switched off: nothing at all
+    params.enabled = false;
+    QVERIFY(!dayOutdated(&day, params, AnalysisDailyData()));
+    QVERIFY(!analyzeDay(&day, params).scored);
+    QVERIFY(repo.remove(m_profileId, kNightDate));
+}
+
+void AnalysisIntegrationTests::testDayAnalysisLoadsOnlyWhatItNeeds()
+{
+    Machine cpap(p_profile, 42);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    day.setDate(kNightDate.addDays(1));
+    Session *cs = hypopneaSession(&cpap, 62, m_machineRow);
+    cs->AddEventList(CPAP_Obstructive, EVL_Event)->AddEvent(synth::kStart + 200000, 12);
+    day.addSession(cs);
+
+    // stage 1 at import, then the events are put away
+    AnalysisParams params;
+    analyzeSession(cs, params);
+    const QString loadedHash = dayInputsHash(&day, params);
+    QVERIFY(cs->StoreEventsToDatabase());
+    cs->TrashEvents();
+    QVERIFY(cs->eventlist.isEmpty());
+    QCOMPARE(dayInputsHash(&day, params), loadedHash);   // whatever is in memory
+
+    // Day scoring needs only event channels: it loads those, and puts them away again.
+    const DayAnalysis a = analyzeDay(&day, params);
+    QVERIFY(a.stored);
+    QVERIFY(a.result.hasFlow);
+    QVERIFY(!a.result.hasOximetry);
+    QCOMPARE(a.result.hypopneas.size(), 1);   // without an oximeter, by flow only
+    QCOMPARE(a.result.unconfirmable, 1);
+    QCOMPARE(a.result.deviceEvents.size(), 1);   // the device's apnea was loaded too
+    QCOMPARE(a.result.match.deviceOnly.size(), 1);
+    QVERIFY(cs->eventlist.isEmpty());
+    QVERIFY(!cs->partialEvents());
+
+    // the waveform is still there, and the hypopnea joined it
+    QVERIFY(cs->OpenEvents());
+    QVERIFY(cs->eventlist.contains(CPAP_FlowRate));
+    QCOMPARE(hypopneaCount(*cs), 1);
+    cs->TrashEvents();
+
+    // scoring for display loads and releases the same way, and stores nothing
+    QVERIFY(AnalysisDailyRepository().remove(m_profileId, day.date()));
+    const DayResult r = scoreStoredDay(&day, params);
+    QCOMPARE(r.hypopneas.size(), 1);
+    QVERIFY(cs->eventlist.isEmpty());
+    QCOMPARE(AnalysisDailyRepository().find(m_profileId, day.date()).id, qint64(0));
 }

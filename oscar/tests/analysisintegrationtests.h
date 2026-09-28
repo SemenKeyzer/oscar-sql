@@ -32,6 +32,8 @@ private slots:
     void testDailyRowReplacesSameDay();
     void testDailyRowRangeAndRemove();
     void testMigrationAddsAnalysisDaily();
+    void testDayAnalysisScoresAndStores();
+    void testDayAnalysisLoadsOnlyWhatItNeeds();
 
 private:
     class QCoreApplication *m_app = nullptr;

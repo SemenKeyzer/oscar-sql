@@ -437,6 +437,10 @@ SOURCES += \
     SleepLib/schema.cpp \
     SleepLib/serialoximeter.cpp \
     SleepLib/oximetry_session_builder.cpp \
+    SleepLib/analysis/day_analysis.cpp \
+    SleepLib/analysis/day_scorer.cpp \
+    SleepLib/analysis/device_event_conventions.cpp \
+    SleepLib/analysis/event_matcher.cpp \
     SleepLib/analysis/session_analysis.cpp \
     SleepLib/analysis/analysis_channels.cpp \
     SleepLib/analysis/apnea_classifier.cpp \
@@ -627,6 +631,10 @@ HEADERS  += \
     SleepLib/xmlreplay.h \
     SleepLib/serialoximeter.h \
     SleepLib/oximetry_session_builder.h \
+    SleepLib/analysis/day_analysis.h \
+    SleepLib/analysis/day_scorer.h \
+    SleepLib/analysis/device_event_conventions.h \
+    SleepLib/analysis/event_matcher.h \
     SleepLib/analysis/session_analysis.h \
     SleepLib/analysis/analysis_channels.h \
     SleepLib/analysis/apnea_classifier.h \
@@ -865,7 +873,9 @@ test {
         tests/flowanalyzertests.cpp \
         tests/flowfeaturetests.cpp \
         tests/apneaclassifiertests.cpp \
-        tests/analysisintegrationtests.cpp
+        tests/analysisintegrationtests.cpp \
+        tests/dayscorertests.cpp \
+        tests/eventmatchertests.cpp
 
     HEADERS += \
         tests/AutoTest.h \
@@ -892,6 +902,8 @@ test {
         tests/contecbledownloadertests.h \
         tests/contecbleimporttests.h \
         tests/analysisintegrationtests.h \
+        tests/dayscorertests.h \
+        tests/eventmatchertests.h \
         tests/apneaclassifiertests.h \
         tests/flowfeaturetests.h \
         tests/flowanalyzertests.h \

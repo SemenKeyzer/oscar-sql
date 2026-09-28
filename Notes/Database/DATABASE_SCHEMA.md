@@ -640,8 +640,9 @@ CREATE TABLE analysis_daily (
     inputs_hash TEXT NOT NULL,                -- the day's sessions, stage 1 stamps, time corrections
     computed_at TEXT NOT NULL,
     -- flow
-    flow_s INTEGER, flow_rate_hz REAL,        -- seconds of valid flow, its sample rate
-    unscoreable_s INTEGER,                    -- of which not scoreable (gaps, leaks, weak signal)
+    flow_s INTEGER,                           -- scoreable flow time: the analysis' hours
+    flow_rate_hz REAL,                        -- lowest sample rate of the analysed sessions
+    unscoreable_s INTEGER,                    -- flow time not scoreable (gaps, leaks, weak signal)
     n_oa INTEGER, n_ca INTEGER, n_a INTEGER, n_oh INTEGER, n_ch INTEGER, n_h INTEGER,
     n_rera INTEGER, n_unconfirmable INTEGER,
     n_h_aasm3 INTEGER, n_h_cms4 INTEGER, n_h_flow INTEGER,   -- hypopneas under each rule
@@ -665,19 +666,19 @@ CREATE TABLE analysis_daily (
     n_pulse_rise INTEGER, dhr_sum REAL, n_dhr INTEGER, brady_s INTEGER, tachy_s INTEGER,
     -- other
     oxi_offset_hint_ms INTEGER,               -- suggested oximeter clock offset; NULL = none
-    extra_json TEXT,
+    extra_json TEXT,                          -- n_linked_desat, n_dev_linked_desat, n_ev_pulse_rise
     UNIQUE(profile_id, date)
 )
 ```
 
-**Example** — the analysis' AHI per night next to the device's (its hours are the
-flow time less the unscoreable time):
+**Example** — the analysis' AHI per night next to the device's (the analysis divides by
+its own scoreable time, the device by its usage time):
 ```sql
 SELECT a.date,
-       ROUND((a.n_oa + a.n_ca + a.n_a + a.n_h) * 3600.0 / (a.flow_s - a.unscoreable_s), 1) AS analysis_ahi,
+       ROUND((a.n_oa + a.n_ca + a.n_a + a.n_oh + a.n_ch + a.n_h) * 3600.0 / a.flow_s, 1) AS analysis_ahi,
        d.ahi AS device_ahi
 FROM analysis_daily a
 JOIN daily_summaries d ON d.profile_id = a.profile_id AND d.date = a.date
-WHERE a.flow_s - a.unscoreable_s > 0
+WHERE a.flow_s > 0
 ORDER BY a.date;
 ```

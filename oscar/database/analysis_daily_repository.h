@@ -35,9 +35,9 @@ struct AnalysisDailyData
     QDateTime computedAt;
 
     bool hasFlow = false;      //!< flow was analysed
-    int flowSeconds = 0;
-    double flowRateHz = 0;
-    int unscoreableSeconds = 0;
+    int flowSeconds = 0;       //!< scoreable flow time: the analysis' hours
+    double flowRateHz = 0;     //!< lowest sample rate of the analysed sessions
+    int unscoreableSeconds = 0;//!< flow time that could not be scored
     int nObstructiveApnea = 0, nCentralApnea = 0, nApnea = 0;
     int nObstructiveHypopnea = 0, nCentralHypopnea = 0, nHypopnea = 0;
     int nRera = 0;
