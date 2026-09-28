@@ -437,6 +437,7 @@ SOURCES += \
     SleepLib/schema.cpp \
     SleepLib/serialoximeter.cpp \
     SleepLib/oximetry_session_builder.cpp \
+    SleepLib/analysis/oxi_analyzer.cpp \
     SleepLib/analysis/analysis_params.cpp \
     SleepLib/analysis/signal_utils.cpp \
     SleepLib/session.cpp \
@@ -621,6 +622,7 @@ HEADERS  += \
     SleepLib/xmlreplay.h \
     SleepLib/serialoximeter.h \
     SleepLib/oximetry_session_builder.h \
+    SleepLib/analysis/oxi_analyzer.h \
     SleepLib/analysis/analysis_params.h \
     SleepLib/analysis/signal_utils.h \
     SleepLib/loader_plugins/md300w1_loader.h \
@@ -847,7 +849,9 @@ test {
         tests/contecbleimporttests.cpp \
         tests/backuprestoretests.cpp \
         tests/loaderrobustnesstests.cpp \
-        tests/analysissignaltests.cpp
+        tests/analysissignaltests.cpp \
+        tests/analysis_synth.cpp \
+        tests/oxianalyzertests.cpp
 
     HEADERS += \
         tests/AutoTest.h \
@@ -873,6 +877,8 @@ test {
         tests/fakecontecdevice.h \
         tests/contecbledownloadertests.h \
         tests/contecbleimporttests.h \
+        tests/oxianalyzertests.h \
+        tests/analysis_synth.h \
         tests/analysissignaltests.h
 }
 
