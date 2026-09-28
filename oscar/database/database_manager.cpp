@@ -120,11 +120,33 @@ bool DatabaseManager::initialize(const QString& databasePath)
         return false;
     }
 
-    // Create schema if this is a new database
-    if (isNewDatabase) {
+    // A file that exists but has no schema version is either empty (an earlier
+    // first run stopped before creating anything) or damaged.  Build the schema
+    // in the first case; refuse the second rather than run on a half-made
+    // database.
+    bool createSchema = isNewDatabase;
+    if (!isNewDatabase && DatabaseSchema::getSchemaVersion(m_database) == 0) {
+        QSqlQuery tables(m_database);
+        const bool empty = tables.exec(QStringLiteral("SELECT COUNT(*) FROM sqlite_master WHERE type='table'"))
+                           && tables.next() && tables.value(0).toInt() == 0;
+        if (!empty) {
+            qCritical() << "DatabaseManager::initialize: database has tables but no schema version:" << databasePath;
+            emit databaseError(QString("The database file is incomplete or damaged: it has no schema version.\n\n%1")
+                                   .arg(databasePath));
+            close();
+            return false;
+        }
+        createSchema = true;
+    }
+
+    if (createSchema) {
+        // One transaction, so an interrupted first run leaves an empty file
+        // (handled above on the next start) instead of a partial schema.
         qDebug() << "DatabaseManager::initialize: Creating new database schema";
-        if (!DatabaseSchema::createSchema(m_database)) {
+        m_database.transaction();
+        if (!DatabaseSchema::createSchema(m_database) || !m_database.commit()) {
             qCritical() << "DatabaseManager::initialize: Failed to create database schema";
+            m_database.rollback();
             close();
             return false;
         }
@@ -786,4 +808,21 @@ bool DatabaseManager::configureConnection(QSqlDatabase& db)
 
     qDebug() << "DatabaseManager: Database settings configured";
     return true;
+}
+
+ReadOnlyScope::ReadOnlyScope(const QSqlDatabase& db)
+    : m_db(db)
+{
+    QSqlQuery q(m_db);
+    if (!q.exec(QStringLiteral("PRAGMA query_only = ON"))) {
+        qWarning() << "ReadOnlyScope: could not make the connection read-only:" << q.lastError().text();
+    }
+}
+
+ReadOnlyScope::~ReadOnlyScope()
+{
+    QSqlQuery q(m_db);
+    if (!q.exec(QStringLiteral("PRAGMA query_only = OFF"))) {
+        qWarning() << "ReadOnlyScope: could not restore write access:" << q.lastError().text();
+    }
 }

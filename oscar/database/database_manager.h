@@ -260,4 +260,24 @@ private:
     mutable QMutex m_mutex;
 };
 
+/*!
+ * \class ReadOnlyScope
+ * \brief Makes a connection refuse writes (SQLite PRAGMA query_only) while it lives.
+ *
+ * Wrap SQL that comes from report files or from the user in one of these, so that a
+ * statement such as "DELETE FROM sessions" fails instead of changing the profile.
+ */
+class ReadOnlyScope
+{
+public:
+    explicit ReadOnlyScope(const QSqlDatabase& db);
+    ~ReadOnlyScope();
+
+    ReadOnlyScope(const ReadOnlyScope&) = delete;
+    ReadOnlyScope& operator=(const ReadOnlyScope&) = delete;
+
+private:
+    QSqlDatabase m_db;
+};
+
 #endif // DATABASE_MANAGER_H

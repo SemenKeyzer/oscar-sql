@@ -1165,6 +1165,9 @@ bool ReportExporter::runExport()
         QMessageBox::warning(this, tr("Export CSV"), tr("Please specify an output filename."));
         return false;
     }
+    // Report queries come from .orf files that users import and share; they may
+    // only read.  The scope lasts until the rows below have been written out.
+    ReadOnlyScope readOnly(DatabaseManager::instance().database());
     QSqlQuery sql(DatabaseManager::instance().database());
     if (!sql.exec(query)) {
         QMessageBox::critical(this, tr("Export CSV"),

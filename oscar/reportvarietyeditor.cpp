@@ -159,6 +159,7 @@ void ReportVarietyEditor::on_testQueryButton_clicked()
     
     // Execute query
     QSqlDatabase db = DatabaseManager::instance().database();
+    ReadOnlyScope readOnly(db);   // report SQL may only read
     QSqlQuery sqlQuery(db);
     
     if (!sqlQuery.exec(query)) {
