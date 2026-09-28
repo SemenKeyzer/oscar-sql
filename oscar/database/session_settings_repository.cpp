@@ -43,7 +43,7 @@ qint64 SessionSettingsRepository::create(const SessionSettingData& data)
     query.addBindValue(data.channelId);
     query.addBindValue(data.value);
     query.addBindValue(data.dataType);
-    query.addBindValue(data.jsonValue.isNull() ? QVariant(QVariant::String) : data.jsonValue);
+    query.addBindValue(data.jsonValue.isNull() ? QVariant(QMetaType::fromType<QString>()) : data.jsonValue);
 
     if (!query.exec()) {
         qWarning() << "SessionSettingsRepository::create() failed:" << query.lastError().text();
@@ -71,7 +71,7 @@ bool SessionSettingsRepository::update(const SessionSettingData& data)
 
     query.addBindValue(data.value);
     query.addBindValue(data.dataType);
-    query.addBindValue(data.jsonValue.isNull() ? QVariant(QVariant::String) : data.jsonValue);
+    query.addBindValue(data.jsonValue.isNull() ? QVariant(QMetaType::fromType<QString>()) : data.jsonValue);
     query.addBindValue(data.id);
 
     if (!query.exec()) {
@@ -183,7 +183,7 @@ bool SessionSettingsRepository::saveBatch(qint64 sessionId, const QList<SessionS
         query.addBindValue(data.channelId);
         query.addBindValue(data.value);
         query.addBindValue(data.dataType);
-        query.addBindValue(data.jsonValue.isNull() ? QVariant(QVariant::String) : data.jsonValue);
+        query.addBindValue(data.jsonValue.isNull() ? QVariant(QMetaType::fromType<QString>()) : data.jsonValue);
 
         if (!query.exec()) {
             qWarning() << "SessionSettingsRepository::saveBatch() failed:" << query.lastError().text();

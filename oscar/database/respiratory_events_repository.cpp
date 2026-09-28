@@ -41,8 +41,8 @@ qint64 RespiratoryEventsRepository::create(const RespiratoryEventData& data)
     query.addBindValue(data.startTime);
     query.addBindValue(data.endTime);
     query.addBindValue(data.duration);
-    query.addBindValue(data.desaturation > 0.0 ? data.desaturation : QVariant(QVariant::Double));
-    query.addBindValue(data.severity > 0 ? data.severity : QVariant(QVariant::Int));
+    query.addBindValue(data.desaturation > 0.0 ? data.desaturation : QVariant(QMetaType::fromType<double>()));
+    query.addBindValue(data.severity > 0 ? data.severity : QVariant(QMetaType::fromType<int>()));
     
     if (!query.exec()) {
         qWarning() << "RespiratoryEventsRepository::create() - Failed to insert:"
@@ -85,8 +85,8 @@ bool RespiratoryEventsRepository::createBatch(const QList<RespiratoryEventData>&
         query.addBindValue(event.startTime);
         query.addBindValue(event.endTime);
         query.addBindValue(event.duration);
-        query.addBindValue(event.desaturation > 0.0 ? event.desaturation : QVariant(QVariant::Double));
-        query.addBindValue(event.severity > 0 ? event.severity : QVariant(QVariant::Int));
+        query.addBindValue(event.desaturation > 0.0 ? event.desaturation : QVariant(QMetaType::fromType<double>()));
+        query.addBindValue(event.severity > 0 ? event.severity : QVariant(QMetaType::fromType<int>()));
         
         if (!query.exec()) {
             qWarning() << "RespiratoryEventsRepository::createBatch() - Failed to insert event:"

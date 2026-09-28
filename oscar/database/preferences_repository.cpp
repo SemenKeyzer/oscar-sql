@@ -355,19 +355,19 @@ bool PreferencesRepository::loadAllPreferences(qint64 profileId,
 
 QString PreferencesRepository::dataTypeFromVariant(const QVariant& value)
 {
-    switch (value.type()) {
-        case QVariant::Bool:
+    switch (value.typeId()) {
+        case QMetaType::Bool:
             return "bool";
-        case QVariant::Int:
-        case QVariant::LongLong:
+        case QMetaType::Int:
+        case QMetaType::LongLong:
             return "int";
-        case QVariant::Double:
+        case QMetaType::Double:
             return "float";
-        case QVariant::Date:
+        case QMetaType::QDate:
             return "date";
-        case QVariant::Time:
+        case QMetaType::QTime:
             return "time";
-        case QVariant::DateTime:
+        case QMetaType::QDateTime:
             return "datetime";
         default:
             return "string";

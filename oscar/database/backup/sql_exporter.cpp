@@ -270,11 +270,7 @@ QString SqlExporter::escapeValue(const QVariant& value, bool isBlobColumn) const
         return "X'" + blobToHex(blob) + "'";
     }
 
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     const int typeId = value.typeId();
-#else
-    const int typeId = static_cast<int>(value.type());
-#endif
 
     // Rule 3: QByteArray variant (BLOB affinity detected by driver)
     if (typeId == QMetaType::QByteArray) {

@@ -39,7 +39,7 @@ qint64 ReportTreeRepository::create(const ReportTreeNode& node)
     
     // Use NULL for parentId of 0 (root nodes have no parent)
     if (node.parentId == 0) {
-        query.addBindValue(QVariant(QVariant::LongLong));
+        query.addBindValue(QVariant(QMetaType::fromType<qlonglong>()));
     } else {
         query.addBindValue(node.parentId);
     }
@@ -47,8 +47,8 @@ qint64 ReportTreeRepository::create(const ReportTreeNode& node)
     query.addBindValue(node.name);
     query.addBindValue(node.nodeType);
     query.addBindValue(node.source);
-    query.addBindValue(node.description.isEmpty() ? QVariant(QVariant::String) : node.description);
-    query.addBindValue(node.query.isEmpty() ? QVariant(QVariant::String) : node.query);
+    query.addBindValue(node.description.isEmpty() ? QVariant(QMetaType::fromType<QString>()) : node.description);
+    query.addBindValue(node.query.isEmpty() ? QVariant(QMetaType::fromType<QString>()) : node.query);
     query.addBindValue(node.displayOrder);
     
     if (!query.exec()) {
@@ -76,8 +76,8 @@ bool ReportTreeRepository::update(const ReportTreeNode& node)
     );
     
     query.addBindValue(node.name);
-    query.addBindValue(node.description.isEmpty() ? QVariant(QVariant::String) : node.description);
-    query.addBindValue(node.query.isEmpty() ? QVariant(QVariant::String) : node.query);
+    query.addBindValue(node.description.isEmpty() ? QVariant(QMetaType::fromType<QString>()) : node.description);
+    query.addBindValue(node.query.isEmpty() ? QVariant(QMetaType::fromType<QString>()) : node.query);
     query.addBindValue(node.displayOrder);
     query.addBindValue(node.id);
     
@@ -327,7 +327,7 @@ bool ReportTreeRepository::moveNode(qint64 nodeId, qint64 newParentId)
     );
     
     if (newParentId == 0) {
-        query.addBindValue(QVariant(QVariant::LongLong));
+        query.addBindValue(QVariant(QMetaType::fromType<qlonglong>()));
     } else {
         query.addBindValue(newParentId);
     }
