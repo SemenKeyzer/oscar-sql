@@ -506,7 +506,8 @@ bool BmcData::DirectoryHasBmcData(const QString& path)
 int BmcData::ReadDataCount()
 {
     QFile file(this->usrFilePath);
-    file.open(QIODevice::ReadOnly);
+    if (!file.open(QIODevice::ReadOnly))
+        return 0;
 
     file.seek(0x102338);  //Packets start at offset 0x800
 
@@ -533,7 +534,11 @@ BmcMachineInfo BmcData::ReadMachineInfo()
    BmcMachineInfo info;
 
    QFile usrFile(this->usrFilePath);
-   usrFile.open(QIODevice::ReadOnly);
+   if (!usrFile.open(QIODevice::ReadOnly)) {
+       // The reads below would fill the fields from an uninitialised buffer.
+       qWarning() << "BmcData: cannot open" << this->usrFilePath;
+       return info;
+   }
 
    char buf[32];
 
@@ -739,9 +744,8 @@ QDateTime BmcData::ReadWaveformPacketTimestamp(const QString& path, quint64 pack
     if ((quint64)file.size() < byteOffset)
         return QDateTime();
 
-    file.open(QIODevice::ReadOnly);
-    if (!file.isOpen()){
-        throw std::invalid_argument("Waveform file could be opened");
+    if (!file.open(QIODevice::ReadOnly)){
+        throw std::invalid_argument("Waveform file could not be opened");
     }
 
     file.seek(byteOffset); //Offset in file of packet + offset of timestamp
@@ -770,7 +774,10 @@ void BmcData::ReadIdxFile()
     QString idxPath = ChangeFileExtension(this->usrFilePath, ".idx");
     QFile file(idxPath);
 
-    file.open(QIODevice::ReadOnly);
+    if (!file.open(QIODevice::ReadOnly)) {
+        qWarning() << "BmcData: cannot open" << idxPath;
+        return;     // no entries, as before
+    }
 
     file.seek(0x800);  //Packets start at offset 0x800
 
@@ -815,7 +822,10 @@ void BmcData::ReadIdxFile()
 void BmcData::ReadAllSessions()
 {
     QFile fileUSR(this->usrFilePath);
-    fileUSR.open(QIODevice::ReadOnly);
+    if (!fileUSR.open(QIODevice::ReadOnly)) {
+        qWarning() << "BmcData: cannot open" << this->usrFilePath;
+        return;     // no sessions, as before
+    }
 
     QDataStream strmUSR(&fileUSR);
     strmUSR.setByteOrder(QDataStream::LittleEndian);
@@ -913,7 +923,10 @@ QList<BmcWaveformPacket> BmcData::ReadWaveforms(BmcDataLink& link)
 
     int currentFileIndex = link.WaveformCrumb.FileIndex;
     QFile* nnnFile = new QFile(link.WaveformCrumb.Filepath);
-    nnnFile->open(QIODevice::ReadOnly);
+    if (!nnnFile->open(QIODevice::ReadOnly)) {
+        delete nnnFile;
+        return waveforms;
+    }
     nnnFile->seek(link.WaveformCrumb.ByteOffset);
 
     bool complete = false;
@@ -959,6 +972,7 @@ QList<BmcWaveformPacket> BmcData::ReadWaveforms(BmcDataLink& link)
             nextPath = ChangeFileExtension(this->usrFilePath, nextExtension);
             if (!QFile::exists(nextPath)){
                 complete = true;
+                delete(nnnFile);
                 break;
             }
         }
@@ -968,7 +982,10 @@ QList<BmcWaveformPacket> BmcData::ReadWaveforms(BmcDataLink& link)
         if (!complete)
         {
             nnnFile = new QFile(nextPath);
-            nnnFile->open(QIODevice::ReadOnly);
+            if (!nnnFile->open(QIODevice::ReadOnly)) {
+                delete nnnFile;
+                break;
+            }
             // Skip the 255-byte legacy tail packet if present so subsequent
             // 256-byte reads are correctly aligned to the current data region.
             const int nextDataOffset = DetectFileDataOffset(nextPath);
