@@ -4692,6 +4692,13 @@ void MainWindow::on_recordsBox_anchorClicked(const QUrl &linkurl)
         if (data == "oximeter") QTimer::singleShot(0, mainwin, SLOT(on_oximetryButton_clicked()));
     } else if (link == "statistics") {
         ui->tabWidget->setCurrentWidget(ui->statisticsTab);
+    } else if (link == "analysis" && data == "recalculate") {
+        // not from here: regenerating the statistics replaces the page that was clicked
+        QTimer::singleShot(0, this, [this]() {
+            updateAnalysis(true);
+            GenerateStatistics();
+            if (overview) overview->ReloadGraphs();
+        });
     }
 }
 

@@ -37,10 +37,139 @@ server= red 30+
 #include "version.h"
 #include "SleepLib/profiles.h"
 #include "SleepLib/performance_timer.h"
+#include "SleepLib/analysis/analysis_service.h"
+#include "SleepLib/analysis/oxi_analyzer.h"
+#include "analysispanel.h"
 
 #include "speedcheck.h"
 
 extern MainWindow *mainwin;
+
+namespace {
+QString analysisValue(const QString &key, const QDate &start, const QDate &end);
+}
+
+namespace {
+
+// ---- OSCAR's own analysis (rows of type SC_ANALYSIS) ----
+
+QList<AnalysisDailyData> analysisRows(const QDate &start, const QDate &end)
+{
+    analysis::AnalysisService *service = mainwin ? mainwin->analysisService() : nullptr;
+    return service ? service->rows(start, end) : QList<AnalysisDailyData>();
+}
+
+// Which data a figure needs: it is shown only when some day of the section has it.
+QString analysisGroup(const QString &key)
+{
+    if (key == QLatin1String("agreement")) return QStringLiteral("comparison");
+    if (key == QLatin1String("fl")) return QStringLiteral("fl");
+    if (key == QLatin1String("hb")) return QStringLiteral("hb");
+    if (key == QLatin1String("dhr")) return QStringLiteral("dhr");
+    if (key == QLatin1String("#pulse") || key == QLatin1String("pri")) return QStringLiteral("pulse");
+    if (key == QLatin1String("#oximetry") || key == QLatin1String("odi3") || key == QLatin1String("odi4")
+        || key.startsWith(QLatin1String("below:")) || key == QLatin1String("zones") || key == QLatin1String("nadir")) {
+        return QStringLiteral("oxi");
+    }
+    return QStringLiteral("flow");
+}
+
+// The groups with data from \a first to \a last; returns the number of analysed days.
+int analysisGroups(const QDate &first, const QDate &last, QSet<QString> &has)
+{
+    has.clear();
+    const QList<AnalysisDailyData> rows = analysisRows(first, last);
+    for (const AnalysisDailyData &d : rows) {
+        if (d.hasFlow) has.insert(QStringLiteral("flow"));
+        if (d.hasFlow && d.flBreaths > 0) has.insert(QStringLiteral("fl"));
+        if (d.hasComparison) has.insert(QStringLiteral("comparison"));
+        if (d.hasOximetry) has.insert(QStringLiteral("oxi"));
+        if (d.hasFlow && d.hasOximetry && d.hasCpap) has.insert(QStringLiteral("hb"));
+        if (d.hasPulse) has.insert(QStringLiteral("pulse"));
+        if (d.hasPulse && d.nDhr > 0) has.insert(QStringLiteral("dhr"));
+    }
+    return int(rows.size());
+}
+
+QString analysisName(const QString &key)
+{
+    if (key == QLatin1String("#breathing")) return Statistics::tr("Breathing");
+    if (key == QLatin1String("#oximetry")) return Statistics::tr("Oximetry");
+    if (key == QLatin1String("#pulse")) return Statistics::tr("Pulse");
+    if (key == QLatin1String("ahi")) return Statistics::tr("AHI (analysis)");
+    if (key == QLatin1String("oai")) return Statistics::tr("Obstructive Apnea Index");
+    if (key == QLatin1String("cai")) return Statistics::tr("Central Apnea Index");
+    if (key == QLatin1String("uai")) return Statistics::tr("Unclassified Apnea Index");
+    if (key == QLatin1String("hi")) return Statistics::tr("Hypopnea Index");
+    if (key == QLatin1String("rerai")) return Statistics::tr("RERA Index");
+    if (key == QLatin1String("fl")) return Statistics::tr("% of time with flow limitation");
+    if (key == QLatin1String("pb")) return Statistics::tr("% of time in periodic breathing");
+    if (key == QLatin1String("agreement")) return Statistics::tr("Agreement with the device, %");
+    if (key == QLatin1String("odi3")) return Statistics::tr("ODI 3%");
+    if (key == QLatin1String("odi4")) return Statistics::tr("ODI 4%");
+    if (key.startsWith(QLatin1String("below:"))) return Statistics::tr("% of time with SpO2 below %1%").arg(key.mid(6));
+    if (key == QLatin1String("zones")) return Statistics::tr("% of time in oximetry problem zones");
+    if (key == QLatin1String("nadir")) return Statistics::tr("Lowest SpO2");
+    if (key == QLatin1String("hb")) return Statistics::tr("Hypoxic burden (approx., %·min/h)");
+    if (key == QLatin1String("pri")) return Statistics::tr("Pulse Rise Index");
+    if (key == QLatin1String("dhr")) return Statistics::tr("Pulse response to events, bpm");
+    return key;
+}
+
+QString analysisValue(const QString &key, const QDate &start, const QDate &end)
+{
+    return analysisFigure(key, analysisRows(start, end));
+}
+
+} // namespace
+
+QString analysisFigure(const QString &key, const QList<AnalysisDailyData> &rows)
+{
+    const QString none = QStringLiteral("-");
+    double num = 0, den = 0;
+    double nadir = 101;
+    for (const AnalysisDailyData &d : rows) {
+        if (d.hasFlow) {
+            const double h = d.flowSeconds / 3600.0;
+            if (key == QLatin1String("ahi")) {
+                num += d.nObstructiveApnea + d.nCentralApnea + d.nApnea + d.nObstructiveHypopnea + d.nCentralHypopnea + d.nHypopnea;
+                den += h;
+            } else if (key == QLatin1String("oai")) { num += d.nObstructiveApnea; den += h; }
+            else if (key == QLatin1String("cai")) { num += d.nCentralApnea; den += h; }
+            else if (key == QLatin1String("uai")) { num += d.nApnea; den += h; }
+            else if (key == QLatin1String("hi")) { num += d.nObstructiveHypopnea + d.nCentralHypopnea + d.nHypopnea; den += h; }
+            else if (key == QLatin1String("rerai")) { num += d.nRera; den += h; }
+            else if (key == QLatin1String("pb")) { num += 100.0 * d.pbSeconds; den += d.flowSeconds; }
+            else if (key == QLatin1String("fl") && d.flBreaths > 0) { num += 100.0 * d.flSeconds; den += d.flowSeconds; }
+            else if (key == QLatin1String("hb") && d.hasOximetry && d.hasCpap) { num += d.linkedDesatArea / 60.0; den += h; }
+        }
+        if (d.hasComparison && key == QLatin1String("agreement")) {
+            num += 100.0 * d.cmpMatched;
+            den += d.cmpMatched + d.cmpDeviceOnly + d.cmpAnalysisOnly;   // device + analysis - matched
+        }
+        if (d.hasOximetry) {
+            const double h = d.oxiSeconds / 3600.0;
+            if (key == QLatin1String("odi3")) { num += d.nDesat3; den += h; }
+            else if (key == QLatin1String("odi4")) { num += d.nDesat4; den += h; }
+            else if (key == QLatin1String("zones")) { num += 100.0 * d.zoneSeconds; den += d.oxiSeconds; }
+            else if (key == QLatin1String("nadir")) { nadir = qMin(nadir, d.spo2Nadir); den += 1; }
+            else if (key.startsWith(QLatin1String("below:"))) {
+                const double t = key.mid(6).toDouble();
+                for (int i = 0; i < d.spo2Hist.size(); ++i) {
+                    if (analysis::kSpo2HistMin + i < t) num += 100.0 * d.spo2Hist[i];
+                }
+                den += d.oxiSeconds;
+            }
+        }
+        if (d.hasPulse) {
+            if (key == QLatin1String("pri")) { num += d.nPulseRise; den += d.pulseSeconds / 3600.0; }
+            else if (key == QLatin1String("dhr")) { num += d.dhrSum; den += d.nDhr; }
+        }
+    }
+    if (den <= 0) return none;
+    if (key == QLatin1String("nadir")) return QString::number(nadir, 'f', 0);
+    return QString::number(num / den, 'f', 2);
+}
 
 // HTML components that make up Statistics page and printed report
 QString htmlReportHeader = "";      // Page header
@@ -881,6 +1010,25 @@ Statistics::Statistics(QObject *parent) :
     rows.push_back(StatisticsRow("Pulse",      SC_MAX,     MT_OXIMETER));
     rows.push_back(StatisticsRow("PulseChange",   SC_CPH,     MT_OXIMETER));
 
+    // OSCAR's own analysis, from the analysis_daily rows: for every period the counts
+    // over the hours they were found in, not an average of nightly indices. Keys
+    // starting with '#' are subheadings, shown when their group has data.
+    rows.push_back(StatisticsRow("", SC_SPACE, MT_UNKNOWN));
+    rows.push_back(StatisticsRow(tr("Analysis (second opinion)"), SC_ANALYSIS_HEADING, MT_UNKNOWN));
+    rows.push_back(StatisticsRow("", SC_COLUMNHEADERS, MT_UNKNOWN));
+    for (const char *key : { "#breathing", "ahi", "oai", "cai", "uai", "hi", "rerai", "fl", "pb", "agreement",
+                             "#oximetry", "odi3", "odi4" }) {
+        rows.push_back(StatisticsRow(QString::fromLatin1(key), SC_ANALYSIS, MT_UNKNOWN));
+    }
+    if (p_profile && p_profile->analysis) {
+        for (double t : p_profile->analysis->spo2Thresholds()) {
+            rows.push_back(StatisticsRow(QStringLiteral("below:%1").arg(t), SC_ANALYSIS, MT_UNKNOWN));
+        }
+    }
+    for (const char *key : { "zones", "nadir", "hb", "#pulse", "pri", "dhr" }) {
+        rows.push_back(StatisticsRow(QString::fromLatin1(key), SC_ANALYSIS, MT_UNKNOWN));
+    }
+
     // These are for formatting the headers for the first column
     int percentile=trunc(p_profile->general->prefCalcPercentile());                    // Pholynyk, 10Mar2016
     char perCentStr[20];
@@ -1555,13 +1703,14 @@ QString Statistics::GenerateCPAPUsage()
     }
 
     bool skipsection = false;;
+    QSet<QString> analysisHas;   // the analysis' groups with data (SC_ANALYSIS rows)
     int alternatingColorCounter = 0 ;
     // Loop through all rows of the Statistics report
     for (QList<StatisticsRow>::iterator i = rows.begin(); i != rows.end(); ++i) {
         StatisticsRow &row = (*i);
         QString name;
 
-        if (row.calc == SC_HEADING) {  // All sections begin with a heading
+        if (row.calc == SC_HEADING || row.calc == SC_ANALYSIS_HEADING) {  // All sections begin with a heading
             first = summaryInfo.first();
             last = summaryInfo.last();
             if (!first.isValid() || !last.isValid()) {
@@ -1610,11 +1759,23 @@ QString Statistics::GenerateCPAPUsage()
             }
 
             MachineType sectionType = (row.type == MT_OXIMETER) ? oxiSourceType : row.type;
-            int days = p_profile->countDays(sectionType, first, last);
+            int days = row.calc == SC_ANALYSIS_HEADING ? analysisGroups(first, last, analysisHas)
+                                                       : p_profile->countDays(sectionType, first, last);
             skipsection = (days == 0);
             if (days > 0) {
                 html+=QString("<tr bgcolor='%1'><th colspan=%2 align=center><font size='+2'>%3</font></th></tr>").
                         arg(heading_color).arg(periods.size()+1).arg(row.src);
+            }
+            if (days > 0 && row.calc == SC_ANALYSIS_HEADING) {
+                html += QString("<tr><td colspan=%1 align=center><i>%2</i></td></tr>").arg(periods.size()+1)
+                            .arg(AnalysisPanel::disclaimer().toHtmlEscaped());
+                analysis::AnalysisService *service = mainwin ? mainwin->analysisService() : nullptr;
+                const int outdated = service ? service->outdatedCount() : 0;
+                if (outdated > 0) {
+                    html += QString("<tr bgcolor='%1'><td colspan=%2 align=center>%3 <a href='analysis=recalculate'>%4</a></td></tr>")
+                                .arg(warning_color).arg(periods.size()+1)
+                                .arg(tr("Analysis is outdated for %n day(s).", "", outdated), tr("Recalculate"));
+                }
             }
             continue;
         }
@@ -1700,6 +1861,16 @@ QString Statistics::GenerateCPAPUsage()
                 html+=QString("<tr><td colspan=%1 align=center>%2</th></tr>").
                         arg(periods.size()+1).arg(text);
             continue;
+        } else if (row.calc == SC_ANALYSIS) {
+            const QString group = analysisGroup(row.src);
+            if (!analysisHas.contains(group)) continue;
+            if (row.src.startsWith(QLatin1Char('#'))) {
+                alternatingColorCounter = 0;
+                html+=QString("<tr bgcolor='%1'><td colspan=%2 align=center><b>%3</b></td></tr>").
+                        arg(subheading_color).arg(periods.size()+1).arg(analysisName(row.src));
+                continue;
+            }
+            name = analysisName(row.src);
         } else if (row.calc == SC_SPACE) {
             // if (CPAP HAS rows and OXI has rows then add space
             html+=QString("<tr bgcolor='%1'><th colspan=%2 align=center><font size='+2'>%3</font></th></tr>").
@@ -2153,6 +2324,8 @@ QString StatisticsRow::value(QDate start, QDate end, MachineType typeOverride)
     // typeOverride allows the caller to substitute a different machine type (e.g. MT_CPAP
     // when oximetry data lives in CPAP sessions rather than a dedicated oximeter).
     MachineType effectiveType = (typeOverride != MT_UNKNOWN) ? typeOverride : type;
+
+    if (calc == SC_ANALYSIS) return analysisValue(src, start, end);
 
     float  daysUsed=0;
     { // hide days to prevent divide by zero crashes.

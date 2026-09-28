@@ -22,6 +22,7 @@ private slots:
     void testSidebarForCpapNight();
     void testSidebarForOximetryOnlyNight();
     void testTabListsDifferences();
+    void testStatisticsFigures();
 
 private:
     class QApplication *m_app = nullptr;

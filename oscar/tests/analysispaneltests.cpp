@@ -13,6 +13,7 @@
 #include <QTreeWidget>
 
 #include "analysispanel.h"
+#include "statistics.h"
 #include "SleepLib/analysis/day_scorer.h"
 #include "tests/analysis_synth.h"
 
@@ -156,4 +157,45 @@ void AnalysisPanelTests::testTabListsDifferences()
     QCOMPARE(tree->topLevelItemCount(), 1);   // the problem zone
     tab.clear();
     QCOMPARE(tree->topLevelItemCount(), 0);
+}
+
+void AnalysisPanelTests::testStatisticsFigures()
+{
+    // A 1-hour night with 5 obstructive apneas and a 2-hour night with one: the period's
+    // index is 6 events over 3 hours, not the mean of 5 and 0.5.
+    AnalysisDailyData a, b;
+    a.hasFlow = b.hasFlow = true;
+    a.flowSeconds = 3600;
+    b.flowSeconds = 7200;
+    a.nObstructiveApnea = 5;
+    b.nObstructiveApnea = 1;
+    b.nHypopnea = 3;
+    a.flBreaths = 100;
+    a.flSeconds = 360;           // 10 % of night a; night b has no flow limitation scored
+    a.hasComparison = b.hasComparison = true;
+    a.cmpMatched = 4;
+    a.cmpDeviceOnly = 1;
+    b.cmpAnalysisOnly = 3;
+    a.hasOximetry = true;
+    a.oxiSeconds = 3600;
+    a.nDesat3 = 6;
+    a.nDesat4 = 3;
+    a.spo2Nadir = 86;
+    a.spo2Hist = QVector<int>(51, 0);
+    a.spo2Hist[96 - 50] = 3240;
+    a.spo2Hist[89 - 50] = 360;   // 10 % below 90
+    const QList<AnalysisDailyData> rows { a, b };
+
+    QCOMPARE(analysisFigure(QStringLiteral("oai"), rows), QStringLiteral("2.00"));
+    QCOMPARE(analysisFigure(QStringLiteral("ahi"), rows), QStringLiteral("3.00"));
+    QCOMPARE(analysisFigure(QStringLiteral("hi"), rows), QStringLiteral("1.00"));
+    QCOMPARE(analysisFigure(QStringLiteral("fl"), rows), QStringLiteral("10.00"));
+    QCOMPARE(analysisFigure(QStringLiteral("agreement"), rows), QStringLiteral("50.00"));   // 4 of 8
+    QCOMPARE(analysisFigure(QStringLiteral("odi3"), rows), QStringLiteral("6.00"));
+    QCOMPARE(analysisFigure(QStringLiteral("odi4"), rows), QStringLiteral("3.00"));
+    QCOMPARE(analysisFigure(QStringLiteral("below:90"), rows), QStringLiteral("10.00"));
+    QCOMPARE(analysisFigure(QStringLiteral("below:97"), rows), QStringLiteral("100.00"));
+    QCOMPARE(analysisFigure(QStringLiteral("nadir"), rows), QStringLiteral("86"));
+    QCOMPARE(analysisFigure(QStringLiteral("pri"), rows), QStringLiteral("-"));   // no pulse
+    QCOMPARE(analysisFigure(QStringLiteral("ahi"), {}), QStringLiteral("-"));
 }

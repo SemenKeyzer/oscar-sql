@@ -19,6 +19,7 @@
 
 
 #include "SleepLib/schema.h"
+#include "database/analysis_daily_repository.h"
 #include "SleepLib/machine.h"
 
 
@@ -66,8 +67,15 @@ public:
 enum StatCalcType {
     SC_UNDEFINED=0, SC_COLUMNHEADERS, SC_HEADING, SC_SUBHEADING, SC_MEDIAN, SC_AVG, SC_WAVG, SC_90P, SC_MIN, SC_MAX, SC_CPH, SC_SPH, SC_AHI_RDI , SC_HOURS, SC_TOTAL_DAYS_PERCENT, SC_DAYS_HEADER , SC_ABOVE, SC_BELOW , SC_WARNING , SC_MESSAGE ,
     SC_TOTAL_DAYS , SC_DAYS_W_DATA , SC_DAYS_WO_DATA , SC_DAYS_GE_COMPLIANCE_HOURS , SC_USED_DAY_PERCENT , SC_DAYS_LT_COMPLAINCE_HOURS , SC_MEDIAN_HOURS , SC_MEDIAN_AHI , SC_AHI_ONLY , SC_SPACE ,
-    SC_OAHI , SC_CAHI
+    SC_OAHI , SC_CAHI ,
+    SC_ANALYSIS_HEADING ,   //!< heading of OSCAR's own analysis (days from analysis_daily)
+    SC_ANALYSIS             //!< a figure of the analysis; src is its key (see analysisValue())
 };
+
+//! A figure of OSCAR's own analysis over the days of \a rows (Statistics rows of type
+//! SC_ANALYSIS, \a key as their src): counts and seconds are summed over the days and
+//! then divided, so a long night weighs more than a short one. "-" without data.
+QString analysisFigure(const QString &key, const QList<AnalysisDailyData> &rows);
 
 /*! \struct StatisticsRow
     \brief Describes a single row on the statistics page
