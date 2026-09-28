@@ -1500,13 +1500,17 @@ void Machine::settleReportedChannels(Session * sess)
 
 void Machine::noteReportedChannels(Session * sess)
 {
+    // Channels OSCAR computes itself (its own analysis) say nothing about what the
+    // device reports, so they never change its capabilities.
+    auto computed = [](ChannelID code) { return schema::channel[code].isComputed(); };
+
     // A session loaded from the database carries its counts in m_cnt ...
     for (auto it = sess->m_cnt.cbegin(); it != sess->m_cnt.cend(); ++it) {
-        if (it.value() > 0) m_reportedChannels.insert(it.key());
+        if (it.value() > 0 && !computed(it.key())) m_reportedChannels.insert(it.key());
     }
     // ... while one built by a loader still has its events in the EventLists.
     for (auto it = sess->eventlist.cbegin(); it != sess->eventlist.cend(); ++it) {
-        if (m_reportedChannels.contains(it.key())) continue;
+        if (m_reportedChannels.contains(it.key()) || computed(it.key())) continue;
         for (EventList * el : it.value()) {
             if (el && el->count() > 0) {
                 m_reportedChannels.insert(it.key());

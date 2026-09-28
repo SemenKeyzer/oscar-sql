@@ -19,6 +19,7 @@
 
 #include "common.h"
 #include "schema.h"
+#include "analysis/analysis_channels.h"
 #include "common_gui.h"
 
 #include "SleepLib/day.h"
@@ -444,6 +445,9 @@ void init()
     #endif
 
 
+    // OSCAR's own analysis (computed channels, never part of the device's AHI)
+    analysis::registerChannels();
+
     // Identify the channels that contribute to AHI calculation
     // When adding more AHI-contributing channels,
     // 1) update this list
@@ -536,7 +540,9 @@ Channel::Channel(ChannelID id, ChanType type, MachineType machtype, ScopeType sc
     m_upperThresholdColor(Qt::red),
     m_lowerThresholdColor(Qt::green),
     m_enabled(true),
-    m_order(255)
+    m_order(255),
+    m_showInOverview(false),
+    m_computed(false)
 {
     if (type == WAVEFORM) {
         // Hue shifts are spaced 72 degrees apart so the four derived lines and the

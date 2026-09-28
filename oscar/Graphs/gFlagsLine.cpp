@@ -12,6 +12,7 @@
 #define BAR_TITLE_BAR_DEBUGoff
 
 
+#include <algorithm>
 #include <cmath>
 #include <QSet>
 #include <QVector>
@@ -81,6 +82,10 @@ void gFlagsGroup::SetDay(Day *d)
     quint32 z = schema::FLAG | schema::SPAN | schema::MINOR_FLAG;
     if (p_profile->general->showUnknownFlags()) z |= schema::UNKNOWN;
     availableChans = d->getSortedMachineChannels(z);
+    // The device's events only: OSCAR's own analysis has its own flags graph.
+    availableChans.erase(std::remove_if(availableChans.begin(), availableChans.end(),
+                                        [](ChannelID code) { return schema::channel[code].isComputed(); }),
+                         availableChans.end());
 
     m_rebuild_cpap = !m_sessions.isEmpty() && (availableChans.size() == 0);
 
@@ -97,6 +102,7 @@ void gFlagsGroup::SetDay(Day *d)
                 seen.insert(code);
 
                 schema::Channel * chan = &schema::channel[code];
+                if (chan->isComputed()) continue;
 
                 if (chan->type() == schema::FLAG) {
                     availableChans.push_back(code);

@@ -87,7 +87,7 @@ extern Channel EmptyChannel;
 class Channel
 {
   public:
-    Channel() { m_id = 0; m_upperThreshold = 0; m_lowerThreshold = 0; m_enabled = true; m_order = 255; m_machtype = MT_UNKNOWN; m_showInOverview = false; }
+    Channel() { m_id = 0; m_upperThreshold = 0; m_lowerThreshold = 0; m_enabled = true; m_order = 255; m_machtype = MT_UNKNOWN; m_showInOverview = false; m_computed = false; }
     Channel(ChannelID id, ChanType type, MachineType machtype, ScopeType scope, QString code, QString fullname,
             QString description, QString label, QString unit, DataType datatype = DEFAULT, QColor = Qt::black,
             int link = 0);
@@ -159,6 +159,12 @@ class Channel
 
     void setShowInOverview(bool b) { m_showInOverview = b; }
 
+    //! \brief True for channels OSCAR computes itself (its own analysis) rather than
+    //! reads from a device. They never count as something the device reports
+    //! (Machine::noteReportedChannels), and stay out of the device's Event Flags.
+    bool isComputed() const { return m_computed; }
+    void setComputed(bool b) { m_computed = b; }
+
     //! \brief Retrieves options that may have been set for the channel.  Used for CPAP Mode, EPR level.
     QString option(int i) {
         if (m_options.contains(i)) {
@@ -217,6 +223,7 @@ class Channel
     short m_order;
 
     bool m_showInOverview;
+    bool m_computed;
 };
 
 /*! \class ChannelList

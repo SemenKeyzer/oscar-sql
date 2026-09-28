@@ -225,7 +225,9 @@ skipcheck:
         if (!m_flags_enabled.contains(code)) {
             bool b = false;
 
-            if (((m_codes[0] == CPAP_FlowRate) ||((m_codes[0] == CPAP_MaskPressureHi))) && (schema::channel[code].machtype() == MT_CPAP)) b = true;
+            // the device's flags on the flow graph; OSCAR's own analysis flags only on request
+            if (((m_codes[0] == CPAP_FlowRate) ||((m_codes[0] == CPAP_MaskPressureHi))) && (schema::channel[code].machtype() == MT_CPAP)
+                    && !schema::channel[code].isComputed()) b = true;
             if ((m_codes[0] == CPAP_Leak) && (code == CPAP_LargeLeak)) b = true;
             m_flags_enabled[code] = b;
         }
