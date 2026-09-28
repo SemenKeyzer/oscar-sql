@@ -437,6 +437,7 @@ SOURCES += \
     SleepLib/schema.cpp \
     SleepLib/serialoximeter.cpp \
     SleepLib/oximetry_session_builder.cpp \
+    SleepLib/analysis/analysis_service.cpp \
     SleepLib/analysis/day_analysis.cpp \
     SleepLib/analysis/day_scorer.cpp \
     SleepLib/analysis/device_event_conventions.cpp \
@@ -631,6 +632,7 @@ HEADERS  += \
     SleepLib/xmlreplay.h \
     SleepLib/serialoximeter.h \
     SleepLib/oximetry_session_builder.h \
+    SleepLib/analysis/analysis_service.h \
     SleepLib/analysis/day_analysis.h \
     SleepLib/analysis/day_scorer.h \
     SleepLib/analysis/device_event_conventions.h \

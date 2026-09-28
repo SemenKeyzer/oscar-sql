@@ -80,6 +80,7 @@ extern QStatusBar *qstatusbar;
 //QString getCPAPPixmap(QString mach_class);
 
 
+namespace analysis { class AnalysisService; }
 class Daily;
 class Report;
 class Overview;
@@ -150,6 +151,13 @@ class MainWindow : public QMainWindow
     void timeCorrectionsChanged();
     //! \brief True while the Time Corrections dialog is open with an unsaved change.
     bool timeCorrectionsDialogHasStagedChange() const;
+
+    //! \brief OSCAR's own sleep analysis of the open profile.
+    analysis::AnalysisService *analysisService() const { return m_analysis; }
+    //! \brief Brings the sleep analysis up to date after data changed: the days that
+    //! need no waveforms (\a all: every outdated day, the user asked for it). A few
+    //! days run straight away, more behind a progress dialog that can be cancelled.
+    void updateAnalysis(bool all = false);
 
     //! \brief Returns the Overview Tab object
     Overview *getOverview() { return overview; }
@@ -486,6 +494,7 @@ private:
     PreferencesDialog *prefdialog;
     class DeviceTimeCorrectionDialog *m_correctionDialog = nullptr;
     class DriftAnalysisDialog *m_driftDialog = nullptr;
+    analysis::AnalysisService *m_analysis = nullptr;
     //! Closes and deletes both dialogs above, which keep pointers to the profile's
     //! devices: before the profile is closed or a device is purged.
     void closeTimeCorrectionDialogs();

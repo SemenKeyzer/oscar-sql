@@ -3847,8 +3847,10 @@ bool Session::LoadEventsFromDatabase()
 
 bool Session::LoadEventsFromDatabase(const QSet<ChannelID> &only)
 {
-    if (s_events_loaded && !m_partialEvents) {
-        return true;   // everything is in memory already
+    // Everything is in memory already: loaded, or built by an import (which does not
+    // set s_events_loaded; OpenEvents() counts such a session as loaded too).
+    if ((s_events_loaded || !eventlist.isEmpty()) && !m_partialEvents) {
+        return true;
     }
     if (m_sessionrow_id == 0) {
         return false;

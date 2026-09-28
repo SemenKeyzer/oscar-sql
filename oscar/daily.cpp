@@ -732,6 +732,7 @@ bool Daily::rejectToggleSessionEnable( Session*sess) {
             return true;
     }
     sess->setEnabled(!sess->enabled());
+    if (mainwin) mainwin->updateAnalysis();   // the day's analysis no longer counts that session
     return false;
 }
 

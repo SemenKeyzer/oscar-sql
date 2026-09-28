@@ -9,11 +9,13 @@
 #include "analysisintegrationtests.h"
 
 #include <QCoreApplication>
+#include <QSignalSpy>
 #include <QSqlQuery>
 #include <QTemporaryDir>
 #include <cmath>
 
 #include "SleepLib/analysis/analysis_channels.h"
+#include "SleepLib/analysis/analysis_service.h"
 #include "SleepLib/analysis/day_analysis.h"
 #include "SleepLib/analysis/session_analysis.h"
 #include "SleepLib/appsettings.h"
@@ -672,4 +674,116 @@ void AnalysisIntegrationTests::testDayAnalysisLoadsOnlyWhatItNeeds()
     QCOMPARE(r.hypopneas.size(), 1);
     QVERIFY(cs->eventlist.isEmpty());
     QCOMPARE(AnalysisDailyRepository().find(m_profileId, day.date()).id, qint64(0));
+}
+
+void AnalysisIntegrationTests::testAnalysisSettingsRoundTrip()
+{
+    AnalysisSettings *settings = p_profile->analysis;
+    QVERIFY(settings != nullptr);
+    settings->resetToDefaults();
+    const AnalysisParams defaults;
+    AnalysisParams p = settings->params();
+    QCOMPARE(p.enabled, defaults.enabled);
+    QCOMPARE(p.flowHash(), defaults.flowHash());
+    QCOMPARE(p.oxiHash(), defaults.oxiHash());
+    QCOMPARE(p.dayHash(), defaults.dayHash());
+
+    p.enabled = false;
+    p.day.rule = HypopneaRule::Cms4;
+    p.day.limitOxiToCpap = true;
+    p.day.linkWindowSec = 45;
+    p.flow.classifyApneas = false;
+    p.flow.flThreshold = 0.6;
+    p.oxi.zoneMinDesats = 4;
+    p.oxi.tachyBpm = 110;
+    settings->setParams(p);
+    const AnalysisParams back = settings->params();
+    QCOMPARE(back.enabled, false);
+    QVERIFY(back.day.rule == HypopneaRule::Cms4);
+    QCOMPARE(back.oxi.zoneMinDesats, 4);
+    QCOMPARE(back.flowHash(), p.flowHash());
+    QCOMPARE(back.oxiHash(), p.oxiHash());
+    QCOMPARE(back.dayHash(), p.dayHash());
+
+    // a rule number from elsewhere falls back on Auto
+    p_profile->Set(STR_AN_HypopneaRule, 9);
+    QVERIFY(settings->params().day.rule == HypopneaRule::Auto);
+
+    QCOMPARE(settings->spo2Thresholds(), AnalysisSettings::defaultSpo2Thresholds());
+    settings->setSpo2Thresholds({ 88, 92, 92, 40, 80, 85, 90, 94, 95 });
+    QCOMPARE(settings->spo2Thresholds(), QList<double>({ 95, 94, 92, 90, 88, 85 }));   // sorted, deduplicated, at most six
+    p_profile->Set(STR_AN_Spo2Thresholds, QStringLiteral("x, 120"));
+    QCOMPARE(settings->spo2Thresholds(), AnalysisSettings::defaultSpo2Thresholds());
+
+    settings->resetToDefaults();
+    QCOMPARE(settings->params().dayHash(), defaults.dayHash());
+    QVERIFY(settings->enabled());
+}
+
+void AnalysisIntegrationTests::testAnalysisServiceKeepsDaysCurrent()
+{
+    Machine cpap(p_profile, 43);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    const QDate date = kNightDate.addDays(5);
+    Day *day = p_profile->addDay(date);
+    day->OpenSummary();   // the session below is built here, not loaded
+    Session *cs = hypopneaSession(&cpap, 63, m_machineRow);
+    analyzeSession(cs, AnalysisParams());   // stage 1, as at import
+    day->addSession(cs);
+
+    p_profile->analysis->resetToDefaults();
+    AnalysisService service;
+    service.reloadSettings();
+    QSignalSpy changed(&service, &AnalysisService::daysChanged);
+
+    // a new day with stage 1 done: pending, and cheap to bring up to date
+    QCOMPARE(service.pendingDays(), QList<QDate>({ date }));
+    QCOMPARE(service.updateDays(service.pendingDays()), 1);
+    QVERIFY(!cs->partialEvents());   // its events were all in memory: nothing was loaded
+    QVERIFY(cs->eventlist.contains(CPAP_FlowRate));
+    QCOMPARE(changed.count(), 1);
+    QVERIFY(service.row(date).id > 0);
+    QCOMPARE(service.rows(date, date).size(), 1);
+    QVERIFY(service.pendingDays().isEmpty());
+    QVERIFY(service.outdatedDays().isEmpty());
+
+    // new flow parameters: stage 1 is outdated, which waits for the user or the Daily view
+    AnalysisParams strict;
+    strict.flow.minEventSec = 20;
+    p_profile->analysis->setParams(strict);
+    service.reloadSettings();
+    QCOMPARE(activeParams().flow.minEventSec, 20.0);   // handed on to the loaders
+    QVERIFY(service.pendingDays().isEmpty());
+    QCOMPARE(service.outdatedDays(), QList<QDate>({ date }));
+    QCOMPARE(service.updateDays({ date }, [](int, int) { return false; }), 0);   // cancelled
+    QCOMPARE(service.updateDays(service.outdatedDays()), 1);
+    QVERIFY(service.outdatedDays().isEmpty());
+
+    // the day for display
+    const DayResult r = service.dayResult(day);
+    QVERIFY(r.hasFlow);
+    QCOMPARE(r.hypopneas.size(), 1);
+
+    // the day's only session switched off: its row goes
+    cs->setEnabled(false);
+    QCOMPARE(service.pendingDays(), QList<QDate>({ date }));
+    QCOMPARE(service.updateDays(service.pendingDays()), 1);
+    QCOMPARE(service.row(date).id, qint64(0));
+    QCOMPARE(AnalysisDailyRepository().find(m_profileId, date).id, qint64(0));
+    QVERIFY(service.pendingDays().isEmpty());
+
+    // switched off altogether: nothing to do
+    AnalysisParams off;
+    off.enabled = false;
+    p_profile->analysis->setParams(off);
+    service.reloadSettings();
+    cs->setEnabled(true);
+    QVERIFY(service.pendingDays().isEmpty());
+    QVERIFY(!service.updateDay(date));
+
+    p_profile->analysis->resetToDefaults();
+    setActiveParams(AnalysisParams());
+    p_profile->daylist.remove(date);
+    delete day;
 }

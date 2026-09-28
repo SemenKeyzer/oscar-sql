@@ -83,6 +83,7 @@
 #include "timealignmentwelcomedialog.h"
 #include "driftanalysisdialog.h"
 #include "database/analysis_daily_repository.h"
+#include "SleepLib/analysis/analysis_service.h"
 #include "database/device_time_correction_repository.h"
 #include "aboutdialog.h"
 #include "newprofile.h"
@@ -132,6 +133,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    m_analysis = new analysis::AnalysisService(this);
 
     {
         QAction *searchIcon = ui->filterBookmarks->addAction(
@@ -703,6 +705,7 @@ bool MainWindow::OpenProfile(QString profileName)
 
     p_profile = prof;
     Statistics::resetReportDate();  // force updateReportDate() to refresh on first GenerateStatistics() for this profile
+    m_analysis->reloadSettings();   // before any import: the loaders run the analysis
     ProgressDialog * progress = new ProgressDialog(this);
 
     auto abortOpenProfile = [&](const char *reason) {
@@ -910,6 +913,7 @@ void MainWindow::CloseProfile()
         overview = nullptr;
     }
 
+    m_analysis->reset();
     if (p_profile) {
         p_profile->StoreMachines();
         p_profile->UnloadMachineData();
@@ -1201,6 +1205,8 @@ void MainWindow::finishCPAPImport()
 
     if (daily)
         daily->Unload(daily->getDate());
+
+    updateAnalysis();
 
     qDebug() << "MainWindow::finishCPAPImport(): calling GenerateStatistics";
     GenerateStatistics();
@@ -2125,9 +2131,35 @@ void MainWindow::timeCorrectionsChanged()
         }
     }
 
+    updateAnalysis();
     if (overview) overview->ReloadGraphs();
     if (welcome) welcome->refreshPage();
     GenerateStatistics();
+}
+
+void MainWindow::updateAnalysis(bool all)
+{
+    if (!p_profile || !m_analysis) return;
+    const QList<QDate> dates = all ? m_analysis->outdatedDays() : m_analysis->pendingDays();
+    if (dates.isEmpty()) return;
+
+    constexpr int kQuickDays = 10;
+    if (dates.size() <= kQuickDays) {
+        QApplication::setOverrideCursor(Qt::WaitCursor);
+        m_analysis->updateDays(dates);
+        QApplication::restoreOverrideCursor();
+        return;
+    }
+    QProgressDialog progress(tr("Analysing %n night(s)...", "", int(dates.size())), tr("Cancel"), 0, int(dates.size()), this);
+    progress.setWindowTitle(tr("Sleep Analysis"));
+    progress.setWindowModality(Qt::WindowModal);
+    progress.setMinimumDuration(0);
+    m_analysis->updateDays(dates, [&progress](int done, int total) {
+        progress.setMaximum(total);
+        progress.setValue(done);
+        QCoreApplication::processEvents();
+        return !progress.wasCanceled();
+    });
 }
 
 #include "oximeterimport.h"
@@ -2138,6 +2170,7 @@ void MainWindow::on_oximetryButton_clicked()
     if (p_profile) {
         OximeterImport oxiimp(this);
         oxiimp.exec();
+        updateAnalysis();
         PopulatePurgeMenu();
         if (overview) overview->ReloadGraphs();
         if (welcome) welcome->refreshPage();
@@ -2616,6 +2649,9 @@ void MainWindow::purgeDay(MachineType type)
         }
     }
 
+    m_analysis->reloadCache();
+    updateAnalysis();
+
     if (type == MT_JOURNAL)
         daily->clearJournalNotesEditor();
 
@@ -2719,6 +2755,9 @@ void MainWindow::on_actionPurgeRangeOfDays_triggered()
             }
         }
     }
+
+    m_analysis->reloadCache();
+    updateAnalysis();
 
     if (type == MT_JOURNAL)
         daily->clearJournalNotesEditor();
@@ -2898,6 +2937,8 @@ void MainWindow::purgeMachine(Machine * mach)
             }
         }
         p_profile->calculateDailySummaries();
+        m_analysis->reloadCache();
+        updateAnalysis();
         // Remove the directory only if it is empty; leave it intact if anything unexpected remains.
         if (!dir.rmdir(path)) {
             qWarning() << "Could not remove device directory (may not be empty), leaving intact:" << path;
@@ -3685,6 +3726,7 @@ bool MainWindow::importNonCPAP(MachineLoader &loader, const QString &folderPrefK
             // Refresh daily_summaries for the newly imported days so that
             // oximetry stats (spo2_avg, pulse_avg/min/max, has_oximetry) appear.
             p_profile->calculateDailySummaries();
+            updateAnalysis();
         }
         PopulatePurgeMenu();
         if (overview) overview->ReloadGraphs();
@@ -3920,6 +3962,8 @@ void MainWindow::on_actionPurgeCurrentDaysOximetry_triggered()
                 AnalysisDailyRepository().remove(profileData.id, date);
             }
         }
+        m_analysis->reloadCache();
+        updateAnalysis();
 
         daily->LoadDate(date);
         if (overview) overview->ReloadGraphs();

@@ -34,6 +34,8 @@ private slots:
     void testMigrationAddsAnalysisDaily();
     void testDayAnalysisScoresAndStores();
     void testDayAnalysisLoadsOnlyWhatItNeeds();
+    void testAnalysisSettingsRoundTrip();
+    void testAnalysisServiceKeepsDaysCurrent();
 
 private:
     class QCoreApplication *m_app = nullptr;

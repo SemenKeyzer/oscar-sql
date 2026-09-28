@@ -26,6 +26,7 @@
 #include <QRegularExpression>
 #include <algorithm>
 #include <cmath>
+#include <functional>
 
 #include "preferences.h"
 #include "profiles.h"
@@ -107,6 +108,7 @@ Profile::Profile(QString path, bool open)
     appearance = new AppearanceSettings(this);
     session = new SessionSettings(this);
     general = new UserSettings(this);
+    analysis = new AnalysisSettings(this);
 
     if (open) {
         // IMPORTANT: Set username from path BEFORE loading from database
@@ -166,6 +168,7 @@ Profile::~Profile()
     delete appearance;
     delete session;
     delete general;
+    delete analysis;
 }
 
 bool Profile::Save(QString filename)
@@ -3379,4 +3382,123 @@ bool Profile::loadProfilePreferencesFromDatabase()
     
 //    qDebug() << "Profile::loadProfilePreferencesFromDatabase() - Loaded" << prefs.size() << "profile-level preferences";
     return true;
+}
+
+namespace {
+
+// The numeric analysis parameters and their preference keys.
+struct AnalysisNumber {
+    const QString &key;
+    double &(*field)(analysis::AnalysisParams &);
+};
+
+const QVector<AnalysisNumber> &analysisNumbers()
+{
+    using P = analysis::AnalysisParams;
+    static const QVector<AnalysisNumber> numbers {
+        { STR_AN_DesatMinDrop, [](P &p) -> double & { return p.oxi.desatMinDrop; } },
+        { STR_AN_DesatMinSec, [](P &p) -> double & { return p.oxi.desatMinSec; } },
+        { STR_AN_DesatMaxFallSec, [](P &p) -> double & { return p.oxi.desatMaxFallSec; } },
+        { STR_AN_DesatMaxSec, [](P &p) -> double & { return p.oxi.desatMaxSec; } },
+        { STR_AN_PulseRise, [](P &p) -> double & { return p.oxi.pulseRise; } },
+        { STR_AN_BradyBpm, [](P &p) -> double & { return p.oxi.bradyBpm; } },
+        { STR_AN_TachyBpm, [](P &p) -> double & { return p.oxi.tachyBpm; } },
+        { STR_AN_BradyTachyMinSec, [](P &p) -> double & { return p.oxi.bradyTachyMinSec; } },
+        { STR_AN_ZoneLowPct, [](P &p) -> double & { return p.oxi.zoneLowPct; } },
+        { STR_AN_ZoneCriticalPct, [](P &p) -> double & { return p.oxi.zoneCriticalPct; } },
+        { STR_AN_ZoneWindowSec, [](P &p) -> double & { return p.oxi.zoneWindowSec; } },
+        { STR_AN_ZoneStepSec, [](P &p) -> double & { return p.oxi.zoneStepSec; } },
+        { STR_AN_ZoneMinSec, [](P &p) -> double & { return p.oxi.zoneMinSec; } },
+        { STR_AN_ZoneMergeGapSec, [](P &p) -> double & { return p.oxi.zoneMergeGapSec; } },
+        { STR_AN_ZoneLowSec, [](P &p) -> double & { return p.oxi.zoneLowSec; } },
+        { STR_AN_ZoneCriticalSec, [](P &p) -> double & { return p.oxi.zoneCriticalSec; } },
+        { STR_AN_ApneaReduction, [](P &p) -> double & { return p.flow.apneaReduction; } },
+        { STR_AN_HypopneaReduction, [](P &p) -> double & { return p.flow.hypopneaReduction; } },
+        { STR_AN_MinEventSec, [](P &p) -> double & { return p.flow.minEventSec; } },
+        { STR_AN_MaxEventSec, [](P &p) -> double & { return p.flow.maxEventSec; } },
+        { STR_AN_BaselineWindowSec, [](P &p) -> double & { return p.flow.baselineWindowSec; } },
+        { STR_AN_BaselinePercentile, [](P &p) -> double & { return p.flow.baselinePercentile; } },
+        { STR_AN_FlThreshold, [](P &p) -> double & { return p.flow.flThreshold; } },
+        { STR_AN_FlowOnlyReduction, [](P &p) -> double & { return p.day.flowOnlyReduction; } },
+        { STR_AN_LinkWindowSec, [](P &p) -> double & { return p.day.linkWindowSec; } },
+    };
+    return numbers;
+}
+
+QString thresholdsText(const QList<double> &thresholds)
+{
+    QStringList parts;
+    for (double t : thresholds) parts << QString::number(t);
+    return parts.join(QLatin1Char(','));
+}
+
+} // namespace
+
+AnalysisSettings::AnalysisSettings(Profile *profile)
+  : PrefSettings(profile)
+{
+    analysis::AnalysisParams defaults;
+    initPref(STR_AN_Enabled, defaults.enabled);
+    initPref(STR_AN_HypopneaRule, int(defaults.day.rule));
+    initPref(STR_AN_LimitOxiToCpap, defaults.day.limitOxiToCpap);
+    initPref(STR_AN_PulseRiseAsArousal, defaults.day.pulseRiseAsArousal);
+    initPref(STR_AN_ClassifyApneas, defaults.flow.classifyApneas);
+    initPref(STR_AN_ZoneMinDesats, defaults.oxi.zoneMinDesats);
+    initPref(STR_AN_Spo2Thresholds, thresholdsText(defaultSpo2Thresholds()));
+    for (const AnalysisNumber &n : analysisNumbers()) initPref(n.key, n.field(defaults));
+}
+
+analysis::AnalysisParams AnalysisSettings::params() const
+{
+    analysis::AnalysisParams p;
+    p.enabled = getPref(STR_AN_Enabled).toBool();
+    const int rule = getPref(STR_AN_HypopneaRule).toInt();
+    p.day.rule = rule >= int(analysis::HypopneaRule::Auto) && rule <= int(analysis::HypopneaRule::FlowOnly)
+               ? analysis::HypopneaRule(rule) : analysis::HypopneaRule::Auto;
+    p.day.limitOxiToCpap = getPref(STR_AN_LimitOxiToCpap).toBool();
+    p.day.pulseRiseAsArousal = getPref(STR_AN_PulseRiseAsArousal).toBool();
+    p.flow.classifyApneas = getPref(STR_AN_ClassifyApneas).toBool();
+    p.oxi.zoneMinDesats = getPref(STR_AN_ZoneMinDesats).toInt();
+    for (const AnalysisNumber &n : analysisNumbers()) {
+        bool ok = false;
+        const double v = getPref(n.key).toDouble(&ok);
+        if (ok) n.field(p) = v;
+    }
+    return p;
+}
+
+void AnalysisSettings::setParams(const analysis::AnalysisParams &params)
+{
+    analysis::AnalysisParams p = params;
+    setPref(STR_AN_Enabled, p.enabled);
+    setPref(STR_AN_HypopneaRule, int(p.day.rule));
+    setPref(STR_AN_LimitOxiToCpap, p.day.limitOxiToCpap);
+    setPref(STR_AN_PulseRiseAsArousal, p.day.pulseRiseAsArousal);
+    setPref(STR_AN_ClassifyApneas, p.flow.classifyApneas);
+    setPref(STR_AN_ZoneMinDesats, p.oxi.zoneMinDesats);
+    for (const AnalysisNumber &n : analysisNumbers()) setPref(n.key, n.field(p));
+}
+
+void AnalysisSettings::resetToDefaults()
+{
+    setParams(analysis::AnalysisParams());
+    setSpo2Thresholds(defaultSpo2Thresholds());
+}
+
+QList<double> AnalysisSettings::spo2Thresholds() const
+{
+    QList<double> out;
+    for (const QString &part : getPref(STR_AN_Spo2Thresholds).toString().split(QLatin1Char(','), Qt::SkipEmptyParts)) {
+        bool ok = false;
+        const double t = part.trimmed().toDouble(&ok);
+        if (ok && t >= 50 && t <= 100 && !out.contains(t)) out.append(t);
+    }
+    std::sort(out.begin(), out.end(), std::greater<double>());
+    while (out.size() > 6) out.removeLast();
+    return out.isEmpty() ? defaultSpo2Thresholds() : out;
+}
+
+void AnalysisSettings::setSpo2Thresholds(const QList<double> &thresholds)
+{
+    setPref(STR_AN_Spo2Thresholds, thresholdsText(thresholds));
 }

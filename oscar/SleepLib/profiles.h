@@ -19,6 +19,7 @@
 #include "machine_loader.h"
 #include "preferences.h"
 #include "common.h"
+#include "SleepLib/analysis/analysis_params.h"
 
 class Machine;
 
@@ -32,6 +33,7 @@ class OxiSettings;
 class CPAPSettings;
 class AppearanceSettings;
 class SessionSettings;
+class AnalysisSettings;
 
 
 /*!
@@ -273,6 +275,7 @@ class Profile : public Preferences
     AppearanceSettings *appearance;
     UserSettings *general;
     SessionSettings *session;
+    AnalysisSettings *analysis;   //!< OSCAR's own sleep analysis
     QList<Machine *> m_machlist;
 
   protected:
@@ -447,6 +450,40 @@ const int STAT_MODE_RANGE = 2;
 //added by Sheila 1/5/2026
 const QString STR_OS_baseSpO2Option = "baseSpO2Option";
 
+// AnalysisSettings Strings: the switches, then every parameter of analysis::AnalysisParams
+const QString STR_AN_Enabled = "AnEnabled";
+const QString STR_AN_HypopneaRule = "AnHypopneaRule";
+const QString STR_AN_LimitOxiToCpap = "AnLimitOxiToCpap";
+const QString STR_AN_PulseRiseAsArousal = "AnPulseRiseAsArousal";
+const QString STR_AN_ClassifyApneas = "AnClassifyApneas";
+const QString STR_AN_Spo2Thresholds = "AnSpo2Thresholds";
+const QString STR_AN_DesatMinDrop = "AnDesatMinDrop";
+const QString STR_AN_DesatMinSec = "AnDesatMinSec";
+const QString STR_AN_DesatMaxFallSec = "AnDesatMaxFallSec";
+const QString STR_AN_DesatMaxSec = "AnDesatMaxSec";
+const QString STR_AN_PulseRise = "AnPulseRise";
+const QString STR_AN_BradyBpm = "AnBradyBpm";
+const QString STR_AN_TachyBpm = "AnTachyBpm";
+const QString STR_AN_BradyTachyMinSec = "AnBradyTachyMinSec";
+const QString STR_AN_ZoneLowPct = "AnZoneLowPct";
+const QString STR_AN_ZoneCriticalPct = "AnZoneCriticalPct";
+const QString STR_AN_ZoneWindowSec = "AnZoneWindowSec";
+const QString STR_AN_ZoneStepSec = "AnZoneStepSec";
+const QString STR_AN_ZoneMinSec = "AnZoneMinSec";
+const QString STR_AN_ZoneMergeGapSec = "AnZoneMergeGapSec";
+const QString STR_AN_ZoneLowSec = "AnZoneLowSec";
+const QString STR_AN_ZoneCriticalSec = "AnZoneCriticalSec";
+const QString STR_AN_ZoneMinDesats = "AnZoneMinDesats";
+const QString STR_AN_ApneaReduction = "AnApneaReduction";
+const QString STR_AN_HypopneaReduction = "AnHypopneaReduction";
+const QString STR_AN_MinEventSec = "AnMinEventSec";
+const QString STR_AN_MaxEventSec = "AnMaxEventSec";
+const QString STR_AN_BaselineWindowSec = "AnBaselineWindowSec";
+const QString STR_AN_BaselinePercentile = "AnBaselinePercentile";
+const QString STR_AN_FlThreshold = "AnFlThreshold";
+const QString STR_AN_FlowOnlyReduction = "AnFlowOnlyReduction";
+const QString STR_AN_LinkWindowSec = "AnLinkWindowSec";
+
 class DoctorInfo : public PrefSettings
 {
   public:
@@ -618,6 +655,31 @@ class OxiSettings : public PrefSettings
     //added by Sheila
     int baseSpO2Option() const { return getPref(STR_OS_baseSpO2Option).toInt(); }
     void setBaseSpO2Option(int val) { setPref(STR_OS_baseSpO2Option, val); }
+};
+
+/*! \class AnalysisSettings
+    \brief Profile options of OSCAR's own sleep analysis: every parameter of
+    analysis::AnalysisParams, plus the SpO2 thresholds its "time below" figures use
+    (read from the stored histograms, so changing them needs no recalculation).
+    */
+class AnalysisSettings : public PrefSettings
+{
+  public:
+    explicit AnalysisSettings(Profile *profile);
+
+    //! The analysis parameters these settings describe.
+    analysis::AnalysisParams params() const;
+    void setParams(const analysis::AnalysisParams &params);
+    //! Every parameter back to its default (the thresholds too).
+    void resetToDefaults();
+
+    bool enabled() const { return getPref(STR_AN_Enabled).toBool(); }
+    void setEnabled(bool enabled) { setPref(STR_AN_Enabled, enabled); }
+
+    //! Up to six SpO2 thresholds (%), highest first; 94, 90, 88, 85, 80 by default.
+    QList<double> spo2Thresholds() const;
+    void setSpo2Thresholds(const QList<double> &thresholds);
+    static QList<double> defaultSpo2Thresholds() { return { 94, 90, 88, 85, 80 }; }
 };
 
 /*! \class CPAPSettings
