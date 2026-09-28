@@ -432,15 +432,19 @@ bool Machine::AddSession(Session *s, bool allowOldSessions)
     dd->addSession(s);
 
     if (combine_next_day) {
-        for (QList<Session *>::iterator i = nextday.value()->begin(); i != nextday.value()->end(); i++) {
-            // i may need to do something here
-            if (locksessions && (*i)->summaryOnly()) continue; // can't move summary only sessions..
-            unlinkSession(*i);
+        // Work on a copy: unlinkSession() removes each session from this very list
+        // and can drop the emptied day (and its map entry, which nextday points
+        // at) altogether.  Iterating the live list skipped every other session,
+        // leaving some in no day and others linked into two (deleted twice later).
+        const QList<Session *> moving = nextday.value()->sessions;
+        for (Session * sess : moving) {
+            if (locksessions && sess->summaryOnly()) continue; // can't move summary only sessions..
+            unlinkSession(sess);
             // Add it back
 
-            sessionlist[(*i)->session()] = *i;
+            sessionlist[sess->session()] = sess;
 
-            dd->addSession(*i);
+            dd->addSession(sess);
         }
 
 //        QMap<QDate, QList<Day *> >::iterator nd = profile->daylist.find(date.addDays(1));
