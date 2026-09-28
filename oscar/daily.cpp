@@ -46,6 +46,8 @@
 #include "SleepLib/session.h"
 #include "SleepLib/performance_timer.h"
 #include "SleepLib/analysis/analysis_channels.h"
+#include "SleepLib/analysis/analysis_service.h"
+#include "analysispanel.h"
 #include "SleepLib/loader_plugins/applehealth_loader.h"
 #include "database/session_repository.h"
 
@@ -74,6 +76,7 @@ QString htmlLeftPieChart = "";
 QString htmlLeftNoHours = "";
 QString htmlLeftStatistics;
 QString htmlLeftOximeter;
+QString htmlLeftAnalysis;
 QString htmlLeftMachineSettings;
 QString htmlLeftSessionInfo;
 QString htmlLeftFooter;
@@ -238,6 +241,16 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     // add the sessionbar after it.
 
     ui->tabWidget->insertTab(0, widget, QIcon(), tr("Details"));
+
+    // OSCAR's own analysis: where it and the device differ, problem zones, ...
+    m_analysisTab = new AnalysisTab(ui->tabWidget);
+    ui->tabWidget->insertTab(ui->tabWidget->indexOf(ui->events) + 1, m_analysisTab, tr("Analysis"));
+    connect(m_analysisTab, &AnalysisTab::showRange, this, [this](qint64 from, qint64 to) {
+        GraphView->SetXBounds(from, to);
+    });
+    if (mainwin && mainwin->analysisService()) {
+        connect(mainwin->analysisService(), &analysis::AnalysisService::daysChanged, this, &Daily::onAnalysisDaysChanged);
+    }
 
     ui->graphFrame->setLayout(layout);
     //ui->graphMainArea->setLayout(layout);
@@ -837,6 +850,15 @@ void Daily::Link_clicked(const QUrl &url)
         }
     } else if (code=="graph") {
         qDebug() << "Select graph " << data;
+    } else if (code=="analysis") {   // "Show differences"
+        if (m_analysisTab) ui->tabWidget->setCurrentWidget(m_analysisTab);
+    } else if (code=="align") {      // the analysis suggests an oximeter clock offset
+        Day *d = p_profile->GetDay(previous_date);
+        Machine *oxi = d ? d->machine(MT_OXIMETER) : nullptr;
+        if (oxi && m_analysisResult.hasOffsetHint) {
+            startAlign(oxi);
+            if (m_alignSession->isActive()) m_alignSession->nudge(m_analysisResult.offsetHintMs);
+        }
     } else if (code=="leftsidebarenable") {
         leftSideBarEnable.toggleBit(data.toInt());
         int bits = 0;
@@ -2215,6 +2237,7 @@ QString Daily::getLeftSidebar (bool honorPieChart) {
 
     html +=   htmlLeftNoHours
             + htmlLeftStatistics
+            + htmlLeftAnalysis
             + htmlLeftOximeter
             + htmlLeftMachineSettings
             + htmlLeftSessionInfo
@@ -2292,6 +2315,7 @@ void Daily::Load(QDate date)
     htmlLeftNoHours.clear();
     htmlLeftStatistics.clear();
     htmlLeftOximeter.clear();
+    htmlLeftAnalysis.clear();
     htmlLeftMachineSettings.clear();
     htmlLeftSessionInfo.clear();
 
@@ -2304,6 +2328,7 @@ void Daily::Load(QDate date)
     if (day) {
         day->OpenEvents();
     }
+    loadAnalysis(day);   // may add or replace analysis channels: before the graphs get the day
     GraphView->setDay(day);
     PERF_TIMER_STOP("Daily::Load::OpenEvents");
 
@@ -2406,6 +2431,7 @@ void Daily::Load(QDate date)
     PERF_TIMER_STOP("Daily::Load::LeftPanel");
     if (day) {
         htmlLeftOximeter = getOximeterInformation(day);
+        htmlLeftAnalysis = getAnalysisInformation(day);
         htmlLeftMachineSettings = getMachineSettings(day);
         htmlLeftSessionInfo= getSessionInformation(day);
     }
@@ -3947,4 +3973,60 @@ void Daily::onAlignCancel()
 {
     if (m_alignSession->isActive()) m_alignSession->cancel();
     stopAlign();
+}
+
+void Daily::loadAnalysis(Day *day)
+{
+    m_analysisResult = analysis::DayResult();
+    m_analysisSource.clear();
+    m_analysisShown = false;
+    analysis::AnalysisService *service = mainwin ? mainwin->analysisService() : nullptr;
+    if (day && service && service->params().enabled && !analysis::analysableSessions(day).isEmpty()) {
+        m_loadingAnalysis = true;   // its own daysChanged() is no reason to reload
+        m_analysisResult = service->dayResult(day, &m_analysisSource);
+        m_loadingAnalysis = false;
+        m_analysisShown = m_analysisResult.hasCpap || m_analysisResult.hasOximetry;
+    }
+    if (!m_analysisTab) return;
+    if (m_analysisShown) m_analysisTab->setResult(m_analysisResult);
+    else m_analysisTab->clear();
+}
+
+QString Daily::getAnalysisInformation(Day *day)
+{
+    QString html;
+    if (!day || !m_analysisShown) return html;
+    htmlLsbSectionHeader(html, tr("Analysis (second opinion)"), LSB_ANALYSIS);
+    if (!leftSideBarEnable[LSB_ANALYSIS]) return html;
+    html += AnalysisPanel::sidebarHtml(day, m_analysisResult, m_analysisSource, p_profile->analysis->spo2Thresholds());
+    html += "<hr/>\n";
+    return html;
+}
+
+void Daily::onAnalysisDaysChanged(const QList<QDate> &dates)
+{
+    if (m_loadingAnalysis || !dates.contains(previous_date)) return;
+    refreshAnalysis();
+}
+
+void Daily::refreshAnalysis()
+{
+    Day *day = p_profile ? p_profile->GetDay(previous_date) : nullptr;
+    loadAnalysis(day);
+    htmlLeftAnalysis = getAnalysisInformation(day);
+    if (webView && !htmlLeftHeader.isEmpty()) webView->setHtml(getLeftSidebar(true));
+
+    // The graphs pick up the new channels with the day; keep the zoom.
+    qint64 minx = 0, maxx = 0;
+    for (int i = 0; i < GraphView->size(); ++i) {
+        gGraph *g = (*GraphView)[i];
+        if (g->visible() && g->min_x < g->max_x) {
+            minx = g->min_x;
+            maxx = g->max_x;
+            break;
+        }
+    }
+    GraphView->setDay(day);
+    if (maxx > minx) GraphView->SetXBounds(minx, maxx);
+    else GraphView->redraw();
 }

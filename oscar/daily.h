@@ -35,6 +35,7 @@
 #include "sessionbar.h"
 #include "mytextbrowser.h"
 #include "timealignsession.h"
+#include "SleepLib/analysis/day_scorer.h"
 class SaveGraphLayoutSettings;
 
 
@@ -46,6 +47,7 @@ class MainWindow;
 class DailySearchTab;
 class TimeAlignBar;
 class gFlagsGroup;
+class AnalysisTab;
 
 
 /*! \class Daily
@@ -198,6 +200,9 @@ private slots:
     void onAlignRequestedForGraph(gGraph *graph);
     void onAlignDeviceChosen(Machine *mach);
     void onAlignOffsetChanged(qint64 ms);
+    //! The stored analysis of these days changed (a time correction, say): refresh it
+    //! if the shown day is among them.
+    void onAnalysisDaysChanged(const QList<QDate> &dates);
     void onAlignNudge(qint64 deltaMs);
     void onAlignDragStarted();
     void onAlignDragMoved(double rawDeltaMs, double msPerPx);
@@ -342,6 +347,19 @@ protected:
     virtual void showEvent(QShowEvent *);
 
 private:
+    //! Brings the day's analysis up to date (before the graphs are given the day) and
+    //! fills the Analysis tab.
+    void loadAnalysis(Day *day);
+    //! The "Analysis (second opinion)" sidebar section.
+    QString getAnalysisInformation(Day *day);
+    //! After the shown day's analysis changed: sidebar, tab and graphs, keeping the zoom.
+    void refreshAnalysis();
+    AnalysisTab *m_analysisTab = nullptr;
+    analysis::DayResult m_analysisResult;
+    QString m_analysisSource;
+    bool m_analysisShown = false;
+    bool m_loadingAnalysis = false;
+
     double  calculateBMI(double weight_kg, double height_cm);
     void set_JournalZombie(QDate&, int);
     void set_JournalWeightValue(QDate&, double kgs);
@@ -472,6 +490,7 @@ private:
         LSB_OXIMETER_INFORMATION ,
         LSB_DEVICE_SETTINGS  ,
         LSB_SESSION_INFORMATION  ,
+        LSB_ANALYSIS ,
         LSB_END_SIZE };
     QBitArray leftSideBarEnable = QBitArray(LSB_END_SIZE,true);
     void htmlLsbSectionHeader (QString& html, const QString& name,LEFT_SIDEBAR checkBox) ;

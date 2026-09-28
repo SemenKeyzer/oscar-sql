@@ -319,6 +319,7 @@ SOURCES += \
     common_gui.cpp \
     cprogressbar.cpp \
     csv.cpp \
+    analysispanel.cpp \
     daily.cpp \
     dailySearchTab.cpp \
     devicetimecorrectiondialog.cpp \
@@ -521,6 +522,7 @@ HEADERS  += \
     database/reports_initializer.h \
     notifyMessageBox.h \
     dailySearchTab.h \
+    analysispanel.h \
     daily.h \
     combocheckdelegate.h \
     saveGraphLayoutSettings.h \
@@ -876,6 +878,7 @@ test {
         tests/flowfeaturetests.cpp \
         tests/apneaclassifiertests.cpp \
         tests/analysisintegrationtests.cpp \
+        tests/analysispaneltests.cpp \
         tests/dayscorertests.cpp \
         tests/eventmatchertests.cpp
 
@@ -904,6 +907,7 @@ test {
         tests/contecbledownloadertests.h \
         tests/contecbleimporttests.h \
         tests/analysisintegrationtests.h \
+        tests/analysispaneltests.h \
         tests/dayscorertests.h \
         tests/eventmatchertests.h \
         tests/apneaclassifiertests.h \
