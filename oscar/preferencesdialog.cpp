@@ -1114,6 +1114,11 @@ bool PreferencesDialog::Save()
         mainwin->reloadProfile();
     }
 #endif
+    // The follow-up steps are not alternatives. (An else-if chain applied only the first
+    // one: a new day-split time was not applied when events were also recalculated, and
+    // a restart was lost whenever a recalculation or reload ran.) Recalculating saves
+    // every session again, so it also applies a compression change; a restart reopens
+    // the profile, so it also applies what a reload would.
     // steady Breathing
     if (clicicalModeChanged) {
 
@@ -1121,23 +1126,23 @@ bool PreferencesDialog::Save()
         //QTimer::singleShot(0, mainwin, SLOT(reloadProfile()));
         // while this one works.
         mainwin->reloadProfile();
-    } else
-        if (recompress_events) {
-            mainwin->recompressEvents();
-        } else if (recalc_events) {
-            // send a signal instead?
-            mainwin->reprocessEvents(needs_restart);
-        } else if (needs_reload) {
-            QTimer::singleShot(0, mainwin, SLOT(reloadProfile()));
-        } else if (needs_restart) {
-            mainwin->RestartApplication();
-            return false; // Prevent accept() so post-dialog UI code doesn't run with null p_profile
-        } else {
-            mainwin->getDaily()->LoadDate(mainwin->getDaily()->getDate());
-            // Save early.. just in case..
-            mainwin->getDaily()->graphView()->SaveSettings("Daily");
-            mainwin->getOverview()->graphView()->SaveSettings("Overview");
-        }
+        needs_reload = false;
+    }
+    if (recalc_events) {
+        mainwin->reprocessEvents(needs_restart, needs_reload);
+    } else if (recompress_events) {
+        mainwin->recompressEvents(needs_restart, needs_reload);
+    } else if (needs_restart) {
+        mainwin->RestartApplication();
+        return false; // Prevent accept() so post-dialog UI code doesn't run with null p_profile
+    } else if (needs_reload) {
+        QTimer::singleShot(0, mainwin, SLOT(reloadProfile()));
+    } else if (!clicicalModeChanged) {
+        mainwin->getDaily()->LoadDate(mainwin->getDaily()->getDate());
+        // Save early.. just in case..
+        mainwin->getDaily()->graphView()->SaveSettings("Daily");
+        mainwin->getOverview()->graphView()->SaveSettings("Overview");
+    }
 
     return true;
 }

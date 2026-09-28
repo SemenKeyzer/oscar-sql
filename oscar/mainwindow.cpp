@@ -2988,14 +2988,31 @@ void MainWindow::on_filterBookmarksButton_clicked()
     }
 }
 
-void MainWindow::recompressEvents()
-{
-    QTimer::singleShot(0, this, SLOT(doRecompressEvents()));
-}
-void MainWindow::reprocessEvents(bool restart)
+void MainWindow::recompressEvents(bool restart, bool reload)
 {
     m_restartRequired = restart;
+    m_reloadRequired = reload;
+    QTimer::singleShot(0, this, SLOT(doRecompressEvents()));
+}
+void MainWindow::reprocessEvents(bool restart, bool reload)
+{
+    m_restartRequired = restart;
+    m_reloadRequired = reload;
     QTimer::singleShot(0, this, SLOT(doReprocessEvents()));
+}
+
+void MainWindow::finishRecalculation()
+{
+    m_inRecalculation = false;
+    const bool restart = m_restartRequired;
+    const bool reload = m_reloadRequired;
+    m_restartRequired = m_reloadRequired = false;
+    // A restart reopens the profile, so it covers a reload too.
+    if (restart) {
+        RestartApplication();
+    } else if (reload && p_profile) {
+        reloadProfile();
+    }
 }
 
 
@@ -3027,6 +3044,9 @@ void MainWindow::FreeSessions()
 void MainWindow::doRecompressEvents()
 {
     if (!p_profile) return;
+    // Blocks Preferences and imports while this runs (the loop below lets the event
+    // loop run); finishRecalculation() clears it.
+    m_inRecalculation = true;
     ProgressDialog progress(this);
     progress.setMessage(QObject::tr("Recompressing Session Files"));
     progress.setProgressMax(p_profile->daylist.size());
@@ -3053,10 +3073,12 @@ void MainWindow::doRecompressEvents()
         QApplication::processEvents();
     }
     progress.close();
+    finishRecalculation();
 }
 void MainWindow::doReprocessEvents()
 {
     if (!p_profile) return;
+    m_inRecalculation = true;   // see doRecompressEvents()
 
     ProgressDialog progress(this);
     progress.setMessage(tr("Recalculating summaries"));
@@ -3143,6 +3165,7 @@ void MainWindow::doReprocessEvents()
     GenerateStatistics();
     PopulatePurgeMenu();
 
+    finishRecalculation();
 }
 
 void MainWindow::on_actionImport_ZEO_Data_triggered()

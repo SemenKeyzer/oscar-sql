@@ -165,8 +165,10 @@ class MainWindow : public QMainWindow
     void sendStatsUrl(QString msg) { on_recordsBox_anchorClicked(QUrl(msg)); }
 
     //! \brief Sets up recalculation of all event summaries and flags
-    void reprocessEvents(bool restart = false);
-    void recompressEvents();
+    //! (or recompression); when that is done, restarts OSCAR if \a restart,
+    //! else reloads the profile if \a reload.
+    void reprocessEvents(bool restart = false, bool reload = false);
+    void recompressEvents(bool restart = false, bool reload = false);
 
 
     //! \brief Internal function to set Records Box html from statistics module
@@ -497,6 +499,9 @@ private:
 //    gGraphView *SnapshotGraph;
     QString bookmarkFilter;
     bool m_restartRequired;
+    bool m_reloadRequired = false;
+    //! The follow-up queued by reprocessEvents()/recompressEvents().
+    void finishRecalculation();
     bool m_clinicalMode = false;
     bool m_geometryCorrected = false;
     volatile bool m_inRecalculation;
