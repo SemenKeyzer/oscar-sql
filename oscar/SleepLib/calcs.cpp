@@ -1058,8 +1058,11 @@ int calcAHIGraph(Session *session)
     if (!gotsome)
        return 0;
 
-    qint64 first = session->first(),
-           last = session->last(),
+    // Device time, like the event times rangeCount() compares against: first()/
+    // last() include the night's time correction, which shifted every window, and
+    // gLineChart adds the correction again when it draws the result.
+    qint64 first = session->realFirst(),
+           last = session->realLast(),
            f;
 
     // The loops below step through the session in 30-second increments, calling

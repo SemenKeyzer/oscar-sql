@@ -710,10 +710,14 @@ qint64 Day::total_time()
                     }
                 }
             } else {
+                // Slice times are device time; the session bounds above include the
+                // night's time correction, so shift the slices the same way before
+                // they are merged with other devices' sessions.
+                const qint64 corr = sess->correctionMs();
                 for (auto & slice : sess->m_slices) {
                     if (slice.status == MaskOn) {
-                        range.insert(slice.start, 0);
-                        range.insert(slice.end, 1);
+                        range.insert(slice.start + corr, 0);
+                        range.insert(slice.end + corr, 1);
                         d_totaltime += slice.end - slice.start;
                         if (slice.end - slice.start == 0) {
                             qWarning() << sess->session() << "0 length slice";
@@ -786,10 +790,11 @@ qint64 Day::total_time(MachineType type)
                     }
                 }
             } else {
+                const qint64 corr = sess->correctionMs();   // slices are device time, see above
                 for (const auto & slice : sess->m_slices) {
                     if (slice.status == MaskOn) {
-                        range.insert(slice.start, 0);
-                        range.insert(slice.end, 1);
+                        range.insert(slice.start + corr, 0);
+                        range.insert(slice.end + corr, 1);
                         d_totaltime += slice.end - slice.start;
                         if (slice.end - slice.start == 0) {
                             qWarning() << sess->session() << "0 length slice";

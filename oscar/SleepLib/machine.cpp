@@ -358,8 +358,17 @@ bool Machine::AddSession(Session *s, bool allowOldSessions)
 
     //int drift=profile->cpap->clockDrift();
 
-    qint64 rawFirst = s->first();
-    qint64 corrMs   = correctionMs(QDateTime::fromMSecsSinceEpoch(rawFirst).date());
+    // Device time: first() already includes the correction once the session has a
+    // night, so re-adding a session (moving it when days are combined, replacing a
+    // Bluetooth record) applied the correction twice.
+    qint64 rawFirst = s->realFirst();
+    // Corrections belong to a night, which runs from the day-split time to the next
+    // day's split, not to the calendar date: a session starting at 01:00 takes the
+    // previous night's correction, as Session::correctionMs() does once it is placed.
+    const QDateTime rawStart = QDateTime::fromMSecsSinceEpoch(rawFirst);
+    QDate rawNight = rawStart.date();
+    if (rawStart.time() < split_time) rawNight = rawNight.addDays(-1);
+    qint64 corrMs   = correctionMs(rawNight);
     QDateTime d2    = QDateTime::fromMSecsSinceEpoch(rawFirst + corrMs);
 
     QDate date = d2.date();
