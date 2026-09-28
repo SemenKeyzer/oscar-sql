@@ -59,13 +59,17 @@ class AnalysisService : public QObject
     //! outdatedDays().size(), kept until something may have changed it (for notices).
     int outdatedCount();
 
+    //! Every day with something to analyse, or with a stored row.
+    QList<QDate> allDays();
+
     //! Brings a day up to date (stage 1 of its sessions where needed, then the day);
-    //! removes the stored row of a day left without anything to analyse. Returns
-    //! whether anything was written.
-    bool updateDay(const QDate &date);
+    //! removes the stored row of a day left without anything to analyse. With \a force
+    //! both stages run again even where current. Returns whether anything was written.
+    bool updateDay(const QDate &date, bool force = false);
     //! updateDay() for each date; \a progress(done, total) returning false cancels.
     //! Emits daysChanged() once for the days written. Returns how many were done.
-    int updateDays(const QList<QDate> &dates, const std::function<bool(int, int)> &progress = {});
+    int updateDays(const QList<QDate> &dates, const std::function<bool(int, int)> &progress = {},
+                   bool force = false);
 
     //! The day brought up to date and scored, for display.
     DayResult dayResult(Day *day, QString *oxiSource = nullptr);

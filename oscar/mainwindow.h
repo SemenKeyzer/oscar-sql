@@ -158,6 +158,13 @@ class MainWindow : public QMainWindow
     //! need no waveforms (\a all: every outdated day, the user asked for it). A few
     //! days run straight away, more behind a progress dialog that can be cancelled.
     void updateAnalysis(bool all = false);
+    //! \brief After the analysis settings changed (Preferences): hands them on, offers to
+    //! recalculate the days they outdated, and refreshes the views.
+    void analysisSettingsChanged(bool parametersChanged);
+    //! \brief Data > Recalculate Analysis...: the outdated days, or every day.
+    void recalculateAnalysis();
+    //! \brief Reloads the Daily, Overview and Statistics pages after the analysis changed.
+    void refreshAnalysisViews();
 
     //! \brief Returns the Overview Tab object
     Overview *getOverview() { return overview; }
@@ -495,6 +502,9 @@ private:
     class DeviceTimeCorrectionDialog *m_correctionDialog = nullptr;
     class DriftAnalysisDialog *m_driftDialog = nullptr;
     analysis::AnalysisService *m_analysis = nullptr;
+    //! Runs the analysis of \a dates (\a force: again even where current); a few straight
+    //! away, more behind a progress dialog that can be cancelled.
+    void runAnalysis(const QList<QDate> &dates, bool force);
     //! Closes and deletes both dialogs above, which keep pointers to the profile's
     //! devices: before the profile is closed or a device is purged.
     void closeTimeCorrectionDialogs();

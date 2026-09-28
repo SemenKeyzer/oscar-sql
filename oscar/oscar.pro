@@ -319,6 +319,7 @@ SOURCES += \
     common_gui.cpp \
     cprogressbar.cpp \
     csv.cpp \
+    analysisprefs.cpp \
     analysispanel.cpp \
     daily.cpp \
     dailySearchTab.cpp \
@@ -523,6 +524,7 @@ HEADERS  += \
     database/reports_initializer.h \
     notifyMessageBox.h \
     dailySearchTab.h \
+    analysisprefs.h \
     analysispanel.h \
     daily.h \
     combocheckdelegate.h \

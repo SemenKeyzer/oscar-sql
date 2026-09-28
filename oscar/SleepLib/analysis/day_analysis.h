@@ -58,10 +58,11 @@ struct DayAnalysis {
 };
 
 //! Stage 2 of a day. Brings its sessions' stage 1 up to date first (loading their events
-//! in full where needed); then, unless \a onlyIfOutdated and the stored row is current,
-//! scores the day and stores its hypopnea channels and its analysis_daily row. Events it
-//! had to load are put away again. Does nothing when the analysis is switched off.
-DayAnalysis analyzeDay(Day *day, const AnalysisParams &params, bool onlyIfOutdated = true);
+//! in full where needed; with \a redoStageOne, even where it is current); then, unless
+//! \a onlyIfOutdated and the stored row is current, scores the day and stores its
+//! hypopnea channels and its analysis_daily row. Events it had to load are put away
+//! again. Does nothing when the analysis is switched off.
+DayAnalysis analyzeDay(Day *day, const AnalysisParams &params, bool onlyIfOutdated = true, bool redoStageOne = false);
 
 //! Scores the day without storing anything (for display), loading only the events it
 //! needs and putting them away again. Stage 1 must be current.

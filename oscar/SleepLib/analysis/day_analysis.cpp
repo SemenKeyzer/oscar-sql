@@ -76,9 +76,9 @@ bool eventsInMemory(Session *s)
 // Stage 1 of a session whose stamp is outdated: needs its events in full. A session
 // without any stored events (summary only) is stamped as analysed, with nothing found,
 // so that it does not count as outdated forever.
-void ensureStageOne(Session *s, const AnalysisParams &p)
+void ensureStageOne(Session *s, const AnalysisParams &p, bool redo)
 {
-    if (!stageOneNeeded(s, p).any()) return;
+    if (!redo && !stageOneNeeded(s, p).any()) return;
     if (!s->OpenEvents() || s->eventlist.isEmpty()) {
         if (s->sessionRowId() > 0 && EventListRepository().countBySession(s->sessionRowId()) == 0) {
             SessionStamp stamp;
@@ -90,7 +90,7 @@ void ensureStageOne(Session *s, const AnalysisParams &p)
         }
         return;
     }
-    const QList<ChannelID> written = analyzeSession(s, p, true);
+    const QList<ChannelID> written = analyzeSession(s, p, !redo);
     if (written.isEmpty()) return;
     s->StoreChannelEvents(written);
     s->StoreSetting(AN_Stamp);
@@ -389,7 +389,7 @@ AnalysisDailyData toDailyRow(const DayResult &r, const AnalysisParams &params, c
     return d;
 }
 
-DayAnalysis analyzeDay(Day *day, const AnalysisParams &params, bool onlyIfOutdated)
+DayAnalysis analyzeDay(Day *day, const AnalysisParams &params, bool onlyIfOutdated, bool redoStageOne)
 {
     DayAnalysis out;
     if (!params.enabled || !day) return out;
@@ -405,7 +405,7 @@ DayAnalysis analyzeDay(Day *day, const AnalysisParams &params, bool onlyIfOutdat
         for (Session *s : loadedHere) s->TrashEvents();
     });
 
-    for (Session *s : sessions) ensureStageOne(s, params);
+    for (Session *s : sessions) ensureStageOne(s, params, redoStageOne);
 
     const qint64 profileId = sessions.first()->machine()->getProfileId();
     const QString inputs = dayInputsHash(day, params);

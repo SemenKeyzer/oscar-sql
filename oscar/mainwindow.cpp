@@ -134,6 +134,12 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     m_analysis = new analysis::AnalysisService(this);
+    {
+        QAction *recalc = new QAction(tr("Recalculate Analysis..."), this);
+        recalc->setToolTip(tr("Recalculate OSCAR's own analysis of your nights"));
+        ui->menu_Data->insertAction(ui->menu_Advanced->menuAction(), recalc);
+        connect(recalc, &QAction::triggered, this, &MainWindow::recalculateAnalysis);
+    }
     // New or changed analysis rows: the Overview's analysis charts read them from the cache.
     connect(m_analysis, &analysis::AnalysisService::daysChanged, this, [this]() {
         if (overview) {
@@ -2147,13 +2153,17 @@ void MainWindow::timeCorrectionsChanged()
 void MainWindow::updateAnalysis(bool all)
 {
     if (!p_profile || !m_analysis) return;
-    const QList<QDate> dates = all ? m_analysis->outdatedDays() : m_analysis->pendingDays();
-    if (dates.isEmpty()) return;
+    runAnalysis(all ? m_analysis->outdatedDays() : m_analysis->pendingDays(), false);
+}
+
+void MainWindow::runAnalysis(const QList<QDate> &dates, bool force)
+{
+    if (!p_profile || !m_analysis || dates.isEmpty()) return;
 
     constexpr int kQuickDays = 10;
     if (dates.size() <= kQuickDays) {
         QApplication::setOverrideCursor(Qt::WaitCursor);
-        m_analysis->updateDays(dates);
+        m_analysis->updateDays(dates, {}, force);
         QApplication::restoreOverrideCursor();
         return;
     }
@@ -2166,7 +2176,60 @@ void MainWindow::updateAnalysis(bool all)
         progress.setValue(done);
         QCoreApplication::processEvents();
         return !progress.wasCanceled();
-    });
+    }, force);
+}
+
+void MainWindow::refreshAnalysisViews()
+{
+    if (!p_profile) return;
+    if (daily) daily->LoadDate(daily->getDate());
+    if (overview) overview->ReloadGraphs();
+    GenerateStatistics();
+}
+
+void MainWindow::analysisSettingsChanged(bool parametersChanged)
+{
+    if (!p_profile || !m_analysis) return;
+    m_analysis->reloadSettings();
+    if (parametersChanged && m_analysis->params().enabled) {
+        const int outdated = m_analysis->outdatedCount();
+        if (outdated > 0 && QMessageBox::question(this, tr("Sleep Analysis"),
+                tr("The new settings outdate the analysis of %n day(s). Recalculate them now?\n\n"
+                   "Otherwise each day is recalculated when you open it.", "", outdated),
+                QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes) == QMessageBox::Yes) {
+            runAnalysis(m_analysis->outdatedDays(), false);
+        }
+    }
+    refreshAnalysisViews();
+}
+
+void MainWindow::recalculateAnalysis()
+{
+    if (!p_profile || !m_analysis) return;
+    if (!m_analysis->params().enabled) {
+        QMessageBox::information(this, tr("Recalculate Analysis"),
+                                 tr("OSCAR's own sleep analysis is switched off (Preferences, Analysis tab)."));
+        return;
+    }
+    const int outdated = m_analysis->outdatedCount();
+    QMessageBox box(QMessageBox::Question, tr("Recalculate Analysis"),
+                    tr("Recalculate OSCAR's own analysis of your nights.\n\n"
+                       "Outdated days need it after an update or a change of settings. All days runs "
+                       "every night again, which takes a while for a long history."), QMessageBox::NoButton, this);
+    QPushButton *outdatedButton = box.addButton(tr("Outdated Days (%1)").arg(outdated), QMessageBox::AcceptRole);
+    outdatedButton->setEnabled(outdated > 0);
+    QPushButton *allButton = box.addButton(tr("All Days"), QMessageBox::ActionRole);
+    box.addButton(QMessageBox::Cancel);
+    box.setDefaultButton(outdated > 0 ? outdatedButton : allButton);
+    box.exec();
+    if (box.clickedButton() == outdatedButton) {
+        runAnalysis(m_analysis->outdatedDays(), false);
+    } else if (box.clickedButton() == allButton) {
+        runAnalysis(m_analysis->allDays(), true);
+    } else {
+        return;
+    }
+    refreshAnalysisViews();
 }
 
 #include "oximeterimport.h"
@@ -4696,8 +4759,7 @@ void MainWindow::on_recordsBox_anchorClicked(const QUrl &linkurl)
         // not from here: regenerating the statistics replaces the page that was clicked
         QTimer::singleShot(0, this, [this]() {
             updateAnalysis(true);
-            GenerateStatistics();
-            if (overview) overview->ReloadGraphs();
+            refreshAnalysisViews();
         });
     }
 }

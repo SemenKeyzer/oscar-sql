@@ -13,6 +13,10 @@
 #include <QTreeWidget>
 
 #include "analysispanel.h"
+#include "analysisprefs.h"
+#include <QComboBox>
+#include <QLabel>
+#include <QLineEdit>
 #include "statistics.h"
 #include "SleepLib/analysis/day_scorer.h"
 #include "tests/analysis_synth.h"
@@ -198,4 +202,47 @@ void AnalysisPanelTests::testStatisticsFigures()
     QCOMPARE(analysisFigure(QStringLiteral("nadir"), rows), QStringLiteral("86"));
     QCOMPARE(analysisFigure(QStringLiteral("pri"), rows), QStringLiteral("-"));   // no pulse
     QCOMPARE(analysisFigure(QStringLiteral("ahi"), {}), QStringLiteral("-"));
+}
+
+void AnalysisPanelTests::testPreferencesPage()
+{
+    AnalysisPreferencesPage page;
+    // a fresh page shows the defaults
+    const AnalysisParams defaults;
+    QCOMPARE(page.params().flowHash(), defaults.flowHash());
+    QCOMPARE(page.params().oxiHash(), defaults.oxiHash());
+    QCOMPARE(page.params().dayHash(), defaults.dayHash());
+
+    AnalysisParams p;
+    p.enabled = false;
+    p.day.rule = HypopneaRule::Cms4;
+    p.day.pulseRiseAsArousal = true;
+    p.flow.hypopneaReduction = 0.35;   // shown as 35 %
+    p.flow.flThreshold = 0.45;
+    p.oxi.zoneMinDesats = 5;
+    page.load(p, { 92, 88 });
+    const AnalysisParams back = page.params();
+    QCOMPARE(back.enabled, false);
+    QVERIFY(back.day.rule == HypopneaRule::Cms4);
+    QCOMPARE(back.flowHash(), p.flowHash());
+    QCOMPARE(back.oxiHash(), p.oxiHash());
+    QCOMPARE(back.dayHash(), p.dayHash());
+    QCOMPARE(page.spo2Thresholds(), QList<double>({ 92, 88 }));
+
+    // the description follows the selected rule
+    QComboBox *rule = page.findChild<QComboBox *>();
+    QVERIFY(rule != nullptr);
+    rule->setCurrentIndex(rule->findData(int(HypopneaRule::FlowOnly)));
+    bool shown = false;
+    for (QLabel *label : page.findChildren<QLabel *>()) {
+        shown = shown || label->text() == AnalysisPreferencesPage::ruleDescription(HypopneaRule::FlowOnly);
+    }
+    QVERIFY(shown);
+    QVERIFY(page.params().day.rule == HypopneaRule::FlowOnly);
+
+    // thresholds as typed: cleaned up, highest first, at most six
+    QLineEdit *thresholds = page.findChild<QLineEdit *>();
+    QVERIFY(thresholds != nullptr);
+    thresholds->setText(QStringLiteral("85, 94, x, 120, 90, 88, 80, 75, 70"));
+    QCOMPARE(page.spo2Thresholds(), QList<double>({ 94, 90, 88, 85, 80, 75 }));
 }

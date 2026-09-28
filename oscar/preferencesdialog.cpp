@@ -25,6 +25,9 @@
 #include <cmath>
 
 #include "preferencesdialog.h"
+#include <QScrollArea>
+#include "analysisprefs.h"
+#include "SleepLib/analysis/analysis_service.h"
 #include "version.h"
 
 #include <Graphs/gGraphView.h>
@@ -146,6 +149,15 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
         return;
     }
     ui->tabWidget->setCurrentIndex(0);
+
+    // OSCAR's own sleep analysis
+    auto *analysisScroll = new QScrollArea(ui->tabWidget);
+    m_analysisPage = new AnalysisPreferencesPage(analysisScroll);
+    analysisScroll->setWidget(m_analysisPage);
+    analysisScroll->setWidgetResizable(true);
+    analysisScroll->setFrameShape(QFrame::NoFrame);
+    ui->tabWidget->addTab(analysisScroll, tr("Analysis"));
+    m_analysisPage->load(profile->analysis->params(), profile->analysis->spo2Thresholds());
 
     //i=ui->timeZoneCombo->findText((*profile)["TimeZone"].toString());
     //ui->timeZoneCombo->setCurrentIndex(i);
@@ -1104,6 +1116,20 @@ bool PreferencesDialog::Save()
     saveWaveInfo();
     //qDebug() << "TODO: Save channels.xml to update channel data";
 
+    // OSCAR's own analysis: a parameter change outdates stored results; new "time below"
+    // thresholds only change what is shown
+    const analysis::AnalysisParams oldAnalysis = profile->analysis->params();
+    const analysis::AnalysisParams newAnalysis = m_analysisPage->params();
+    const bool analysisParamsChanged = oldAnalysis.enabled != newAnalysis.enabled
+        || oldAnalysis.flowHash() != newAnalysis.flowHash() || oldAnalysis.oxiHash() != newAnalysis.oxiHash()
+        || oldAnalysis.dayHash() != newAnalysis.dayHash();
+    const bool analysisThresholdsChanged = profile->analysis->spo2Thresholds() != m_analysisPage->spo2Thresholds()
+        && !m_analysisPage->spo2Thresholds().isEmpty();
+    profile->analysis->setParams(newAnalysis);
+    profile->analysis->setSpo2Thresholds(m_analysisPage->spo2Thresholds());
+    // now, so that a reprocess below already runs the analysis with the new parameters
+    if (analysisParamsChanged && mainwin && mainwin->analysisService()) mainwin->analysisService()->reloadSettings();
+
     p_pref->Save();
     profile->Save();
     profile->resetOxiChannelPref();
@@ -1142,6 +1168,13 @@ bool PreferencesDialog::Save()
         // Save early.. just in case..
         mainwin->getDaily()->graphView()->SaveSettings("Daily");
         mainwin->getOverview()->graphView()->SaveSettings("Overview");
+    }
+
+    // after the dialog has closed: hand the settings on, offer to recalculate
+    if ((analysisParamsChanged || analysisThresholdsChanged) && !needs_restart) {
+        QTimer::singleShot(0, mainwin, [analysisParamsChanged]() {
+            if (mainwin) mainwin->analysisSettingsChanged(analysisParamsChanged);
+        });
     }
 
     return true;

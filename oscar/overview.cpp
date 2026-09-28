@@ -80,9 +80,10 @@ Overview::Overview(QWidget *parent, gGraphView *shared) :
     m_analysisNotice->setTextFormat(Qt::RichText);
     m_analysisNotice->hide();
     ui->horizontalLayout->insertWidget(ui->horizontalLayout->indexOf(ui->graphHelp), m_analysisNotice);
-    connect(m_analysisNotice, &QLabel::linkActivated, this, [this]() {
-        if (mainwin) mainwin->updateAnalysis(true);
-        ReloadGraphs();
+    connect(m_analysisNotice, &QLabel::linkActivated, this, []() {
+        if (!mainwin) return;
+        mainwin->updateAnalysis(true);
+        mainwin->refreshAnalysisViews();
     });
 
     // Set Date controls locale to 4 digit years

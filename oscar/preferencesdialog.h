@@ -43,6 +43,8 @@ class MySortFilterProxyModel: public QSortFilterProxyModel
 
     This provides the Preferences form and logic to alter Preferences for OSCAR
 */
+class AnalysisPreferencesPage;
+
 class PreferencesDialog : public QDialog
 {
     Q_OBJECT
@@ -114,6 +116,7 @@ private:
     QHash<MachineType, QStandardItem *> machlevel;
 
     Ui::PreferencesDialog *ui;
+    AnalysisPreferencesPage *m_analysisPage = nullptr;
     Profile *profile;
     QHash<ChannelID, QColor> m_new_colors;
 

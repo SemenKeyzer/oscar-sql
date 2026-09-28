@@ -23,6 +23,7 @@ private slots:
     void testSidebarForOximetryOnlyNight();
     void testTabListsDifferences();
     void testStatisticsFigures();
+    void testPreferencesPage();
 
 private:
     class QApplication *m_app = nullptr;

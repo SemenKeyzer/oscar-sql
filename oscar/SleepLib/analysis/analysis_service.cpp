@@ -131,7 +131,22 @@ int AnalysisService::outdatedCount()
     return m_outdatedCount;
 }
 
-bool AnalysisService::updateDay(const QDate &date)
+QList<QDate> AnalysisService::allDays()
+{
+    QList<QDate> out;
+    if (!p_profile) return out;
+    ensureCache();
+    for (auto it = p_profile->daylist.begin(); it != p_profile->daylist.end(); ++it) {
+        if (m_rows.contains(it.key()) || !analysableSessions(p_profile->GetDay(it.key())).isEmpty()) out.append(it.key());
+    }
+    for (auto it = m_rows.begin(); it != m_rows.end(); ++it) {
+        if (!p_profile->daylist.contains(it.key())) out.append(it.key());
+    }
+    std::sort(out.begin(), out.end());
+    return out;
+}
+
+bool AnalysisService::updateDay(const QDate &date, bool force)
 {
     if (!p_profile || !m_params.enabled) return false;
     ensureCache();
@@ -142,18 +157,18 @@ bool AnalysisService::updateDay(const QDate &date)
         m_rows.remove(date);
         return true;
     }
-    const DayAnalysis a = analyzeDay(day, m_params, true);
+    const DayAnalysis a = analyzeDay(day, m_params, !force, force);
     if (a.scored) refreshRow(date);
     return a.scored;
 }
 
-int AnalysisService::updateDays(const QList<QDate> &dates, const std::function<bool(int, int)> &progress)
+int AnalysisService::updateDays(const QList<QDate> &dates, const std::function<bool(int, int)> &progress, bool force)
 {
     QList<QDate> changed;
     int done = 0;
     for (const QDate &date : dates) {
         if (progress && !progress(done, dates.size())) break;
-        if (updateDay(date)) changed.append(date);
+        if (updateDay(date, force)) changed.append(date);
         ++done;
     }
     if (progress) progress(done, dates.size());
