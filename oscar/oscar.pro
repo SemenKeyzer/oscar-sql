@@ -865,7 +865,8 @@ test {
         tests/fakecontecdevice.cpp \
         tests/contecbledownloadertests.cpp \
         tests/contecbleimporttests.cpp \
-        tests/backuprestoretests.cpp
+        tests/backuprestoretests.cpp \
+        tests/loaderrobustnesstests.cpp
 
     HEADERS += \
         tests/AutoTest.h \
@@ -885,6 +886,7 @@ test {
         tests/prismatests.h \
         tests/machinetests.h \
         tests/backuprestoretests.h \
+        tests/loaderrobustnesstests.h \
         tests/timealignsessiontests.h \
         tests/contecbleprotocoltests.h \
         tests/fakecontecdevice.h \
