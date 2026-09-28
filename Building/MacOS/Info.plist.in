@@ -24,5 +24,7 @@
   <true/>
   <key>NSRequiresAquaSystemAppearance</key>
   <true/>
+  <key>NSBluetoothAlwaysUsageDescription</key>
+  <string>OSCAR uses Bluetooth to import recordings from your pulse oximeter.</string>
 </dict>
 </plist>

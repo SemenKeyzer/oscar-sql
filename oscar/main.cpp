@@ -60,6 +60,7 @@
 #include "SleepLib/loader_plugins/cms50_loader.h"
 #include "SleepLib/loader_plugins/cms50f37_loader.h"
 #include "SleepLib/loader_plugins/md300w1_loader.h"
+#include "SleepLib/loader_plugins/contec_ble_loader.h"
 #include "SleepLib/loader_plugins/zeo_loader.h"
 #include "SleepLib/loader_plugins/somnopose_loader.h"
 #include "SleepLib/loader_plugins/resmed_loader.h"
@@ -1273,6 +1274,7 @@ int main(int argc, char *argv[]) {
     CMS50Loader::Register();
     CMS50F37Loader::Register();
     MD300W1Loader::Register();
+    ContecBleLoader::Register();
     ViatomLoader::Register();
     PrismaLoader::Register();
     ResventLoader::Register();

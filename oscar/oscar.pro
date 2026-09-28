@@ -26,6 +26,17 @@ lessThan(QT_MAJOR_VERSION,6) {
 DEFINES += helpless
 
 QT += core gui network xml printsupport serialport sql widgets help concurrent
+
+# Bluetooth oximeter import. Optional: OSCAR still builds without the Qt Bluetooth module
+# (or with CONFIG+=no_bluetooth), just without the Bluetooth import button.
+qtHaveModule(bluetooth):!no_bluetooth {
+    QT += bluetooth
+    DEFINES += HAVE_BLUETOOTH
+    SOURCES += SleepLib/loader_plugins/contec_ble_link.cpp bluetoothoximeterpage.cpp
+    HEADERS += SleepLib/loader_plugins/contec_ble_link.h bluetoothoximeterpage.h
+} else {
+    message("Building without Bluetooth oximeter import")
+}
 contains(DEFINES, helpless) {
     QT -= help
 }
@@ -395,6 +406,10 @@ SOURCES += \
     SleepLib/loader_plugins/icon_loader.cpp \
     SleepLib/loader_plugins/intellipap_loader.cpp \
     SleepLib/loader_plugins/md300w1_loader.cpp \
+    SleepLib/loader_plugins/contec_ble_protocol.cpp \
+    SleepLib/loader_plugins/contec_ble_downloader.cpp \
+    SleepLib/loader_plugins/contec_ble_import.cpp \
+    SleepLib/loader_plugins/contec_ble_loader.cpp \
     SleepLib/loader_plugins/mseries_loader.cpp \
     SleepLib/loader_plugins/prisma_loader.cpp \
     SleepLib/loader_plugins/vrem_loader.cpp \
@@ -423,6 +438,7 @@ SOURCES += \
     SleepLib/progressdialog.cpp \
     SleepLib/schema.cpp \
     SleepLib/serialoximeter.cpp \
+    SleepLib/oximetry_session_builder.cpp \
     SleepLib/session.cpp \
     SleepLib/thirdparty/miniz.c \
     SleepLib/xmlreplay.cpp \
@@ -604,7 +620,12 @@ HEADERS  += \
     SleepLib/deviceconnection.h \
     SleepLib/xmlreplay.h \
     SleepLib/serialoximeter.h \
+    SleepLib/oximetry_session_builder.h \
     SleepLib/loader_plugins/md300w1_loader.h \
+    SleepLib/loader_plugins/contec_ble_protocol.h \
+    SleepLib/loader_plugins/contec_ble_downloader.h \
+    SleepLib/loader_plugins/contec_ble_import.h \
+    SleepLib/loader_plugins/contec_ble_loader.h \
     logger.h \
     SleepLib/loader_plugins/weinmann_loader.h \
     Graphs/gdailysummary.h \
@@ -837,7 +858,11 @@ test {
         tests/zeotests.cpp \
         tests/applehealthtests.cpp \
         tests/machinetests.cpp \
-        tests/timealignsessiontests.cpp
+        tests/timealignsessiontests.cpp \
+        tests/contecbleprotocoltests.cpp \
+        tests/fakecontecdevice.cpp \
+        tests/contecbledownloadertests.cpp \
+        tests/contecbleimporttests.cpp
 
     HEADERS += \
         tests/AutoTest.h \
@@ -855,7 +880,11 @@ test {
         tests/zeotests.h \
         tests/applehealthtests.h \
         tests/machinetests.h \
-        tests/timealignsessiontests.h
+        tests/timealignsessiontests.h \
+        tests/contecbleprotocoltests.h \
+        tests/fakecontecdevice.h \
+        tests/contecbledownloadertests.h \
+        tests/contecbleimporttests.h
 }
 
 macx {
