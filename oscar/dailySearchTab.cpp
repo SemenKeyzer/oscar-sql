@@ -28,6 +28,8 @@
 #include <QHeaderView>
 #include <QCoreApplication>
 #include <QFileInfo>
+#include <QElapsedTimer>
+#include <QTimer>
 #include "dailySearchTab.h"
 #include "SleepLib/day.h"
 #include "SleepLib/profiles.h"
@@ -1004,13 +1006,19 @@ bool DailySearchTab::matchFind(Match* myMatch ,Day* day, QDate& date, Qt::Alignm
                     for (Session* sess : sessions ) {
                         if (!sess->enabled()) continue;
                         auto keys = sess->eventlist.keys();
+                        // Events this search loads are released again once the session is
+                        // checked: kept, a search over the whole profile held every
+                        // night's events in memory.
+                        bool loadedHere = false;
                         if (keys.size() <= 0) {
                             bool ok = sess->LoadSummary(false);
                             bool ok1 = sess->OpenEvents(false);
+                            loadedHere = true;
                             keys = sess->eventlist.keys();
                             if ((keys.size() <= 0) || !ok || !ok1 ) {
                                 if ((keys.size() <= 0) || !ok || !ok1 ) {
                                     errorFound |= true;
+                                    sess->TrashEvents();
                                     // skip this channel
                                     continue;
                                 }
@@ -1047,6 +1055,7 @@ bool DailySearchTab::matchFind(Match* myMatch ,Day* day, QDate& date, Qt::Alignm
                                 }
                             }
                         }
+                        if (loadedHere) sess->TrashEvents();
                     }
                 }
                 for ( auto it= values.begin() ; it != values.end() ; it++) {
@@ -1123,7 +1132,6 @@ bool DailySearchTab::matchFind(Match* myMatch ,Day* day, QDate& date, Qt::Alignm
 };
 
 void DailySearchTab::find(QDate& date) {
-        QCoreApplication::processEvents();
         Day* day = p_profile->GetDay(date);
         if ( (!day) && (match->searchTopic != ST_DAYS_SKIPPED)) { daysSkipped++; return;};
         Qt::Alignment alignment=Qt::AlignCenter;
@@ -1155,16 +1163,33 @@ void DailySearchTab::search(QDate date) {
 		startButton->setEnabled(false);
         match->foundString.clear();
         passFound=0;
+        nextDate = date;
+        // The days are searched a slice at a time from the event loop, not in one loop
+        // calling processEvents(): closing the profile or rebuilding the Daily view while
+        // a search ran freed what that loop was still using. A step that finds the
+        // search abandoned (state changed, profile closed) just stops, and deleting this
+        // tab drops its pending step with it.
+        QTimer::singleShot(0, this, &DailySearchTab::searchStep);
+};
+
+void DailySearchTab::searchStep() {
+        if (state != searching || !p_profile) return;
+        QElapsedTimer slice;
+        slice.start();
+        QDate date = nextDate;
         while (date >= earliestDate) {
             nextDate = date;
             if (passFound >= passDisplayLimit)  break;
+            if (slice.elapsed() > 50) {     // keep the window responsive
+                QTimer::singleShot(0, this, &DailySearchTab::searchStep);
+                return;
+            }
 
             find(date);
             progressBar->setValue(++daysProcessed);
             date=date.addDays(-1);
         }
         endOfPass();
-        return ;
 };
 
 void DailySearchTab::addItem(QDate date, QString value,Qt::Alignment alignment) {

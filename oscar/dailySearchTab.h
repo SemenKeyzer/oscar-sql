@@ -237,6 +237,7 @@ private:
     Matches     matches;
     Match*      match = matches.empty();
     void        search(QDate date);
+    void        searchStep();
     void        find(QDate&);
     bool        matchFind(Match* myMatch ,Day* day,QDate& date , Qt::Alignment& alignment);
     void        criteriaChanged();
