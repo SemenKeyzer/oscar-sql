@@ -681,6 +681,7 @@ HEADERS  += \
     database/database_delete_dialog.h \
     network/cloud_downloader.h \
     network/cloud_uploader.h \
+    network/log_redaction.h \
     network/oauth2_handler.h \
     network/dropbox_uploader.h \
     network/googledrive_uploader.h \
@@ -863,7 +864,8 @@ test {
         tests/contecbleprotocoltests.cpp \
         tests/fakecontecdevice.cpp \
         tests/contecbledownloadertests.cpp \
-        tests/contecbleimporttests.cpp
+        tests/contecbleimporttests.cpp \
+        tests/backuprestoretests.cpp
 
     HEADERS += \
         tests/AutoTest.h \
@@ -882,6 +884,7 @@ test {
         tests/applehealthtests.h \
         tests/prismatests.h \
         tests/machinetests.h \
+        tests/backuprestoretests.h \
         tests/timealignsessiontests.h \
         tests/contecbleprotocoltests.h \
         tests/fakecontecdevice.h \
