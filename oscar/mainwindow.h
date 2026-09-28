@@ -484,6 +484,9 @@ private:
     PreferencesDialog *prefdialog;
     class DeviceTimeCorrectionDialog *m_correctionDialog = nullptr;
     class DriftAnalysisDialog *m_driftDialog = nullptr;
+    //! Closes and deletes both dialogs above, which keep pointers to the profile's
+    //! devices: before the profile is closed or a device is purged.
+    void closeTimeCorrectionDialogs();
     QTime logtime;
     QSystemTrayIcon *systray;
     QMenu *systraymenu;

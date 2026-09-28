@@ -873,6 +873,8 @@ void MainWindow::CloseProfile()
     if (updateChecker != nullptr)
         updateChecker->showMessage();
 
+    closeTimeCorrectionDialogs();
+
     if (daily) {
         daily->Unload();
         daily->clearLastDay(); // otherwise Daily will crash
@@ -1971,6 +1973,21 @@ void MainWindow::refreshTimeCorrectionsDialog()
     }
 }
 
+void MainWindow::closeTimeCorrectionDialogs()
+{
+    // close() first so an unsaved preview is reverted (closeEvent), then delete now:
+    // WA_DeleteOnClose only deletes them later, when the devices they point at may
+    // be gone. Their destroyed() handlers reset the pointers.
+    if (m_correctionDialog) {
+        m_correctionDialog->close();
+        delete m_correctionDialog;
+    }
+    if (m_driftDialog) {
+        m_driftDialog->close();
+        delete m_driftDialog;
+    }
+}
+
 bool MainWindow::timeCorrectionsDialogHasStagedChange() const
 {
     return m_correctionDialog && m_correctionDialog->hasStagedChange();
@@ -2777,8 +2794,11 @@ void MainWindow::on_actionPurgeMachine(QAction *action)
 
 void MainWindow::purgeMachine(Machine * mach)
 {
+    closeTimeCorrectionDialogs();   // they may point at this device
+
     // detect backups
     daily->Unload(daily->getDate());
+    daily->detachDay();   // the view may point into this device's sessions
 
     // Technicially the above won't sessions under short session limit.. Using Purge to clean up the rest.
     if (mach->Purge(3478216)) {

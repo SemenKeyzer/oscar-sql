@@ -942,3 +942,12 @@ void DeviceTimeCorrectionDialog::closeEvent(QCloseEvent* event)
         clearStagedAndRevert();
     QDialog::closeEvent(event);
 }
+
+void DeviceTimeCorrectionDialog::reject()
+{
+    // Esc hides the dialog through reject() without a close event, which left an
+    // unsaved preview applied: it looked saved until OSCAR was restarted.
+    if (m_hasStagedChange)
+        clearStagedAndRevert();
+    QDialog::reject();
+}

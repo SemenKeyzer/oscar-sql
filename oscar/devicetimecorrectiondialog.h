@@ -105,6 +105,9 @@ private:
     QList<DeviceTimeCorrectionData> m_historyRows;
     QList<Machine*>                 m_historyMachines;
 
+public slots:
+    void reject() override;
+
 protected:
     void closeEvent(QCloseEvent* event) override;
 };
