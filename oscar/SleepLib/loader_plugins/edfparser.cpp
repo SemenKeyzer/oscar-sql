@@ -270,8 +270,15 @@ bool EDFInfo::Parse() {
     for (auto & sig : edfsignals) { 
         sig.prefiltering = ReadBytes(80); 
     }
+    bool badCount = false;
     for (auto & sig : edfsignals) { 
         sig.sampleCnt = ReadBytes(8).toLong(&ok); 
+        if (sig.sampleCnt < 0) badCount = true;     // a damaged header, not a real signal
+    }
+    if (badCount) {
+        qWarning() << "EDFInfo::Parse() negative sample count in" << filename;
+        fileData.clear();
+        return false;
     }
     for (auto & sig : edfsignals) { 
         sig.reserved = ReadBytes(32); 
@@ -290,14 +297,24 @@ bool EDFInfo::Parse() {
 }
 
 bool EDFInfo::ParseSignalData() {
-    // Now check the file isn't truncated before allocating space for the values
-    long allocsize = 0;
+    // Now check the file isn't truncated before allocating space for the values.
+    // Sizes are 64-bit and checked before multiplying: header fields are
+    // untrusted, and a 32-bit long (Windows) wrapped round to a small size that
+    // passed this check and then overran the buffers below.
+    const qint64 records   = edfHdr.num_data_records;
+    const qint64 available = qint64(datasize) - qint64(pos);
+    qint64 allocsize = 0;
+    bool tooShort = false;
     for (auto & sig : edfsignals) {
-        if (edfHdr.num_data_records > 0) {
-            allocsize += sig.sampleCnt * edfHdr.num_data_records * 2;
+        if (records > 0 && sig.sampleCnt > 0) {
+            if (qint64(sig.sampleCnt) > available / 2 / records) {
+                tooShort = true;
+                break;
+            }
+            allocsize += qint64(sig.sampleCnt) * records * 2;
         }
     }
-    if (allocsize > (datasize - pos)) {
+    if (tooShort || allocsize > available) {
         // Space required more than the remainder left to read,
         // so abort and let the user clean up the corrupted file themselves
         qWarning() << "EDFInfo::Parse(): " << filename << " is too short!";
@@ -307,8 +324,8 @@ bool EDFInfo::ParseSignalData() {
     }
     // allocate the arrays for the signal values
     for (auto & sig : edfsignals) {
-        long samples = sig.sampleCnt * edfHdr.num_data_records;
-        if (edfHdr.num_data_records <= 0) {
+        const qint64 samples = qint64(sig.sampleCnt) * records;
+        if (records <= 0) {
             sig.dataArray = nullptr;
             continue;
         }
@@ -316,7 +333,7 @@ bool EDFInfo::ParseSignalData() {
 //      sig.pos = 0;
     }
 
-    for (int recNo = 0; recNo < edfHdr.num_data_records; recNo++) {
+    for (qint64 recNo = 0; recNo < records; recNo++) {
         for (auto & sig : edfsignals) {
             if ( sig.label.contains("Annotations") ) {
                 annotations.push_back(ReadAnnotations( (char *)&signalPtr[pos], sig.sampleCnt*2));
@@ -324,6 +341,7 @@ bool EDFInfo::ParseSignalData() {
             } else {    // it's got genuine 16-bit values
                 for (int j=0;j<sig.sampleCnt;j++) { // Big endian safe
                     qint16 t=Read16();
+                    if (eof) return false;
                     sig.dataArray[recNo*sig.sampleCnt+j]=t;
                     #ifdef TEST_MACROS_ENABLED
                       if (
@@ -409,6 +427,7 @@ QVector<Annotation> EDFInfo::ReadAnnotations(const char * data, int charLen)
         if ((c != '+') && (c != '-'))       // Annotaion must start with a +/- sign
             break;
         sign = (data[pos++] == '+');
+        if (pos >= charLen) break;
 
         text = "";
         c = data[pos];
@@ -416,8 +435,10 @@ QVector<Annotation> EDFInfo::ReadAnnotations(const char * data, int charLen)
         do {            // collect the offset 
             text += c;
             pos++;
+            if (pos >= charLen) break;      // damaged record: no separator
             c = data[pos];
         } while ((c != AnnoSep) && (c != AnnoDurMark)); // a duration is optional
+        if (pos >= charLen) break;
 
         offset = text.toDouble(&ok);
         if (!ok) {
@@ -435,12 +456,13 @@ QVector<Annotation> EDFInfo::ReadAnnotations(const char * data, int charLen)
         // First entry
         if (data[pos] == AnnoDurMark) { // get duration.(preceded by decimal 21 byte)
             pos++;
+            if (pos >= charLen) break;
             text = "";
 
             do {        // collect the duration
                 text += data[pos];
                 pos++;
-            } while ((data[pos] != AnnoSep) && (pos < charLen)); // separator code
+            } while ((pos < charLen) && (data[pos] != AnnoSep)); // separator code
 
             duration = text.toDouble(&ok);
             if (!ok) {
@@ -452,9 +474,11 @@ QVector<Annotation> EDFInfo::ReadAnnotations(const char * data, int charLen)
             }
         }
 
-        while ((data[pos] == AnnoSep) && (pos < charLen)) {
+        while ((pos < charLen) && (data[pos] == AnnoSep)) {
             int textLen = 0;
             pos++;
+            if (pos >= charLen)
+                break;
             const char * textStart = &data[pos];
             if (data[pos] == AnnoEnd)
                 break;
@@ -465,7 +489,7 @@ QVector<Annotation> EDFInfo::ReadAnnotations(const char * data, int charLen)
             do {            // collect the annotation text
                 pos++;      // officially UTF-8 is allowed here, so don't mangle it
                 textLen++;
-            } while ((data[pos] != AnnoSep) && (pos < charLen)); // separator code
+            } while ((pos < charLen) && (data[pos] != AnnoSep)); // separator code
             text = QString::fromUtf8(textStart, textLen);
             annoVec.push_back( Annotation( offset, duration, text) );
             if (pos >= charLen) {
