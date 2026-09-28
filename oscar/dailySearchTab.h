@@ -237,7 +237,7 @@ private:
     Matches     matches;
     Match*      match = matches.empty();
     void        search(QDate date);
-    void        searchStep();
+    void        searchStep(int generation);
     void        find(QDate&);
     bool        matchFind(Match* myMatch ,Day* day,QDate& date , Qt::Alignment& alignment);
     void        criteriaChanged();
@@ -275,6 +275,7 @@ private:
     QDate       earliestDate ;
     QDate       latestDate ;
     QDate       nextDate;
+    int         searchGeneration = 0;   // identifies the search a pending step belongs to
 
     //
     int         daysTotal;

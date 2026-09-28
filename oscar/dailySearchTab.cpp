@@ -1167,13 +1167,14 @@ void DailySearchTab::search(QDate date) {
         // The days are searched a slice at a time from the event loop, not in one loop
         // calling processEvents(): closing the profile or rebuilding the Daily view while
         // a search ran freed what that loop was still using. A step that finds the
-        // search abandoned (state changed, profile closed) just stops, and deleting this
-        // tab drops its pending step with it.
-        QTimer::singleShot(0, this, &DailySearchTab::searchStep);
+        // search abandoned (state changed, profile closed, a newer search started) just
+        // stops, and deleting this tab drops its pending step with it.
+        const int generation = ++searchGeneration;
+        QTimer::singleShot(0, this, [this, generation]() { searchStep(generation); });
 };
 
-void DailySearchTab::searchStep() {
-        if (state != searching || !p_profile) return;
+void DailySearchTab::searchStep(int generation) {
+        if (generation != searchGeneration || state != searching || !p_profile) return;
         QElapsedTimer slice;
         slice.start();
         QDate date = nextDate;
@@ -1181,7 +1182,7 @@ void DailySearchTab::searchStep() {
             nextDate = date;
             if (passFound >= passDisplayLimit)  break;
             if (slice.elapsed() > 50) {     // keep the window responsive
-                QTimer::singleShot(0, this, &DailySearchTab::searchStep);
+                QTimer::singleShot(0, this, [this, generation]() { searchStep(generation); });
                 return;
             }
 
