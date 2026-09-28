@@ -18,6 +18,7 @@
 
 #include <QDebug>
 #include <QHash>
+#include <QSet>
 #include <QVector>
 
 #include "SleepLib/machine.h"
@@ -96,6 +97,21 @@ class Session
     
     //! \brief Loads the Sessions EventLists from database (NEW - database storage)
     bool LoadEventsFromDatabase();
+
+    //! \brief Loads only the EventLists of \a only (the analysis's day scoring needs a few
+    //! event channels, not the waveforms). The session then counts as partially loaded
+    //! until TrashEvents(): OpenEvents() reloads it in full, and StoreEventsToDatabase()
+    //! refuses to run, since it would replace every channel with the few in memory.
+    //! Does nothing when all events are already loaded.
+    bool LoadEventsFromDatabase(const QSet<ChannelID> &only);
+    bool partialEvents() const { return m_partialEvents; }
+
+    //! \brief Replaces in the database only the event lists and channel rows of
+    //! \a channels, leaving every other channel, and the waveforms, as they are.
+    bool StoreChannelEvents(const QList<ChannelID> &channels);
+
+    //! \brief Writes one setting of this session to the database (insert or update).
+    bool StoreSetting(ChannelID code);
 
     //bool Load(QString path);
 
@@ -488,6 +504,10 @@ class Session
     //! \brief Regenerates the Session Index Caches, and calls the fun calculation functions
     void UpdateSummaries();
 
+    //! \brief Recomputes the cached summaries (count, first/last, min/max, per-hour rates,
+    //! averages) of one channel from its EventLists.
+    void updateChannelSummary(ChannelID id);
+
     //! \brief Creates and returns a new EventList for the supplied Channel code
     EventList *AddEventList(ChannelID code, EventListType et, EventDataType gain = 1.0,
                             EventDataType offset = 0.0, EventDataType min = 0.0, EventDataType max = 0.0,
@@ -558,6 +578,7 @@ protected:
 
     bool s_summary_loaded;
     bool s_events_loaded;
+    bool m_partialEvents = false;   //!< see LoadEventsFromDatabase(const QSet<ChannelID>&)
     quint8 s_enabled;
 
     // for debugging

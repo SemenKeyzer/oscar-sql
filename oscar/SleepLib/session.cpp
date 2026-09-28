@@ -30,6 +30,8 @@
 #include "SleepLib/calcs.h"
 #include "SleepLib/profiles.h"
 #include "SleepLib/performance_timer.h"
+#include "SleepLib/analysis/analysis_channels.h"
+#include "SleepLib/analysis/session_analysis.h"
 
 // Database repositories
 #include "../database/session_repository.h"
@@ -101,6 +103,7 @@ void Session::TrashEvents()
     }
 
     s_events_loaded = false;
+    m_partialEvents = false;
     eventlist.clear();
     eventlist.squeeze();
 }
@@ -136,6 +139,11 @@ QString Session::eventFile() const
 //const int max_pack_size=128;
 bool Session::OpenEvents(bool debug)
 {
+    // Only some channels are in memory: drop them and load everything.
+    if (m_partialEvents) {
+        TrashEvents();
+    }
+
     if (s_events_loaded) {
         return true;
     }
@@ -1349,6 +1357,11 @@ void Session::UpdateSummaries()
     calcSPO2Drop(this);
     calcPulseChange(this);
 
+    // OSCAR's own analysis (stage 1) of what is not analysed yet with the current
+    // parameters: writes its computed channels; their summaries are made in the loop
+    // below with everything else.
+    analysis::analyzeSession(this, analysis::activeParams(), true);
+
     QHash<ChannelID, QVector<EventList *> >::iterator c = eventlist.begin();
     QHash<ChannelID, QVector<EventList *> >::iterator ev_end = eventlist.end();
 
@@ -1357,44 +1370,47 @@ void Session::UpdateSummaries()
     for (; c != ev_end; c++) {
         id = c.key();
         m_availableChannels.push_back(id);
-
-        schema::ChanType ctype = schema::channel[id].type();
-        if (ctype != schema::SETTING) {
-            //sum(id); // avg calculates this and cnt.
-            if (c.value().size() > 0) {
-                EventList *el = c.value()[0];
-                EventDataType gain = el->gain();
-                m_gain[id] = gain;
-            }
-
-            if (!((id == CPAP_FlowRate) || (id == CPAP_MaskPressureHi) || (id == CPAP_RespEvent)
-                    || (id == CPAP_MaskPressure))) {
-                updateCountSummary(id);
-            }
-
-            Min(id);
-            Max(id);
-            count(id);
-            last(id);
-            first(id);
-
-            if (((id == CPAP_FlowRate)
-                 || (id == CPAP_MaskPressureHi)
-                 || (id == CPAP_RespEvent)
-                 || (id == CPAP_MaskPressure))) {
-                continue;
-            }
-
-            cph(id);
-            sph(id);
-            avg(id);
-            wavg(id);
-        }
+        updateChannelSummary(id);
     }
 
     timeAboveThreshold(CPAP_Leak, p_profile->cpap->leakRedline());
 
     s_machine->updateChannels(this);
+}
+
+void Session::updateChannelSummary(ChannelID id)
+{
+    schema::ChanType ctype = schema::channel[id].type();
+    if (ctype == schema::SETTING) return;
+
+    //sum(id); // avg calculates this and cnt.
+    auto c = eventlist.constFind(id);
+    if (c != eventlist.constEnd() && c.value().size() > 0) {
+        EventList *el = c.value()[0];
+        EventDataType gain = el->gain();
+        m_gain[id] = gain;
+    }
+
+    const bool waveform = (id == CPAP_FlowRate) || (id == CPAP_MaskPressureHi) || (id == CPAP_RespEvent)
+                          || (id == CPAP_MaskPressure);
+    if (!waveform) {
+        updateCountSummary(id);
+    }
+
+    Min(id);
+    Max(id);
+    count(id);
+    last(id);
+    first(id);
+
+    if (waveform) {
+        return;
+    }
+
+    cph(id);
+    sph(id);
+    avg(id);
+    wavg(id);
 }
 
 EventDataType Session::SearchValue(ChannelID code, qint64 time, bool square)
@@ -2893,8 +2909,8 @@ bool Session::StoreToDatabase()
                 setting.value = 0;  // Not used for JSON types
                 setting.dataType = "json";
                 setting.jsonValue = QString::fromUtf8(QJsonDocument(array).toJson(QJsonDocument::Compact));
-            } else if (it.key() == Journal_Notes) {
-                // Journal notes are stored as HTML text; skip if empty (no note entered).
+            } else if (it.key() == Journal_Notes || it.key() == AN_Stamp) {
+                // Journal notes (HTML) and the analysis stamp (JSON) are text; skip if empty.
                 QString noteText = it.value().toString();
                 if (noteText.isEmpty()) continue;
                 setting.value = 0;
@@ -3517,6 +3533,8 @@ QList<RespiratoryEventData> Session::extractRespiratoryEvents()
                           (chanType & schema::SPAN);
         
         if (!isFlagType) continue;
+        // only what the device reported; OSCAR's own analysis is not a device event
+        if (schema::channel[channelId].isComputed()) continue;
         
 #ifdef DBDEBUG
         flagChannels++;
@@ -3572,12 +3590,100 @@ QList<RespiratoryEventData> Session::extractRespiratoryEvents()
     return events;
 }
 
+namespace {
+
+enum class StoreOutcome { Skipped, Saved, Failed };
+
+// Writes one EventList (metadata row and data blob) for a session.
+StoreOutcome storeEventList(EventListRepository &eventListRepo, EventDataRepository &eventDataRepo,
+                            qint64 sessionRowId, qint64 profileId, ChannelID channelId, int index,
+                            EventList *eventList)
+{
+    // Guard against corrupted source data: a count field that overflows to a huge
+    // value produces a blob SQLite cannot bind (SQLITE_TOOBIG). No legitimate CPAP
+    // night comes close to 100 MB for a single event list (even 250 Hz waveforms
+    // for 8 hours are ~14 MB). Skip and log; don't count in totalEventLists so the
+    // rest of the session still imports cleanly.
+    {
+        qint64 estimatedSize = (qint64)eventList->count() * (qint64)sizeof(EventStoreType);
+        if (eventList->hasSecondField()) estimatedSize *= 2;
+        if (eventList->type() != EVL_Waveform)
+            estimatedSize += (qint64)eventList->count() * (qint64)sizeof(quint32);
+        if (estimatedSize > 100LL * 1024 * 1024) {
+            qWarning() << "Session::StoreEventsToDatabase() - Skipping oversized event list"
+                       << "channel" << channelId << "index" << index
+                       << "count" << eventList->count()
+                       << "estimated" << estimatedSize << "bytes — corrupted source data";
+            return StoreOutcome::Skipped;
+        }
+    }
+
+    // 1. Create EventListData from EventList
+    EventListData listData;
+    listData.sessionId = sessionRowId;
+    listData.profileId = profileId;
+    listData.channelId = channelId;
+    listData.eventlistIndex = index;
+    listData.eventType = (int)eventList->type();
+    listData.firstTime = eventList->first();
+    listData.lastTime = eventList->last();
+    listData.count = eventList->count();
+    listData.rate = eventList->rate();
+    listData.gain = eventList->gain();
+    listData.offset = eventList->offset();
+    listData.minValue = eventList->Min();
+    listData.maxValue = eventList->Max();
+    listData.dimension = eventList->dimension();
+    listData.hasSecondField = eventList->hasSecondField();
+    
+    if (listData.hasSecondField) {
+        listData.min2Value = eventList->min2();
+        listData.max2Value = eventList->max2();
+    }
+    
+    // Calculate uncompressed data size
+    listData.dataSize = eventList->count() * sizeof(EventStoreType);
+    if (listData.hasSecondField) {
+        listData.dataSize += eventList->count() * sizeof(EventStoreType);
+    }
+    if (eventList->type() != EVL_Waveform) {
+        listData.dataSize += eventList->count() * sizeof(quint32);
+    }
+    
+    // 2. Create EventList metadata record in database
+    qint64 eventListId = eventListRepo.create(listData);
+    if (eventListId < 0) {
+        qWarning() << "Session::StoreEventsToDatabase() - Failed to create event_list for channel"
+                  << channelId << "index" << index;
+        return StoreOutcome::Failed;
+    }
+    
+    // 3. Store binary data
+    if (!eventDataRepo.storeEventListData(eventListId, eventList)) {
+        qWarning() << "Session::StoreEventsToDatabase() - Failed to store event data for channel"
+                  << channelId << "index" << index;
+        // Delete the metadata record since data storage failed
+        eventListRepo.deleteById(eventListId);
+        return StoreOutcome::Failed;
+    }
+    return StoreOutcome::Saved;
+}
+
+} // namespace
+
 bool Session::StoreEventsToDatabase()
 {
     PERF_TIMER_SCOPE("Session::StoreEventsToDatabase");
     
     if (m_sessionrow_id == 0) {
         qWarning() << "Session::StoreEventsToDatabase() - session not in database";
+        return false;
+    }
+
+    // Only some channels are in memory: this would delete every other channel's lists,
+    // the waveforms among them.
+    if (m_partialEvents) {
+        qWarning() << "Session::StoreEventsToDatabase() - refusing to store the partially loaded session" << s_session;
         return false;
     }
     
@@ -3627,84 +3733,16 @@ bool Session::StoreEventsToDatabase()
             if (!eventList || eventList->count() == 0) {
                 continue;  // Skip empty EventLists
             }
-
-            // Guard against corrupted source data: a count field that overflows to a huge
-            // value produces a blob SQLite cannot bind (SQLITE_TOOBIG). No legitimate CPAP
-            // night comes close to 100 MB for a single event list (even 250 Hz waveforms
-            // for 8 hours are ~14 MB). Skip and log; don't count in totalEventLists so the
-            // rest of the session still imports cleanly.
-            {
-                qint64 estimatedSize = (qint64)eventList->count() * (qint64)sizeof(EventStoreType);
-                if (eventList->hasSecondField()) estimatedSize *= 2;
-                if (eventList->type() != EVL_Waveform)
-                    estimatedSize += (qint64)eventList->count() * (qint64)sizeof(quint32);
-                if (estimatedSize > 100LL * 1024 * 1024) {
-                    qWarning() << "Session::StoreEventsToDatabase() - Skipping oversized event list"
-                               << "channel" << channelId << "index" << index
-                               << "count" << eventList->count()
-                               << "estimated" << estimatedSize << "bytes — corrupted source data";
-                    continue;
-                }
-            }
-
+            const StoreOutcome outcome = storeEventList(eventListRepo, eventDataRepo, m_sessionrow_id, profileId,
+                                                        channelId, index, eventList);
+            if (outcome == StoreOutcome::Skipped) continue;   // not counted: see storeEventList()
             totalEventLists++;
-            
-            // 1. Create EventListData from EventList
-            EventListData listData;
-            listData.sessionId = m_sessionrow_id;
-            listData.profileId = profileId;
-            listData.channelId = channelId;
-            listData.eventlistIndex = index;
-            listData.eventType = (int)eventList->type();
-            listData.firstTime = eventList->first();
-            listData.lastTime = eventList->last();
-            listData.count = eventList->count();
-            listData.rate = eventList->rate();
-            listData.gain = eventList->gain();
-            listData.offset = eventList->offset();
-            listData.minValue = eventList->Min();
-            listData.maxValue = eventList->Max();
-            listData.dimension = eventList->dimension();
-            listData.hasSecondField = eventList->hasSecondField();
-            
-            if (listData.hasSecondField) {
-                listData.min2Value = eventList->min2();
-                listData.max2Value = eventList->max2();
-            }
-            
-            // Calculate uncompressed data size
-            listData.dataSize = eventList->count() * sizeof(EventStoreType);
-            if (listData.hasSecondField) {
-                listData.dataSize += eventList->count() * sizeof(EventStoreType);
-            }
-            if (eventList->type() != EVL_Waveform) {
-                listData.dataSize += eventList->count() * sizeof(quint32);
-            }
-            
-            totalUncompressed += listData.dataSize;
-            
-            // 2. Create EventList metadata record in database
-            qint64 eventListId = eventListRepo.create(listData);
-            if (eventListId < 0) {
-                qWarning() << "Session::StoreEventsToDatabase() - Failed to create event_list for channel"
-                          << channelId << "index" << index;
-                continue;
-            }
-            
-            // 3. Store binary data
-            if (!eventDataRepo.storeEventListData(eventListId, eventList)) {
-                qWarning() << "Session::StoreEventsToDatabase() - Failed to store event data for channel"
-                          << channelId << "index" << index;
-                // Delete the metadata record since data storage failed
-                eventListRepo.deleteById(eventListId);
-                continue;
-            }
-            
+            if (outcome != StoreOutcome::Saved) continue;
             totalSaved++;
-            
-            // Track compressed size from the data we already have
-            // (storeEventListData already updates compressed_size in the DB)
-            totalCompressed += listData.dataSize;  // Approximate; exact value is in DB
+            qint64 size = qint64(eventList->count()) * qint64(sizeof(EventStoreType));
+            if (eventList->hasSecondField()) size *= 2;
+            totalUncompressed += size;
+            totalCompressed += size;  // Approximate; exact value is in DB
         }
     }
     
@@ -3805,6 +3843,131 @@ bool Session::LoadEventsFromDatabase()
 #endif
 
     return (loaded == eventListsData.size());
+}
+
+bool Session::LoadEventsFromDatabase(const QSet<ChannelID> &only)
+{
+    if (s_events_loaded && !m_partialEvents) {
+        return true;   // everything is in memory already
+    }
+    if (m_sessionrow_id == 0) {
+        return false;
+    }
+    m_partialEvents = true;
+
+    EventListRepository eventListRepo;
+    EventDataRepository eventDataRepo;
+    bool ok = true;
+    for (ChannelID code : only) {
+        if (eventlist.contains(code)) continue;   // loaded before
+        for (const EventListData &listData : eventListRepo.findByChannel(m_sessionrow_id, code)) {
+            EventList *eventList = AddEventList(listData.channelId, EventListType(listData.eventType), listData.gain,
+                                                listData.offset, listData.minValue, listData.maxValue,
+                                                listData.rate, listData.hasSecondField);
+            eventList->setFirst(listData.firstTime);
+            eventList->setLast(listData.lastTime);
+            eventList->setCount(listData.count);
+            eventList->setDimension(listData.dimension);
+            if (listData.hasSecondField) {
+                eventList->setMin2(listData.min2Value);
+                eventList->setMax2(listData.max2Value);
+            }
+            if (!eventDataRepo.loadEventListData(listData.id, eventList)) {
+                qWarning() << "Session::LoadEventsFromDatabase(only) - Failed to load event data for channel"
+                           << listData.channelId << "index" << listData.eventlistIndex;
+                eventlist[listData.channelId].removeLast();
+                delete eventList;
+                ok = false;
+            }
+        }
+    }
+    return ok;
+}
+
+bool Session::StoreChannelEvents(const QList<ChannelID> &channels)
+{
+    if (m_sessionrow_id == 0) {
+        qWarning() << "Session::StoreChannelEvents() - session not in database";
+        return false;
+    }
+    const qint64 profileId = s_machine->getProfileId();
+    if (profileId == 0) {
+        qWarning() << "Session::StoreChannelEvents() - machine has no profile_id";
+        return false;
+    }
+
+    EventListRepository eventListRepo;
+    EventDataRepository eventDataRepo;
+    SessionChannelsRepository channelsRepo;
+    bool ok = true;
+    for (ChannelID code : channels) {
+        // the channel's lists (their data goes with them: ON DELETE CASCADE)
+        for (const EventListData &old : eventListRepo.findByChannel(m_sessionrow_id, code)) {
+            if (!eventListRepo.deleteById(old.id)) ok = false;
+        }
+        const QVector<EventList *> lists = eventlist.value(code);
+        bool anyEvents = false;
+        for (int index = 0; index < lists.size(); ++index) {
+            EventList *el = lists[index];
+            if (!el || el->count() == 0) continue;
+            anyEvents = true;
+            if (storeEventList(eventListRepo, eventDataRepo, m_sessionrow_id, profileId, code, index, el)
+                    == StoreOutcome::Failed) {
+                ok = false;
+            }
+        }
+
+        // its row in session_channels, rebuilt (its value summaries go with the old row)
+        const SessionChannelData existing = channelsRepo.findByChannel(m_sessionrow_id, code);
+        if (existing.id > 0 && !channelsRepo.remove(existing.id)) ok = false;
+        if (!anyEvents) continue;
+        SessionChannelData row;
+        row.sessionId = m_sessionrow_id;
+        row.profileId = profileId;
+        row.channelId = code;
+        row.count = qRound(m_cnt.value(code, 0));
+        row.sum = m_sum.value(code, 0);
+        row.avg = m_avg.value(code, 0);
+        row.wavg = m_wavg.value(code, 0);
+        row.min = m_min.value(code, 0);
+        row.max = m_max.value(code, 0);
+        row.cph = m_cph.value(code, 0);
+        row.sph = m_sph.value(code, 0);
+        row.gain = m_gain.value(code, 1.0);
+        row.firstTime = m_firstchan.value(code, 0);
+        row.lastTime = m_lastchan.value(code, 0);
+        row.physMin = physMin(code);
+        row.physMax = physMax(code);
+        if (channelsRepo.create(row) < 0) ok = false;
+    }
+    return ok;
+}
+
+bool Session::StoreSetting(ChannelID code)
+{
+    if (m_sessionrow_id == 0) {
+        return false;
+    }
+    SessionSettingsRepository settingsRepo;
+    SessionSettingData setting = settingsRepo.findBySetting(m_sessionrow_id, code);
+    const bool exists = setting.id > 0;
+    if (!settings.contains(code)) {
+        return !exists || settingsRepo.remove(setting.id);
+    }
+    const QVariant value = settings.value(code);
+    setting.sessionId = m_sessionrow_id;
+    setting.profileId = s_machine->getProfileId();
+    setting.channelId = code;
+    if (value.typeId() == QMetaType::QString) {
+        setting.value = 0;
+        setting.dataType = "text";
+        setting.jsonValue = value.toString();
+    } else {
+        setting.value = value.toDouble();
+        setting.dataType = "numeric";
+        setting.jsonValue = QString();
+    }
+    return exists ? settingsRepo.update(setting) : settingsRepo.create(setting) > 0;
 }
 
 // ===== END NEW DATABASE STORAGE =====

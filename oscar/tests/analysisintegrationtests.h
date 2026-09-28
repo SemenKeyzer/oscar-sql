@@ -17,9 +17,24 @@ class AnalysisIntegrationTests : public QObject
     Q_OBJECT
 private slots:
     void initTestCase();
+    void cleanupTestCase();
     void testAnalysisChannelsAreComputed();
     void testComputedChannelsAreNotReportedByDevice();
     void testAnalysisChannelsAreNotInAhi();
+    void testStageOneWritesFlowChannelsAndStamp();
+    void testStageOneOximetry();
+    void testStageOneSkipsSessionWithoutEvents();
+    void testStageOneOffDoesNothing();
+    void testStoreChannelEventsLeavesWaveform();
+    void testPartialSessionIsNeverStoredInFull();
+    void testStampIsStoredAsText();
+
+private:
+    class QCoreApplication *m_app = nullptr;
+    class QTemporaryDir *m_tempDir = nullptr;
+    QString m_previousAppData;
+    qint64 m_profileId = 0;
+    qint64 m_machineRow = 0;
 };
 DECLARE_TEST(AnalysisIntegrationTests)
 

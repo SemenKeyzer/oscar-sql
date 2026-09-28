@@ -9,6 +9,7 @@
 #include "oximetry_session_builder.h"
 #include "SleepLib/calcs.h"
 #include "SleepLib/session.h"
+#include "SleepLib/analysis/session_analysis.h"
 
 qint64 addOximetryEvents(Session *session, qint64 startMs, const QVector<OxiRecord> &records,
                          qint64 stepMs, bool havePerfIndex)
@@ -94,6 +95,7 @@ void finishOximetrySession(Session *session, qint64 lastMs, bool havePerfIndex)
 
     calcSPO2Drop(session);
     calcPulseChange(session);
+    analysis::analyzeSession(session, analysis::activeParams(), true);   // also makes its summaries
 
     session->first(OXI_Pulse);
     session->first(OXI_SPO2);
