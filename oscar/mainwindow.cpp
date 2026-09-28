@@ -10,6 +10,7 @@
 #define TEST_MACROS_ENABLEDoff
 #include "test_macros.h"
 
+#include <exception>
 #include <QHostInfo>
 #include <QFileDialog>
 #include <QInputDialog>
@@ -1019,11 +1020,28 @@ int MainWindow::importCPAP(ImportPath import, const QString &message)
     }
 
     import.loader->resetDailySummariesCalculated();
-    int c = import.loader->Open(import.path);
+    int c = -1;
+    // Loaders parse files straight from the card, and a damaged file can make one
+    // throw (a short packet, a malformed number). Catch it here so the import
+    // fails cleanly and stores nothing, instead of closing OSCAR.
+    QString loaderError;
+    try {
+        c = import.loader->Open(import.path);
+    } catch (const std::exception& e) {
+        loaderError = QString::fromLocal8Bit(e.what());
+    } catch (...) {
+        loaderError = tr("unknown error");
+    }
+    if (!loaderError.isEmpty()) {
+        qWarning() << "MainWindow::importCPAP() - loader failed on" << import.path << ":" << loaderError;
+        c = -1;
+    }
 
     progdlg->setMessage(QObject::tr("Finishing up..."));
     QCoreApplication::processEvents();
-    ctx->Commit();
+    if (loaderError.isEmpty()) {
+        ctx->Commit();
+    }
 
     // Loaders that add sessions with mach->AddSession() directly (BMC, G3X, Resvent)
     // never call finishAddingSessions(), so nothing refreshed daily_summaries for the
@@ -1056,7 +1074,9 @@ int MainWindow::importCPAP(ImportPath import, const QString &message)
     // Commit the transaction after all import operations are complete
     qDebug() << "MainWindow::importCPAP committing import transaction";
     QString commitError;
-    if (!dbMgr.commit()) {
+    if (!loaderError.isEmpty()) {
+        dbMgr.rollback();
+    } else if (!dbMgr.commit()) {
         commitError = dbMgr.lastError().text();
         qWarning() << "MainWindow::importCPAP() - Failed to commit database transaction:" << commitError;
         dbMgr.rollback();
@@ -1066,7 +1086,7 @@ int MainWindow::importCPAP(ImportPath import, const QString &message)
     import.loader->SetContext(nullptr);
     delete ctx;
 
-    if (!commitError.isEmpty()) {
+    if (!commitError.isEmpty() || !loaderError.isEmpty()) {
         // Don't show a false success/up-to-date notification — fall through to error below
     } else if (c > 0) {
         Notify(tr("Imported %1 CPAP session(s) from\n\n%2").arg(c).arg(import.path), tr("Import Success"));
@@ -1089,6 +1109,13 @@ int MainWindow::importCPAP(ImportPath import, const QString &message)
                "If you have the OSCAR database open in another application "
                "(e.g., a SQLite viewer or editor), please close it and try again.\n\nError: %1")
             .arg(commitError));
+        return -1;
+    }
+    if (!loaderError.isEmpty()) {
+        QMessageBox::warning(this, tr("Import Problem"),
+            tr("OSCAR could not read the device data at\n\n%1\n\n"
+               "A file on the card may be damaged. Nothing was imported.\n\nDetails: %2")
+            .arg(import.path, loaderError));
         return -1;
     }
 
