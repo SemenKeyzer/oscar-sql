@@ -13,3 +13,5 @@
 | 2026-09-28 | Собственный анализ: второе мнение, SpO₂ и пульс | [specs/2026-09-28-sleep-analysis-design.md](specs/2026-09-28-sleep-analysis-design.md) | — | спецификация согласована, план — следующий шаг |
 
 Документация проекта (upstream) — индекс в [`Notes/README.md`](../../Notes/README.md).
+
+Ревью: [reviews/2026-09-28-project-review.md](reviews/2026-09-28-project-review.md) — ревью всего проекта, находки по приоритетам.
