@@ -487,6 +487,8 @@ private:
     //! Closes and deletes both dialogs above, which keep pointers to the profile's
     //! devices: before the profile is closed or a device is purged.
     void closeTimeCorrectionDialogs();
+    //! After an import was rolled back: drops what it left in memory.
+    void discardRolledBackImport();
     QTime logtime;
     QSystemTrayIcon *systray;
     QMenu *systraymenu;

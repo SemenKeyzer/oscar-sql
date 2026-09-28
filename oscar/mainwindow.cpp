@@ -1111,6 +1111,7 @@ int MainWindow::importCPAP(ImportPath import, const QString &message)
                "If you have the OSCAR database open in another application "
                "(e.g., a SQLite viewer or editor), please close it and try again.\n\nError: %1")
             .arg(commitError));
+        discardRolledBackImport();
         return -1;
     }
     if (!loaderError.isEmpty()) {
@@ -1118,6 +1119,7 @@ int MainWindow::importCPAP(ImportPath import, const QString &message)
             tr("OSCAR could not read the device data at\n\n%1\n\n"
                "A file on the card may be damaged. Nothing was imported.\n\nDetails: %2")
             .arg(import.path, loaderError));
+        discardRolledBackImport();
         return -1;
     }
 
@@ -1126,6 +1128,45 @@ int MainWindow::importCPAP(ImportPath import, const QString &message)
     }
 
     return c;
+}
+
+void MainWindow::discardRolledBackImport()
+{
+    if (!p_profile) return;
+
+    // The rollback undid the import in the database, but what the loader added is
+    // still in memory: its sessions would show until the profile was reopened, and a
+    // device it created keeps the id of a row that no longer exists, which the next
+    // device inserted would be given too. Take those devices out of the profile, then
+    // reload the profile from the database.
+    MachineRepository repo;
+    QList<Machine *> gone;
+    QList<Session *> orphans;   // their sessions that are in no day, so no Day deletes them
+    for (Machine *m : p_profile->GetMachines()) {
+        if (m->getDatabaseId() <= 0 || repo.findById(m->getDatabaseId()).id > 0) continue;
+        QSet<Session *> inDays;
+        for (Day *day : m->day) {
+            for (auto it = day->begin(); it != day->end(); ++it) inDays.insert(*it);
+        }
+        for (Session *sess : m->sessionlist) {
+            if (!inDays.contains(sess)) orphans.append(sess);
+        }
+        gone.append(m);
+    }
+    for (Machine *m : gone) {
+        qDebug() << "MainWindow: dropping device" << m->loaderName() << m->serial()
+                 << "created by a rolled-back import";
+        p_profile->DelMachine(m);
+    }
+
+    reloadProfile();   // also deletes the profile's days and the sessions in them
+
+    qDeleteAll(orphans);
+    for (Machine *m : gone) {
+        m->sessionlist.clear();
+        m->day.clear();
+        delete m;
+    }
 }
 
 void MainWindow::updateOverview()
