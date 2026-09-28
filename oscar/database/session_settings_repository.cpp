@@ -33,13 +33,16 @@ qint64 SessionSettingsRepository::create(const SessionSettingData& data)
     }
 
     QSqlQuery query(db);
+    // profile_id is NOT NULL (schema v12 denormalisation); it was left out here, so
+    // every insert through create() failed.
     query.prepare(
         "INSERT INTO session_settings "
-        "(session_id, channel_id, value, data_type, json_value) "
-        "VALUES (?, ?, ?, ?, ?)"
+        "(session_id, profile_id, channel_id, value, data_type, json_value) "
+        "VALUES (?, ?, ?, ?, ?, ?)"
     );
 
     query.addBindValue(data.sessionId);
+    query.addBindValue(data.profileId);
     query.addBindValue(data.channelId);
     query.addBindValue(data.value);
     query.addBindValue(data.dataType);
