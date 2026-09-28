@@ -71,27 +71,34 @@ ChannelID PrismaLoader::CPAPModeChannel() { return Prisma_Mode; }
 //********************************************************************************************
 
 bool WMEDFInfo::ParseSignalData() {
-    int bytes = 0;
+    // Bytes per data record; only "#1" (8-bit) and "#2" (16-bit) signals carry data.
+    qint64 bytes = 0;
     for (auto & sig : edfsignals) {
         if (sig.reserved == "#1") {
-            bytes += 1 * sig.sampleCnt;
+            bytes += 1 * qint64(sig.sampleCnt);
         }
         else if (sig.reserved == "#2") {
-            bytes += 2 * sig.sampleCnt;
+            bytes += 2 * qint64(sig.sampleCnt);
         }
+    }
+    if (bytes <= 0) {
+        // No signal says how it is stored (blank reserved fields): there is no
+        // record size, and dividing by it crashed.
+        qWarning() << "WMEDFInfo::ParseSignalData(): no 8/16-bit signals in" << filename;
+        return false;
     }
     // allocate the arrays for the signal values
     edfHdr.num_data_records = (fileData.size() - edfHdr.num_header_bytes) / bytes;
 
     for (auto & sig : edfsignals) {
-        long samples = sig.sampleCnt * edfHdr.num_data_records;
-        if (edfHdr.num_data_records <= 0) {
-            sig.dataArray = nullptr;
+        if (edfHdr.num_data_records <= 0 || (sig.reserved != "#1" && sig.reserved != "#2")) {
+            sig.dataArray = nullptr;    // no data stored for this signal
             continue;
         }
+        const qint64 samples = qint64(sig.sampleCnt) * edfHdr.num_data_records;
         sig.dataArray = new qint16 [samples];
     }
-    for (int recNo = 0; recNo < edfHdr.num_data_records; recNo++) {
+    for (qint64 recNo = 0; recNo < edfHdr.num_data_records; recNo++) {
         for (auto & sig : edfsignals) {
             for (int j=0;j<sig.sampleCnt;j++) {
                 // The reserved field indicates if the channel is 8 or 16 bit.
@@ -142,6 +149,14 @@ quint8 WMEDFInfo::Read8U()
 void PrismaImport::run()
 {
     qDebug() << "PRISMA IMPORT" << sessionid;
+
+    // Skip sessions imported before, as the other loaders do. Re-parsing them only
+    // built duplicates that Machine::AddSession rejected: they leaked, and the
+    // import's Commit() reported failure on every re-import of the card.
+    if (loader->context()->SessionExists(sessionid)) {
+        qDebug() << "Prisma session" << sessionid << "already imported";
+        return;
+    }
 
     if (!wmedf.Open(signalData)) {
         qWarning() << "Signal file open failed";
@@ -450,14 +465,16 @@ QList<QPair<ChannelID, QList<Prisma_Event_Type>>> PrismaImport::eventChannels()
 void PrismaImport::AddWaveform(ChannelID code, QString edfLabel)
 {
     EDFSignal * es = wmedf.lookupLabel(edfLabel);
-    if (es != nullptr) {
+    // A signal without stored samples (no "#1"/"#2" size in the header) has no
+    // data array; importing it used to read uninitialised memory.
+    if (es != nullptr && es->dataArray != nullptr && es->sampleCnt > 0) {
         qint64 duration = wmedf.GetNumDataRecords() * wmedf.GetDuration() * 1000L;
-        long recs = es->sampleCnt * wmedf.GetNumDataRecords();
+        const qint64 recs = qint64(es->sampleCnt) * wmedf.GetNumDataRecords();
 
         double rate = double(duration) / double(recs);
         EventList *a = session->AddEventList(code, EVL_Waveform, es->gain, es->offset, 0, 0, rate);
         a->setDimension(es->physical_dimension);
-        a->AddWaveform(startdate, es->dataArray, recs, duration);
+        a->AddWaveform(startdate, es->dataArray, int(recs), duration);
 
         session->setPhysMin(code, es->physical_minimum);
         session->setPhysMax(code, es->physical_maximum);
