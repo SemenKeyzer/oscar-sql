@@ -7,6 +7,7 @@
  * for more details. */
 
 #include "cloud_uploader.h"
+#include "log_redaction.h"
 
 #include <QFile>
 #include <QFileInfo>
@@ -221,7 +222,7 @@ void CloudUploader::onUploadReplyFinished()
         m_deleteToken = QString::fromUtf8(m_reply->rawHeader("X-Token")).trimmed();
     }
 
-    qDebug() << "CloudUploader: upload complete, URL =" << m_shareUrl
+    qDebug() << "CloudUploader: upload complete, URL =" << redactedUrl(m_shareUrl)
              << "token =" << (m_deleteToken.isEmpty() ? "(none)" : "(received)");
 
     cleanupReply();

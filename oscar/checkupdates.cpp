@@ -68,6 +68,19 @@ QString platformStr()
 
 static const QString OSCAR_Version_File = "http://apneaboard.net/OSCAR/versions.xml";
 
+// versions.xml is fetched without TLS, so its contents are untrusted: show the
+// installer address in full (so the user sees where it leads), escape it, and only
+// make http(s) addresses clickable.
+static QString installerLink(const QString& url)
+{
+    const QString shown = url.toHtmlEscaped();
+    const QString scheme = QUrl(url).scheme().toLower();
+    if (scheme == QLatin1String("https") || scheme == QLatin1String("http")) {
+        return QStringLiteral("<a href=\"%1\">%1</a>").arg(shown);  // toHtmlEscaped() escapes \"
+    }
+    return shown;
+}
+
 static QString versionXML;
 
 /*! \fn readLocalVersions
@@ -177,14 +190,14 @@ void CheckUpdates::compareVersions () {
         msg = QObject::tr("A more recent version of OSCAR is available");
         msg += "<p>" + QObject::tr("You are running OSCAR %1").arg(getVersion()) + "</p>";
         if (releaseVersion.version.length() > 0) {
-            msg += "<p>" + QObject::tr("OSCAR %1 is available <a href='%2'>here</a>.")
-                               .arg(releaseVersion.version,
-                               releaseVersion.urlInstaller) + "</p>";
+            msg += "<p>" + QObject::tr("OSCAR %1 is available at %2")
+                               .arg(releaseVersion.version.toHtmlEscaped(),
+                                    installerLink(releaseVersion.urlInstaller)) + "</p>";
         }
         if (showTestVersion && (testVersion.version.length() > 0)) {
-            msg += "<p>" + QObject::tr("Information about more recent test version %1 is available at <a href='%2'>%2</a>")
-                               .arg(testVersion.version,
-                                testVersion.urlInstaller) + "</p>";
+            msg += "<p>" + QObject::tr("Information about more recent test version %1 is available at %2")
+                               .arg(testVersion.version.toHtmlEscaped(),
+                                    installerLink(testVersion.urlInstaller)) + "</p>";
         }
     }
 

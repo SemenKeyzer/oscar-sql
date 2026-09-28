@@ -11,6 +11,7 @@
 #include <QDebug>
 #include <QDateTime>
 #include <QCoreApplication>
+#include <QStorageInfo>
 #include "SleepLib/progressdialog.h"
 
 static const quint64 PROGRESS_SCALE = 1024;  // QProgressBar only holds an int, so report progress in KiB.
@@ -424,11 +425,22 @@ static size_t unzip_qfile_read(void* pOpaque, mz_uint64 file_ofs, void* pBuf, si
 }
 
 // miniz write callback: streams decompressed chunks directly into an open QFile.
-// file_ofs always increases monotonically so no seeking is needed.
-static size_t unzip_qfile_write(void* pOpaque, mz_uint64 /*file_ofs*/, const void* pBuf, size_t n)
+// file_ofs always increases monotonically so no seeking is needed.  It never
+// writes more bytes than the entry's header declared, so an entry that lies
+// about its size cannot keep writing until the disk is full.
+struct UnzipBoundedSink
 {
-    QFile* f = static_cast<QFile*>(pOpaque);
-    const qint64 written = f->write(static_cast<const char*>(pBuf), static_cast<qint64>(n));
+    QFile* file;
+    mz_uint64 limit;
+};
+
+static size_t unzip_qfile_write_bounded(void* pOpaque, mz_uint64 file_ofs, const void* pBuf, size_t n)
+{
+    UnzipBoundedSink* sink = static_cast<UnzipBoundedSink*>(pOpaque);
+    if (file_ofs + n > sink->limit) {
+        return 0;   // miniz treats a short write as an error and stops
+    }
+    const qint64 written = sink->file->write(static_cast<const char*>(pBuf), static_cast<qint64>(n));
     return written < 0 ? 0 : static_cast<size_t>(written);
 }
 
@@ -439,7 +451,7 @@ struct UnzipProgressSink
     const std::function<void(qint64, qint64)>* progress;
 };
 
-// Same as unzip_qfile_write, but file_ofs is monotonic so file_ofs+written is the running total.
+// Writes to a QFile and reports progress; file_ofs is monotonic so file_ofs+written is the running total.
 static size_t unzip_qfile_write_progress(void* pOpaque, mz_uint64 file_ofs, const void* pBuf, size_t n)
 {
     UnzipProgressSink* sink = static_cast<UnzipProgressSink*>(pOpaque);
@@ -532,6 +544,31 @@ bool UnzipFile::ExtractAll(const QString& destDir)
         return false;
     }
 
+    // Archives can come from share links.  Before writing anything, refuse ones
+    // that would not fit on the disk or that expand implausibly (zip bombs):
+    // OSCAR's SQL and card files compress by a factor of tens at most.
+    {
+        mz_uint64 totalUncompressed = 0;
+        for (int i = 0; i < n; ++i) {
+            mz_zip_archive_file_stat stat;
+            if (!mz_zip_reader_file_stat(pZip, static_cast<mz_uint>(i), &stat)) continue;
+            const mz_uint64 kBigEntry = mz_uint64(64) * 1024 * 1024;
+            if (stat.m_uncomp_size > kBigEntry && stat.m_uncomp_size / qMax<mz_uint64>(stat.m_comp_size, 1) > 1000) {
+                qWarning() << "UnzipFile::ExtractAll: rejecting entry with an implausible compression ratio:"
+                           << QString::fromUtf8(stat.m_filename);
+                return false;
+            }
+            totalUncompressed += stat.m_uncomp_size;
+        }
+        const QStorageInfo volume(destDir);
+        const qint64 kMargin = qint64(256) * 1024 * 1024;
+        if (volume.isValid() && qint64(totalUncompressed) > volume.bytesAvailable() - kMargin) {
+            qWarning() << "UnzipFile::ExtractAll: not enough free space to extract"
+                       << totalUncompressed << "bytes into" << destDir;
+            return false;
+        }
+    }
+
     for (int i = 0; i < n; ++i) {
         mz_zip_archive_file_stat stat;
         if (!mz_zip_reader_file_stat(pZip, static_cast<mz_uint>(i), &stat)) {
@@ -580,8 +617,9 @@ bool UnzipFile::ExtractAll(const QString& destDir)
             qWarning() << "UnzipFile::ExtractAll: cannot write" << destPath;
             return false;
         }
+        UnzipBoundedSink sink { &outFile, stat.m_uncomp_size };
         const bool ok = mz_zip_reader_extract_to_callback(
-            pZip, static_cast<mz_uint>(i), unzip_qfile_write, &outFile, 0);
+            pZip, static_cast<mz_uint>(i), unzip_qfile_write_bounded, &sink, 0);
         outFile.close();
         if (!ok) {
             QFile::remove(destPath);

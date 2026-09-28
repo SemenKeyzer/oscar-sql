@@ -7,6 +7,7 @@
  * for more details. */
 
 #include "googledrive_uploader.h"
+#include "log_redaction.h"
 #include "oauth2_handler.h"
 
 #include <QFile>
@@ -481,6 +482,6 @@ void GoogleDriveUploader::onPermissionReplyFinished()
         return;
     }
 
-    qDebug() << "GoogleDriveUploader: share link:" << m_shareUrl;
+    qDebug() << "GoogleDriveUploader: share link:" << redactedUrl(m_shareUrl);
     emit uploadFinished(m_shareUrl);
 }

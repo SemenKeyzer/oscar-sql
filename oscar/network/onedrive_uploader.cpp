@@ -7,6 +7,7 @@
  * for more details. */
 
 #include "onedrive_uploader.h"
+#include "log_redaction.h"
 #include "oauth2_handler.h"
 
 #include <QFile>
@@ -384,6 +385,6 @@ void OneDriveUploader::onShareLinkReplyFinished()
         return;
     }
 
-    qDebug() << "OneDriveUploader: share link:" << m_shareUrl;
+    qDebug() << "OneDriveUploader: share link:" << redactedUrl(m_shareUrl);
     emit uploadFinished(m_shareUrl);
 }

@@ -7,7 +7,9 @@
  * for more details. */
 
 #include "cloud_downloader.h"
+#include "log_redaction.h"
 
+#include <QStorageInfo>
 #include <QDir>
 #include <QFileInfo>
 #include <QTemporaryFile>
@@ -57,6 +59,8 @@ void CloudDownloader::setUrl(const QUrl& url)
 void CloudDownloader::start()
 {
     m_aborted = false;
+    m_bytesWritten = 0;
+    m_abortReason.clear();
 
     if (!m_originalUrl.isValid()) {
         emit downloadFailed(tr("Invalid URL."));
@@ -94,7 +98,7 @@ void CloudDownloader::start()
     }
 
     qDebug() << "CloudDownloader: provider =" << providerName(m_provider)
-             << "download URL =" << downloadUrl.toString();
+             << "download URL =" << redactedUrl(downloadUrl.toString());
 
     // Create a uniquely-named temp file in the system temp directory.
     QString tempDir = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
@@ -356,8 +360,22 @@ void CloudDownloader::cleanupReply()
 void CloudDownloader::onReadyRead()
 {
     // Stream data to the temp file as it arrives, keeping memory usage low.
-    if (m_tempFile && m_reply) {
-        m_tempFile->write(m_reply->readAll());
+    if (!m_tempFile || !m_reply || m_aborted) return;
+    m_bytesWritten += m_tempFile->write(m_reply->readAll());
+
+    // A share link can point at anything.  Stop before a huge or endless download
+    // fills the disk: past the size limit, or when little free space is left.
+    static const qint64 kMaxDownloadBytes = qint64(4) * 1024 * 1024 * 1024;   // 4 GiB
+    static const qint64 kMinFreeBytes     = qint64(256) * 1024 * 1024;       // 256 MiB
+    const QStorageInfo volume(QFileInfo(m_localPath).absolutePath());
+    if (m_bytesWritten > kMaxDownloadBytes) {
+        m_abortReason = tr("The file is larger than %1 GB, which is more than any OSCAR package "
+                           "should be. The download was stopped.").arg(kMaxDownloadBytes >> 30);
+    } else if (volume.isValid() && volume.bytesAvailable() < kMinFreeBytes) {
+        m_abortReason = tr("The download was stopped because the disk is almost full.");
+    }
+    if (!m_abortReason.isEmpty()) {
+        abort();
     }
 }
 
@@ -371,7 +389,7 @@ void CloudDownloader::onReplyFinished()
             delete m_tempFile;
             m_tempFile = nullptr;
         }
-        emit downloadFailed(tr("Download was cancelled."));
+        emit downloadFailed(m_abortReason.isEmpty() ? tr("Download was cancelled.") : m_abortReason);
         return;
     }
 

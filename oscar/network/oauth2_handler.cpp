@@ -10,6 +10,8 @@
 
 #include <QCryptographicHash>
 #include <QDesktopServices>
+#include <QFile>
+#include <QFileInfo>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QNetworkAccessManager>
@@ -95,6 +97,13 @@ void OAuth2Handler::startAuth()
         return;
     }
 
+    // Don't leave the port open forever if the user abandons the sign-in.  The
+    // timer belongs to the server, so it goes away when the server is stopped.
+    QTimer::singleShot(5 * 60 * 1000, m_server, [this]() {
+        stopServer();
+        emit authFailed(tr("Sign-in timed out. Please try again."));
+    });
+
     quint16 port = m_server->serverPort();
     QString redirectUri = QStringLiteral("http://127.0.0.1:%1/callback").arg(port);
     m_redirectUri = redirectUri;
@@ -131,12 +140,15 @@ void OAuth2Handler::onNewConnection()
 
     // Wait for the HTTP request to arrive.
     connect(socket, &QTcpSocket::readyRead, this, [this, socket]() {
-        QByteArray data = socket->readAll();
-        QString request = QString::fromUtf8(data);
+        // The request line may arrive in pieces; wait until it is complete.
+        if (!socket->canReadLine()) {
+            if (socket->bytesAvailable() > 8192) socket->abort();   // not a browser redirect
+            return;
+        }
+        const QString firstLine = QString::fromUtf8(socket->readLine()).trimmed();
 
         // Parse the GET request line for query parameters.
         // Expected: GET /callback?code=XXX&state=YYY HTTP/1.1
-        QString firstLine = request.section('\n', 0, 0).trimmed();
         QString path = firstLine.section(' ', 1, 1);
         QUrl requestUrl(QStringLiteral("http://localhost") + path);
         QUrlQuery query(requestUrl);
@@ -144,6 +156,17 @@ void OAuth2Handler::onNewConnection()
         QString code  = query.queryItemValue(QStringLiteral("code"));
         QString state = query.queryItemValue(QStringLiteral("state"));
         QString error = query.queryItemValue(QStringLiteral("error"));
+
+        // Anything on this port that is not the provider's redirect for this
+        // sign-in (another local page, a favicon request, a stray process) gets a
+        // 404 and does not end the sign-in.
+        if (requestUrl.path() != QLatin1String("/callback") || state != m_state) {
+            qDebug() << "OAuth2Handler: ignoring request that is not this sign-in's callback";
+            socket->write("HTTP/1.1 404 Not Found\r\nConnection: close\r\nContent-Length: 0\r\n\r\n");
+            socket->flush();
+            socket->disconnectFromHost();
+            return;
+        }
 
         // Send response HTML to the browser.
         QString html;
@@ -320,6 +343,15 @@ void OAuth2Handler::saveTokens(const QString& providerKey)
         s.setValue(QStringLiteral("tokenExpiry"), m_tokenExpiry.toMSecsSinceEpoch());
     }
     s.endGroup();
+    s.sync();
+
+    // On Linux and macOS the settings are a file.  It now holds a token that can
+    // create links on the user's cloud storage, so keep it readable by this
+    // account only.  (On Windows the settings live in the per-user registry.)
+    const QFileInfo settingsFile(s.fileName());
+    if (settingsFile.isFile()) {
+        QFile::setPermissions(settingsFile.filePath(), QFileDevice::ReadOwner | QFileDevice::WriteOwner);
+    }
 }
 
 void OAuth2Handler::loadTokens(const QString& providerKey)

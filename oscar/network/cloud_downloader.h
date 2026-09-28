@@ -114,6 +114,8 @@ private:
     CloudProvider          m_provider  = CloudProvider::Unknown;
     QString                m_localPath;
     bool                   m_aborted   = false;
+    qint64                 m_bytesWritten = 0;   ///< Bytes saved so far.
+    QString                m_abortReason;          ///< Why the download was stopped, if not by the user.
 };
 
 #endif // CLOUD_DOWNLOADER_H

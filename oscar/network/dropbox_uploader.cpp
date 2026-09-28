@@ -7,6 +7,7 @@
  * for more details. */
 
 #include "dropbox_uploader.h"
+#include "log_redaction.h"
 #include "oauth2_handler.h"
 
 #include <QFile>
@@ -307,7 +308,7 @@ void DropboxUploader::onShareLinkReplyFinished()
         m_shareUrl = metadata.value(QStringLiteral("url")).toString();
 
         if (!m_shareUrl.isEmpty()) {
-            qDebug() << "DropboxUploader: reusing existing shared link:" << m_shareUrl;
+            qDebug() << "DropboxUploader: reusing existing shared link:" << redactedUrl(m_shareUrl);
             cleanupReply();
             emit uploadFinished(m_shareUrl);
             return;
@@ -332,6 +333,6 @@ void DropboxUploader::onShareLinkReplyFinished()
         return;
     }
 
-    qDebug() << "DropboxUploader: shared link created:" << m_shareUrl;
+    qDebug() << "DropboxUploader: shared link created:" << redactedUrl(m_shareUrl);
     emit uploadFinished(m_shareUrl);
 }
