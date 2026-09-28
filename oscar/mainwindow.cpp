@@ -3030,6 +3030,12 @@ void MainWindow::doReprocessEvents()
         progress.setProgressValue(++idx);
         QApplication::processEvents();
     }
+
+    // The sessions' summaries changed, so the per-day rows built from them are
+    // stale (CSV reports, SQL); recompute them before the views are rebuilt.
+    progress.setMessage(tr("Updating daily summaries"));
+    QApplication::processEvents();
+    p_profile->calculateDailySummaries();
     progress.close();
 
     welcome = new Welcome(ui->tabWidget);
