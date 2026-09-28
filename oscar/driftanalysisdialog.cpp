@@ -10,6 +10,7 @@
 #include "ui_driftanalysisdialog.h"
 #include "SleepLib/profiles.h"
 #include "SleepLib/machine_common.h"
+#include "database/database_manager.h"
 #include <QMessageBox>
 #include <QComboBox>
 #include <QDateTime>
@@ -338,17 +339,25 @@ void DriftAnalysisDialog::onUseDrift()
 
     DeviceTimeCorrectionRepository repo;
 
+    // The three writes below stand or fall together: closing the old model or
+    // retiring the reference entries without the new model row would leave both
+    // devices corrected differently from what was fitted.
+    DatabaseManager& dbMgr = DatabaseManager::instance();
+    const bool ownTransaction = !dbMgr.inTransaction() && dbMgr.transaction();
+    bool ok = true;
+
     // Close the existing CPAP drift row the day before the new fit starts
     if (m_hasExistingModel && m_existingModelRowId >= 0) {
         QString closedTo = fitStart.addDays(-1).toString(Qt::ISODate);
-        repo.updateDateTo(m_existingModelRowId, closedTo);
+        ok = repo.updateDateTo(m_existingModelRowId, closedTo);
     }
 
     // Mark the reference device's constant entries in the fit range as undone — they
     // are absorbed into the CPAP drift model and are no longer needed for correction.
     for (const auto& r : repo.findManualOffsetRows(ref->getDatabaseId())) {
+        if (!ok) break;
         QDate d = QDate::fromString(r.dateFrom, Qt::ISODate);
-        if (d >= fitStart && d <= fitEnd) repo.markUndone(r.id);
+        if (d >= fitStart && d <= fitEnd) ok = repo.markUndone(r.id);
     }
 
     // Write new open-ended drift row on the CPAP (scenario b: extends forward indefinitely).
@@ -363,12 +372,18 @@ void DriftAnalysisDialog::onUseDrift()
     modelRow.c1        = m_fitSlope;
     modelRow.reason    = tr("Fitted drift model");
 
-    if (repo.create(modelRow) < 0) {
+    if (ok) ok = repo.create(modelRow) >= 0;
+    if (ok && ownTransaction) ok = dbMgr.commit();
+    if (!ok) {
+        if (ownTransaction) dbMgr.rollback();
         QMessageBox::warning(this, tr("Drift Analysis"), tr("Failed to save drift model."));
         return;
     }
 
+    // Both devices' corrections changed: the CPAP's new model, and the reference
+    // entries retired above (they were still applied from the in-memory cache).
     rebuildMachine(mach);
+    rebuildMachine(ref);
 
     QString status;
     if (m_hasExistingModel) {
