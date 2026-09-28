@@ -10,8 +10,11 @@
 #include "eventstabtests.h"
 
 #include <QDebug>
+#include <QDir>
+#include <QLocale>
 #include <QProgressBar>
 #include <QSettings>
+#include <time.h>
 #include "mainwindow.h"
 #include "SleepLib/machine_loader.h"
 #include "SleepLib/profiles.h"
@@ -70,16 +73,36 @@ void EventsTabTests::initTestCase()
 {
     DEBUGXD O("EventsTabTests::initTestCase");
 
+    // The sample profile is not in the repository (see the link below). Without it
+    // there is nothing to test: each test is skipped in init(). (Not QSKIP here:
+    // a skipped initTestCase() leaves QTest's skip flag set, and every test class
+    // run after this one in the same process would then silently run nothing.)
+    m_haveData = QDir(TESTDATA_PATH "profile/tpo-25apr25").exists();
+    if (!m_haveData) return;
+
     // note: need dummy app for Qt even though hidden
     int argc = 0;
     char** argv = nullptr;
     m_app = new QApplication(argc, argv);
 
+    // The expected values below were recorded at UTC-5 (1745679339000 ms is noted as
+    // 09:55:39, i.e. US Central daylight time) with US date formats (4/26/25). Pin
+    // both so the results don't depend on the machine the tests run on;
+    // cleanupTestCase() restores them.
+    m_had_tz = qEnvironmentVariableIsSet("TZ");
+    m_save_tz = qgetenv("TZ");
+#ifndef Q_OS_WIN
+    qputenv("TZ", "America/Chicago");
+    tzset();
+#endif
+    m_save_locale = QLocale();
+    QLocale::setDefault(QLocale(QLocale::English, QLocale::UnitedStates));
+
     // Load in profile with sample data.
     // See http://www.tomasohara.trade/misc/testdata-22may25.tar.gz
     qDebug() << "loading mocked up profile";
     p_profile = new Profile(TESTDATA_PATH "profile/tpo-25apr25", true);
-    Q_ASSERT(p_profile);
+    QVERIFY(p_profile);
 
     // Make sure global preferences initialized
     // note: based on ResmedTests::initTestCase
@@ -158,9 +181,20 @@ void EventsTabTests::freeObjects()
 void EventsTabTests::cleanupTestCase()
 {
     DEBUGXD O("EventsTabTests::cleanupTestCase");
-    
+
+    // No sample data: initTestCase() returned before creating anything, and the
+    // globals below are not ours to delete.
+    if (!m_app) return;
+
     // Cleanup objects
     freeObjects();
+
+    QLocale::setDefault(m_save_locale);
+#ifndef Q_OS_WIN
+    if (m_had_tz) qputenv("TZ", m_save_tz);
+    else qunsetenv("TZ");
+    tzset();
+#endif
 
     // Restore OSCAR globals
     mainwin = m_save_mainwin;
@@ -177,6 +211,7 @@ void EventsTabTests::cleanupTestCase()
 void EventsTabTests::init()
 {
     DEBUGXD O("EventsTabTests::init");
+    if (!m_haveData) QSKIP("sample data not found in " TESTDATA_PATH "profile/tpo-25apr25");
     // Install the custom message handler and store the original one
     originalMessageHandler = qInstallMessageHandler(capturingMessageOutput);
     capturedDebugMessages.clear(); // Ensure the list is empty before running tests
@@ -186,6 +221,7 @@ void EventsTabTests::init()
 void EventsTabTests::cleanup()
 {
     DEBUGXD O("EventsTabTests::cleanup");
+    if (!m_haveData) return;   // init() skipped before installing the handler
     // Restore the original message handler
     qInstallMessageHandler(originalMessageHandler);
 

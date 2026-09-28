@@ -9,6 +9,8 @@
 #ifndef EVENTSTABTESTS_H
 #define EVENTSTABTESTS_H
 
+#include <QByteArray>
+#include <QLocale>
 #include <QObject>
 #include <QStringList>
 #include <QtGlobal>    // Provides QtMessageHandler for custom message handling
@@ -56,6 +58,10 @@ private:
     Profile* m_save_p_profile = nullptr;
     ProgressDialog* m_progress = nullptr;
     QString m_save_app_data;
+    bool m_haveData = false;
+    bool m_had_tz = false;
+    QByteArray m_save_tz;
+    QLocale m_save_locale;
 };
 
 // Register the test class with the AutoTest framework
