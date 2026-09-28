@@ -1091,31 +1091,25 @@ void Profile::LoadMachineData(ProgressDialog *progress)
                                day->hasEnabledSessions(MT_POSITION));
             };
 
-            int expected = 0;
+            // Compare the dates themselves, not only the counts: a row left behind for
+            // a night that moved (a time correction, a changed day-split or combine
+            // setting) kept the count up and hid real gaps. Rows without a day in
+            // memory are left alone: days older than "ignore sessions before" are not
+            // loaded at all, and their rows must survive.
+            QSet<QString> haveSummary;
+            const QList<DailySummaryData> rows = summaryRepo.findByProfile(profileData.id);
+            for (const DailySummaryData &ds : rows) haveSummary.insert(ds.date);
+
+            int filled = 0;
             for (auto it = daylist.begin(), end = daylist.end(); it != end; ++it) {
-                if (isEligible(it.value())) expected++;
+                Day *day = it.value();
+                if (!isEligible(day)) continue;
+                if (haveSummary.contains(it.key().toString(Qt::ISODate))) continue;
+                if (filled == 0) progress->setMessage(QObject::tr("Calculating Daily Summaries"));
+                if (summaryRepo.calculateAndStoreFromDay(day, profileData.id)) filled++;
             }
-
-            if (expected > existingCount) {
-                qDebug() << "Profile::LoadMachineData() - daily_summaries incomplete: have"
-                         << existingCount << "expected" << expected << "- reconciling gaps...";
-                progress->setMessage(QObject::tr("Calculating Daily Summaries"));
-
-                QSet<QString> haveSummary;
-                const QList<DailySummaryData> rows = summaryRepo.findByProfile(profileData.id);
-                for (const DailySummaryData &ds : rows) haveSummary.insert(ds.date);
-
-                int filled = 0;
-                for (auto it = daylist.begin(), end = daylist.end(); it != end; ++it) {
-                    Day *day = it.value();
-                    if (!isEligible(day)) continue;
-                    if (haveSummary.contains(it.key().toString(Qt::ISODate))) continue;
-                    if (summaryRepo.calculateAndStoreFromDay(day, profileData.id)) filled++;
-                }
-                qDebug() << "Profile::LoadMachineData() - Reconciled" << filled << "missing daily summaries";
-            } else {
-                qDebug() << "Profile::LoadMachineData() - Found" << existingCount << "existing daily summaries";
-            }
+            qDebug() << "Profile::LoadMachineData() - daily summaries:" << existingCount << "found,"
+                     << filled << "missing filled";
         }
     } else {
         qWarning() << "Profile::LoadMachineData() - Cannot check daily summaries, profile not in database";
