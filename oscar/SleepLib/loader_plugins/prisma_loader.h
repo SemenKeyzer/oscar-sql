@@ -24,7 +24,7 @@ class QDir;
 //********************************************************************************************
 // Please INCREMENT the following value when making changes to this loaders implementation
 // BEFORE making a release
-const int prisma_data_version = 1;
+const int prisma_data_version = 2;
 //
 //********************************************************************************************
 const QString prisma_class_name = STR_MACH_Prisma;
@@ -98,7 +98,8 @@ enum Prisma_APAP_Mode {
 enum Prisma_SoftPAP_Mode {
     Prisma_SoftPAP_OFF = 0,
     Prisma_SoftPAP_SLIGHT = 1,
-    Prisma_SoftPAP_STANDARD = 2
+    Prisma_SoftPAP_STANDARD = 2,
+    Prisma_SoftPAP_LEVEL3 = 3     //!< Prisma Line only
 };
 
 enum Prisma_BiSoft_Mode {
@@ -166,6 +167,8 @@ class WMEDFInfo : public EDFInfo {
 class PrismaLoader;
 class PrismaEventFile;
 
+extern ChannelID Prisma_Mode, Prisma_SoftPAP, Prisma_TubeType;
+
 /*! \class PrismaImport
  *  \brief Contains the functions to parse a single session... multithreaded */
 class PrismaImport:public ImportTask
@@ -176,6 +179,11 @@ public:
 
     //! \brief PrismaImport thread starts execution here.
     virtual void run();
+
+    //! \brief Maps a card's therapy parameters (Prisma SMART and Prisma Line) to session settings.
+    static void applySettings(QHash<ChannelID, QVariant> &settings, const QHash<int, int> &parameters);
+    //! \brief The OSCAR channel each imported Prisma event type is stored in.
+    static QList<QPair<ChannelID, QList<Prisma_Event_Type>>> eventChannels();
 
 protected:    
     PrismaLoader * loader;

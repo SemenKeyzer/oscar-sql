@@ -832,6 +832,7 @@ test {
         tests/eventstabtests.cpp \
         tests/zeotests.cpp \
         tests/applehealthtests.cpp \
+        tests/prismatests.cpp \
         tests/machinetests.cpp
 
     HEADERS += \
@@ -849,6 +850,7 @@ test {
         tests/eventstabtests.h \
         tests/zeotests.h \
         tests/applehealthtests.h \
+        tests/prismatests.h \
         tests/machinetests.h
 }
 
