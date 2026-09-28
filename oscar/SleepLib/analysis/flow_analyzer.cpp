@@ -8,6 +8,8 @@
 
 #include "flow_analyzer.h"
 
+#include "apnea_classifier.h"
+
 #include <algorithm>
 
 namespace analysis {
@@ -340,6 +342,18 @@ QVector<Span> periodicBreathing(const Grid &E)
     return out;
 }
 
+// Mean of a 1 Hz grid over [from, to), or NaN.
+float meanOver(const Grid *g, qint64 from, qint64 to)
+{
+    if (!g || g->size() == 0) return kNoData;
+    double sum = 0;
+    int cnt = 0;
+    for (int i = qMax(0, g->indexOf(from)); i < qMin(g->size(), g->indexOf(to)); ++i) {
+        if (hasData(g->v[i])) { sum += g->v[i]; ++cnt; }
+    }
+    return cnt ? float(sum / cnt) : kNoData;
+}
+
 void mergeSpans(QVector<Span> &spans)
 {
     std::sort(spans.begin(), spans.end(), [](const Span &a, const Span &b) { return a.start < b.start; });
@@ -364,8 +378,6 @@ int FlowResult::periodicSeconds() const { return spanSeconds(periodic); }
 FlowResult analyzeFlow(const QVector<FlowChunk> &chunkIn, const QVector<Span> &excluded,
                        const Grid *pulse, const Grid *obstructLevel, const FlowParams &params)
 {
-    Q_UNUSED(pulse)
-    Q_UNUSED(obstructLevel)
     FlowResult result;
 
     // ---- 3.3.1 preparation
@@ -562,6 +574,31 @@ FlowResult analyzeFlow(const QVector<FlowChunk> &chunkIn, const QVector<Span> &e
     result.flowLimitation = flowLimitationSpans(result.breaths, blocked, params.flThreshold);
     result.reras = flowReras(result.breaths, blocked, params.flThreshold);
     result.periodic = periodicBreathing(E);
+
+    // ---- 3.3.6 apnea classification (experimental)
+    if (params.classifyApneas) {
+        for (FlowEvent &ev : result.events) {
+            if (!ev.apnea) continue;
+            const int ci = chunkAt(chunks, ev.start);
+            if (ci < 0) continue;
+            const Proc &c = chunks[ci];
+            ApneaEvidence evd;
+            const int j0 = qMax(0, c.indexAt(ev.start)), j1 = qMin(int(c.x.size()), c.indexAt(ev.end));
+            if (j1 > j0) evd.flow = QVector<float>(c.x.begin() + j0, c.x.begin() + j1);
+            evd.fs = c.fs;
+            evd.baseline = ev.baseline;
+            for (const Breath &b : result.breaths) {
+                if (b.end <= ev.start + 500) evd.before.append(b);
+                else if (!evd.after && b.start >= ev.end - 500) evd.after = &b;
+                if (evd.before.size() > 3) evd.before.removeFirst();
+            }
+            evd.pulseBpm = meanOver(pulse, ev.start, ev.end);
+            evd.inPeriodicBreathing = overlapsAny(result.periodic, ev.start, ev.end);
+            evd.obstructLevel = meanOver(obstructLevel, ev.start, ev.end);
+            ev.classScore = apneaScore(evd, params.flThreshold);
+            ev.cls = classForScore(ev.classScore);
+        }
+    }
 
     return result;
 }

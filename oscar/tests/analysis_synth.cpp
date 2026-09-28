@@ -108,4 +108,12 @@ QVector<SynthBreath> repeat(int count, SynthBreath breath)
     return QVector<SynthBreath>(count, breath);
 }
 
+void addOscillation(analysis::FlowChunk &chunk, double from, double to, double hz, double amplitude)
+{
+    const double fs = 1000.0 / chunk.rateMs;
+    for (int i = int(std::lround(from * fs)); i < qMin(int(chunk.samples.size()), int(std::lround(to * fs))); ++i) {
+        chunk.samples[i] += float(amplitude * std::sin(2 * kPi * hz * i / fs));
+    }
+}
+
 } // namespace synth

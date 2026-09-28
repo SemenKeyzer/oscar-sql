@@ -54,6 +54,8 @@ struct SynthBreath {
 analysis::FlowChunk breathSequence(double fs, const QVector<SynthBreath> &breaths, qint64 start = kStart);
 //! \a count identical breaths.
 QVector<SynthBreath> repeat(int count, SynthBreath breath);
+//! Adds a sine of \a hz and \a amplitude to the flow between the two times (s from start).
+void addOscillation(analysis::FlowChunk &chunk, double from, double to, double hz, double amplitude);
 
 } // namespace synth
 
