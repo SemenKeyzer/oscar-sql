@@ -1984,6 +1984,10 @@ double Profile::calcSum(ChannelID code, MachineType mt, QDate start, QDate end)
 
     QDate date = start;
 
+    if (date.isNull() || end.isNull()) {
+        return 0;   // no days: QDate() <= QDate() holds, so the loop below never ended
+    }
+
     double val = 0;
 
     do {
@@ -2254,6 +2258,10 @@ EventDataType Profile::calcMax(ChannelID code, MachineType mt, QDate start, QDat
 
     QDate date = start;
 
+    if (date.isNull() || end.isNull()) {
+        return 0;   // no days: QDate() <= QDate() holds, so the loop below never ended
+    }
+
     bool first = true;
     double max = 0, tmp;
 
@@ -2429,9 +2437,10 @@ EventDataType Profile::calcPercentile(ChannelID code, EventDataType percent, Mac
                 timeweight = (tsi != sess->m_timesummary.end());
 
                 QHash<EventStoreType, EventStoreType> &vsum = vsi.value();
-                QHash<EventStoreType, quint32> &tsum = tsi.value();
 
                 if (timeweight) {
+                    // Only now: tsi may be end() when the session has no time summary.
+                    QHash<EventStoreType, quint32> &tsum = tsi.value();
                     for (auto k=tsum.begin(), tsumend=tsum.end(); k != tsumend; k++) {
                         weight = k.value();
                         value = EventDataType(k.key()) * gain;

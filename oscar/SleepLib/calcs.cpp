@@ -771,7 +771,7 @@ void FlowParser::flagUserEvents(ChannelID code, EventDataType restriction, Event
     // Look for the 60th percentile of the abs'ed min/max values
     const EventDataType perc = 0.6F;
     int idx = float(br.size()) * perc;
-    nth_element(br.begin(), br.begin() + idx, br.end() - 1);
+    nth_element(br.begin(), br.begin() + idx, br.end());   // end(), not end()-1: include the last value
 
     // Take this value as the peak
     EventDataType peak = br[idx]; ;
@@ -924,11 +924,11 @@ void calcRespRate(Session *session, FlowParser *flowparser)
 // Force calculation for testing calculation vs CPAP data
 //    z = 1;
 
-    // If any of these three missing, remove all, and switch all on
+    // If any of these three missing, remove all, and switch all on.  (The old test
+    // "all three false" can never hold inside this branch, so the device-supplied
+    // lists were deleted below but only some were recalculated.)
     if (z > 0 && z < 3) {
-        if (!calcResp && !calcTv && !calcMv) {
-            calcTv = calcMv = calcResp = true;
-        }
+        calcTv = calcMv = calcResp = true;
 
         auto & list = session->eventlist[CPAP_RespRate];
         for (auto & l : list) {
@@ -1323,7 +1323,11 @@ int calcLeaks(Session *session)
             break;
         }
     }
-    TimeSeries pressureEvents(session->eventlist[pressure_channel]);
+    // find(), not operator[]: operator[] added an empty pressure channel to sessions
+    // without one, which then showed up as an available (and stored) channel.
+    static const QVector<EventList *> noEvents;
+    const auto pressureIt = session->eventlist.constFind(pressure_channel);
+    TimeSeries pressureEvents(pressureIt != session->eventlist.constEnd() ? pressureIt.value() : noEvents);
 
     int totalEvents = 0;
 
@@ -1384,6 +1388,10 @@ void flagLargeLeaks(Session *session)
     qint64 leaktime=0;
     int count;
 
+    // A large leak starts when the leak reaches the threshold and ends when it drops
+    // below it (the same test both ways: ending on "> threshold" missed a leak that
+    // came down through exactly the threshold value). A leak still open at the end
+    // of a list is closed there, so each list's leaks are kept, not only the last's.
     for (auto & el : EVL) {
         count = el->count();
         if (!count) continue;
@@ -1400,7 +1408,7 @@ void flagLargeLeaks(Session *session)
                     leaktime = time;
                     //leakvalue = value;
                 }
-            } else if (lastvalue > threshold) {
+            } else if (lastvalue >= threshold) {
                 if (!LL) {
                     LL=session->AddEventList(CPAP_LargeLeak, EVL_Event);
                 }
@@ -1410,14 +1418,13 @@ void flagLargeLeaks(Session *session)
             lastvalue = value;
         }
 
-    }
-
-    if (lastvalue > threshold) {
-        if (!LL) {
-            LL=session->AddEventList(CPAP_LargeLeak, EVL_Event);
+        if (lastvalue >= threshold) {
+            if (!LL) {
+                LL=session->AddEventList(CPAP_LargeLeak, EVL_Event);
+            }
+            int duration = (time - leaktime) / 1000L;
+            LL->AddEvent(time, duration);
         }
-        int duration = (time - leaktime) / 1000L;
-        LL->AddEvent(time, duration);
     }
 }
 

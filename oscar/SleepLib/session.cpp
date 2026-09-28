@@ -1308,8 +1308,11 @@ void Session::updateCountSummary(ChannelID code)
 
     if ( valsum.size() == 0) {  // no value summary for this channel
         using namespace schema;
-        Channel *ch_p = channel.channels[code];
-        if (  ! ch_p->isNull() ) {                      // the channel was found in the channel list
+        // value(), not operator[]: operator[] inserted a null entry into the global
+        // channel table for an unregistered code, and the next lookup of that code
+        // dereferenced it.
+        Channel *ch_p = channel.channels.value(code, nullptr);
+        if ( ch_p && ! ch_p->isNull() ) {               // the channel was found in the channel list
 #ifdef DBDEBUG
             if ( ((ch_p->type() & (FLAG|SPAN|MINOR_FLAG)) == 0) ) {  // the channel is not a flag or span type
                 qDebug() << "No valuesummary for channel " << ch_p->label() <<  " " << QDateTime::fromMSecsSinceEpoch( realFirst()).toString() ;    // so tell about missing summary
@@ -2198,8 +2201,10 @@ EventDataType Session::cph(ChannelID id) // count per hour
         return i.value();
     }
 
-    EventDataType val = count(id);
-    val /= hours();
+    // A session whose slices are all mask-off has no hours; 0/0 cached and
+    // stored NaN/Inf, which later reached qRound() when restoring counts.
+    const double h = hours();
+    EventDataType val = (h > 0) ? EventDataType(count(id) / h) : 0;
 
     m_cph[id] = val;
     return val;
@@ -2212,8 +2217,9 @@ EventDataType Session::sph(ChannelID id) // sum per hour, assuming id is a time 
         return i.value();
     }
 
+    const double h = hours();
     EventDataType val = sum(id) / 3600.0;
-    val = 100.0 / hours() * val;
+    val = (h > 0) ? EventDataType(100.0 / h * val) : 0;   // see cph()
     m_sph[id] = val;
     return val;
 }
