@@ -3578,6 +3578,7 @@ void ResmedLoader::SaveSession(ResmedLoader* loader, Session* sess)
     Machine* mach = sess->machine();
 
     loader->sessionMutex.lock();         // AddSession definitely ain't threadsafe.
+    mach->settleReportedChannels(sess);  // its summary row depends on the device's reported channels
     if ( ! sess->Store(mach->getDataPath()) ) {
         qWarning() << "ResmedLoader::SaveSession: Failed to store session" << sess->session();
     }

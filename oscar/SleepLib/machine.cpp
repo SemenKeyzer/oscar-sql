@@ -1358,20 +1358,7 @@ bool Machine::Save()
         if ((*s)->sessionRowId() != 0) hasStoredRows = true;
     }
     if (hasStoredRows && m_database_id > 0 && m_reportedChannels != before) {
-        qDebug() << "Machine::Save(): device reports new channels; rebuilding stored summaries for machine" << m_database_id;
-        QSqlDatabase db = DatabaseManager::instance().database();
-        if (SessionSummariesRepository::rebuildFromChannels(db, m_database_id)) {
-            // Daily rows: recompute this device's days. calculateAndStoreFromDay() is an
-            // INSERT OR REPLACE, so nothing needs invalidating first. The post-import
-            // pass may cover only the imported days (ImportContext::Commit), so the
-            // older days are not left to it.
-            DailySummaryRepository dailyRepo;
-            const qint64 profileId = getProfileId();
-            for (auto it = day.begin(); it != day.end(); ++it) {
-                Day * d = it.value();
-                if (d && d->hasEnabledSessions()) dailyRepo.calculateAndStoreFromDay(d, profileId);
-            }
-        }
+        rebuildStoredSummaries();
     }
 
 //  m_savelist.clear();
@@ -1467,6 +1454,38 @@ void Machine::updateChannels(Session * sess)
     for (int i=0; i < size; ++i) {
         ChannelID code = sess->m_availableSettings.at(i);
         m_availableSettings[code] = true;
+    }
+}
+
+void Machine::rebuildStoredSummaries()
+{
+    qDebug() << "Machine: device reports new channels; rebuilding stored summaries for machine" << m_database_id;
+    QSqlDatabase db = DatabaseManager::instance().database();
+    if (SessionSummariesRepository::rebuildFromChannels(db, m_database_id)) {
+        // Daily rows: recompute this device's days. calculateAndStoreFromDay() is an
+        // INSERT OR REPLACE, so nothing needs invalidating first. The post-import
+        // pass may cover only the imported days (ImportContext::Commit), so the
+        // older days are not left to it.
+        DailySummaryRepository dailyRepo;
+        const qint64 profileId = getProfileId();
+        for (auto it = day.begin(); it != day.end(); ++it) {
+            Day * d = it.value();
+            if (d && d->hasEnabledSessions()) dailyRepo.calculateAndStoreFromDay(d, profileId);
+        }
+    }
+}
+
+void Machine::settleReportedChannels(Session * sess)
+{
+    // Sessions a loader stores itself (ImportContext::AddSession, ResMed) are no
+    // longer marked changed when Save() runs, so its pre-pass never saw them and
+    // their summary rows were written with NULL event counts. Note their channels
+    // before they are stored instead. A newly reported channel means rows stored
+    // earlier (by an earlier import, or earlier in this one) have NULLs for it.
+    const QSet<ChannelID> before = m_reportedChannels;
+    noteReportedChannels(sess);
+    if (m_reportedChannels != before && m_database_id > 0) {
+        rebuildStoredSummaries();
     }
 }
 

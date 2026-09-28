@@ -111,6 +111,9 @@ bool ImportContext::AddSession(Session* session)
     // Update indexes, process waveform and perform flagging.
     session->UpdateSummaries();
 
+    // Its summary row depends on which channels the device reports.
+    session->machine()->settleReportedChannels(session);
+
     // Write the session file to disk.
     bool ok = session->Store(session->machine()->getDataPath());
     if (!ok) {

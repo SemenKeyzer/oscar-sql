@@ -155,9 +155,15 @@ class Machine
     //! \brief Record which of \p sess's channels carry at least one event.
     //! Reads both the in-memory EventLists (an import-time session) and m_cnt (a
     //! session loaded from session_channels). Main thread only: called from
-    //! LoadSessionsFromDatabase() and the pre-pass in Save(), never from the
-    //! SaveTask workers, which is why this is not part of updateChannels().
+    //! LoadSessionsFromDatabase(), the pre-pass in Save() and settleReportedChannels(),
+    //! never from the SaveTask workers, which is why this is not part of updateChannels().
     void noteReportedChannels(Session * sess);
+
+    //! \brief noteReportedChannels() for a session a loader stores itself, just before
+    //! it is written; if that reveals a channel the device had not reported before,
+    //! rows stored earlier are rebuilt as in Save(). Call it where the session is
+    //! stored: on the main thread, or under the loader's sessionMutex like Store().
+    void settleReportedChannels(Session * sess);
 
     //! \brief Returns a pointer to a valid Session object if SessionID exists
     Session *SessionExists(SessionID session);
@@ -228,6 +234,13 @@ class Machine
 
     qint64 correctionMs(QDate night) const;
     void rebuildCorrections(const QList<TimeCorrectionRow>& rows);
+
+  private:
+    //! Recompute this device's stored session and daily summaries after its
+    //! reported-channel set grew (their NULL columns depend on it).
+    void rebuildStoredSummaries();
+
+  public:
     //! \brief Reload corrections from DB and rebuild the in-memory cache.
     static void reloadCorrectionsFromDb(Machine* mach);
     //! \brief Converts a device_time_corrections row to the in-memory form used by correctionMs().
