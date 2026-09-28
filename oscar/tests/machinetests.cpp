@@ -60,6 +60,37 @@ void MachineTests::testEmptyListDoesNotReport()
     QVERIFY(!mach.reportsHypopneaMechanism());
 }
 
+// Sessions a loader stores itself are noted just before they are written, so
+// their summary rows get counts instead of NULLs (no database: no rebuild).
+void MachineTests::testSettleReportedChannelsForLoaderStoredSession()
+{
+    Machine mach(nullptr, 4);
+    Session sess(&mach, 1);
+    sess.AddEventList(CPAP_Obstructive, EVL_Event)->AddEvent(1000, 12);
+
+    QVERIFY(!mach.hasReportedEvents(CPAP_Obstructive));
+    mach.settleReportedChannels(&sess);
+    QVERIFY(mach.hasReportedEvents(CPAP_Obstructive));
+    mach.settleReportedChannels(&sess);            // idempotent
+    QVERIFY(mach.hasReportedEvents(CPAP_Obstructive));
+}
+
+// Every slice mask-off: no hours, and the per-hour indices are 0, not NaN/Inf.
+void MachineTests::testIndicesWithoutMaskOnTimeAreZero()
+{
+    Machine mach(nullptr, 5);
+    Session sess(&mach, 1);
+    sess.really_set_first(0);
+    sess.really_set_last(3600000);
+    sess.m_slices.append(SessionSlice(0, 3600000, MaskOff));
+    sess.AddEventList(CPAP_Obstructive, EVL_Event)->AddEvent(1000, 12);
+    sess.setCount(CPAP_Obstructive, 1);
+
+    QCOMPARE(sess.hours(), 0.0);
+    QCOMPARE(sess.cph(CPAP_Obstructive), EventDataType(0));
+    QCOMPARE(sess.sph(CPAP_Obstructive), EventDataType(0));
+}
+
 // The shared DB-row -> TimeCorrectionRow conversion keeps every field.
 void MachineTests::testRowFromDataCopiesFields()
 {

@@ -18,6 +18,8 @@ private slots:
     void testReportedChannelsFromEventLists();
     void testReportedChannelsFromCounts();
     void testEmptyListDoesNotReport();
+    void testSettleReportedChannelsForLoaderStoredSession();
+    void testIndicesWithoutMaskOnTimeAreZero();
     void testRowFromDataCopiesFields();
     void testRowFromDataStripsLegacyDriftSentinel();
     void testCorrectionMsSumsRowsInRange();
