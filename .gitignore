@@ -14,12 +14,12 @@
 build/*
 oscar/build/*
 git_info.h
-.github
 .claude/
 .code-review-graph/
 .superpowers/
 claude.md
 AGENTS.md
+# written by the mkOSDistDeb scripts on every run
 Building/Linux/changelog
 
 notes/temp/
@@ -63,10 +63,11 @@ __pycache__/
 #Doxygen output does not go in repository
 doxydoc
 
-#SourceTrail files
-*.json
-# Added by code-review-graph
-.code-review-graph/
+#SourceTrail and other code indexers
+*.srctrlbm
+*.srctrldb
+*.srctrlprj
+compile_commands.json
 
 # Local planning docs (not for the repo)
 /docs/
