@@ -111,6 +111,25 @@ if [ -z "$libSQL" ]; then
     libSQL="libqt6sql6"
 fi
 
+# OSCAR keeps its data in SQLite through the Qt SQL plugin, which is packaged
+# separately from libqt6sql6: without it no profile can be opened.
+getPkg libqt6sql6-sqlite
+libSQLite=${PKGNAME:-libqt6sql6-sqlite}
+
+# Package names gained a t64 suffix on newer releases; getPkg finds the installed one.
+getPkg libqt6network6
+libnet=${PKGNAME:-libqt6network6}
+getPkg libqt6concurrent6
+libconc=${PKGNAME:-libqt6concurrent6}
+
+# Bluetooth oximeter import is optional at build time (see oscar.pro): depend on
+# Qt Bluetooth only when the binary being packaged uses it.
+extra_depends=()
+if ldd "${build_folder}/oscar/${base_name}" 2>/dev/null | grep -q libQt6Bluetooth; then
+    getPkg libqt6bluetooth6
+    extra_depends+=(--depends "${PKGNAME:-libqt6bluetooth6}")
+fi
+
 # clean folders need to create the package
 if [ -d "${temp_folder}" ]; then
     rm -r ${temp_folder}
@@ -207,6 +226,10 @@ fpm --input-type dir --output-type deb  \
     --depends ${libxml} \
     --depends libqt6serialport6 \
     --depends $libSQL \
+    --depends $libSQLite \
+    --depends $libnet \
+    --depends $libconc \
+    "${extra_depends[@]}" \
     -C ${temp_folder} \
     -p ${deb_file} \
     .
