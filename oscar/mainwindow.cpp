@@ -2517,9 +2517,12 @@ void MainWindow::purgeDay(MachineType type)
     QDate date = daily->getDate();
     qDebug() << "Purging data from" << date;
     daily->Unload(date);
+    daily->detachDay();
 
-    if (!purgeDayData(date, type))
+    if (!purgeDayData(date, type)) {
+        daily->LoadDate(date);
         return;
+    }
 
     Day *day = p_profile->GetDay(date, MT_UNKNOWN);
     {
@@ -2586,6 +2589,7 @@ void MainWindow::on_actionPurgeRangeOfDays_triggered()
 
     const QDate viewDate = daily->getDate();
     daily->Unload(viewDate);
+    daily->detachDay();   // reattached by LoadDate() below
 
     QProgressDialog progress(tr("Purging data..."), tr("Cancel"), 0, numDays, this);
     progress.setWindowModality(Qt::WindowModal);
@@ -2611,6 +2615,7 @@ void MainWindow::on_actionPurgeRangeOfDays_triggered()
     progress.setValue(numDays);
 
     if (purgedDates.isEmpty()) {
+        daily->LoadDate(viewDate);
         staticQMessageBox::information(this,
             tr("Purge Range of Days"),
             tr("No data was found in the selected date range."),
@@ -3766,19 +3771,17 @@ void MainWindow::on_actionPurgeCurrentDaysOximetry_triggered()
     if (day) {
         QLocale locale;
         if (staticQMessageBox::question(this, STR_MessageBox_Warning,
+            // The day being purged, not today's date (which the Qt 6 branch showed).
             tr("Are you sure you want to delete oximetry data for %1").
-                arg(
-                    #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-                        daily->getDate().toString(Qt::DefaultLocaleLongDate)
-                    #else
-                        locale.toString(QDate::currentDate(), QLocale::LongFormat)
-                    #endif
-                    ) +"<br/><br/>"
+                arg(locale.toString(date, QLocale::LongFormat)) +"<br/><br/>"
                 +
             tr("<b>Please be aware you can not undo this operation!</b>"),
             QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::No) {
             return;
         }
+
+        daily->Unload(date);
+        daily->detachDay();   // the view points into the sessions deleted below
 
         QList<Session *> sessionlist=day->getSessions(MT_OXIMETER);
         QSet<Machine *> machines;
@@ -3808,13 +3811,10 @@ void MainWindow::on_actionPurgeCurrentDaysOximetry_triggered()
             }
         }
 
-        if (daily) {
-            daily->Unload(date);
-            daily->clearLastDay(); // otherwise Daily will crash
-            daily->ReloadGraphs();
-        }
+        daily->LoadDate(date);
         if (overview) overview->ReloadGraphs();
         if (welcome) welcome->refreshPage();
+        GenerateStatistics();
     } else {
         staticQMessageBox::information(this, STR_MessageBox_Information,
             tr("Select the day with valid oximetry data in daily view first."),QMessageBox::Ok);

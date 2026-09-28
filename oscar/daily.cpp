@@ -2637,6 +2637,15 @@ void Daily::clearLastDay()
     lastcpapday=nullptr;
 }
 
+void Daily::detachDay()
+{
+    // A repaint while the sessions are being deleted (the purge's progress dialog runs
+    // the event loop) would otherwise reach freed sessions and event lists.
+    sessionbar->clear();
+    graphView()->setDay(nullptr);
+    lastcpapday = nullptr;
+}
+
 void Daily::clearJournalNotesEditor()
 {
     ui->JournalNotes->clear();

@@ -133,6 +133,9 @@ public:
     gGraph * eventBreakdownPie() { return graphlist["EventBreakdown"]; }
 
     void clearLastDay();
+    //! \brief Drops the view's pointers into the shown day's sessions (graphs and
+    //! session bar) before they are deleted, as a purge does; LoadDate() shows the day again.
+    void detachDay();
     void clearJournalNotesEditor();
 
     /*! \fn updateCalendarDays(const QList<QDate> &dates)
