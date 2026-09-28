@@ -644,17 +644,19 @@ bool removeDirWithProgress(const QString &path, class QProgressDialog *progress,
     return result;
 }
 
-void copyPath(QString src, QString dst, bool overwrite)
+bool copyPath(QString src, QString dst, bool overwrite)
 {
     QDir dir(src);
     if (!dir.exists())
-        return;
+        return false;
+
+    bool ok = true;
 
     // Recursively handle directories
     foreach (QString d, dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
         QString dst_path = dst + QDir::separator() + d;
         dir.mkpath(dst_path);
-        copyPath(src + QDir::separator() + d, dst_path, overwrite);
+        ok = copyPath(src + QDir::separator() + d, dst_path, overwrite) && ok;
     }
 
     // Files
@@ -668,6 +670,7 @@ void copyPath(QString src, QString dst, bool overwrite)
         if (!QFile::exists(destFile)) {
             if (!QFile::copy(srcFile, destFile)) {
                 qWarning() << "copyPath: could not copy" << srcFile << "to" << destFile;
+                ok = false;
             }
             // TODO: Since copyPath is only used by loaders, it should
             // build the list of files first, and then update the progress bar
@@ -677,6 +680,7 @@ void copyPath(QString src, QString dst, bool overwrite)
             QCoreApplication::processEvents();
         }
     }
+    return ok;
 }
 
 QString GFXEngineNames[MaxGFXEngine+1]; // Set by initializeStrings()

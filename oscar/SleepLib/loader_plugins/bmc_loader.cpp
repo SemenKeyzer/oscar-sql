@@ -1012,13 +1012,31 @@ int BmcLoader::Open(const QString & dirpath)
         emit updateMessage(QObject::tr("Creating data backup..."));
         QCoreApplication::processEvents();
 
-        QDir backupDir(backupPath);
-        if (backupDir.exists(backupPath))
-            backupDir.removeRecursively();
-
-        backupDir.mkpath(backupPath);
-
-        copyPath(dirpath, backupPath);
+        // Copy into a side folder and swap it in only when the copy worked: the
+        // previous backup may be the only copy of nights the card has since
+        // overwritten, so it must not be deleted before its replacement exists.
+        const QString target  = QDir::cleanPath(backupPath);
+        const QString staging = target + QStringLiteral(".new");
+        const QString old     = target + QStringLiteral(".old");
+        QDir(staging).removeRecursively();
+        QDir().mkpath(staging);
+        if (!copyPath(dirpath, staging)) {
+            qWarning() << "BmcLoader::Open: backup copy failed; keeping the previous backup";
+            QDir(staging).removeRecursively();
+        } else {
+            QDir(old).removeRecursively();
+            const bool hadOld = QDir(target).exists();
+            if (hadOld && !QDir().rename(target, old)) {
+                qWarning() << "BmcLoader::Open: could not move the previous backup aside; keeping it";
+                QDir(staging).removeRecursively();
+            } else if (!QDir().rename(staging, target)) {
+                qWarning() << "BmcLoader::Open: could not put the new backup in place";
+                if (hadOld) QDir().rename(old, target);
+                QDir(staging).removeRecursively();
+            } else if (hadOld) {
+                QDir(old).removeRecursively();
+            }
+        }
     }
 
     //******************************************************************************

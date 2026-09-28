@@ -96,7 +96,8 @@ struct ValueCount {
 
 extern int idealThreads();
 
-void copyPath(QString src, QString dst, bool overwrite=false);
+//! Copies \a src into \a dst recursively; returns false if any file could not be copied.
+bool copyPath(QString src, QString dst, bool overwrite=false);
 
 
 // Primarily sort by value

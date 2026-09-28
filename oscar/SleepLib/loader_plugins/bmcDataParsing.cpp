@@ -70,7 +70,9 @@ void BmcUsrSession::ReadInProgressSession(QDataStream* strm)
                                    this->StartTimestamp.time(), this->StartTimestamp.timeSpec());
     strm->device()->seek(0x441);
 
-    while (true)
+    // The message list ends with 0xff.  A truncated file has no terminator: stop
+    // at the end of the data instead of reading zeros for ever.
+    while (strm->status() == QDataStream::Ok && !strm->atEnd())
     {
         quint8 msgType;
         *strm >> msgType;
@@ -88,9 +90,9 @@ void BmcUsrSession::ReadInProgressSession(QDataStream* strm)
         //strm->readRawData(msgBytes, datalen);
 
         std::vector<char> msgBytes(datalen);
-        strm->readRawData(msgBytes.data(), datalen);
+        if (strm->readRawData(msgBytes.data(), datalen) != datalen) break;
 
-        if (msgType == 0x07 || msgType == 0x08 || msgType == 0x09)
+        if ((msgType == 0x07 || msgType == 0x08 || msgType == 0x09) && datalen >= 3)
         {
             BmcRespiratoryEvent evt;
             switch (msgType){
@@ -136,8 +138,8 @@ void BmcUsrSession::ReadHistoricSession(QDataStream* strm)
     {
         *strm >> b;
         *strm >> tmp32;
-        if (b == 0xff)
-            break;
+        if (b == 0xff || strm->status() != QDataStream::Ok)
+            break;      // end marker, or a truncated record without one
 
         MessageItem32 msg(b, tmp32);
         this->MessagesOffset45.append(msg);
@@ -152,6 +154,7 @@ void BmcUsrSession::ReadHistoricSession(QDataStream* strm)
         *strm >> msgType;
         *strm >> count;
         *strm >> tmp16; //Discard next byte
+        if (strm->status() != QDataStream::Ok) break;   // truncated record
 
         switch (msgType)
         {
@@ -418,7 +421,9 @@ BmcWaveformPacket::BmcWaveformPacket(char* buffer)
     this->TidalVolume = packetStruct->TidalVolume;
     this->MinuteVentilation = packetStruct->MinuteVentilation / 10.0f;
     this->RespiratoryRate = packetStruct->RespiratoryRate;
-    this->IERatio = packetStruct->IERatio <= 100 ? 100 - IERatioLookup[packetStruct->IERatio] : 0;
+    // IERatio is signed: erased flash (0xFFFF) reads as -1 and must not index the table.
+    const bool ieValid = packetStruct->IERatio >= 0 && packetStruct->IERatio <= 100;
+    this->IERatio = ieValid ? 100 - IERatioLookup[packetStruct->IERatio] : 0;
     this->Timestamp = QDateTime(QDate(packetStruct->Year, packetStruct->Month, packetStruct->Day), QTime(packetStruct->Hour, packetStruct->Minute, packetStruct->Second));
 
 
@@ -443,9 +448,8 @@ BmcWaveformPacket::BmcWaveformPacket(char* buffer)
     this->Raw.RespiratoryRate = packetStruct->RespiratoryRate;
     //this->Raw.IERatioMapped = ((qint16)(packetStruct->IERatio <= 100 ? 100 - IERatioLookup[packetStruct->IERatio] : 0) * 10);
     this->Raw.IERatioMapped = static_cast<qint16>(
-                (packetStruct->IERatio <= 100)
-                              ? 100 - IERatioLookup[packetStruct->IERatio]
-                                  : 0);
+                ieValid ? 100 - IERatioLookup[packetStruct->IERatio]
+                        : 0);
     this->Raw.Timestamp = QDateTime(QDate(packetStruct->Year, packetStruct->Month, packetStruct->Day), QTime(packetStruct->Hour, packetStruct->Minute, packetStruct->Second));
 
 }
@@ -792,10 +796,17 @@ void BmcData::ReadIdxFile()
         }
         this->AllIdxEntries.append(entry);
 
-        //Go back to the start of the packet and read the machine settings in it
+        //Go back to the start of the packet and read the machine settings in it.
+        //A short last packet throws here too; nothing catches it further up.
         buf.seek(0);
-        BmcMachineSettings settings(&strmPacket);
-        this->AllMachineSettings.append(settings);
+        try {
+            BmcMachineSettings settings(&strmPacket);
+            this->AllMachineSettings.append(settings);
+        } catch (const std::invalid_argument &e) {
+            // Keep the index entry (it parsed); settings are looked up by
+            // content, not by position, so one missing packet is harmless.
+            qDebug() << "ReadIdxFile: skipping unreadable settings packet:" << e.what();
+        }
     }
 
     file.close();
