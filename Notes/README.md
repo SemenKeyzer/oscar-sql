@@ -34,6 +34,7 @@ When a reference document and the code disagree, the code wins — please fix th
 - [ARCHITECTURE.md](Developer%20Notes/ARCHITECTURE.md) — Architecture guide.
 - [SessionChannelData_Calculation_Explanation.md](Developer%20Notes/SessionChannelData_Calculation_Explanation.md) — Where per-session numbers are computed.
 - [STEADY_BREATHING_ALGORITHM.md](Developer%20Notes/STEADY_BREATHING_ALGORITHM.md) — Steady-breathing detection.
+- [SLEEP_ANALYSIS.md](Developer%20Notes/SLEEP_ANALYSIS.md) — OSCAR's own sleep analysis ("second opinion"): pipeline, channels, storage, algorithms, parameters.
 - [SIGNALS_AND_SLOTS_GUIDE.md](Developer%20Notes/SIGNALS_AND_SLOTS_GUIDE.md) — Qt signals/slots as used in the database manager.
 - [PERFORMANCE_INSTRUMENTATION_GUIDE.md](Developer%20Notes/PERFORMANCE_INSTRUMENTATION_GUIDE.md) — Timing instrumentation.
 - [Reducing log noise.md](Developer%20Notes/Reducing%20log%20noise.md) — Logging conventions.

@@ -34,6 +34,7 @@
     QT_TRANSLATE_NOOP("SystemReports", "Session Summaries"),
     QT_TRANSLATE_NOOP("SystemReports", "Other"),
     QT_TRANSLATE_NOOP("SystemReports", "Statistics"),
+    QT_TRANSLATE_NOOP("SystemReports", "Analysis"),
 };
 
 // ---- Report names ----
@@ -67,4 +68,5 @@
     QT_TRANSLATE_NOOP("SystemReports", "Individual respiratory events with timestamps (AHI-contributing only)"),
     QT_TRANSLATE_NOOP("SystemReports", "Monthly summary matching the Statistics page — one row per month"),
     QT_TRANSLATE_NOOP("SystemReports", "Detailed per-session channel statistics (selected respiratory channels)"),
+    QT_TRANSLATE_NOOP("SystemReports", "OSCAR's own sleep analysis (experimental), one row per day, next to the device's AHI"),
 };

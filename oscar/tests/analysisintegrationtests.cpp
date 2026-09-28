@@ -9,7 +9,11 @@
 #include "analysisintegrationtests.h"
 
 #include <QCoreApplication>
+#include <QFile>
+#include <QRegularExpression>
+#include <QSqlRecord>
 #include <QSignalSpy>
+#include <QSqlError>
 #include <QSqlQuery>
 #include <QTemporaryDir>
 #include <cmath>
@@ -846,4 +850,59 @@ void AnalysisIntegrationTests::testFlagsGraphsSplitDeviceAndAnalysis()
     gFlagsGroup plainFlags(true);
     plainFlags.SetDay(&plain);
     QVERIFY(plainFlags.isEmpty());
+}
+
+void AnalysisIntegrationTests::testAnalysisReportQuery()
+{
+    // the system report's query, as the report tree runs it
+    QFile orf(QStringLiteral(":/docs/system_reports.orf"));
+    QVERIFY(orf.open(QIODevice::ReadOnly | QIODevice::Text));
+    const QString text = QString::fromUtf8(orf.readAll());
+    const QRegularExpression block(QStringLiteral("=== Report: Analysis/by Day ===.*?Query: <<SQL\\n(.*?)\\nSQL\\n"),
+                                   QRegularExpression::DotMatchesEverythingOption);
+    const QRegularExpressionMatch m = block.match(text);
+    QVERIFY(m.hasMatch());
+    QString sql = m.captured(1);
+    const QDate date(2026, 6, 1);
+    sql.replace(QStringLiteral("#PROFILE_ID"), QString::number(m_profileId));
+    sql.replace(QStringLiteral("#START_DATE"), QStringLiteral("'%1'").arg(date.toString(Qt::ISODate)));
+    sql.replace(QStringLiteral("#END_DATE"), QStringLiteral("'%1'").arg(date.addDays(1).toString(Qt::ISODate)));
+
+    AnalysisDailyData d;
+    d.profileId = m_profileId;
+    d.date = date;
+    d.algoVersion = kAnalysisAlgoVersion;
+    d.paramsHash = d.inputsHash = QStringLiteral("x");
+    d.hasFlow = true;
+    d.flowSeconds = 7200;
+    d.nObstructiveApnea = 4;
+    d.nHypopnea = 2;
+    d.hasOximetry = true;
+    d.oxiSeconds = 7200;
+    d.nDesat3 = 10;
+    d.spo2Hist = QVector<int>(51, 0);
+    d.spo2Hist[95 - 50] = 6600;
+    d.spo2Hist[89 - 50] = 480;   // 8 minutes below 90
+    d.spo2Hist[87 - 50] = 120;   // 2 of them below 88
+    QVERIFY(AnalysisDailyRepository().upsert(d));
+    AnalysisDailyData flowOnly = d;   // the next day: no oximetry
+    flowOnly.date = date.addDays(1);
+    flowOnly.hasOximetry = false;
+    QVERIFY(AnalysisDailyRepository().upsert(flowOnly));
+
+    QSqlQuery q(DatabaseManager::instance().database());
+    QVERIFY2(q.exec(sql), qPrintable(q.lastError().text()));
+    QVERIFY(q.next());
+    QCOMPARE(q.value(QStringLiteral("AHI")).toDouble(), 3.0);
+    QCOMPARE(q.value(QStringLiteral("OAI")).toDouble(), 2.0);
+    QCOMPARE(q.value(QStringLiteral("ODI3")).toDouble(), 5.0);
+    QCOMPARE(q.value(QStringLiteral("T90_Min")).toDouble(), 10.0);
+    QCOMPARE(q.value(QStringLiteral("T88_Min")).toDouble(), 2.0);
+    QCOMPARE(q.value(QStringLiteral("Hypopnea_Rule")).toString(), QStringLiteral("Auto"));
+    QVERIFY(q.next());
+    QCOMPARE(q.value(QStringLiteral("AHI")).toDouble(), 3.0);
+    QVERIFY(q.value(QStringLiteral("ODI3")).isNull());   // no oximetry that day
+    QVERIFY(q.value(QStringLiteral("T90_Min")).isNull());
+    QVERIFY(!q.next());
+    QVERIFY(AnalysisDailyRepository().removeRange(m_profileId, date, date.addDays(1)));
 }

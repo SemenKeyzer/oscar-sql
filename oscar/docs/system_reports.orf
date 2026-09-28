@@ -515,3 +515,55 @@ WHERE p.id = #PROFILE_ID
   AND Date <= #END_DATE
 ORDER BY s.start_time AND c.channel_id
 SQL
+
+# ============================================================================
+# Analysis (OSCAR's own sleep analysis, schema v20)
+# ============================================================================
+
+=== Folder: Analysis ===
+
+=== Report: Analysis/by Day ===
+Description: OSCAR's own sleep analysis (experimental), one row per day, next to the device's AHI
+Query: <<SQL
+-- analysis_daily stores counts and seconds; a group of columns is NULL on days it does
+-- not apply to (no flow, no oximetry, no pulse). Indices are per hour of the analysis'
+-- own time: flow_s is the scoreable flow time, oxi_s the valid SpO2 time, pulse_s the
+-- valid pulse time. spo2_hist holds the seconds at each SpO2 % from 50 (index 0) to 100.
+SELECT
+  a.date as Date,
+  ROUND(ds.ahi, 2) as Device_AHI,
+  ROUND((a.n_oa + a.n_ca + a.n_a + a.n_oh + a.n_ch + a.n_h) * 3600.0 / NULLIF(a.flow_s, 0), 2) as AHI,
+  ROUND(a.n_oa * 3600.0 / NULLIF(a.flow_s, 0), 2) as OAI,
+  ROUND(a.n_ca * 3600.0 / NULLIF(a.flow_s, 0), 2) as CAI,
+  ROUND(a.n_a * 3600.0 / NULLIF(a.flow_s, 0), 2) as UAI,
+  ROUND((a.n_oh + a.n_ch + a.n_h) * 3600.0 / NULLIF(a.flow_s, 0), 2) as HI,
+  ROUND(a.n_h_aasm3 * 3600.0 / NULLIF(a.flow_s, 0), 2) as HI_AASM3,
+  ROUND(a.n_h_cms4 * 3600.0 / NULLIF(a.flow_s, 0), 2) as HI_CMS4,
+  ROUND(a.n_h_flow * 3600.0 / NULLIF(a.flow_s, 0), 2) as HI_FlowOnly,
+  ROUND(a.n_rera * 3600.0 / NULLIF(a.flow_s, 0), 2) as RERA_Index,
+  ROUND(100.0 * a.fl_time_s / NULLIF(a.flow_s, 0), 1) as FL_Pct,
+  ROUND(100.0 * a.pb_time_s / NULLIF(a.flow_s, 0), 1) as PB_Pct,
+  ROUND(100.0 * a.cmp_matched / NULLIF(a.cmp_matched + a.cmp_device_only + a.cmp_analysis_only, 0), 1) as Agreement_Pct,
+  ROUND(a.n_desat3 * 3600.0 / NULLIF(a.oxi_s, 0), 2) as ODI3,
+  ROUND(a.n_desat4 * 3600.0 / NULLIF(a.oxi_s, 0), 2) as ODI4,
+  ROUND(a.spo2_sum / NULLIF(a.oxi_s, 0), 1) as SpO2_Avg,
+  a.spo2_nadir as SpO2_Nadir,
+  ROUND((SELECT SUM(h.value) FROM json_each(a.spo2_hist) h WHERE h.key < 40) / 60.0, 1) as T90_Min,
+  ROUND((SELECT SUM(h.value) FROM json_each(a.spo2_hist) h WHERE h.key < 38) / 60.0, 1) as T88_Min,
+  ROUND(a.zone_s / 60.0, 1) as Zone_Min,
+  ROUND(a.zone_severe_s / 60.0, 1) as Zone_Marked_Min,
+  ROUND(a.linked_desat_area / 60.0 / NULLIF(a.flow_s / 3600.0, 0), 1) as HB_Approx,
+  a.n_unexplained_desat as Unexplained_Desat,
+  ROUND(a.n_pulse_rise * 3600.0 / NULLIF(a.pulse_s, 0), 2) as Pulse_Rise_Index,
+  ROUND(a.dhr_sum / NULLIF(a.n_dhr, 0), 1) as Delta_HR,
+  ROUND(a.flow_s / 3600.0, 2) as Flow_Hours,
+  ROUND(a.oxi_s / 3600.0, 2) as SpO2_Hours,
+  a.oxi_source as SpO2_Source,
+  CASE a.hypopnea_rule WHEN 0 THEN 'Auto' WHEN 1 THEN 'AASM 3%' WHEN 2 THEN 'CMS 4%' WHEN 3 THEN 'Flow only' END as Hypopnea_Rule
+FROM analysis_daily a
+LEFT JOIN daily_summaries ds ON ds.profile_id = a.profile_id AND ds.date = a.date
+WHERE a.profile_id = #PROFILE_ID
+  AND a.date >= #START_DATE
+  AND a.date <= #END_DATE
+ORDER BY a.date
+SQL
