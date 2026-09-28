@@ -857,6 +857,7 @@ test {
         tests/eventstabtests.cpp \
         tests/zeotests.cpp \
         tests/applehealthtests.cpp \
+        tests/prismatests.cpp \
         tests/machinetests.cpp \
         tests/timealignsessiontests.cpp \
         tests/contecbleprotocoltests.cpp \
@@ -879,6 +880,7 @@ test {
         tests/eventstabtests.h \
         tests/zeotests.h \
         tests/applehealthtests.h \
+        tests/prismatests.h \
         tests/machinetests.h \
         tests/timealignsessiontests.h \
         tests/contecbleprotocoltests.h \
