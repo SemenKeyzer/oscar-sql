@@ -237,6 +237,12 @@ public:
     QString getErrorMessage() const;
 
     /*!
+     * \brief Describe a problem that did not stop a successful restore, such as
+     *        SD card data that could not be copied.  Empty if there was none.
+     */
+    QString getWarningMessage() const;
+
+    /*!
      * \brief Return the database primary key of the newly restored profile.
      *
      * Only valid after a successful restoreProfile() call.
@@ -432,6 +438,7 @@ private:
 
     QString            m_packagePath;         ///< Absolute path to .oscar file.
     QString            m_errorMessage;        ///< Last error description.
+    QString            m_warningMessage;      ///< Problem after a committed restore (e.g. SD data not copied).
     QString            m_tempDir;             ///< Temporary extraction directory.
     qint64             m_newProfileId  = -1;  ///< Restored profile DB ID.
     QString            m_newUsername;         ///< Resolved username after conflict handling.

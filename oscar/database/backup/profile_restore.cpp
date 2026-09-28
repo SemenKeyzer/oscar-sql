@@ -17,6 +17,7 @@
 #include "../database_schema.h"
 #include "../../zip.h"
 #include "../../SleepLib/preferences.h"
+#include "../../SleepLib/profiles.h"
 
 // p_pref is the global Preferences object (defined in SleepLib/profiles.cpp).
 // We need it to resolve the canonical Profiles directory path, using the
@@ -33,6 +34,7 @@ extern Preferences *p_pref;
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <QTemporaryDir>
 #include <QTextStream>
 #include <QDebug>
 
@@ -399,16 +401,16 @@ bool ProfileRestore::extractPackage()
         m_tempDir.clear();
     }
 
-    // Create a unique temp directory under the system temp path.
-    const QString base = QDir::tempPath()
-                         + QStringLiteral("/oscar_restore_")
-                         + QString::number(QDateTime::currentMSecsSinceEpoch());
-
-    if (!QDir().mkpath(base)) {
+    // Create a new, private (owner-only) temp directory.  A fixed or guessable
+    // name could be created in advance by another local user to read the health
+    // data or change the extracted SQL files before they are replayed.
+    QTemporaryDir extractDir(QDir::tempPath() + QStringLiteral("/oscar_restore_XXXXXX"));
+    if (!extractDir.isValid()) {
         m_errorMessage = QStringLiteral("Failed to create temporary directory for extraction");
         return false;
     }
-    m_tempDir = base;
+    extractDir.setAutoRemove(false);   // removed by this class (destructor / next validate)
+    m_tempDir = extractDir.path();
 
     UnzipFile zip;
     if (!zip.Open(m_packagePath)) {
@@ -651,6 +653,7 @@ bool ProfileRestore::restoreProfile()
 {
     qDebug () << "ProfileRestore::restoreProfile entered";
     m_errorMessage.clear();
+    m_warningMessage.clear();
     m_newProfileId = -1;
     m_cancelRequested.store(false);
 
@@ -696,6 +699,16 @@ bool ProfileRestore::restoreProfile()
         m_newUsername = resolved;
     }
 
+    // The name becomes a folder under Profiles/ and comes from the package or the
+    // user, so it must not be able to point anywhere else.
+    const QString nameProblem = Profiles::nameProblem(m_newUsername);
+    if (!nameProblem.isEmpty()) {
+        m_errorMessage = QString("The profile name \"%1\" can't be used. %2")
+                             .arg(m_newUsername, nameProblem);
+        emit restoreFailed(m_errorMessage);
+        return false;
+    }
+
     emit progressChanged(10, QStringLiteral("Restoring database..."));
 
     if (!restoreInTransaction()) {
@@ -726,9 +739,11 @@ bool ProfileRestore::restoreProfile()
     if (m_includesSDData) {
         emit progressChanged(80, QStringLiteral("Restoring SD card data (may take several minutes)..."));
         if (!restoreSDData()) {
-            // Non-fatal: the DB restore succeeded.  The profile is fully usable;
-            // the user can reimport their SD card to repopulate on-disk data.
+            // The database restore is committed and the profile is usable, but the
+            // caller must say that the SD card files did not arrive.  Any files the
+            // profile folder already had are untouched (see restoreSDData()).
             qWarning() << "ProfileRestore: SD data restore failed (DB restore OK):" << m_errorMessage;
+            m_warningMessage = m_errorMessage;
             m_errorMessage.clear();
         }
     }
@@ -750,6 +765,11 @@ void ProfileRestore::requestCancel()
 QString ProfileRestore::getErrorMessage() const
 {
     return m_errorMessage;
+}
+
+QString ProfileRestore::getWarningMessage() const
+{
+    return m_warningMessage;
 }
 
 qint64 ProfileRestore::getRestoredProfileId() const
@@ -819,9 +839,11 @@ QString ProfileRestore::resolveUsernameConflict(const QString& originalUsername)
  * \brief Copy the \c sddata/ subtree from the extracted package to the
  *        restored profile's on-disk data directory.
  *
- * The target directory (\c Profiles/<newname>/) has already been created by
- * restoreProfile().  For the Replace resolution strategy, any existing content
- * in that directory is cleared first so the restored SD data is authoritative.
+ * The files are first copied into a hidden staging folder next to the target
+ * and swapped in only when the whole copy succeeded.  With the Replace strategy
+ * the existing folder (which may hold the only copies of CPAP SD card backups)
+ * is therefore removed only after its replacement is complete; a failed or
+ * partial copy leaves it exactly as it was.
  *
  * \return true on success; false on any I/O error (sets m_errorMessage).
  */
@@ -829,32 +851,42 @@ bool ProfileRestore::restoreSDData()
 {
     const QString sdDataDir = m_tempDir + QStringLiteral("/sddata");
     if (!QDir(sdDataDir).exists()) {
-        qWarning() << "ProfileRestore::restoreSDData: no sddata/ directory found in extracted package";
+        m_errorMessage = QStringLiteral("The package says it includes SD card data, but none was found in it.");
         return false;
     }
 
-    const QString targetDir =
-        p_pref->Get(QStringLiteral("{home}/Profiles")) + QLatin1Char('/') + m_newUsername;
+    const QString profilesDir = p_pref->Get(QStringLiteral("{home}/Profiles"));
+    QDir profiles(profilesDir);
+    const QString stamp       = QString::number(QDateTime::currentMSecsSinceEpoch());
+    const QString stagingName = QStringLiteral(".") + m_newUsername + QStringLiteral(".restoring-") + stamp;
+    const QString oldName     = QStringLiteral(".") + m_newUsername + QStringLiteral(".replaced-") + stamp;
+    const QString targetDir   = profiles.filePath(m_newUsername);
+    const QString stagingDir  = profiles.filePath(stagingName);
 
-    // For Replace: clear the existing directory content before writing.
-    // This ensures stale files from the old profile do not persist.
-    if (m_resolution == ConflictResolution::Replace) {
-        const QFileInfoList entries = QDir(targetDir).entryInfoList(
-            QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot | QDir::Hidden);
-        for (const QFileInfo& fi : entries) {
-            if (fi.isDir()) {
-                QDir(fi.absoluteFilePath()).removeRecursively();
-            } else {
-                QFile::remove(fi.absoluteFilePath());
-            }
-        }
+    qDebug() << "ProfileRestore::restoreSDData: copying to" << stagingDir;
+    if (!copyDirectoryRecursive(sdDataDir, stagingDir)) {
+        QDir(stagingDir).removeRecursively();
+        m_errorMessage = QString("Failed to copy SD card data into %1 (is the disk full?).")
+                             .arg(QDir::toNativeSeparators(profilesDir));
+        return false;
     }
 
-    qDebug() << "ProfileRestore::restoreSDData: copying to" << targetDir;
-    if (!copyDirectoryRecursive(sdDataDir, targetDir)) {
-        m_errorMessage = QString("Failed to copy SD card data to profile directory: %1")
-                             .arg(targetDir);
+    const bool hadTarget = QDir(targetDir).exists();
+    if (hadTarget && !profiles.rename(m_newUsername, oldName)) {
+        QDir(stagingDir).removeRecursively();
+        m_errorMessage = QString("Could not move the existing profile folder %1 aside.")
+                             .arg(QDir::toNativeSeparators(targetDir));
         return false;
+    }
+    if (!profiles.rename(stagingName, m_newUsername)) {
+        if (hadTarget) profiles.rename(oldName, m_newUsername);
+        QDir(stagingDir).removeRecursively();
+        m_errorMessage = QString("Could not move the restored SD card data into %1.")
+                             .arg(QDir::toNativeSeparators(targetDir));
+        return false;
+    }
+    if (hadTarget) {
+        QDir(profiles.filePath(oldName)).removeRecursively();
     }
 
     qDebug() << "ProfileRestore::restoreSDData: SD data restored successfully";
@@ -958,13 +990,25 @@ bool ProfileRestore::executeSqlFile(const QString& sqlFile)
     QSqlDatabase db = DatabaseManager::instance().database();
     QTextStream  in(&file);
 
+    int lineNo = 0;
     while (!in.atEnd()) {
         const QString line = in.readLine().trimmed();
-        if (line.isEmpty()) continue;
+        ++lineNo;
+        if (line.isEmpty() || line.startsWith(QLatin1String("--"))) continue;
 
+        // Anything else must be one INSERT into this file's own table.  Skipping
+        // an unreadable line would silently drop a row, and honouring another
+        // table name would let a package write where it was never exported from.
         InsertStatement stmt;
         if (!parseInsert(line, stmt)) {
-            continue; // skip blank lines, comments, etc.
+            m_errorMessage = QString("Line %1 of %2.sql could not be read; the package may be damaged.")
+                                 .arg(lineNo).arg(tableName);
+            return false;
+        }
+        if (stmt.tableName != tableName) {
+            m_errorMessage = QString("Line %1 of %2.sql writes to table \"%3\"; the package is not valid.")
+                                 .arg(lineNo).arg(tableName, stmt.tableName);
+            return false;
         }
 
         // Extract the original auto-increment id value (before stripping).
@@ -997,11 +1041,13 @@ bool ProfileRestore::executeSqlFile(const QString& sqlFile)
                 continue;
             }
 
-            // 2. Replace @PROFILE_ID@ placeholder.
-            if (val == QLatin1String("@PROFILE_ID@")) {
+            // 2. Every profile_id belongs to the restored profile.  The exporter
+            //    writes the @PROFILE_ID@ placeholder; any other value is replaced
+            //    too, so a package can never attach rows to an existing profile.
+            if (col == QLatin1String("profile_id")) {
                 if (m_newProfileId < 0) {
                     m_errorMessage = QString(
-                        "Encountered @PROFILE_ID@ in %1 before profiles.sql was processed.")
+                        "Encountered profile_id in %1 before profiles.sql was processed.")
                         .arg(sqlFile);
                     return false;
                 }
@@ -1021,33 +1067,16 @@ bool ProfileRestore::executeSqlFile(const QString& sqlFile)
                 continue;
             }
 
-            // 3b. Update data_folder when the username changes (Rename strategy).
-            // The profile data folder is normally "%PROFDIR%/<username>".  When
-            // restoring under a different name we must update that path so the
-            // restored profile does not share the original profile's directory.
-//            qDebug() << "ProfileRestore::executeSqlFile() step 3b";
+            // 3b. The data folder is always rebuilt as "%PROFDIR%/<username>".
+            // The package's own value is never used: it may name another user,
+            // carry an absolute path, or point outside Profiles/.
             if (tableName == QLatin1String("profiles")
                 && col == QLatin1String("data_folder")) {
-                const QString origUsername =
-                    m_manifestJson[QStringLiteral("profile")].toObject()
-                                  [QStringLiteral("username")].toString();
-                if (!origUsername.isEmpty() && m_newUsername != origUsername) {
-                    // Decode the SQL string literal (strip outer single-quotes,
-                    // then unescape '' → ').
-                    QString folder = val;
-                    if (folder.startsWith(QLatin1Char('\''))
-                        && folder.endsWith(QLatin1Char('\''))) {
-                        folder = folder.mid(1, folder.length() - 2);
-                        folder.replace(QLatin1String("''"), QLatin1String("'"));
-                    }
-                    // Replace the original username wherever it appears in the path.
-                    folder.replace(origUsername, m_newUsername);
-                    // Re-encode as a SQL string literal.
-                    folder.replace(QLatin1Char('\''), QLatin1String("''"));
-                    newCols.append(col);
-                    newVals.append(QLatin1Char('\'') + folder + QLatin1Char('\''));
-                    continue;
-                }
+                QString folder = QStringLiteral("%PROFDIR%/") + m_newUsername;
+                folder.replace(QLatin1Char('\''), QLatin1String("''"));
+                newCols.append(col);
+                newVals.append(QLatin1Char('\'') + folder + QLatin1Char('\''));
+                continue;
             }
 
             // 4. Remap FK columns.

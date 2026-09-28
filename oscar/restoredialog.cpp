@@ -33,6 +33,7 @@
 #include "network/cloud_downloader.h"
 #include "mainwindow.h"
 #include "SleepLib/preferences.h"
+#include "SleepLib/profiles.h"
 
 extern MainWindow *mainwin;
 extern Preferences *p_pref;
@@ -104,7 +105,18 @@ RestoreDialog::~RestoreDialog()
     delete m_validateWatcher;
     delete m_downloader;
     delete m_restore;
+    removeDownloadedPackage();
     delete ui;
+}
+
+void RestoreDialog::removeDownloadedPackage()
+{
+    // A package fetched from a share link is someone's health data; don't leave
+    // it behind in the temp folder once it has been restored or abandoned.
+    if (!m_downloadedPackage.isEmpty()) {
+        QFile::remove(m_downloadedPackage);
+        m_downloadedPackage.clear();
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -415,9 +427,10 @@ void RestoreDialog::on_downloadButton_clicked()
         return;
     }
 
-    // Clean up any previous downloader.
+    // Clean up any previous downloader and the file it fetched.
     delete m_downloader;
     m_downloader = nullptr;
+    removeDownloadedPackage();
 
     // Reset any prior validation state.
     resetValidation();
@@ -481,6 +494,7 @@ void RestoreDialog::onDownloadFinished(const QString& localPath)
     ui->statusLabel->setText(tr("Download complete. Validating..."));
 
     // Set the package path to the downloaded temp file and auto-validate.
+    m_downloadedPackage = localPath;
     ui->packagePathEdit->setText(localPath);
     ui->validateButton->setEnabled(true);
 
@@ -682,6 +696,15 @@ void RestoreDialog::on_restoreButton_clicked()
         ui->statusLabel->setText(tr("Profile name cannot be empty."));
         return;
     }
+    // The name becomes the profile's folder; a package can suggest names such as
+    // "../x" that would point outside the Profiles folder.
+    const QString nameProblem = Profiles::nameProblem(targetName);
+    if (!nameProblem.isEmpty()) {
+        ui->statusLabel->setText(nameProblem);
+        QMessageBox::warning(this, tr("Restore Profile"),
+            tr("Please choose a different profile name.\n\n%1").arg(nameProblem));
+        return;
+    }
     m_restore->setNewUsername(targetName);
 
     // Apply conflict resolution if the conflict group is visible.
@@ -691,6 +714,14 @@ void RestoreDialog::on_restoreButton_clicked()
         } else if (ui->renameRadio->isChecked()) {
             m_restore->setConflictResolution(ConflictResolution::Rename);
         } else if (ui->replaceRadio->isChecked()) {
+            // The open profile's in-memory state would be written back over the
+            // restored data when it is closed, so it can't be replaced while open.
+            if (p_profile && p_profile->user && p_profile->user->userName() == targetName) {
+                QMessageBox::warning(this, tr("Restore Profile"),
+                    tr("The profile \"%1\" is open. Open a different profile (or close "
+                       "this one) before replacing it, or choose Rename.").arg(targetName));
+                return;
+            }
             // Determine whether the incoming package will wipe the profile
             // directory (only happens when it includes SD card data) and
             // whether the existing profile has a Backup subdirectory that
@@ -777,8 +808,16 @@ void RestoreDialog::onRestoreCompleted(qint64 profileId, const QString& username
                                 QStringLiteral("Source"), source);
     }
 
-    QMessageBox::information(this, tr("Restore Complete"),
-        tr("Profile \"%1\" restored successfully.").arg(username));
+    const QString warning = m_restore ? m_restore->getWarningMessage() : QString();
+    if (warning.isEmpty()) {
+        QMessageBox::information(this, tr("Restore Complete"),
+            tr("Profile \"%1\" restored successfully.").arg(username));
+    } else {
+        QMessageBox::warning(this, tr("Restore Complete"),
+            tr("Profile \"%1\" was restored, but its SD card data could not be copied. "
+               "Any files the profile folder already had were left unchanged.\n\n%2")
+                .arg(username, warning));
+    }
 
     accept();  // Close dialog with Accepted result so caller can refresh profile list.
 }

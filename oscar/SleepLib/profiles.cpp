@@ -23,6 +23,7 @@
 #include <QHostInfo>
 #include <QApplication>
 #include <QSettings>
+#include <QRegularExpression>
 #include <algorithm>
 #include <cmath>
 
@@ -1507,6 +1508,35 @@ Profile *Get(QString name)
     }
 
     return nullptr;
+}
+
+QString nameProblem(const QString& name)
+{
+    // A profile name becomes a folder under Profiles/, so it must be a single,
+    // portable path component: nothing that climbs out of Profiles/ or that
+    // Windows or macOS refuse in a file name.
+    if (name.trimmed().isEmpty()) {
+        return QObject::tr("The profile name is empty.");
+    }
+    if (name != name.trimmed()) {
+        return QObject::tr("The profile name can't start or end with a space.");
+    }
+    if (name == QLatin1String(".") || name == QLatin1String("..") || name.endsWith(QLatin1Char('.'))) {
+        return QObject::tr("The profile name can't be \".\", \"..\" or end with a dot.");
+    }
+    static const QString forbidden = QStringLiteral("/\\:*?\"<>|");
+    for (const QChar c : name) {
+        if (c.unicode() < 0x20 || forbidden.contains(c)) {
+            return QObject::tr("The profile name can't contain any of these characters: %1").arg(forbidden);
+        }
+    }
+    static const QRegularExpression reserved(
+        QStringLiteral("^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(\\..*)?$"),
+        QRegularExpression::CaseInsensitiveOption);
+    if (reserved.match(name).hasMatch()) {
+        return QObject::tr("\"%1\" is reserved by Windows and can't be used as a profile name.").arg(name);
+    }
+    return QString();
 }
 
 Profile *Create(QString name, const QString* in_path)

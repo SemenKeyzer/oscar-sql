@@ -313,6 +313,9 @@ Profile *Create(QString name, const QString* in_path=nullptr);
 Profile *Get(QString name);
 Profile *Get();
 
+//! Why \a name can't be used as a profile (folder) name, or an empty string if it can.
+QString nameProblem(const QString& name);
+
 }
 
 // DoctorInfo Strings

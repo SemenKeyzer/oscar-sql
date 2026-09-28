@@ -124,6 +124,9 @@ private:
      */
     void setBusy(bool busy);
 
+    //! Delete the package downloaded from a share link, if any.
+    void removeDownloadedPackage();
+
     /*! \brief Reset validation state (info/name/conflict groups, restore button). */
     void resetValidation();
 
@@ -173,6 +176,7 @@ private:
     Ui::RestoreDialog*      ui;
     ProfileRestore*         m_restore          = nullptr; ///< Heap-allocated; owned by this dialog.
     CloudDownloader*        m_downloader       = nullptr; ///< Heap-allocated; owned by this dialog.
+    QString                 m_downloadedPackage;          ///< Package fetched from a share link; deleted with the dialog.
     QFutureWatcher<bool>*   m_validateWatcher  = nullptr; ///< Tracks the background validation future.
     QString             m_lastPackageDir;         ///< Last directory used to browse for a package.
     bool                m_packageIsShare    = false; ///< True if filename begins with "share_".

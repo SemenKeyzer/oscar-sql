@@ -227,6 +227,16 @@ void NewProfile::on_nextButton_clicked()
             staticQMessageBox::information(this, STR_MessageBox_Error, tr("Please provide a username for this profile"), QMessageBox::Ok);
             return;
         }
+        {
+            // The name becomes the profile's folder. An existing profile keeps its
+            // name even if it predates this check; only new names are validated.
+            const QString name = ui->userNameEdit->text().simplified();
+            const QString problem = (name == originalProfileName) ? QString() : Profiles::nameProblem(name);
+            if (!problem.isEmpty()) {
+                staticQMessageBox::information(this, STR_MessageBox_Error, problem, QMessageBox::Ok);
+                return;
+            }
+        }
 
         if (ui->genderCombo->currentIndex() == 0) {
             //QMessageBox::information(this,tr("Notice"),tr("You did not specify Gender."),QMessageBox::Ok);
