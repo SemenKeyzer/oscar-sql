@@ -1445,7 +1445,7 @@ int calcPulseChange(Session *session)
     EventDataType lv = 0;
     int li = 0;
 
-    int max;
+    EventDataType max;   // float: an int truncated fractional pulse changes
 
     int elcount;
     for (auto & el : it.value()) {
@@ -1478,7 +1478,9 @@ int calcPulseChange(Session *session)
 
             if (lastt > 0) {
                 qint64 len = (lastt - time) / 1000.0;
-                pc->AddEvent(lastt, len, tmp);
+                // The event's size is the largest change seen in the window; tmp is
+                // only the difference at the last sample compared.
+                pc->AddEvent(lastt, len, max);
                 i = li;
 
             }
@@ -1526,7 +1528,7 @@ int calcSPO2Drop(Session *session)
     //EventDataType ring[ringsize]={0};
     //qint64 rtime[ringsize]={0};
     //int rp=0;
-    int min;
+    EventDataType min;   // lowest SpO2 inside the current drop
     // int cnt = 0;
     // tmp = 0;
 
@@ -1635,6 +1637,8 @@ int calcSPO2Drop(Session *session)
                 val2 = el->data(j);
 
                 if (val2 > baseline - change) { break; }
+
+                if (val2 > 0 && val2 < min) { min = val2; }   // lowest SpO2 of the drop
 
                 lastt = time2;
                 li = j + 1;
