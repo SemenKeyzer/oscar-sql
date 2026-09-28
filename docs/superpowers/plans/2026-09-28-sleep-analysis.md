@@ -145,16 +145,16 @@ DayResult scoreDay(const DayInput&, const DayParams&);
 
 ### Этап B. Интеграция и хранение
 
-- [ ] **B7. Каналы анализа.** `schema.cpp`: каналы `0x1A00–0x1A30` (спец. §4.2), группа
+- [x] **B7. Каналы анализа.** `schema.cpp`: каналы `0x1A00–0x1A30` (спец. §4.2), группа
   `GRP_ANALYSIS`; `Channel::isComputed()`; исключение вычисленных каналов из
   `Machine::noteReportedChannels`, записи `respiratory_events`, круговой диаграммы, «Event
   Flags» и списков AHI; тест: вычисленные каналы не попадают в `reportedChannels`.
-- [ ] **B8. Этап 1 на сессию.** `session_analysis.{h,cpp}`: `Session` → анализаторы → `EventList`
+- [x] **B8. Этап 1 на сессию.** `session_analysis.{h,cpp}`: `Session` → анализаторы → `EventList`
   `AN_*` + штамп `AN_Stamp` в `session_settings`; вызов из `UpdateSummaries`; оксиметрические
   каналы — в сессию-источник SpO₂. `Session::StoreChannelEvents(const QList<ChannelID>&)` и
   `Session::LoadEventsFromDatabase(const QSet<ChannelID>& only)` с флагом `m_partialEvents`
   (полная запись частично загруженной сессии запрещена). Тесты — спец. §7.1 п. 11.
-- [ ] **B9. Таблица `analysis_daily`** (схема v20, миграция v19 → v20) и
+- [x] **B9. Таблица `analysis_daily`** (схема v20, миграция v19 → v20) и
   `database/analysis_daily_repository.{h,cpp}`; исключить таблицу из резервной копии;
   очистка дней удаляет строки. Тесты п. 10 (временная БД, upsert/чтение/удаление, миграция).
 - [ ] **B10. Этап 2 на день.** `event_matcher.{h,cpp}`, `day_scorer.{h,cpp}`,
