@@ -48,7 +48,8 @@ using namespace std;
 // This is the uber important database version for OSCAR's internal storage
 // Increment this after stuffing with Session's save & load code.
 const quint16 summary_version = 18;
-const quint16 events_version = 10;
+// maybe_unused: also read by the commented-out file-based storage below.
+[[maybe_unused]] const quint16 events_version = 10;
 
 Session::Session(Machine *m, SessionID session)
 {
@@ -726,7 +727,7 @@ bool Session::LoadSummary(bool debug)
     ===== END FILE-BASED LOADING (DISABLED) ===== */
 }
 
-const quint16 compress_method = 1;
+[[maybe_unused]] const quint16 compress_method = 1;
 
 bool Session::StoreEvents()
 {
@@ -3224,7 +3225,7 @@ bool Session::LoadFromDatabase()
 
     // 3b. Bulk-load value/time summaries for ALL channels in one query (eliminates N+1 pattern)
     SessionChannelValuesRepository valuesRepo;
-    int valuesLoadedCount = 0;
+    [[maybe_unused]] int valuesLoadedCount = 0;
     
     QHash<ChannelID, QHash<EventStoreType, EventStoreType>> allValueSummaries;
     QHash<ChannelID, QHash<EventStoreType, quint32>> allTimeSummaries;
@@ -3606,8 +3607,8 @@ bool Session::StoreEventsToDatabase()
 
     int totalEventLists = 0;
     int totalSaved = 0;
-    qint64 totalUncompressed = 0;
-    qint64 totalCompressed = 0;
+    [[maybe_unused]] qint64 totalUncompressed = 0;
+    [[maybe_unused]] qint64 totalCompressed = 0;
     
 #ifdef DBDEBUG
     qDebug() << "Session::StoreEventsToDatabase() - Storing events for session" << s_session;

@@ -122,7 +122,8 @@ def escape_cpp(s: str) -> str:
 
 def write_array(out, comment: str, var_name: str, strings: list):
     out.append(f"// ---- {comment} ----")
-    out.append(f"static const char* const {var_name}[] = {{")
+    # maybe_unused: the arrays exist only for lupdate; nothing reads them.
+    out.append(f"[[maybe_unused]] static const char* const {var_name}[] = {{")
     for s in strings:
         out.append(f'    QT_TRANSLATE_NOOP("SystemReports", "{escape_cpp(s)}"),')
     out.append("};")

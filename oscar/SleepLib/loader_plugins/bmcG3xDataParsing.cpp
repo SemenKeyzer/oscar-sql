@@ -99,8 +99,8 @@ constexpr int kG3xOffsetPressureSeed = 0x00A;
 /// their sum is near-constant (~565 cs) regardless of respiratory rate and shows
 /// no correlation with RR, tidal volume, or pressure.  Not confirmed Ti/Te.
 /// Read but currently discarded; kept for future investigation.
-constexpr int kG3xOffsetInspirationTime = 0x074;
-constexpr int kG3xOffsetExpirationTime  = 0x07E;
+[[maybe_unused]] constexpr int kG3xOffsetInspirationTime = 0x074;
+[[maybe_unused]] constexpr int kG3xOffsetExpirationTime  = 0x07E;
 
 /// Leak rate (offset 0x52A). Scale: raw × G3xLeakScaleTenthsPerRawUnit() → tenths of L/min.
 /// Confirmed for firmware G3-2.11.x (Luna G3X; internal build G3-2.SC.72.01).  The scale
@@ -201,12 +201,12 @@ constexpr int kG3xEvtTypeBreathExpiration  = 0x0D;
 /// Minimum device-reported apnea duration to qualify for PB scoring (seconds).
 /// 3 s matches the AASM PB definition; in practice the G3X firmware never classifies
 /// an event as an apnea unless it is ≥10 s, so this threshold has no practical effect.
-constexpr int kG3xPbMinApneaDurationSec = 3;
+[[maybe_unused]] constexpr int kG3xPbMinApneaDurationSec = 3;
 /// Maximum normal-breathing interval between consecutive apneas for them to belong to
 /// the same PB cluster (AASM: ≤20 s of normal breathing between apneas).
-constexpr int kG3xPbMaxInterApneaNormalBreathSec = 20;
+[[maybe_unused]] constexpr int kG3xPbMaxInterApneaNormalBreathSec = 20;
 /// Minimum number of qualifying apneas in a cluster to score as a PB episode (AASM: ≥3).
-constexpr int kG3xPbMinApneasPerEpisode = 3;
+[[maybe_unused]] constexpr int kG3xPbMinApneasPerEpisode = 3;
 
 /// Clamping limits for respiratory event duration.
 constexpr int kG3xRespEventMinDurationSec = 10;
@@ -851,20 +851,22 @@ BmcDateSession BmcG3xData::ReadDateSession(QDate aDate)
     // Collect therapy pressure updates and respiratory events.
 
     QList<G3xTimedSampleUpdate> timedSampleUpdates;
+    // [[maybe_unused]]: this and the other counters in this function are only
+    // reported in BMCDEBUG builds.
     bool hasEvtPressureUpdates  = false;
-    int  evtPressureUpdateCount = 0;
+    [[maybe_unused]] int  evtPressureUpdateCount = 0;
 
     QVector<G3xRawRespEvent>  rawRespEvents;
     QVector<QDateTime>        rawInspirationTimestamps;
     QVector<BmcFlowLimitEvent> rawFlEvents;
-    int rawRespType01Count = 0;
-    int rawRespType02Count = 0;
-    int rawRespType03Count = 0;
-    int rawRespType04Count = 0;
-    int rawRespType07Count = 0;
-    int rawRespType08Count = 0;
-    int rawRespType09Count = 0;  // counts 0x09 PB marker records (for BMCDEBUG)
-    int rawRespType0ACount = 0;
+    [[maybe_unused]] int rawRespType01Count = 0;
+    [[maybe_unused]] int rawRespType02Count = 0;
+    [[maybe_unused]] int rawRespType03Count = 0;
+    [[maybe_unused]] int rawRespType04Count = 0;
+    [[maybe_unused]] int rawRespType07Count = 0;
+    [[maybe_unused]] int rawRespType08Count = 0;
+    [[maybe_unused]] int rawRespType09Count = 0;  // counts 0x09 PB marker records (for BMCDEBUG)
+    [[maybe_unused]] int rawRespType0ACount = 0;
     QVector<BmcRespiratoryEvent> rawPbEvents;  // PB episodes from 0x09 records
 
     // Collected for EVT-only session boundary detection (waveLen == 0).
@@ -1030,10 +1032,10 @@ BmcDateSession BmcG3xData::ReadDateSession(QDate aDate)
             const qint64 endWindowSec   = dayEntry->EndTimestamp.toSecsSinceEpoch()   + (12 * 60 * 60);
             const QDate  dateWindowStart = aDate.addDays(-1);
             const QDate  dateWindowEnd   = aDate.addDays(1);
-            int fallbackPressureUpdates = 0;
-            int scanned42 = 0;
-            int inTimeWindow42 = 0;
-            int inDateWindow42 = 0;
+            [[maybe_unused]] int fallbackPressureUpdates = 0;
+            [[maybe_unused]] int scanned42 = 0;
+            [[maybe_unused]] int inTimeWindow42 = 0;
+            [[maybe_unused]] int inDateWindow42 = 0;
 
             for (int offset = 0; offset + kG3xEvtRecordSize <= evtBytes.size(); offset += kG3xEvtRecordSize) {
                 const char* rec = evtBytes.constData() + offset;
@@ -1111,14 +1113,14 @@ BmcDateSession BmcG3xData::ReadDateSession(QDate aDate)
     // ---- Phase 2: Map EVT respiratory events to OSCAR types ----
 
     if (!rawRespEvents.isEmpty()) {
-        int mappedOsaCount  = 0;
-        int mappedCsaCount  = 0;
-        int mappedHypCount  = 0;
-        int mappedOhCount   = 0;
-        int mappedChCount   = 0;
-        int mappedUaCount   = 0;
-        int mappedReraCount = 0;
-        int ignoredCount    = 0;
+        [[maybe_unused]] int mappedOsaCount  = 0;
+        [[maybe_unused]] int mappedCsaCount  = 0;
+        [[maybe_unused]] int mappedHypCount  = 0;
+        [[maybe_unused]] int mappedOhCount   = 0;
+        [[maybe_unused]] int mappedChCount   = 0;
+        [[maybe_unused]] int mappedUaCount   = 0;
+        [[maybe_unused]] int mappedReraCount = 0;
+        [[maybe_unused]] int ignoredCount    = 0;
 
         for (const G3xRawRespEvent& rawEvt : rawRespEvents) {
             BmcRespiratoryEventType mappedType  = BmcRespiratoryEventType::Unknown;
@@ -1412,7 +1414,7 @@ BmcDateSession BmcG3xData::ReadDateSession(QDate aDate)
     float  firstPressureCmH2O   = -1.0f;
     qint16 waveformRawIpapMin   = std::numeric_limits<qint16>::max();
     qint16 waveformRawIpapMax   = std::numeric_limits<qint16>::min();
-    int    outOfOrderPacketCount = 0;
+    [[maybe_unused]] int    outOfOrderPacketCount = 0;
     qint64 lastTimestampKey      = std::numeric_limits<qint64>::min();
     int    timedUpdateIndex      = 0;
 
@@ -1706,10 +1708,10 @@ BmcDateSession BmcG3xData::ReadDateSession(QDate aDate)
     }
 
     // ---- Summary debug output ----
+#ifdef BMCDEBUG
     const auto idxToDouble = [](int x100) -> double {
         return (x100 >= 0) ? (static_cast<double>(x100) / 100.0) : -1.0;
     };
-#ifdef BMCDEBUG
     qDebug() << "BmcG3xData idx summary day" << aDate.toString(Qt::ISODate)
              << "ahi"          << idxToDouble(dayEntry->ItAhiX100)
              << "ai"           << idxToDouble(dayEntry->ItAiX100)
@@ -1927,7 +1929,7 @@ void BmcG3xData::ParseIdxRecords(const QByteArray& idxBytes)
         return (rawValue == 0xFFFF) ? -1 : static_cast<int>(rawValue);
     };
 
-    int idxScanned = 0, idxNoMagic = 0, idxBadDate = 0, idxNoWave = 0, idxBadTs = 0, idxAccepted = 0;
+    [[maybe_unused]] int idxScanned = 0, idxNoMagic = 0, idxBadDate = 0, idxNoWave = 0, idxBadTs = 0, idxAccepted = 0;
 
     for (int offset = kG3xIdxRecordOffset; offset + 0x34 <= idxBytes.size(); offset += kG3xIdxRecordSize) {
         ++idxScanned;

@@ -547,7 +547,7 @@ void BmcLoader::setSessionWaveforms(BmcSession* bmcSession, Session* oscarSessio
     qint16 rawMvMax = std::numeric_limits<qint16>::min();
     quint16 rawRrMin = std::numeric_limits<quint16>::max();
     quint16 rawRrMax = std::numeric_limits<quint16>::min();
-    int pressureEventCount = 0;
+    [[maybe_unused]] int pressureEventCount = 0;
 
     for (auto & bmcWaveform : bmcSession->Waveforms)
     {

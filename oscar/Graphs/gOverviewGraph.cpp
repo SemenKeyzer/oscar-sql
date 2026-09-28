@@ -1046,7 +1046,6 @@ bool gOverviewGraph::mouseMoveEvent(QMouseEvent *event, gGraph *graph)
         int xposLeft = event->position().x();
         int yPosTop = event->position().y();
     #endif  
-    int event_y = yPosTop;
 
     if (!m_rect.contains(xposLeft, yPosTop)) {
         //    if ((x<0 || y<0 || x>l_width || y>l_height)) {
@@ -1079,7 +1078,6 @@ bool gOverviewGraph::mouseMoveEvent(QMouseEvent *event, gGraph *graph)
         auto d = m_values.find(hl_day);
 
         xposLeft += m_rect.left(); //gYAxis::Margin+gGraphView::titleWidth; //graph->m_marginleft+
-        int y = event_y - m_rect.top() + rtop - 15;
         //QDateTime dt1=QDateTime::fromSecsSinceEpoch(hl_day*86400).toLocalTime();
         QDateTime dt2 = QDateTime::fromSecsSinceEpoch(hl_day * 86400).toUTC();
 //        QDateTime dt2 = QDateTime::fromSecsSinceEpoch(hl_day * 86400).toLocalTime();

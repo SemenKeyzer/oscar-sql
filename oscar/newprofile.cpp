@@ -280,7 +280,6 @@ void NewProfile::on_nextButton_clicked()
                 profile = Profiles::Create(profileName);
             }
 
-            Profile &prof = *profile;
             profile->user->setFirstName(ui->firstNameEdit->text());
             profile->user->setLastName(ui->lastNameEdit->text());
             profile->user->setDOB(ui->dobEdit->date());

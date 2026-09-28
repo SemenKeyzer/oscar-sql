@@ -133,7 +133,6 @@ void DriftAnalysisDialog::refreshCurrentModelLabel()
     DeviceTimeCorrectionRepository repo;
     bool hasModel = false;
     double slope = 0.0;
-    double c0Ms = 0.0;
     QDate from;
 
     for (const auto& row : repo.findActive(mach->getDatabaseId())) {
@@ -142,7 +141,6 @@ void DriftAnalysisDialog::refreshCurrentModelLabel()
         if (!hasModel || rowFrom > from) {
             hasModel = true;
             from     = rowFrom;
-            c0Ms     = double(row.c0Ms);
             slope    = (row.c1 >= 1.0) ? row.c1 - 1.0 : row.c1;
         }
     }

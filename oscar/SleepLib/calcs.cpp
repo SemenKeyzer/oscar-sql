@@ -1838,7 +1838,7 @@ void FlowParser::flagSteadyBreathing(Session *session)
     EventList * BF = nullptr;
     BF = session->AddEventList(CPAP_SteadyBreathingFlag, EVL_Event);
     qint64 time = 0;
-    EventDataType value, lastvalue=-1;
+    EventDataType value;
     qint64 steadytime=0;
     int count;
     int minimumFlagTime_Seconds = 60;

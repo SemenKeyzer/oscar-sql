@@ -76,7 +76,7 @@ bool RespiratoryEventsRepository::createBatch(const QList<RespiratoryEventData>&
         "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
     );
     
-    int inserted = 0;
+    [[maybe_unused]] int inserted = 0;
     for (const RespiratoryEventData& event : events) {
         query.addBindValue(event.sessionId);
         query.addBindValue(event.profileId);

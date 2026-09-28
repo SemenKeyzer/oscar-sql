@@ -23,13 +23,13 @@
 #include <QCoreApplication>
 
 // ---- Root node names ----
-static const char* const roots[] = {
+[[maybe_unused]] static const char* const roots[] = {
     QT_TRANSLATE_NOOP("SystemReports", "System"),
     QT_TRANSLATE_NOOP("SystemReports", "User"),
 };
 
 // ---- Folder names ----
-static const char* const folders[] = {
+[[maybe_unused]] static const char* const folders[] = {
     QT_TRANSLATE_NOOP("SystemReports", "Daily Summaries"),
     QT_TRANSLATE_NOOP("SystemReports", "Session Summaries"),
     QT_TRANSLATE_NOOP("SystemReports", "Other"),
@@ -37,7 +37,7 @@ static const char* const folders[] = {
 };
 
 // ---- Report names ----
-static const char* const names[] = {
+[[maybe_unused]] static const char* const names[] = {
     QT_TRANSLATE_NOOP("SystemReports", "by Day"),
     QT_TRANSLATE_NOOP("SystemReports", "by Week"),
     QT_TRANSLATE_NOOP("SystemReports", "by Month"),
@@ -52,7 +52,7 @@ static const char* const names[] = {
 };
 
 // ---- Report descriptions ----
-static const char* const descriptions[] = {
+[[maybe_unused]] static const char* const descriptions[] = {
     QT_TRANSLATE_NOOP("SystemReports", "Daily data, one row per day, no aggregation"),
     QT_TRANSLATE_NOOP("SystemReports", "Weekly aggregation of daily data"),
     QT_TRANSLATE_NOOP("SystemReports", "Monthly aggregation of daily data"),

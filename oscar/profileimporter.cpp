@@ -597,7 +597,7 @@ bool ProfileImporter::migrateJournalFromSource(Profile* profile, const QString& 
 //    qDebug() << "ProfileImporter::migrateJournalFromSource() - Found" << files.size() << ".000 files to migrate";
 
     // Migrate each file
-    int migratedCount = 0;
+    [[maybe_unused]] int migratedCount = 0;
     int errorCount = 0;
 
     for (const QString& filename : files) {

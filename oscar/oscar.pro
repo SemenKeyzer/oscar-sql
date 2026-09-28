@@ -67,9 +67,7 @@ contains(DEFINES, NoGL) {
 greaterThan(QT_MAJOR_VERSION, 5) {
     CONFIG += c++17
 ## Added for Qt6-Clang compiler - Crimson Nape 25-11-17
-    CONFIG += warn_off
-    QMAKE_CXXFLAGS += -Wno-nonportable-include-path
-
+    clang: QMAKE_CXXFLAGS += -Wno-nonportable-include-path
 }
 
 DEFINES += LOCK_RESMED_SESSIONS
@@ -785,23 +783,13 @@ gcc | clang {
     message("$$QMAKE_CXX major version $$COMPILER_MAJOR")
 }
 
-if (false) {
-  if (equals(QT_MAJOR_VERSION,6)) {
-   if (greaterThan(QT_MINOR_VERSION,8)) {
-    ## allow deprecated warings for TESTING
-    message("ALLOW DEPRECATED WARNINGS FOR TESTING ")
-    # Make deprecation warnings just warnings
-    QMAKE_CFLAGS += -Wno-error=deprecated-declarations
-    QMAKE_CXXFLAGS += -Wno-error=deprecated-declarations
-} } }
+# Qt deprecates more API with every minor release, so a newer Qt than the one the
+# code was last built with must not break the build: deprecations stay warnings.
+QMAKE_CFLAGS += -Wno-error=deprecated-declarations
+QMAKE_CXXFLAGS += -Wno-error=deprecated-declarations
 
 message("CXXFLAGS post-mods $$QMAKE_CXXFLAGS ")
 message("CXXFLAGS_WARN_ON $$QMAKE_CXXFLAGS_WARN_ON")
-
-lessThan(QT_MAJOR_VERSION,5)|lessThan(QT_MINOR_VERSION,9) {
-    QMAKE_CFLAGS += -Wno-error=strict-aliasing
-    QMAKE_CXXFLAGS += -Wno-error=strict-aliasing
-}
 
 # Create a debug GUI build by adding "CONFIG+=memdebug" to your qmake command
 memdebug {
@@ -812,13 +800,7 @@ memdebug {
     QMAKE_CXXFLAGS += -Wno-error=deprecated-copy
     !win32 {  # add memory checking on Linux and macOS debug builds
         QMAKE_CFLAGS += -g -Werror -fsanitize=address -fno-omit-frame-pointer -fno-common -fsanitize-address-use-after-scope
-        lessThan(QT_MAJOR_VERSION,5)|lessThan(QT_MINOR_VERSION,9) {
-            QMAKE_CFLAGS -= -fsanitize-address-use-after-scope
-        }
         QMAKE_CXXFLAGS += -g -Werror -fsanitize=address -fno-omit-frame-pointer -fno-common -fsanitize-address-use-after-scope
-        lessThan(QT_MAJOR_VERSION,5)|lessThan(QT_MINOR_VERSION,9) {
-            QMAKE_CXXFLAGS -= -fsanitize-address-use-after-scope
-        }
         QMAKE_LFLAGS += -fsanitize=address
     }
 }
@@ -834,13 +816,7 @@ test {
     CONFIG -= app_bundle
     !win32 {  # add memory checking on Linux and macOS test builds
         QMAKE_CFLAGS += -Werror -fsanitize=address -fno-omit-frame-pointer -fno-common -fsanitize-address-use-after-scope
-        lessThan(QT_MAJOR_VERSION,5)|lessThan(QT_MINOR_VERSION,9) {
-            QMAKE_CFLAGS -= -fsanitize-address-use-after-scope
-        }
         QMAKE_CXXFLAGS += -Werror -fsanitize=address -fno-omit-frame-pointer -fno-common -fsanitize-address-use-after-scope
-        lessThan(QT_MAJOR_VERSION,5)|lessThan(QT_MINOR_VERSION,9) {
-            QMAKE_CXXFLAGS -= -fsanitize-address-use-after-scope
-        }
         QMAKE_LFLAGS += -fsanitize=address
     }
 

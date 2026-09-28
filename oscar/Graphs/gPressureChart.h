@@ -18,13 +18,13 @@ public:
     gPressureChart();
     virtual ~gPressureChart() {}
 
-    virtual Layer * Clone() {
+    virtual Layer * Clone() override {
         gPressureChart * sc = new gPressureChart();
         gSummaryChart::CloneInto(sc);
         return sc;
     }
 
-    virtual void customCalc(Day *day, QVector<SummaryChartSlice> &slices) {
+    virtual void customCalc(Day *day, QVector<SummaryChartSlice> &slices) override {
         int size = slices.size();
         float hour = day->hours(m_machtype);
         for (int i=0; i < size; ++i) {
@@ -33,17 +33,17 @@ public:
             calc->update(slice.value, hour);
          }
     }
-    virtual void afterDraw(QPainter &, gGraph &, QRectF);
+    virtual void afterDraw(QPainter &, gGraph &, QRectF) override;
 
-    virtual void populate(Day * day, int idx);
+    virtual void populate(Day * day, int idx) override;
 
     virtual EventDataType Maxy() override;
 
-    virtual QString tooltipData(Day * day, int idx) {
+    virtual QString tooltipData(Day * day, int idx) override {
         return day->getCPAPModeStr() + "\n" + day->getPressureSettings() + gSummaryChart::tooltipData(day, idx);
     }
 
-    virtual int addCalc(ChannelID code, SummaryType type);
+    virtual int addCalc(ChannelID code, SummaryType type) override;
 
 protected:
     SummaryCalcItem* getCalc(ChannelID code, SummaryType type = ST_SETMAX);

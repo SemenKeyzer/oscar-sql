@@ -38,18 +38,18 @@ class AppleHealthLoader : public MachineLoader
     AppleHealthLoader();
     virtual ~AppleHealthLoader();
 
-    virtual bool Detect(const QString & path);
+    virtual bool Detect(const QString & path) override;
 
-    virtual int Open(const QString & path) { Q_UNUSED(path); return 0; }
+    virtual int Open(const QString & path) override { Q_UNUSED(path); return 0; }
     virtual int Open(const QStringList & paths) override;
-    virtual int OpenFile(const QString & path);
-    virtual QStringList getNameFilter() { return QStringList("Apple Health Export (*.xml *.zip)"); }
+    virtual int OpenFile(const QString & path) override;
+    virtual QStringList getNameFilter() override { return QStringList("Apple Health Export (*.xml *.zip)"); }
     static void Register();
 
-    virtual int Version() { return applehealth_data_version; }
-    virtual const QString &loaderName() { return applehealth_class_name; }
+    virtual int Version() override { return applehealth_data_version; }
+    virtual const QString &loaderName() override { return applehealth_class_name; }
 
-    virtual MachineInfo newInfo() {
+    virtual MachineInfo newInfo() override {
         return MachineInfo(MT_OXIMETER, 0, applehealth_class_name, QObject::tr("Apple"), QObject::tr("Watch"), QString(), QStringLiteral("Vitals"), QObject::tr("Apple Health"), QDateTime::currentDateTime(), applehealth_data_version);
     }
 
