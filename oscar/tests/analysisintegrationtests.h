@@ -36,6 +36,7 @@ private slots:
     void testDayAnalysisLoadsOnlyWhatItNeeds();
     void testAnalysisSettingsRoundTrip();
     void testAnalysisServiceKeepsDaysCurrent();
+    void testFlagsGraphsSplitDeviceAndAnalysis();
 
 private:
     class QCoreApplication *m_app = nullptr;

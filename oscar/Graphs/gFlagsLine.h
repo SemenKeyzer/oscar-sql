@@ -87,14 +87,15 @@ class gFlagsLine: public Layer
 };
 
 /*! \class gFlagsGroup
-    \brief Contains multiple gFlagsLine entries for the Events Flag graph
+    \brief Contains multiple gFlagsLine entries for the Events Flag graph: the device's
+    flags, or with \a computed the flags of OSCAR's own analysis (Analysis Flags graph)
     */
 class gFlagsGroup: public LayerGroup
 {
     friend class gFlagsLabelArea;
 
   public:
-    gFlagsGroup();
+    explicit gFlagsGroup(bool computed = false);
     virtual ~gFlagsGroup();
 
     //! Draw filled rectangles behind Event Flag's, and an outlines around them all, Calls the individual paint for each gFlagLine
@@ -118,7 +119,7 @@ class gFlagsGroup: public LayerGroup
     void refreshConfiguration(gGraph* graph) ;
 
     virtual Layer * Clone() {
-        gFlagsGroup * layer = new gFlagsGroup();  //ouchie..
+        gFlagsGroup * layer = new gFlagsGroup(m_computed);  //ouchie..
         Layer::CloneInto(layer);
         CloneInto(layer);
         return layer;
@@ -154,6 +155,7 @@ class gFlagsGroup: public LayerGroup
     float m_barh;
     bool m_empty;
     bool m_rebuild_cpap;
+    bool m_computed;   //!< shows the analysis' computed channels instead of the device's
     int sessionBarHeight();
 };
 

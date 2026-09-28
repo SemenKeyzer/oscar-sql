@@ -45,6 +45,7 @@
 #include "SleepLib/journal.h"
 #include "SleepLib/session.h"
 #include "SleepLib/performance_timer.h"
+#include "SleepLib/analysis/analysis_channels.h"
 #include "SleepLib/loader_plugins/applehealth_loader.h"
 #include "database/session_repository.h"
 
@@ -102,8 +103,8 @@ inline QString channelInfo(ChannelID code) {
 //
 // Standard graph order
 const QList<QString> standardGraphOrder = {
-    STR_GRAPH_SleepFlags, STR_GRAPH_FlowRate, STR_GRAPH_Pressure, STR_GRAPH_PressureWave, STR_GRAPH_LeakRate, STR_GRAPH_FlowLimitation,
-    STR_GRAPH_Snore, STR_GRAPH_IE_Ratio, STR_GRAPH_FlowAbnormality, STR_GRAPH_TidalVolume, STR_GRAPH_MaskPressure, STR_GRAPH_RespRate, STR_GRAPH_MinuteVent,
+    STR_GRAPH_SleepFlags, STR_GRAPH_AnalysisFlags, STR_GRAPH_FlowRate, STR_GRAPH_Pressure, STR_GRAPH_PressureWave, STR_GRAPH_LeakRate,
+    STR_GRAPH_FlowLimitation, STR_GRAPH_AnalysisFL, STR_GRAPH_Snore, STR_GRAPH_IE_Ratio, STR_GRAPH_FlowAbnormality, STR_GRAPH_TidalVolume, STR_GRAPH_MaskPressure, STR_GRAPH_RespRate, STR_GRAPH_MinuteVent,
     "RMVENT_AlvMinVent", "RMVENT_SpontCyc", "RMVENT_SpontTrig",   // ResMed ventilation (match channel codes)
     STR_GRAPH_PTB, STR_GRAPH_RespEvent, STR_GRAPH_Ti, STR_GRAPH_Te, STR_GRAPH_IE,
     STR_GRAPH_SleepStage, STR_GRAPH_Inclination, STR_GRAPH_Orientation, STR_GRAPH_Motion, STR_GRAPH_TestChan1,
@@ -118,9 +119,9 @@ const QList<QString> standardGraphOrder = {
 
 // Advanced graph order
 const QList<QString> advancedGraphOrder = {
-    STR_GRAPH_SleepFlags, STR_GRAPH_FlowRate, STR_GRAPH_PressureWave, STR_GRAPH_MaskPressure, STR_GRAPH_TidalVolume, STR_GRAPH_MinuteVent,
+    STR_GRAPH_SleepFlags, STR_GRAPH_AnalysisFlags, STR_GRAPH_FlowRate, STR_GRAPH_PressureWave, STR_GRAPH_MaskPressure, STR_GRAPH_TidalVolume, STR_GRAPH_MinuteVent,
     "RMVENT_AlvMinVent", "RMVENT_SpontCyc", "RMVENT_SpontTrig",   // ResMed ventilation (match channel codes)
-    STR_GRAPH_Ti, STR_GRAPH_Te, STR_GRAPH_IE, STR_GRAPH_FlowLimitation, STR_GRAPH_FlowAbnormality, STR_GRAPH_Pressure, STR_GRAPH_LeakRate, STR_GRAPH_Snore,
+    STR_GRAPH_Ti, STR_GRAPH_Te, STR_GRAPH_IE, STR_GRAPH_FlowLimitation, STR_GRAPH_AnalysisFL, STR_GRAPH_FlowAbnormality, STR_GRAPH_Pressure, STR_GRAPH_LeakRate, STR_GRAPH_Snore,
     STR_GRAPH_IE_Ratio, STR_GRAPH_RespRate, STR_GRAPH_PTB, STR_GRAPH_RespEvent,
     STR_GRAPH_SleepStage, STR_GRAPH_Inclination, STR_GRAPH_Orientation, STR_GRAPH_Motion, STR_GRAPH_TestChan1,
     STR_GRAPH_Oxi_Pulse, STR_GRAPH_Oxi_SPO2, STR_GRAPH_Oxi_Perf, STR_GRAPH_Oxi_Plethy,
@@ -292,6 +293,11 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     sleepFlags = SF;
     SF->setPinned(true);
 
+    // OSCAR's own analysis: its flags apart from the device's (hidden on days without any)
+    gGraph *AF;
+    graphlist[STR_GRAPH_AnalysisFlags] = AF = new gGraph(STR_GRAPH_AnalysisFlags, GraphView, tr("Analysis Flags"),
+                                                         tr("Events found by OSCAR's own analysis (experimental)"), default_height);
+
     // Build union of channels with actual data across all loaded machines.
     // Empty set (no machines/data loaded) means all channel graphs will be created.
     QSet<ChannelID> availableChannels;
@@ -314,6 +320,7 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
         CPAP_IE, SLEEP_Stage, POS_Inclination, POS_Orientation, POS_Movement, CPAP_Test1,
         Prisma_ObstructLevel, Prisma_rRMV, Prisma_rMVFluctuation, Prisma_PressureMeasured, Prisma_FlowFull
         ,  BMC_PressureWave, BMC_FlowAbnormality, BMC_IE_Ratio
+        ,  AN_FLScore
         ,  RMVENT_AlvMinVent, RMVENT_SpontCyc, RMVENT_SpontTrig
         #if defined(STEADY_BREATHING)
         ,    CPAP_SteadyBreathing
@@ -404,6 +411,13 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     SF->AddLayer(new gLabelArea(fg),LayerLeft,gYAxis::Margin);
     SF->AddLayer(new gXAxis(COLOR_Text,false),LayerBottom,0,gXAxis::Margin);
 
+    gFlagsGroup *afg = new gFlagsGroup(true);
+    AF->AddLayer(afg);
+    AF->setBlockZoom(true);
+    AF->AddLayer(new gShadowArea());
+    AF->AddLayer(new gLabelArea(afg),LayerLeft,gYAxis::Margin);
+    AF->AddLayer(new gXAxis(COLOR_Text,false),LayerBottom,0,gXAxis::Margin);
+
 
     // Now take care of xgrid/yaxis labels for all graphs
 
@@ -411,6 +425,7 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     QStringList skipgraph;
     skipgraph.push_back(STR_GRAPH_EventBreakdown);
     skipgraph.push_back(STR_GRAPH_SleepFlags);
+    skipgraph.push_back(STR_GRAPH_AnalysisFlags);
     skipgraph.push_back(STR_GRAPH_TAP);
     skipgraph.push_back(STR_GRAPH_SleepStage);
 
@@ -521,6 +536,11 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
 
     //graphlist[schema::channel[CPAP_TidalVolume].code()]->AddLayer(AddCPAP(new gLineChart("TidalVolume2", square)));
     if (auto *g = graphlist.value(schema::channel[CPAP_FLG].code())) g->AddLayer(new gLineChart(CPAP_FLG, true));
+    if (auto *g = graphlist.value(schema::channel[AN_FLScore].code())) {
+        g->AddLayer(new gLineChart(AN_FLScore, false));
+        g->setForceMinY(0);
+        g->setForceMaxY(1);
+    }
     //graphlist[schema::channel[CPAP_RespiratoryEvent].code()]->AddLayer(AddCPAP(new gLineChart(CPAP_RespiratoryEvent, true)));
     if (auto *g = graphlist.value(schema::channel[CPAP_IE].code())) g->AddLayer(lc=new gLineChart(CPAP_IE, false));      // this should be inverse of supplied value
     if (auto *g = graphlist.value(schema::channel[CPAP_Te].code())) g->AddLayer(lc=new gLineChart(CPAP_Te, false));

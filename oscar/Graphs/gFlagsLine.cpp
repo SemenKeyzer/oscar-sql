@@ -41,10 +41,12 @@ int gLabelArea::minimumWidth()
 
 
 
-gFlagsGroup::gFlagsGroup()
+gFlagsGroup::gFlagsGroup(bool computed)
 {
     m_barh = 0;
     m_empty = true;
+    m_rebuild_cpap = false;
+    m_computed = computed;
 }
 gFlagsGroup::~gFlagsGroup()
 {
@@ -78,13 +80,16 @@ void gFlagsGroup::SetDay(Day *d)
     }
 
     m_sessions = d->getSessions(MT_CPAP);
+    // a night with only an oximeter still has analysis flags (its desaturations)
+    if (m_computed && m_sessions.isEmpty()) m_sessions = d->getSessions(MT_OXIMETER);
 
     quint32 z = schema::FLAG | schema::SPAN | schema::MINOR_FLAG;
     if (p_profile->general->showUnknownFlags()) z |= schema::UNKNOWN;
     availableChans = d->getSortedMachineChannels(z);
-    // The device's events only: OSCAR's own analysis has its own flags graph.
+    // The device's events here, OSCAR's own analysis in its own flags graph.
+    const bool computed = m_computed;
     availableChans.erase(std::remove_if(availableChans.begin(), availableChans.end(),
-                                        [](ChannelID code) { return schema::channel[code].isComputed(); }),
+                                        [computed](ChannelID code) { return schema::channel[code].isComputed() != computed; }),
                          availableChans.end());
 
     m_rebuild_cpap = !m_sessions.isEmpty() && (availableChans.size() == 0);
@@ -102,7 +107,7 @@ void gFlagsGroup::SetDay(Day *d)
                 seen.insert(code);
 
                 schema::Channel * chan = &schema::channel[code];
-                if (chan->isComputed()) continue;
+                if (chan->isComputed() != m_computed) continue;
 
                 if (chan->type() == schema::FLAG) {
                     availableChans.push_back(code);
@@ -130,7 +135,9 @@ void gFlagsGroup::SetDay(Day *d)
     cnt = lvisible.size();
     m_empty = (cnt == 0);
 
-    if (m_empty && !m_sessions.isEmpty()) {
+    // An empty Event Flags graph still shows while the day has events; the analysis
+    // graph only with something to show.
+    if (m_empty && !m_sessions.isEmpty() && !m_computed) {
         if (d) {
             m_empty = !d->hasEvents();
         }
@@ -141,6 +148,7 @@ void gFlagsGroup::SetDay(Day *d)
 
 bool gFlagsGroup::isEmpty()
 {
+    if (m_computed) return m_empty || !m_day || !m_day->hasEnabledSessions();
     if (m_day && !m_sessions.isEmpty()) {
         if (m_day->hasEnabledSessions() && m_day->hasEvents())
             return false;

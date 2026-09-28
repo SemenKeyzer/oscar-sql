@@ -23,6 +23,7 @@
 #include "Graphs/gGraphView.h"
 #include "SleepLib/profiles.h"
 #include "Graphs/gLineOverlay.h"
+#include "SleepLib/analysis/analysis_channels.h"
 
 #define EXTRA_ASSERTS 1
 
@@ -229,6 +230,9 @@ skipcheck:
             if (((m_codes[0] == CPAP_FlowRate) ||((m_codes[0] == CPAP_MaskPressureHi))) && (schema::channel[code].machtype() == MT_CPAP)
                     && !schema::channel[code].isComputed()) b = true;
             if ((m_codes[0] == CPAP_Leak) && (code == CPAP_LargeLeak)) b = true;
+            // the analysis' desaturations on SpO2 and pulse rises on the pulse
+            if ((m_codes[0] == OXI_SPO2) && (code == AN_Desaturation)) b = true;
+            if ((m_codes[0] == OXI_Pulse) && (code == AN_PulseRise)) b = true;
             m_flags_enabled[code] = b;
         }
         if (!m_day->channelExists(code)) continue;

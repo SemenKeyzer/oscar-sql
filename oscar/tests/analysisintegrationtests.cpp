@@ -25,6 +25,7 @@
 #include "SleepLib/profiles.h"
 #include "SleepLib/schema.h"
 #include "SleepLib/session.h"
+#include "Graphs/gFlagsLine.h"
 #include "database/analysis_daily_repository.h"
 #include "database/database_manager.h"
 #include "database/database_schema.h"
@@ -786,4 +787,60 @@ void AnalysisIntegrationTests::testAnalysisServiceKeepsDaysCurrent()
     setActiveParams(AnalysisParams());
     p_profile->daylist.remove(date);
     delete day;
+}
+
+void AnalysisIntegrationTests::testFlagsGraphsSplitDeviceAndAnalysis()
+{
+    Machine cpap(p_profile, 44);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Machine oxi(p_profile, 45);
+    oxi.info.type = MT_OXIMETER;
+    Day day;
+    day.setDate(kNightDate.addDays(9));
+    Session *cs = new Session(&cpap, 64);
+    addFlow(*cs);
+    cs->AddEventList(CPAP_Obstructive, EVL_Event)->AddEvent(synth::kStart + 200000, 12);
+    analyzeSession(cs, AnalysisParams());
+    day.addSession(cs);
+
+    auto codes = [](gFlagsGroup &g) {
+        QSet<ChannelID> out;
+        for (gFlagsLine *line : g.visibleLayers()) out.insert(line->code());
+        return out;
+    };
+
+    gFlagsGroup device, analysisFlags(true);
+    device.SetDay(&day);
+    analysisFlags.SetDay(&day);
+    QVERIFY(codes(device).contains(CPAP_Obstructive));
+    QVERIFY(!codes(device).contains(AN_Apnea));
+    QVERIFY(codes(analysisFlags).contains(AN_Apnea));
+    QVERIFY(!codes(analysisFlags).contains(CPAP_Obstructive));
+    QVERIFY(!codes(analysisFlags).contains(AN_FLScore));   // a waveform, not a flag
+    QVERIFY(!analysisFlags.isEmpty());
+
+    // a night with only an oximeter: the analysis graph shows its desaturations
+    Day oxiDay;
+    oxiDay.setDate(kNightDate.addDays(10));
+    Session *os = new Session(&oxi, 65);
+    addSpo2(*os);
+    analyzeSession(os, AnalysisParams());
+    oxiDay.addSession(os);
+    gFlagsGroup oxiFlags(true);
+    oxiFlags.SetDay(&oxiDay);
+    QVERIFY(codes(oxiFlags).contains(AN_Desaturation));
+    QVERIFY(!oxiFlags.isEmpty());
+
+    // nothing analysed: the analysis graph hides
+    Day plain;
+    plain.setDate(kNightDate.addDays(11));
+    Session *ps = new Session(&cpap, 66);
+    ps->AddEventList(CPAP_Obstructive, EVL_Event)->AddEvent(synth::kStart + 200000, 12);
+    ps->really_set_first(synth::kStart);
+    ps->really_set_last(synth::kStart + 600000);
+    plain.addSession(ps);
+    gFlagsGroup plainFlags(true);
+    plainFlags.SetDay(&plain);
+    QVERIFY(plainFlags.isEmpty());
 }

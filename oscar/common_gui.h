@@ -16,6 +16,8 @@
 // Internal graph identifiers -- must NOT be translated
 const QString STR_GRAPH_EventBreakdown = "EventBreakdown";
 const QString STR_GRAPH_SleepFlags = "SF";  // aka Event Flags
+const QString STR_GRAPH_AnalysisFlags = "AnalysisFlags";  // OSCAR's own analysis
+const QString STR_GRAPH_AnalysisFL = "AnFLScore";  // matches the channel code
 const QString STR_GRAPH_FlowRate = "FlowRate";
 const QString STR_GRAPH_Pressure = "Pressure";
 const QString STR_GRAPH_LeakRate = "Leak";
