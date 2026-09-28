@@ -315,8 +315,9 @@ bool YuwellFormatA::OpenSession(Machine *mach, const QString & filename)
 
             if (record.size() != 0x0a) {
                 qWarning() << "Yuwell Session Record Short" << filename;
-                file.close();
-                return false;
+                // Keep the complete records read so far instead of discarding the whole
+                // night because the last record was cut short.
+                break;
             }
 
             QDataStream in(record);
@@ -759,6 +760,9 @@ int YuwellFormatB::OpenMachine(Machine *mach, const QString & serial) {
                     if (i == 0 && leakage != 0xF9) {
                         break; // Out of bounds offset, not a valid record
                     }
+                    if (in.status() != QDataStream::Ok) {
+                        break; // log runs past the end of the file: past here QDataStream reads zeros
+                    }
                     logDecoded = true;
                     PR->AddEvent(ti + (i * 60000), pressure); // Samples are every 60 seconds
                     if (pulse < 249) {
@@ -1081,8 +1085,9 @@ bool YuwellFormatC::OpenSession(Machine *mach, const QString & filename)
 
             if (record.size() != 0x28) {
                 qWarning() << "Yuwell Session Record Short" << filename;
-                file.close();
-                return false;
+                // Keep the complete records read so far instead of discarding the whole
+                // night because the last record was cut short.
+                break;
             }
 
             QDataStream in(record);
@@ -1509,8 +1514,9 @@ bool YuwellFormatD::OpenSession(Machine *mach, const QString & filename)
 
             if (record.size() != 18) {
                 qWarning() << "Yuwell Session Record Short " << minutes.fileName();
-                bysMFile.close();
-                return false;
+                // Keep the complete records read so far instead of discarding the whole
+                // night because the last record was cut short.
+                break;
             }
 
             QDataStream in(record);
@@ -1613,8 +1619,9 @@ bool YuwellFormatD::OpenSession(Machine *mach, const QString & filename)
 
                 if (record.size() != 1200) {
                     qWarning() << "Yuwell Session Record Short " << minutes.fileName();
-                    bysDFile.close();
-                    return false;
+                    // Keep the complete records read so far instead of discarding the whole
+                    // night because the last record was cut short.
+                    break;
                 }
 
                 QDataStream in(record);
@@ -2491,8 +2498,9 @@ bool YuwellFormatF::OpenSession(Machine *mach, const QString & filename)
 
             if (record.size() != 0x0a) {
                 qWarning() << "Yuwell Session Record Short" << filename;
-                file.close();
-                return false;
+                // Keep the complete records read so far instead of discarding the whole
+                // night because the last record was cut short.
+                break;
             }
 
             QDataStream rin(record);
