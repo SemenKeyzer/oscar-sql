@@ -506,7 +506,9 @@ int main(int argc, char* argv[])
     initializeStrings();
     qDebug() << STR_TR_OSCAR + " " + getVersion();
 
-    AutoTest::run(argc, argv);
+    // Non-zero when any test failed, so scripts and CI can tell. (The count itself
+    // is not returned: exit codes wrap at 256.)
+    return AutoTest::run(argc, argv) ? 1 : 0;
 }
 
 #else
