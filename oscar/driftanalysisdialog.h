@@ -29,6 +29,8 @@ public:
 
 signals:
     void correctionsChanged();
+    //! A drift model was written to the database.
+    void correctionsSaved();
 
 private slots:
     void onDutDeviceChanged(int);

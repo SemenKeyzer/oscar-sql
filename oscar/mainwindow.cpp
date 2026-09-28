@@ -1943,8 +1943,13 @@ void MainWindow::on_actionTime_Corrections_triggered()
         connect(m_correctionDialog, &QObject::destroyed, this, [this]() {
             m_correctionDialog = nullptr;
         });
+        // Through MainWindow rather than straight to daily: the Daily view is
+        // recreated (reprocess, profile reload) while this dialog stays open.
+        // Previews only redraw; saved changes also refresh the stored summaries.
         connect(m_correctionDialog, &DeviceTimeCorrectionDialog::correctionsChanged,
-                daily, &Daily::redrawWithZoom);
+                this, [this]() { if (daily) daily->redrawWithZoom(); });
+        connect(m_correctionDialog, &DeviceTimeCorrectionDialog::correctionsSaved,
+                this, &MainWindow::timeCorrectionsChanged);
     }
     m_correctionDialog->setDate(daily->getDate());
     m_correctionDialog->show();
@@ -1986,7 +1991,9 @@ void MainWindow::on_actionDrift_Analysis_triggered()
             m_driftDialog = nullptr;
         });
         connect(m_driftDialog, &DriftAnalysisDialog::correctionsChanged,
-                daily, &Daily::redrawWithZoom);
+                this, [this]() { if (daily) daily->redrawWithZoom(); });
+        connect(m_driftDialog, &DriftAnalysisDialog::correctionsSaved,
+                this, &MainWindow::timeCorrectionsChanged);
     }
     m_driftDialog->setDate(daily->getDate());
     m_driftDialog->show();
@@ -2012,8 +2019,36 @@ void MainWindow::on_actionPurgeAllTimeCorrections_triggered()
         mach->rebuildCorrections({});
     }
 
-    if (daily) daily->redrawWithZoom();
+    timeCorrectionsChanged();
     if (m_correctionDialog) m_correctionDialog->setDate(daily ? daily->getDate() : QDate());
+}
+
+void MainWindow::timeCorrectionsChanged()
+{
+    if (!p_profile) return;
+    if (daily) daily->redrawWithZoom();
+
+    // Corrections are applied when data is read, so nothing stored moves; but the
+    // per-day rows (total and mask-on time where devices overlap) are computed
+    // with them. Recompute each affected day once.
+    const qint64 profileId = ProfileRepository().findByUsername(p_profile->user->userName()).id;
+    if (profileId > 0) {
+        DailySummaryRepository summaryRepo;
+        QSet<Day *> done;
+        for (Machine *mach : p_profile->GetMachines()) {
+            if (!Machine::isCorrectableType(mach->type())) continue;
+            for (Day *day : mach->day) {
+                if (day && !done.contains(day) && day->hasEnabledSessions()) {
+                    done.insert(day);
+                    summaryRepo.calculateAndStoreFromDay(day, profileId);
+                }
+            }
+        }
+    }
+
+    if (overview) overview->ReloadGraphs();
+    if (welcome) welcome->refreshPage();
+    GenerateStatistics();
 }
 
 #include "oximeterimport.h"

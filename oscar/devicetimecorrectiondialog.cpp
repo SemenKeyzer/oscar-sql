@@ -239,6 +239,7 @@ void DeviceTimeCorrectionDialog::commitAndRefresh(Machine* mach)
     refreshCurrentOffset();
     refreshHistory();
     emit correctionsChanged();
+    emit correctionsSaved();
 }
 
 // ---------------------------------------------------------------------------

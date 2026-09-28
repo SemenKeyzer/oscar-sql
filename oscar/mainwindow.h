@@ -143,6 +143,11 @@ class MainWindow : public QMainWindow
     void openTimeCorrections(Machine *mach);
     //! \brief Re-reads corrections in an open Time Corrections dialog that has no unsaved edit.
     void refreshTimeCorrectionsDialog();
+
+    //! After any device time correction is saved or removed: redraw the Daily
+    //! view, recompute the stored daily summaries and refresh Overview and
+    //! Statistics, which are all built with the corrected times.
+    void timeCorrectionsChanged();
     //! \brief True while the Time Corrections dialog is open with an unsaved change.
     bool timeCorrectionsDialogHasStagedChange() const;
 

@@ -386,4 +386,5 @@ void DriftAnalysisDialog::onUseDrift()
     refreshCurrentModelLabel();
 
     emit correctionsChanged();
+    emit correctionsSaved();
 }

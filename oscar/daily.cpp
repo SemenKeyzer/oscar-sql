@@ -3754,7 +3754,10 @@ void Daily::afterAlignSaved()
     if (Day *day = p_profile ? p_profile->GetDay(previous_date) : nullptr) {
         UpdateEventsTree(ui->treeWidget, day);   // event times include the correction
     }
-    if (mainwin) mainwin->refreshTimeCorrectionsDialog();
+    if (mainwin) {
+        mainwin->refreshTimeCorrectionsDialog();
+        mainwin->timeCorrectionsChanged();
+    }
 }
 
 bool Daily::finishAlign(bool allowCancel)

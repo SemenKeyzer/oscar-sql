@@ -35,7 +35,10 @@ public:
     bool hasStagedChange() const { return m_hasStagedChange; }
 
 signals:
+    //! The corrections in effect changed, including a live preview or its revert.
     void correctionsChanged();
+    //! A change was written to the database (not emitted for previews).
+    void correctionsSaved();
 
 private slots:
     void onDeviceChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
