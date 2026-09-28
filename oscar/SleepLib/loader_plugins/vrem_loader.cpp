@@ -199,7 +199,7 @@ int VREMLoader::Open(const QString & selectedPath)
 
             QStringList parts = line.split(",");
 
-            if (parts.size() >= 1) {  // Ensure there are enough parts
+            if (parts.size() >= 13) {  // Ensure there are enough parts (fields 0..12 are read)
                 vData.start_time = parts[1].toLongLong();
                 vData.end_time = parts[2].toLongLong();
                 vData.max_pressure =parts[3];
@@ -455,14 +455,17 @@ int VREMLoader::OscarDataParser(QStringList OdataList,Machine* machine,QVector<v
                 index-=9;
                 qint32 value  = StartTime(reducedArray.mid(2, 4));
                 qint64 timeinmillies = value;
-                // if (context()->SessionExists(value)) {
-                //     continue;
-                // }
                 
                 time = timeinmillies*1000;
+                // A session imported before is skipped: its packets are ignored
+                // until the next start packet (isValidData stays false).
+                const bool alreadyImported = machine->SessionExists(value) != nullptr;
+                if (alreadyImported) {
+                    qDebug() << "vREM session" << value << "already imported";
+                }
                 for (auto data : vREMdata)
                 {
-                    if (data.start_time == time && data.start_time < data.end_time)
+                    if (!alreadyImported && data.start_time == time && data.start_time < data.end_time)
                     {
                         int mode = data.mode.toInt();
                         session = new Session(machine,value);
@@ -513,7 +516,7 @@ int VREMLoader::OscarDataParser(QStringList OdataList,Machine* machine,QVector<v
                     }
                     
                 };
-                if (!isValidData) {
+                if (!isValidData && !alreadyImported) {
                     qDebug() << "No matching time found for "<< time << " in Program Information.";
                 }
             } else if (hexByte.toHex() == "7b" && Byte2.toHex() == "4f" && isValidData == true)
@@ -594,6 +597,17 @@ int VREMLoader::OscarDataParser(QStringList OdataList,Machine* machine,QVector<v
                 session->UpdateSummaries();
                 machine->AddSession(session);
             }
+        }
+
+        // A file that ends without its end packet (card pulled mid-session) still
+        // holds a session: keep what was read, and don't let it swallow the start
+        // of the next file's session.
+        if (isValidData) {
+            qDebug() << "vREM: no end packet in" << Odata << "- keeping the session read so far";
+            isValidData = false;
+            valueQueue.clear();
+            session->UpdateSummaries();
+            machine->AddSession(session);
         }
     }
     return task;
