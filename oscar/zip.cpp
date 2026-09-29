@@ -529,6 +529,25 @@ bool UnzipFile::Open(const QString& filepath)
  * \param destDir  Root directory for extraction (created if absent).
  * \return true on success; false on any I/O or decompression error.
  */
+// The cleaned absolute form of \a path with symlinks resolved in the part of it that exists.
+// Paths that don't exist yet (a file about to be extracted) are resolved through their
+// deepest existing ancestor, so they compare equal to an existing root in the same form:
+// on macOS the temp folder /var/folders/... is really /private/var/folders/...
+static QString resolvedPath(const QString& path)
+{
+    const QString absolute = QDir::cleanPath(QFileInfo(path).absoluteFilePath());
+    QString existing = absolute;
+    QString rest;
+    while (!QFileInfo::exists(existing)) {
+        const int slash = existing.lastIndexOf(QLatin1Char('/'));
+        if (slash <= 0) return absolute;
+        rest = existing.mid(slash) + rest;
+        existing = existing.left(slash);
+    }
+    const QString canonical = QFileInfo(existing).canonicalFilePath();
+    return canonical.isEmpty() ? absolute : QDir::cleanPath(canonical + rest);
+}
+
 bool UnzipFile::ExtractAll(const QString& destDir)
 {
     if (!m_open) {
@@ -585,16 +604,8 @@ bool UnzipFile::ExtractAll(const QString& destDir)
             return false;
         }
         const QString destPath    = QDir(destDir).filePath(archiveName);
-        const QString canonDest   = QFileInfo(destPath).canonicalFilePath();
-        const QString canonRoot   = QFileInfo(destDir).canonicalFilePath();
-        // canonicalFilePath() returns "" for paths that don't exist yet, so
-        // fall back to the cleaned absolute path for new files/directories.
-        const QString safeDest    = canonDest.isEmpty()
-                                        ? QDir::cleanPath(QFileInfo(destPath).absoluteFilePath())
-                                        : canonDest;
-        const QString safeRoot    = canonRoot.isEmpty()
-                                        ? QDir::cleanPath(QFileInfo(destDir).absoluteFilePath())
-                                        : canonRoot;
+        const QString safeDest    = resolvedPath(destPath);
+        const QString safeRoot    = resolvedPath(destDir);
         if (!safeDest.startsWith(safeRoot + "/") && safeDest != safeRoot) {
             qWarning() << "UnzipFile::ExtractAll: rejecting entry that escapes extraction root:"
                        << archiveName;

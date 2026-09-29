@@ -28,6 +28,9 @@
 #include "database/profile_repository.h"
 #include "database/backup/profile_backup.h"
 #include "database/backup/profile_restore.h"
+
+#define MINIZ_NO_ZLIB_COMPATIBLE_NAMES
+#include "SleepLib/thirdparty/miniz.h"
 #include "zip.h"
 
 namespace {
@@ -298,4 +301,58 @@ void BackupRestoreTests::cleanupTestCase()
     m_tempDir = nullptr;
     delete m_app;
     m_app = nullptr;
+}
+
+namespace {
+
+bool writeOneEntryZip(const QString &zipPath, const char *entryName)
+{
+    mz_zip_archive zip;
+    memset(&zip, 0, sizeof(zip));
+    if (!mz_zip_writer_init_heap(&zip, 0, 0)) return false;
+    void *buf = nullptr;
+    size_t size = 0;
+    bool ok = mz_zip_writer_add_mem(&zip, entryName, "x", 1, MZ_DEFAULT_COMPRESSION)
+           && mz_zip_writer_finalize_heap_archive(&zip, &buf, &size);
+    if (ok) {
+        QFile out(zipPath);
+        ok = out.open(QIODevice::WriteOnly) && out.write(static_cast<const char *>(buf), qint64(size)) == qint64(size);
+    }
+    mz_free(buf);
+    mz_zip_writer_end(&zip);
+    return ok;
+}
+
+bool extract(const QString &zipPath, const QString &destDir)
+{
+    UnzipFile zip;
+    if (!zip.Open(zipPath)) return false;
+    const bool ok = zip.ExtractAll(destDir);
+    zip.Close();
+    return ok;
+}
+
+} // namespace
+
+// The temp folder the restore extracts into is reached through a symlink on macOS
+// (/var -> /private/var). Ordinary entries must still extract there, while an entry that
+// climbs out of the folder is refused and nothing is written outside it.
+void BackupRestoreTests::testExtractKeepsEntriesInsideRoot()
+{
+    QTemporaryDir tmp(QDir::tempPath() + QStringLiteral("/oscar-zipslip-XXXXXX"));
+    QVERIFY(tmp.isValid());
+    const QString good = tmp.path() + QStringLiteral("/good.zip");
+    const QString evil = tmp.path() + QStringLiteral("/evil.zip");
+    QVERIFY(writeOneEntryZip(good, "data/file.txt"));
+    QVERIFY(writeOneEntryZip(evil, "../escaped.txt"));
+
+    const QString root = tmp.path() + QStringLiteral("/root");
+    QVERIFY(QDir().mkpath(root));
+    QVERIFY(extract(good, root));
+    QVERIFY(QFile::exists(root + QStringLiteral("/data/file.txt")));
+
+    const QString root2 = tmp.path() + QStringLiteral("/root2");
+    QVERIFY(QDir().mkpath(root2));
+    QVERIFY(!extract(evil, root2));
+    QVERIFY(!QFile::exists(tmp.path() + QStringLiteral("/escaped.txt")));
 }

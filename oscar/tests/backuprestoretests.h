@@ -22,6 +22,7 @@ private slots:
     void testPrivacyPackageLeavesOutPersonalData();
     void testRestoreRejectsUnsafeProfileName();
     void testRestoreRebuildsDataFolder();
+    void testExtractKeepsEntriesInsideRoot();
     void cleanupTestCase();
 
 private:
