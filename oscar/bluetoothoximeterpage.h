@@ -11,6 +11,7 @@
 
 #include <QDateTime>
 #include <QElapsedTimer>
+#include <QImage>
 #include <QList>
 #include <QPointer>
 #include <QWidget>
@@ -39,6 +40,9 @@ public:
     void start();
     bool isBusy() const { return m_busy; }
     bool importedAny() const { return m_importedAny; }
+
+    //! \a base scaled to \a size x \a size with a Bluetooth badge in its lower-right corner.
+    static QImage badgedIcon(const QImage &base, int size);
     void cancel();
 
 signals:

@@ -17,6 +17,7 @@
 #include <QHeaderView>
 #include <QLabel>
 #include <QListWidget>
+#include <QPainter>
 #include <QLocale>
 #include <QProgressBar>
 #include <QPushButton>
@@ -290,8 +291,9 @@ QString BluetoothOximeterPage::recordListText() const
                  : m_headersOnDevice == 1 ? tr("1 record on the oximeter")
                  : tr("%1 records on the oximeter").arg(m_headersOnDevice);
     if (!m_rows.isEmpty()) {
-        text += QStringLiteral(": ") + tr("%1 new, %2 already in OSCAR").arg(fresh).arg(present);
-        if (skipped > 0) text += QStringLiteral(", ") + tr("%1 skipped").arg(skipped);
+        QString tally = tr("%1 new, %2 already in OSCAR").arg(fresh).arg(present);
+        if (skipped > 0) tally += QStringLiteral(", ") + tr("%1 skipped").arg(skipped);
+        text += QStringLiteral(" (") + tally + QStringLiteral(")");
     }
     return text;
 }
@@ -551,3 +553,33 @@ QString BluetoothOximeterPage::summaryText(const QString &error) const
     if (!m_eraseText.isEmpty()) lines << m_eraseText.toHtmlEscaped();
     return lines.join(QStringLiteral("<br>"));
 }
+
+QImage BluetoothOximeterPage::badgedIcon(const QImage &base, int size)
+{
+    QImage icon(size, size, QImage::Format_ARGB32_Premultiplied);
+    icon.fill(Qt::transparent);
+    QPainter p(&icon);
+    p.setRenderHint(QPainter::Antialiasing);
+    p.setRenderHint(QPainter::SmoothPixmapTransform);
+    const QImage scaled = base.scaled(size, size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    p.drawImage((size - scaled.width()) / 2, (size - scaled.height()) / 2, scaled);
+
+    // Badge: a Bluetooth-blue disc with a white rim, holding the white Bluetooth rune.
+    const qreal d = size * 0.47;
+    const QRectF disc(size - d, size - d, d, d);
+    p.setPen(QPen(Qt::white, size * 0.025));
+    p.setBrush(QColor(0x00, 0x82, 0xFC));
+    p.drawEllipse(disc.adjusted(1, 1, -1, -1));
+
+    const QPointF c = disc.center();
+    const qreal u = d * 0.24;
+    const QPointF rune[] = { c + QPointF(-0.7 * u, -0.65 * u), c + QPointF(0.7 * u, 0.65 * u),
+                             c + QPointF(0, 1.3 * u), c + QPointF(0, -1.3 * u),
+                             c + QPointF(0.7 * u, -0.65 * u), c + QPointF(-0.7 * u, 0.65 * u) };
+    p.setPen(QPen(Qt::white, size * 0.045, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    p.setBrush(Qt::NoBrush);
+    p.drawPolyline(rune, 6);
+    p.end();
+    return icon.convertToFormat(QImage::Format_ARGB32);
+}
+

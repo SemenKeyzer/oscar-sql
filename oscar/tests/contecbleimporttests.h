@@ -28,6 +28,7 @@ private slots:
     void testImporterKeepsOldSessionWhenReplacementIsRejected();
     void testImporterReportsDatabaseFailure();
     void testImporterReportsMissingSamples();
+    void testBluetoothBadgeIcon();
     void cleanupTestCase();
 private:
     QCoreApplication *m_app = nullptr;

@@ -19,6 +19,7 @@
 #include "SleepLib/loader_plugins/contec_ble_import.h"
 #include "SleepLib/loader_plugins/contec_ble_loader.h"
 #include "database/database_manager.h"
+#include "bluetoothoximeterpage.h"
 
 #include <QCoreApplication>
 #include <QDir>
@@ -308,3 +309,19 @@ void ContecBleImportTests::testImporterReportsMissingSamples()
     QCOMPARE(o, Outcome::SaveFailed);
     QVERIFY(!mach->sessionlist.contains(SessionID(start.toUTC().toSecsSinceEpoch())));
 }
+
+// The wizard's Bluetooth button shows the oximeter picture with a Bluetooth badge in its
+// lower-right corner, so it reads as "the same device, over Bluetooth" next to the cable button.
+void ContecBleImportTests::testBluetoothBadgeIcon()
+{
+    QImage base(32, 32, QImage::Format_ARGB32);
+    base.fill(QColor(Qt::red));
+    const QImage icon = BluetoothOximeterPage::badgedIcon(base, 128);
+    QCOMPARE(icon.size(), QSize(128, 128));
+    QCOMPARE(icon.pixelColor(10, 10), QColor(Qt::red));                   // the picture stays
+    const QColor badge = icon.pixelColor(80, 98);                          // badge disc, left of the rune
+    QVERIFY2(badge.blue() > 150 && badge.red() < 80, qPrintable(badge.name()));
+    const QColor rune = icon.pixelColor(98, 98);                           // badge centre: the white rune
+    QVERIFY2(rune.red() > 200 && rune.green() > 200 && rune.blue() > 200, qPrintable(rune.name()));
+}
+

@@ -181,7 +181,13 @@ OximeterImport::OximeterImport(QWidget *parent) :
     connect(m_btDoneButton, &QPushButton::clicked, this, [this]() { onBluetoothFinished(m_btPage->importedAny()); });
     auto *btButton = new QPushButton(tr("Import over Bluetooth from a Contec oximeter (CMS50FW, CMS50D-BT, ...)"),
                                      ui->importSelectionPage);
+    // Dressed like the other import buttons: the oximeter picture, here with a Bluetooth badge.
+    btButton->setIcon(QIcon(QPixmap::fromImage(
+        BluetoothOximeterPage::badgedIcon(QImage(QStringLiteral(":/icons/oximeter.png")), 128))));
+    btButton->setIconSize(ui->directImportButton->iconSize());
+    btButton->setSizePolicy(ui->directImportButton->sizePolicy());
     btButton->setMinimumHeight(ui->directImportButton->minimumHeight());
+    btButton->setAutoDefault(false);
     btButton->setToolTip(tr("Turn on Bluetooth in the oximeter's menu and close the Contec phone app first."));
     ui->verticalLayout_6->insertWidget(ui->verticalLayout_6->indexOf(ui->directImportButton), btButton);
     connect(btButton, &QPushButton::clicked, this, &OximeterImport::onBluetoothImportClicked);
