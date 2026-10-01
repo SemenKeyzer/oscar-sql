@@ -9,6 +9,7 @@
 #include "analysispaneltests.h"
 
 #include <QApplication>
+#include <QPushButton>
 #include <QSignalSpy>
 #include <QTreeWidget>
 
@@ -161,6 +162,49 @@ void AnalysisPanelTests::testTabListsDifferences()
     QCOMPARE(tree->topLevelItemCount(), 1);   // the problem zone
     tab.clear();
     QCOMPARE(tree->topLevelItemCount(), 0);
+}
+
+// Previous / Next step through the differences from the device in time order, across
+// their groups, showing each in the graphs as a click would.
+void AnalysisPanelTests::testTabStepsThroughDifferences()
+{
+    AnalysisTab tab;
+    QPushButton *prev = nullptr, *next = nullptr;
+    for (QPushButton *b : tab.findChildren<QPushButton *>()) {
+        if (b->text().contains(QStringLiteral("Previous"))) prev = b;
+        if (b->text().contains(QStringLiteral("Next"))) next = b;
+    }
+    QVERIFY(prev && next);
+    QVERIFY(!next->isEnabled());                       // nothing yet
+    tab.setResult(cpapNight());
+    QTreeWidget *tree = tab.findChild<QTreeWidget *>();
+    int differences = 0;
+    for (int i = 0; i < tree->topLevelItemCount(); ++i) {
+        const QString title = tree->topLevelItem(i)->text(0);
+        if (title.startsWith(QStringLiteral("Device only")) || title.startsWith(QStringLiteral("Analysis only"))
+                || title.startsWith(QStringLiteral("Different type"))) {
+            differences += tree->topLevelItem(i)->childCount();
+        }
+    }
+    QVERIFY(differences >= 2);
+    QVERIFY(next->isEnabled());
+
+    QSignalSpy spy(&tab, &AnalysisTab::showRange);
+    QList<qint64> starts;
+    for (int i = 0; i < differences; ++i) {
+        next->click();
+        QCOMPARE(spy.count(), i + 1);
+        starts << spy.last().at(0).toLongLong();
+        QCOMPARE(tree->currentItem()->data(0, Qt::UserRole).toLongLong() - starts.last() >= 60000, true);
+    }
+    for (int i = 1; i < starts.size(); ++i) QVERIFY(starts[i - 1] <= starts[i]);   // in time order
+    QVERIFY(!next->isEnabled());                       // at the last one
+    prev->click();
+    QCOMPARE(spy.last().at(0).toLongLong(), starts[differences - 2]);
+    QVERIFY(next->isEnabled());
+
+    tab.clear();
+    QVERIFY(!prev->isEnabled() && !next->isEnabled());
 }
 
 void AnalysisPanelTests::testStatisticsFigures()

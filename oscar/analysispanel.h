@@ -55,6 +55,9 @@ class AnalysisTab : public QWidget
 
     void setResult(const analysis::DayResult &result);
     void clear();
+    //! Shows the next (\a step 1) or previous (-1) difference from the device, in time
+    //! order across the device-only, analysis-only and different-type groups.
+    void stepDifference(int step);
 
   signals:
     //! Show this span (device-corrected times) in the graphs.
@@ -62,7 +65,13 @@ class AnalysisTab : public QWidget
 
   private:
     void onItemClicked(QTreeWidgetItem *item);
+    void updateStepper();
     QTreeWidget *m_tree;
+    class QPushButton *m_prev;
+    class QPushButton *m_next;
+    class QLabel *m_position;
+    QList<QTreeWidgetItem *> m_differences;   //!< in time order
+    int m_current = -1;
 };
 
 #endif // ANALYSISPANEL_H

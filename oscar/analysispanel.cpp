@@ -9,9 +9,13 @@
 #include "analysispanel.h"
 
 #include <QDateTime>
+#include <QHBoxLayout>
 #include <QHeaderView>
+#include <QLabel>
+#include <QPushButton>
 #include <QTreeWidget>
 #include <QVBoxLayout>
+#include <algorithm>
 #include <cmath>
 
 #include "Graphs/gAnalysisCharts.h"
@@ -258,22 +262,63 @@ AnalysisTab::AnalysisTab(QWidget *parent)
 {
     auto *layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
+    // step through the differences without hunting for them in the tree
+    auto *stepper = new QHBoxLayout;
+    m_prev = new QPushButton(tr("< Previous"), this);
+    m_next = new QPushButton(tr("Next >"), this);
+    m_prev->setToolTip(tr("The previous difference from the device"));
+    m_next->setToolTip(tr("The next difference from the device"));
+    m_position = new QLabel(this);
+    stepper->addWidget(m_prev);
+    stepper->addWidget(m_next);
+    stepper->addWidget(m_position, 1);
+    layout->addLayout(stepper);
+    connect(m_prev, &QPushButton::clicked, this, [this]() { stepDifference(-1); });
+    connect(m_next, &QPushButton::clicked, this, [this]() { stepDifference(1); });
     m_tree = new QTreeWidget(this);
     m_tree->setColumnCount(1);
     m_tree->header()->hide();
     layout->addWidget(m_tree);
     connect(m_tree, &QTreeWidget::itemClicked, this, [this](QTreeWidgetItem *item) { onItemClicked(item); });
     connect(m_tree, &QTreeWidget::itemActivated, this, [this](QTreeWidgetItem *item) { onItemClicked(item); });
+    updateStepper();
 }
 
 void AnalysisTab::clear()
 {
     m_tree->clear();
+    m_differences.clear();
+    m_current = -1;
+    updateStepper();
+}
+
+void AnalysisTab::stepDifference(int step)
+{
+    if (m_differences.isEmpty()) return;
+    m_current = m_current < 0 ? (step > 0 ? 0 : int(m_differences.size()) - 1)
+                              : qBound(0, m_current + step, int(m_differences.size()) - 1);
+    QTreeWidgetItem *item = m_differences.at(m_current);
+    m_tree->setCurrentItem(item);
+    m_tree->scrollToItem(item);
+    onItemClicked(item);
+    updateStepper();
+}
+
+void AnalysisTab::updateStepper()
+{
+    const int n = int(m_differences.size());
+    m_prev->setEnabled(n > 0 && m_current != 0);
+    m_next->setEnabled(n > 0 && m_current < n - 1);
+    m_position->setText(n == 0 ? tr("No differences from the device")
+                        : m_current < 0 ? tr("%n difference(s) from the device", nullptr, n)
+                                        : tr("Difference %1 of %2").arg(m_current + 1).arg(n));
 }
 
 void AnalysisTab::setResult(const DayResult &r)
 {
     m_tree->clear();
+    m_differences.clear();
+    m_current = -1;
     auto group = [this](const QString &title, int count) {
         auto *g = new QTreeWidgetItem(m_tree, QStringList(QStringLiteral("%1 (%2)").arg(title).arg(count)));
         g->setFlags(g->flags() & ~Qt::ItemIsSelectable);
@@ -283,6 +328,7 @@ void AnalysisTab::setResult(const DayResult &r)
         auto *it = new QTreeWidgetItem(parent, QStringList(text));
         it->setData(0, Qt::UserRole, from);
         it->setData(0, Qt::UserRole + 1, to);
+        return it;
     };
 
     const OxiResult &o = r.oxi;
@@ -300,19 +346,19 @@ void AnalysisTab::setResult(const DayResult &r)
         QTreeWidgetItem *g = group(tr("Device only"), m.deviceOnly.size());
         for (int i : m.deviceOnly) {
             const DayEvent &e = r.deviceEvents[i];
-            item(g, QStringLiteral("%1 %2, %3 s").arg(clock(e.start), eventLabel(e.type)).arg((e.end - e.start) / 1000), e.start, e.end);
+            m_differences << item(g, QStringLiteral("%1 %2, %3 s").arg(clock(e.start), eventLabel(e.type)).arg((e.end - e.start) / 1000), e.start, e.end);
         }
         g = group(tr("Analysis only"), m.analysisOnly.size());
         for (int j : m.analysisOnly) {
             const DayEvent &e = r.analysisEvents[j];
-            item(g, QStringLiteral("%1 a%2, %3 s").arg(clock(e.start), eventLabel(e.type)).arg((e.end - e.start) / 1000), e.start, e.end);
+            m_differences << item(g, QStringLiteral("%1 a%2, %3 s").arg(clock(e.start), eventLabel(e.type)).arg((e.end - e.start) / 1000), e.start, e.end);
         }
         g = group(tr("Different type"), m.typeMismatch);
         for (const auto &pair : m.matched) {
             const DayEvent &d = r.deviceEvents[pair.first], &a = r.analysisEvents[pair.second];
             if (groupOf(d.type) == groupOf(a.type)) continue;
-            item(g, tr("%1 device %2, analysis a%3").arg(clock(qMin(d.start, a.start)), eventLabel(d.type), eventLabel(a.type)),
-                 qMin(d.start, a.start), qMax(d.end, a.end));
+            m_differences << item(g, tr("%1 device %2, analysis a%3").arg(clock(qMin(d.start, a.start)), eventLabel(d.type), eventLabel(a.type)),
+                                  qMin(d.start, a.start), qMax(d.end, a.end));
         }
     }
     if (!r.unexplained.isEmpty()) {
@@ -328,6 +374,10 @@ void AnalysisTab::setResult(const DayResult &r)
         none->setFlags(Qt::NoItemFlags);
     }
     m_tree->expandAll();
+    std::stable_sort(m_differences.begin(), m_differences.end(), [](QTreeWidgetItem *a, QTreeWidgetItem *b) {
+        return a->data(0, Qt::UserRole).toLongLong() < b->data(0, Qt::UserRole).toLongLong();
+    });
+    updateStepper();
 }
 
 void AnalysisTab::onItemClicked(QTreeWidgetItem *item)
