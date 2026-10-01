@@ -119,6 +119,13 @@ class Channel
     //! Can be changed in Preferences dialog.
     const QString &label() { return m_label; }
 
+    //! \brief The texts the channel was registered with, in the current language. A stored
+    //! text equal to its default is not the user's: the profile keeps only the ones the user
+    //! changed (Preferences), so that an improved translation still reaches the others.
+    const QString &defaultFullname() const { return m_defaultFullname; }
+    const QString &defaultDescription() const { return m_defaultDescription; }
+    const QString &defaultLabel() const { return m_defaultLabel; }
+
     //! \brief Units, such as cmH2O, events per hour, etc.  See STR_UNIT_* for possible values.
     const QString &units() { return m_unit; }
 
@@ -201,6 +208,7 @@ class Channel
     QString m_fullname; // Translatable Name
     QString m_description;
     QString m_label;
+    QString m_defaultFullname, m_defaultDescription, m_defaultLabel;
     QString m_unit;
 
     QString default_fullname;

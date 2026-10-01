@@ -2736,6 +2736,14 @@ void Profile::saveChannelsToDat()
 
 }
 
+// A channel text as the profile keeps it: only when the user changed it (Preferences).
+// Left empty, the channel shows its registered, translated text, including a better
+// translation in a later version.
+static QString storedChannelText(const QString &text, const QString &registered)
+{
+    return text == registered ? QString() : text;
+}
+
 // New database implementation
 bool Profile::saveChannelsToDatabase()
 {
@@ -2768,9 +2776,9 @@ bool Profile::saveChannelsToDatabase()
         data.type = chan->type();  // Store channel type from schema
         data.enabled = chan->enabled();
         data.defaultColor = chan->defaultColor();
-        data.fullname = chan->fullname();
-        data.label = chan->label();
-        data.description = chan->description();
+        data.fullname = storedChannelText(chan->fullname(), chan->defaultFullname());
+        data.label = storedChannelText(chan->label(), chan->defaultLabel());
+        data.description = storedChannelText(chan->description(), chan->defaultDescription());
         data.lowerThreshold = chan->lowerThreshold();
         data.lowerThresholdColor = chan->lowerThresholdColor();
         data.upperThreshold = chan->upperThreshold();
@@ -2834,10 +2842,12 @@ bool Profile::loadChannelsFromDatabase()
         chan->setEnabled(data.enabled);
         chan->setDefaultColor(data.defaultColor);
         
+        // The user's own names (an empty text is the registered one); not after a change
+        // of language, when they would be in the old one.
         if (!changing_language) {
-            chan->setFullname(data.fullname);
-            chan->setLabel(data.label);
-            chan->setDescription(data.description);
+            if (!data.fullname.isEmpty()) chan->setFullname(data.fullname);
+            if (!data.label.isEmpty()) chan->setLabel(data.label);
+            if (!data.description.isEmpty()) chan->setDescription(data.description);
         }
         
         chan->setLowerThreshold(data.lowerThreshold);
@@ -2846,9 +2856,13 @@ bool Profile::loadChannelsFromDatabase()
         chan->setUpperThresholdColor(data.upperThresholdColor);
         chan->setShowInOverview(data.showInOverview);
         
-        // Load channel options
+        // Stored options add to the registered ones but never replace them: these are
+        // translated, and stored ones may be in another language or an older wording.
         if (optionsRepo.hasOptions(data.channelId)) {
-            chan->m_options = optionsRepo.getOptionsHash(data.channelId);
+            const QHash<int, QString> stored = optionsRepo.getOptionsHash(data.channelId);
+            for (auto it = stored.cbegin(); it != stored.cend(); ++it) {
+                if (!chan->m_options.contains(it.key())) chan->m_options.insert(it.key(), it.value());
+            }
         }
     }
     
@@ -2959,9 +2973,9 @@ bool Profile::initializeChannelsFromSchema()
         data.type = chan->type();
         data.enabled = chan->enabled();
         data.defaultColor = chan->defaultColor();
-        data.fullname = chan->fullname();
-        data.label = chan->label();
-        data.description = chan->description();
+        data.fullname = storedChannelText(chan->fullname(), chan->defaultFullname());
+        data.label = storedChannelText(chan->label(), chan->defaultLabel());
+        data.description = storedChannelText(chan->description(), chan->defaultDescription());
         data.lowerThreshold = chan->lowerThreshold();
         data.lowerThresholdColor = chan->lowerThresholdColor();
         data.upperThreshold = chan->upperThreshold();

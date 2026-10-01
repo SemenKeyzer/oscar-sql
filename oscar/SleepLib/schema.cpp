@@ -544,6 +544,9 @@ Channel::Channel(ChannelID id, ChanType type, MachineType machtype, ScopeType sc
     m_showInOverview(false),
     m_computed(false)
 {
+    m_defaultFullname = fullname;
+    m_defaultDescription = description;
+    m_defaultLabel = label;
     if (type == WAVEFORM) {
         // Hue shifts are spaced 72 degrees apart so the four derived lines and the
         // base colour occupy five distinct slots around the colour wheel.

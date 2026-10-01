@@ -873,6 +873,7 @@ test {
         tests/prismatests.cpp \
         tests/analysischarttests.cpp \
         tests/nightsummarytests.cpp \
+        tests/channelstoretests.cpp \
         tests/machinetests.cpp \
         tests/timealignsessiontests.cpp \
         tests/contecbleprotocoltests.cpp \
@@ -910,6 +911,7 @@ test {
         tests/prismatests.h \
         tests/analysischarttests.h \
         tests/nightsummarytests.h \
+        tests/channelstoretests.h \
         tests/machinetests.h \
         tests/backuprestoretests.h \
         tests/loaderrobustnesstests.h \
