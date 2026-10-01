@@ -96,13 +96,16 @@ void Welcome::refreshPage()
 
     mainwin->EnableTabs(b);
 
-    ui->cpapInfo->setHtml(GenerateCPAPHTML());
-    ui->oxiInfo->setHtml(GenerateOxiHTML());
-    showNightSummary();
+    // The last night as cards once there is data; the prose only before that, where it
+    // says what to do first (generating it as well would load the night's SpO2 again).
+    if (!showNightSummary()) {
+        ui->cpapInfo->setHtml(GenerateCPAPHTML());
+        ui->oxiInfo->setHtml(GenerateOxiHTML());
+    }
     QTimer::singleShot(0, this, &Welcome::adjustInfoBrowserHeights);
 }
 
-void Welcome::showNightSummary()
+bool Welcome::showNightSummary()
 {
     const NightSummary s = buildNightSummary(p_profile, mainwin ? mainwin->analysisService() : nullptr,
                                              QDate::currentDate());
@@ -118,6 +121,7 @@ void Welcome::showNightSummary()
         ui->cpapIcon->setVisible(true);
         ui->cpapInfoFrame->setVisible(true);
     }
+    return show;
 }
 
 void Welcome::on_dailyButton_clicked()
