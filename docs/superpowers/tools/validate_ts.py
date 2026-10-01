@@ -4,7 +4,7 @@ import re, sys, json, collections
 import xml.etree.ElementTree as ET
 
 PH = re.compile(r'%(?:L?\d+|n)')
-TAG = re.compile(r'<\s*(/?)\s*([a-zA-Z][a-zA-Z0-9]*)')
+TAG = re.compile(r'<(/?)([a-zA-Z][a-zA-Z0-9]*)')   # a tag has no space after '<'
 ATTR = re.compile(r'''(href|onclick|src|name|id|class|style)\s*=\s*(['"])(.*?)\2''', re.I | re.S)
 URL = re.compile(r'(?:https?|mailto|file)://[^\s\'"<>)]+')
 
