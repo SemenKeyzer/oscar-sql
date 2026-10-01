@@ -185,3 +185,39 @@ void NightSummaryTests::testViewShowsTheNight()
     QVERIFY(view.findChild<QFrame *>(QStringLiteral("nsTrends"))->isHidden());
     QVERIFY(!view.findChild<QLabel *>(QStringLiteral("nsActions"))->isHidden());
 }
+
+// SpO2 is judged by the time below 90 % (under 5 % of the night) and by ODI 3 % (under 5 an
+// hour, only when the analysis counted it: the classic drops use other thresholds). Spot
+// checks and a night without oximetry are not judged.
+void NightSummaryTests::testSpo2AgainstTargets()
+{
+    NightSummary s = goodNight();
+    QCOMPARE(s.spo2Level(), NightSummary::Unknown);
+    s.oxi.valid = true;
+    s.oxi.spo2Avg = 95;
+    s.oxi.hours = 8;
+    s.oxi.fromAnalysis = true;
+    s.oxi.percentBelow90 = 1.2;
+    s.oxi.desaturations = 32;                          // 4 an hour
+    QCOMPARE(s.spo2Level(), NightSummary::Good);
+    QVERIFY(s.concerns().isEmpty());
+
+    s.oxi.desaturations = 40;                          // 5 an hour: no longer below 5
+    QCOMPARE(s.spo2Level(), NightSummary::Attention);
+    QCOMPARE(s.concerns().size(), 1);
+    QVERIFY(s.concerns().first().contains(QStringLiteral("ODI")));
+
+    s.oxi.desaturations = 8;
+    s.oxi.percentBelow90 = 5.0;
+    QCOMPARE(s.spo2Level(), NightSummary::Attention);
+    QCOMPARE(s.concerns().size(), 1);
+    QVERIFY(s.concerns().first().contains(QStringLiteral("90%")));
+
+    s.oxi.fromAnalysis = false;                        // classic drops are not ODI 3 %
+    s.oxi.desaturations = 400;
+    s.oxi.percentBelow90 = 1;
+    QCOMPARE(s.spo2Level(), NightSummary::Good);
+    s.oxi.spotChecks = true;
+    QCOMPARE(s.spo2Level(), NightSummary::Unknown);
+}
+

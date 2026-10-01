@@ -59,6 +59,8 @@ class gAnalysisChart : public gSummaryChart
     static QString code(Kind kind);
     static QString title(Kind kind);
     static QString units(Kind kind);
+    //! The target drawn as a dashed line on a kind's chart; 0 for none.
+    static float target(Kind kind);
     //! Every kind, in the Overview's order.
     static QList<Kind> kinds();
 
@@ -70,7 +72,7 @@ class gAnalysisChart : public gSummaryChart
     virtual void drawBarOverlay(QPainter &painter, int idx, const QRectF &column, float miny, float ymult);
     virtual float overlayPeak(int idx);
     //! An AHI of 5 on the analysis' AHI, as a line.
-    virtual float targetValue() { return m_kind == Ahi ? 5 : 0; }
+    virtual float targetValue() { return target(m_kind); }
 
     virtual Layer *Clone() {
         gAnalysisChart *sc = new gAnalysisChart(m_kind);

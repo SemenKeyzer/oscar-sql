@@ -21,6 +21,7 @@ private slots:
     void testSpo2RangeLabels();
     void testSpo2RangeColorsDarkenWithDepth();
     void testProblemZoneShares();
+    void testOdiTargetLine();
 };
 
 DECLARE_TEST(AnalysisChartTests)

@@ -182,6 +182,14 @@ QStringList NightSummary::concerns() const
     if (leakLevel() == Attention) {
         out << tr("Average leak %1 %2, at or above your red line of %3.").arg(num(leak), leakUnits).arg(leakRedline);
     }
+    if (spo2Level() == Attention) {
+        if (oxi.percentBelow90 >= kT90Target) {
+            out << tr("SpO2 below 90% for %1% of the time, at or above %2%.").arg(num(oxi.percentBelow90)).arg(kT90Target);
+        }
+        if (oxi.fromAnalysis && oxi.desaturations / oxi.hours >= kOdiTarget) {
+            out << tr("ODI 3% %1 per hour, at or above %2.").arg(num(oxi.desaturations / oxi.hours)).arg(kOdiTarget);
+        }
+    }
     return out;
 }
 
@@ -513,7 +521,7 @@ void NightSummaryView::setSummary(const NightSummary &s)
             note += QStringLiteral("<br/>") + tr("pulse %1 (%2 to %3)").arg(num(s.oxi.pulseAvg, 0), num(s.oxi.pulseMin, 0), num(s.oxi.pulseMax, 0));
         }
         addTile(col++, tr("SpO2 below 90%"), figure(num(s.oxi.percentBelow90), QStringLiteral("%")),
-                note, NightSummary::Unknown,
+                note, s.spo2Level(),
                 tr("Share of the time with valid SpO2 readings spent below 90%: %1 min.").arg(qRound(s.oxi.minutesBelow90)));
     } else if (s.lastOximetry.isValid()) {
         addTile(col++, tr("SpO2"), QStringLiteral("&mdash;"),
@@ -545,3 +553,13 @@ void NightSummaryView::setSummary(const NightSummary &s)
     m_actions->setText(actions.join(QStringLiteral("<br/>")));
     m_actions->setVisible(!actions.isEmpty());
 }
+
+NightSummary::Level NightSummary::spo2Level() const
+{
+    if (!oxi.valid || oxi.spotChecks || oxi.spo2Avg <= 0 || oxi.hours <= 0) return Unknown;
+    if (oxi.percentBelow90 >= kT90Target) return Attention;
+    // The classic drops follow the profile's own thresholds, so only ODI 3 % is judged.
+    if (oxi.fromAnalysis && oxi.desaturations / oxi.hours >= kOdiTarget) return Attention;
+    return Good;
+}
+

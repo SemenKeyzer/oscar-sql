@@ -28,12 +28,15 @@ namespace analysis { class AnalysisService; }
     know first in the morning, each figure against its target, the 30 nights before it,
     and what needs doing.
 
-    The targets are the profile's own (compliance hours, leak red line) and an AHI below 5.
+    The targets are the profile's own (compliance hours, leak red line), an AHI below 5,
+    and for oximetry less than 5 % of the time below 90 % and an ODI 3 % below 5.
     */
 struct NightSummary {
     enum Level { Unknown, Good, Attention };
     static constexpr int kTrendNights = 30;
     static constexpr double kAhiTarget = 5;
+    static constexpr double kT90Target = 5;     //!< % of the time below 90 %
+    static constexpr double kOdiTarget = 5;     //!< desaturations of >= 3 % an hour
 
     QDate date;                     //!< invalid: nothing imported yet
 
@@ -68,6 +71,7 @@ struct NightSummary {
     Level usageLevel() const;
     Level ahiLevel() const;
     Level leakLevel() const;
+    Level spo2Level() const;
     //! Nights of the trend used for complianceHours or more.
     int compliantNights() const;
     //! Median AHI over the trend's nights with data; NaN without any.

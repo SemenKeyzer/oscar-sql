@@ -340,3 +340,13 @@ QColor gAnalysisChart::rangeColor(int index, int count)
     const int step = below > 1 ? qRound(double(index - 1) * (kLowSpo2Count - 1) / (below - 1)) : kLowSpo2Count - 1;
     return kLowSpo2[qBound(0, step, kLowSpo2Count - 1)];
 }
+
+float gAnalysisChart::target(Kind kind)
+{
+    switch (kind) {
+    case Ahi: return 5;
+    case Odi: return 5;   // ODI 3 % (the bar's top)
+    default: return 0;
+    }
+}
+

@@ -69,3 +69,12 @@ void AnalysisChartTests::testProblemZoneShares()
     QCOMPARE(qRound(p.second * 100), 333);      // marked: 120 of 3600 s
     QCOMPARE(gAnalysisChart::problemZoneShares(600, 120, 0).first, 0.0);
 }
+
+// The Overview draws the targets as dashed lines: AHI 5 and, for oximetry, ODI 3 % 5.
+void AnalysisChartTests::testOdiTargetLine()
+{
+    QCOMPARE(gAnalysisChart::target(gAnalysisChart::Odi), 5.0f);
+    QCOMPARE(gAnalysisChart::target(gAnalysisChart::Ahi), 5.0f);
+    QCOMPARE(gAnalysisChart::target(gAnalysisChart::PulseRises), 0.0f);
+}
+

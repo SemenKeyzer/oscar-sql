@@ -21,6 +21,7 @@ private slots:
     void testLevelsAgainstTargets();
     void testTrendFigures();
     void testConcerns();
+    void testSpo2AgainstTargets();
     void testActions();
     void testViewShowsTheNight();
 
