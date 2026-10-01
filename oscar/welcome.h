@@ -41,9 +41,12 @@ protected:
 
 private:
     void adjustInfoBrowserHeights();
+    //! The last night's summary in place of the CPAP and oximetry prose, once there is data.
+    void showNightSummary();
     QString GenerateCPAPHTML();
     QString GenerateOxiHTML();
     QPixmap pixmap;
+    class NightSummaryView *m_nightSummary = nullptr;
     Ui::Welcome *ui;
 };
 

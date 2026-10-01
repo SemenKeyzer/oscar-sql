@@ -358,6 +358,7 @@ SOURCES += \
     translation.cpp \
     version.cpp \
     welcome.cpp \
+    nightsummary.cpp \
     zip.cpp \
     Graphs/gAHIChart.cpp \
     Graphs/gdailysummary.cpp \
@@ -669,6 +670,7 @@ HEADERS  += \
     SleepLib/loader_plugins/edfparser.h \
     aboutdialog.h \
     welcome.h \
+    nightsummary.h \
     mytextbrowser.h \
     staticQMessageBox.h \
     git_info.h \
@@ -870,6 +872,7 @@ test {
         tests/applehealthtests.cpp \
         tests/prismatests.cpp \
         tests/analysischarttests.cpp \
+        tests/nightsummarytests.cpp \
         tests/machinetests.cpp \
         tests/timealignsessiontests.cpp \
         tests/contecbleprotocoltests.cpp \
@@ -906,6 +909,7 @@ test {
         tests/applehealthtests.h \
         tests/prismatests.h \
         tests/analysischarttests.h \
+        tests/nightsummarytests.h \
         tests/machinetests.h \
         tests/backuprestoretests.h \
         tests/loaderrobustnesstests.h \

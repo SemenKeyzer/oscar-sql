@@ -17,6 +17,7 @@
 
 #include "welcome.h"
 #include "SleepLib/oximetry_summary.h"
+#include "nightsummary.h"
 #include "SleepLib/analysis/analysis_service.h"
 #include "ui_welcome.h"
 
@@ -30,7 +31,11 @@ Welcome::Welcome(QWidget *parent) :
 {
     ui->setupUi(this);
     pixmap.load(":/icons/mask.png");
-
+    m_nightSummary = new NightSummaryView(ui->frame);
+    ui->verticalLayout_2->insertWidget(0, m_nightSummary);
+    connect(m_nightSummary, &NightSummaryView::linkActivated, this, [](const QString &link) {
+        mainwin->sendStatsUrl(link);   // daily=, import=cpap, analysis=recalculate
+    });
 
     refreshPage();
 }
@@ -93,7 +98,26 @@ void Welcome::refreshPage()
 
     ui->cpapInfo->setHtml(GenerateCPAPHTML());
     ui->oxiInfo->setHtml(GenerateOxiHTML());
+    showNightSummary();
     QTimer::singleShot(0, this, &Welcome::adjustInfoBrowserHeights);
+}
+
+void Welcome::showNightSummary()
+{
+    const NightSummary s = buildNightSummary(p_profile, mainwin ? mainwin->analysisService() : nullptr,
+                                             QDate::currentDate());
+    const bool show = s.date.isValid();
+    m_nightSummary->setVisible(show);
+    if (show) m_nightSummary->setSummary(s);
+    // The prose stays for a profile without data: it says what to do first.
+    for (QWidget *w : { static_cast<QWidget *>(ui->cpapIcon), static_cast<QWidget *>(ui->cpapInfoFrame),
+                        static_cast<QWidget *>(ui->oxiIcon), static_cast<QWidget *>(ui->oxiInfoFrame) }) {
+        if (show) w->setVisible(false);
+    }
+    if (!show) {
+        ui->cpapIcon->setVisible(true);
+        ui->cpapInfoFrame->setVisible(true);
+    }
 }
 
 void Welcome::on_dailyButton_clicked()
