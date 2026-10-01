@@ -401,19 +401,20 @@ QString weightString(float kg, UnitSystem us, bool rounded)
         us = p_profile->general->unitSystem();
     }
 
+    // the translated units (STR_UNIT_*), set up by initializeStrings()
     if (us == US_Metric) {
         if (rounded) {
-            return QString("%1kg").arg(qRound(kg));
+            return QString("%1%2").arg(qRound(kg)).arg(STR_UNIT_KG);
         }
-        return QString("%1kg").arg(kg, 0, 'f', 2);
+        return QString("%1%2").arg(kg, 0, 'f', 2).arg(STR_UNIT_KG);
     } else if (us == US_English) {
         if (rounded) {
-            return QString("%1lb").arg(qRound(kg * pounds_per_kg));
+            return QString("%1%2").arg(qRound(kg * pounds_per_kg)).arg(STR_UNIT_POUND);
         }
         int oz = (kg * 1000.0) * (float)gram_ounce_convert;
         int lb = oz / 16.0;
         oz = oz % 16;
-        return QString("%1lb %2oz").arg(lb, 0, 10).arg(oz);
+        return QString("%1%2 %3%4").arg(lb, 0, 10).arg(STR_UNIT_POUND).arg(oz).arg(STR_UNIT_OUNCE);
     }
 
     return ("Bad UnitSystem");

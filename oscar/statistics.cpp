@@ -32,6 +32,7 @@ server= red 30+
 
 #include "mainwindow.h"
 #include "statistics.h"
+#include "translation.h"
 #include "cprogressbar.h"
 #include "SleepLib/common.h"
 #include "version.h"
@@ -293,6 +294,7 @@ void Statistics::loadRXChanges()
     }
     QDataStream in(&file);
     in.setByteOrder(QDataStream::LittleEndian);
+    in.setVersion(QDataStream::Qt_5_0);   // as saveRXChanges() writes it
 
     quint32 mag32;
     if (in.version() != QDataStream::Qt_5_0) {
@@ -305,6 +307,16 @@ void Statistics::loadRXChanges()
     }
     quint16 version;
     in >> version;
+    // The items hold ready-made texts (mode, relief, pressure): a cache from before the
+    // language was kept, or in another language, is rebuilt.
+    if (version < 1) {
+        return;
+    }
+    QString language;
+    in >> language;
+    if (language != currentLanguage()) {
+        return;
+    }
 
     in >> rxitems;
 
@@ -334,7 +346,8 @@ void Statistics::saveRXChanges()
     out.setByteOrder(QDataStream::LittleEndian);
     out.setVersion(QDataStream::Qt_5_0);
     out << magic;
-    out << (quint16)0;
+    out << (quint16)1;
+    out << currentLanguage();
     out << rxitems;
 
 }
