@@ -1081,8 +1081,8 @@ void PrismaLoader::initChannels()
         QObject::tr("Warning"),
         QObject::tr("Warning"),
         "", LOOKUP, Qt::green));
-    chan->addOption(1, "Mode is not supported yet, please send sample data.");
-    chan->addOption(2, "Mode partially supported, please send sample data.");
+    chan->addOption(1, QObject::tr("Mode is not supported yet, please send sample data."));
+    chan->addOption(2, QObject::tr("Mode partially supported, please send sample data."));
 
     // Known only from the device's current configuration, so only for nights after it last changed.
     channel.add(GRP_CPAP, chan = new Channel(Prisma_SoftPAPLock=0xe40e, SETTING,  MT_CPAP,  SESSION,

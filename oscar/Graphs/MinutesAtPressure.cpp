@@ -186,10 +186,10 @@ QString timeString(EventDataType milliSeconds) {
     s = 60*modf(s/60000,&m);
     m = 60*modf(m/60,&h );
 
-   // These string are existing translations
-    static const char* TR_TIME_FMT_S        =" (%3 sec)"  ;
-    static const char* TR_TIME_FMT_MS       =" (%2 min, %3 sec)"  ;
-    static const char* TR_TIME_FMT_HMS      ="%1 hours, %2 minutes and %3 seconds" ;
+    // Marked for lupdate, translated where used.
+    static const char* TR_TIME_FMT_S        = QT_TRANSLATE_NOOP("QObject", " (%3 sec)");
+    static const char* TR_TIME_FMT_MS       = QT_TRANSLATE_NOOP("QObject", " (%2 min, %3 sec)");
+    static const char* TR_TIME_FMT_HMS      = QT_TRANSLATE_NOOP("QObject", "%1 hours, %2 minutes and %3 seconds");
 
     if (m>0) {
         if (h<=0) {

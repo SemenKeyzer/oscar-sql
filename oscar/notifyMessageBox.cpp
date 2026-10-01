@@ -15,14 +15,13 @@
 int defaultTimeoutSeconds = 4 ;
 //QString defaultTimeoutMessage = QObject::tr("Notifcation expires in %1 seconds.\nTo Dismiss: Press Escape or Enter.");
 //QString timeoutStoppedMessage = QObject::tr("Timer Stopped.\nTo Dismiss: Press Escape or Enter.");
-QString defaultTimeoutMessage = QObject::tr("Notifcation expires in %1 seconds.");
-QString timeoutStoppedMessage = QObject::tr("");
+// Translated where used: a global set with tr() is set before the translator is installed.
 
     NotifyMessageBox::NotifyMessageBox(const QString& title, const QString& message, int timeoutSeconds,  const QString& timeoutMessage, QWidget* parent)
         : QObject(parent), m_title(title), m_message(message), m_timeoutSeconds(timeoutSeconds), m_timeoutMessage(timeoutMessage), m_state(nmb_init)
     {
         if (timeoutSeconds<defaultTimeoutSeconds) m_timeoutSeconds=defaultTimeoutSeconds;
-        if ( timeoutMessage.isEmpty() ) m_timeoutMessage = defaultTimeoutMessage;
+        if ( timeoutMessage.isEmpty() ) m_timeoutMessage = QObject::tr("Notifcation expires in %1 seconds.");
         setupTimer();
 
     }
@@ -49,7 +48,7 @@ QString timeoutStoppedMessage = QObject::tr("");
             m_msgBox->setDefaultButton(terminateB);
             connect(m_msgBox, SIGNAL(rejected()), this, SLOT(onTerminate()));
             if (m_state == nmb_stopped) {
-                m_msgBox->setInformativeText(timeoutStoppedMessage);
+                m_msgBox->setInformativeText(QString());
             } else {
                 m_msgBox->setInformativeText(m_timeoutMessage.arg(m_timeoutSeconds));
                 m_msgBox->addButton("Stop Timer", QMessageBox::AcceptRole);

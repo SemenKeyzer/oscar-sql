@@ -274,26 +274,26 @@ void ResmedLoader::initChannels()
     channel.add(GRP_CPAP, chan = new Channel(RMAS1x_RiseEnable = 0xe212, SETTING, MT_CPAP, SESSION,
         "RMAS1x_RiseEnable", QObject::tr("Rise Time Enable"), QObject::tr("Rise Time Enable"), QObject::tr("Rise Time Enable"), "", LOOKUP, Qt::black));
     chan->addOption(0, STR_TR_Off);
-    chan->addOption(1, "Enabled");
+    chan->addOption(1, QObject::tr("Enabled"));
 
     channel.add(GRP_CPAP, chan = new Channel(RMAS1x_RiseTime = 0xe213, SETTING, MT_CPAP, SESSION,
         "RMAS1x_RiseTime", QObject::tr("Rise Time"), QObject::tr("Rise Time"), QObject::tr("Rise Time"), STR_UNIT_milliSeconds, INTEGER, Qt::black));
 
     channel.add(GRP_CPAP, chan = new Channel(RMAS1x_Cycle = 0xe214, SETTING, MT_CPAP, SESSION,
         "RMAS1x_Cycle", QObject::tr("Cycle"), QObject::tr("Cycle"), QObject::tr("Cycle"), "", LOOKUP, Qt::black));
-    chan->addOption(0, "Very Low");
-    chan->addOption(1, "Low");
-    chan->addOption(2, "Med");
-    chan->addOption(3, "High");
-    chan->addOption(4, "Very High");
+    chan->addOption(0, QObject::tr("Very Low"));
+    chan->addOption(1, QObject::tr("Low"));
+    chan->addOption(2, QObject::tr("Med"));
+    chan->addOption(3, QObject::tr("High"));
+    chan->addOption(4, QObject::tr("Very High"));
 
     channel.add(GRP_CPAP, chan = new Channel(RMAS1x_Trigger = 0xe215, SETTING, MT_CPAP, SESSION,
         "RMAS1x_Trigger", QObject::tr("Trigger"), QObject::tr("Trigger"), QObject::tr("Trigger"), "", LOOKUP, Qt::black));
-    chan->addOption(0, "Very Low");
-    chan->addOption(1, "Low");
-    chan->addOption(2, "Med");
-    chan->addOption(3, "High");
-    chan->addOption(4, "Very High");
+    chan->addOption(0, QObject::tr("Very Low"));
+    chan->addOption(1, QObject::tr("Low"));
+    chan->addOption(2, QObject::tr("Med"));
+    chan->addOption(3, QObject::tr("High"));
+    chan->addOption(4, QObject::tr("Very High"));
 
     channel.add(GRP_CPAP, chan = new Channel(RMAS1x_TiMax = 0xe216, SETTING, MT_CPAP, SESSION,
         "RMAS1x_TiMax", QObject::tr("Ti Max"), QObject::tr("Ti Max"), QObject::tr("Ti Max"), STR_UNIT_Seconds, DOUBLE, Qt::black));
@@ -306,7 +306,7 @@ void ResmedLoader::initChannels()
     // ResMed bilevel/iVAPS ventilation waveforms (decoded from the PLD file)
     channel.add(GRP_CPAP, new Channel(RMVENT_AlvMinVent = 0xe218, WAVEFORM, MT_CPAP, SESSION,
         "RMVENT_AlvMinVent", QObject::tr("Alv. Min. Vent."), QObject::tr("Alveolar Minute Ventilation"),
-        QObject::tr("Alv MV"), "L/min", DOUBLE, Qt::darkGray));
+        QObject::tr("Alv MV"), STR_UNIT_LPM, DOUBLE, Qt::darkGray));
 
     channel.add(GRP_CPAP, new Channel(RMVENT_SpontCyc = 0xe219, WAVEFORM, MT_CPAP, SESSION,
         "RMVENT_SpontCyc", QObject::tr("Spont. Cycle%"), QObject::tr("Spontaneous Cycle Percentage"),
@@ -323,13 +323,13 @@ void ResmedLoader::initChannels()
 
     channel.add(GRP_CPAP, new Channel(RMVENT_iAlvMinVent = 0xe22d, SETTING, MT_CPAP, SESSION,
         "RMVENT_iAlvMinVent", QObject::tr("iVAPS Target Va"), QObject::tr("Target Alveolar Ventilation (iVAPS)"),
-        QObject::tr("Target Va"), "L/min", DOUBLE, Qt::cyan));
+        QObject::tr("Target Va"), STR_UNIT_LPM, DOUBLE, Qt::cyan));
 
     // Target respiratory rate. Shared across iVAPS (S.i.RespRate, target patient rate)
     // and bilevel ST (S.BL.TgtRR, iBR target rate) — only one mode applies per session.
     channel.add(GRP_CPAP, new Channel(RMVENT_iRespRate = 0xe22e, SETTING, MT_CPAP, SESSION,
         "RMVENT_iRespRate", QObject::tr("Target Rate"), QObject::tr("Target Respiratory Rate"),
-        QObject::tr("Target Rate"), "breaths/min", DOUBLE, Qt::green));
+        QObject::tr("Target Rate"), STR_UNIT_BreathsPerMinute, DOUBLE, Qt::green));
 
     channel.add(GRP_CPAP, chan = new Channel(RMVENT_AutoEPAP = 0xe22f, SETTING, MT_CPAP, SESSION,
         "RMVENT_AutoEPAP", QObject::tr("Auto EPAP"), QObject::tr("Auto EPAP Enable (iVAPS)"),
@@ -356,11 +356,11 @@ void ResmedLoader::initChannels()
 
     channel.add(GRP_CPAP, new Channel(RMVENT_BackupRate = 0xe233, SETTING, MT_CPAP, SESSION,
         "RMVENT_BackupRate", QObject::tr("Backup Rate"), QObject::tr("Backup Respiratory Rate"),
-        QObject::tr("Backup Rate"), "breaths/min", DOUBLE, Qt::darkGreen));
+        QObject::tr("Backup Rate"), STR_UNIT_BreathsPerMinute, DOUBLE, Qt::darkGreen));
 
     channel.add(GRP_CPAP, new Channel(RMVENT_RespRate = 0xe234, SETTING, MT_CPAP, SESSION,
         "RMVENT_RespRate", QObject::tr("Resp. Rate"), QObject::tr("Set Respiratory Rate (T mode)"),
-        QObject::tr("Resp Rate"), "breaths/min", DOUBLE, Qt::green));
+        QObject::tr("Resp Rate"), STR_UNIT_BreathsPerMinute, DOUBLE, Qt::green));
 
     // Setup ResMeds signal name translation map
     setupResMedTranslationMap();

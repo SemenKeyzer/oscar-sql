@@ -746,7 +746,7 @@ void BmcLoader::initChannels()
 
     channel.add(GRP_CPAP, chan = new Channel(BMC_RESLEX_MODE = BMC_CHANNEL_IDX + 2, SETTING, MT_CPAP,   SESSION,
                                              "ReslexMode", QObject::tr("Reslex Mode"), QObject::tr("Reslex Mode"), QObject::tr("Reslex Mode"), "", LOOKUP, Qt::green));
-    chan->addOption(0, "Full Time");
+    chan->addOption(0, QObject::tr("Full Time"));
 
     channel.add(GRP_CPAP, chan = new Channel(BMC_HUMIDIFIER = BMC_CHANNEL_IDX + 3, SETTING, MT_CPAP,   SESSION,
                                              // Displayed label standardised across loaders — see GitLab #263.

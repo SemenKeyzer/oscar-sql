@@ -8257,6 +8257,11 @@ Disabled Sessions are used for graphing and Statistics.</source>
         <translation>Экспериментальные параметры</translation>
     </message>
     <message>
+        <location filename="../oscar/preferencesdialog.ui" line="1751"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Baseline SpO&lt;span style=&quot; vertical-align:sub;&quot;&gt;2&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Базовая SpO&lt;span style=&quot; vertical-align:sub;&quot;&gt;2&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
         <location filename="../oscar/preferencesdialog.ui" line="1771"/>
         <source>By default, OSCAR uses a calculation from the first hour of oximetry data as baseline.
 This setting allows you to override that with a static value.
@@ -8817,6 +8822,11 @@ OSCAR может импортировать из этого сжатого ка�
         <translation>Необходимо включить разрешительный режим (см. вкладку «Клинический»)</translation>
     </message>
     <message>
+        <location filename="../oscar/preferencesdialog.cpp" line="432"/>
+        <source>Default (Calculated from Hour 1)</source>
+        <translation>По умолчанию (по первому часу)</translation>
+    </message>
+    <message>
         <location filename="../oscar/preferencesdialog.cpp" line="623"/>
         <source>Double click to change the descriptive name the &apos;%1&apos; channel.</source>
         <translation>Дважды щелкните, чтобы изменить описание канала &apos;%1&apos;.</translation>
@@ -8931,27 +8941,27 @@ Would you like do this now?</source>
 Хотите сделать это сейчас?</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1351"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1348"/>
         <source>ResMed S9 devices routinely delete certain data from your SD card older than 7 and 30 days (depending on resolution).</source>
         <translation>Аппараты ResMed S9 регулярно удаляют с SD-карты данные, записанные больше 7 и 30 дней назад (в зависимости от точности).</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1352"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1349"/>
         <source> If you ever need to reimport this data again (whether in OSCAR or ResScan) this data won&apos;t come back.</source>
         <translation> Если вам когда-нибудь понадобится заново импортировать эти данные (в OSCAR или ResScan), их нельзя будет вернуть.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1353"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1350"/>
         <source> If you need to conserve disk space, please remember to carry out manual backups.</source>
         <translation> Если вам нужно свободное место на диске, не забывайте делать резервные копии вручную.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1354"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1351"/>
         <source> Are you sure you want to disable these backups?</source>
         <translation> Вы уверены, что хотите отключить эти резервные копии?</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1450"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1447"/>
         <source>Switching off backups is not a good idea, because OSCAR needs these to rebuild the database if errors are found.
 
 </source>
@@ -8960,7 +8970,7 @@ Would you like do this now?</source>
 </translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1451"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1448"/>
         <source>Are you really sure you want to do this?</source>
         <translation>Вы действительно уверены, что хотите это сделать?</translation>
     </message>
@@ -9040,7 +9050,7 @@ Would you like do this now?</source>
         <translation>Никогда</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1350"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1347"/>
         <source>This may not be a good idea</source>
         <translation>Скорей всего это плохая идея</translation>
     </message>
@@ -9607,6 +9617,11 @@ Would you like do this now?</source>
 <context>
     <name>QObject</name>
     <message>
+        <location filename="../oscar/Graphs/MinutesAtPressure.cpp" line="192"/>
+        <source>%1 hours, %2 minutes and %3 seconds</source>
+        <translation>%1 ч, %2 мин и %3 сек</translation>
+    </message>
+    <message>
         <location filename="../oscar/Graphs/MinutesAtPressure.cpp" line="727"/>
         <location filename="../oscar/Graphs/gOverviewGraph.cpp" line="1245"/>
         <source>No Data</source>
@@ -9629,74 +9644,74 @@ Would you like do this now?</source>
         <translation>(% %1 в событиях)</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="74"/>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="423"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="75"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="426"/>
         <source>Jan</source>
         <translation>Янв</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="74"/>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="423"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="75"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="426"/>
         <source>Feb</source>
         <translation>Фев</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="74"/>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="423"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="75"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="426"/>
         <source>Mar</source>
         <translation>Мар</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="74"/>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="423"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="76"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="426"/>
         <source>Apr</source>
         <translation>Апр</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="74"/>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="423"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="76"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="426"/>
         <source>May</source>
         <translation>Май</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="74"/>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="423"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="76"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="426"/>
         <source>Jun</source>
         <translation>Июн</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="75"/>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="424"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="77"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="427"/>
         <source>Jul</source>
         <translation>Июл</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="75"/>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="424"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="77"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="427"/>
         <source>Aug</source>
         <translation>Авг</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="75"/>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="424"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="77"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="427"/>
         <source>Sep</source>
         <translation>Сен</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="75"/>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="424"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="78"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="427"/>
         <source>Oct</source>
         <translation>Окт</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="75"/>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="424"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="78"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="427"/>
         <source>Nov</source>
         <translation>Ноя</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="75"/>
-        <location filename="../oscar/Graphs/gXAxis.cpp" line="424"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="78"/>
+        <location filename="../oscar/Graphs/gXAxis.cpp" line="427"/>
         <source>Dec</source>
         <translation>Дек</translation>
     </message>
@@ -10812,6 +10827,8 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/common.cpp" line="1112"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="286"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="294"/>
         <source>Med</source>
         <translation>Мед</translation>
     </message>
@@ -11062,6 +11079,16 @@ TTIA: %1</translation>
         <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1075"/>
         <source>Tube type</source>
         <translation>Тип трубки</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1084"/>
+        <source>Mode is not supported yet, please send sample data.</source>
+        <translation>Режим пока не поддерживается, пожалуйста, пришлите образец данных.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1085"/>
+        <source>Mode partially supported, please send sample data.</source>
+        <translation>Режим поддерживается частично, пожалуйста, пришлите образец данных.</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="1090"/>
@@ -11635,12 +11662,16 @@ TTIA: %1</translation>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="870"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="881"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="284"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="292"/>
         <source>Very Low</source>
         <translation>Очень низкий</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="871"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="882"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="285"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="293"/>
         <source>Low</source>
         <translation>Низкий</translation>
     </message>
@@ -11665,12 +11696,16 @@ TTIA: %1</translation>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="875"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="886"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="287"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="295"/>
         <source>High</source>
         <translation>Высокий</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="876"/>
         <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="887"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="288"/>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="296"/>
         <source>Very High</source>
         <translation>Очень высокий</translation>
     </message>
@@ -13404,22 +13439,22 @@ TTIA: %1</translation>
         <translation>Тест #2</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="884"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="887"/>
         <source>Zero</source>
         <translation>Ноль</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="888"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="891"/>
         <source>Leak Redline Threshold</source>
         <translation>Порог утечки (красная линия)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="890"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="893"/>
         <source>Upper Threshold</source>
         <translation>Верхняя граница</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="893"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="896"/>
         <source>Lower Threshold</source>
         <translation>Нижняя граница</translation>
     </message>
@@ -14000,17 +14035,17 @@ You may continue, but some data may be incomplete or incorrect.</source>
         <translation>Невозможно создать zip!</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1392"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1389"/>
         <source>Are you sure you want to reset all your channel colors and settings to defaults?</source>
         <translation>Точно сбросить все настройки и цвета каналов?</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1413"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1410"/>
         <source>Are you sure you want to reset all your oximetry settings to defaults?</source>
         <translation>Точно сбросить все настройки оксиметрии к начальным?</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1492"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1489"/>
         <source>Are you sure you want to reset all your waveform channel colors and settings to defaults?</source>
         <translation>Точно сбросить все цвета и настройки графиков?</translation>
     </message>
@@ -14442,11 +14477,13 @@ Please Rebuild CPAP Data</source>
 Пожалуйста перестройте данные CPAP</translation>
     </message>
     <message>
+        <location filename="../oscar/Graphs/MinutesAtPressure.cpp" line="191"/>
         <location filename="../oscar/Graphs/gFlagsLine.cpp" line="478"/>
         <source> (%2 min, %3 sec)</source>
         <translation> (%2 мин, %3 сек)</translation>
     </message>
     <message>
+        <location filename="../oscar/Graphs/MinutesAtPressure.cpp" line="190"/>
         <location filename="../oscar/Graphs/gFlagsLine.cpp" line="480"/>
         <source> (%3 sec)</source>
         <translation> (%3 сек)</translation>
@@ -14578,6 +14615,7 @@ popout window, delete it, then pop out this graph again.</source>
         <translation>Только разгон</translation>
     </message>
     <message>
+        <location filename="../oscar/SleepLib/loader_plugins/bmc_loader.cpp" line="749"/>
         <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2808"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="172"/>
         <source>Full Time</source>
@@ -14890,6 +14928,11 @@ popout window, delete it, then pop out this graph again.</source>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="275"/>
         <source>Rise Time Enable</source>
         <translation>Включение времени подъёма</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="277"/>
+        <source>Enabled</source>
+        <translation>Включено</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="308"/>
@@ -15422,7 +15465,7 @@ popout window, delete it, then pop out this graph again.</source>
         <translation>IPR: </translation>
     </message>
     <message>
-        <location filename="../oscar/notifyMessageBox.cpp" line="18"/>
+        <location filename="../oscar/notifyMessageBox.cpp" line="24"/>
         <source>Notifcation expires in %1 seconds.</source>
         <translation>Уведомление закроется через %1 с.</translation>
     </message>
@@ -19161,6 +19204,12 @@ Make sure you trust the recipient before sharing this data.</source>
         <translation>Лучшие настройки аппарата</translation>
     </message>
     <message>
+        <location filename="../oscar/statistics.cpp" line="2292"/>
+        <location filename="../oscar/statistics.cpp" line="2304"/>
+        <source>Serial: %1</source>
+        <translation>Серийный номер: %1</translation>
+    </message>
+    <message>
         <location filename="../oscar/statistics.cpp" line="2299"/>
         <source>Worst Device Setting</source>
         <translation>Худшие настройки аппарата</translation>
@@ -19471,6 +19520,14 @@ Make sure you trust the recipient before sharing this data.</source>
         <location filename="../oscar/statistics.cpp" line="1777"/>
         <source>Recalculate</source>
         <translation>Пересчитать</translation>
+    </message>
+</context>
+<context>
+    <name>StatisticsRow</name>
+    <message>
+        <location filename="../oscar/statistics.cpp" line="2447"/>
+        <source>Err</source>
+        <translation>Ошибка</translation>
     </message>
 </context>
 <context>

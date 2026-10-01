@@ -70,9 +70,12 @@ int gXAxis::minimumHeight()
 #endif
 }
 
-const QString months[] = {
-    QObject::tr("Jan"), QObject::tr("Feb"), QObject::tr("Mar"), QObject::tr("Apr"), QObject::tr("May"), QObject::tr("Jun"),
-    QObject::tr("Jul"), QObject::tr("Aug"), QObject::tr("Sep"), QObject::tr("Oct"), QObject::tr("Nov"), QObject::tr("Dec")
+// Translated where used: a global set with tr() is set before the translator is installed.
+const char *const kMonths[] = {
+    QT_TRANSLATE_NOOP("QObject", "Jan"), QT_TRANSLATE_NOOP("QObject", "Feb"), QT_TRANSLATE_NOOP("QObject", "Mar"),
+    QT_TRANSLATE_NOOP("QObject", "Apr"), QT_TRANSLATE_NOOP("QObject", "May"), QT_TRANSLATE_NOOP("QObject", "Jun"),
+    QT_TRANSLATE_NOOP("QObject", "Jul"), QT_TRANSLATE_NOOP("QObject", "Aug"), QT_TRANSLATE_NOOP("QObject", "Sep"),
+    QT_TRANSLATE_NOOP("QObject", "Oct"), QT_TRANSLATE_NOOP("QObject", "Nov"), QT_TRANSLATE_NOOP("QObject", "Dec")
 };
 //static QString dow[]={"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};
 
@@ -330,7 +333,7 @@ void gXAxis::paint(QPainter &painter, gGraph &w, const QRegion &region)
                 //dt.toString("MMM dd");
 
                 // Doing it this way instead because it's MUUUUUUCH faster
-                tmpstr = QString(dayFirst?"%1 %2":"%2 %1").arg(date.day()).arg(months[date.month() - 1]);
+                tmpstr = QString(dayFirst?"%1 %2":"%2 %1").arg(date.day()).arg(QObject::tr(kMonths[date.month() - 1]));
 
                 //} else if (fitmode==0) {
                 //            tmpstr=QString("%1 %2:%3").arg(dow[d]).arg(h,2,10,QChar('0')).arg(m,2,10,QChar('0'));

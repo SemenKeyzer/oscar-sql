@@ -2289,7 +2289,7 @@ QString Statistics::UpdateRecordsBox()
             html += QString("<a href='overview=%1,%2'>").arg(rxbest.start.toString(Qt::ISODate)).arg(rxbest.end.toString(Qt::ISODate)) +
                 tr("Date: %1 - %2").arg(rxbest.start.toString(QLocale::system().dateFormat(QLocale::ShortFormat))).arg(rxbest.end.toString(QLocale::system().dateFormat(QLocale::ShortFormat))) + "</a><br>";
             html += QString("%1").arg(rxbest.machine->model()) + "<br>";
-            html += QString("Serial: %1").arg(rxbest.machine->serial()) + "<br>";
+            html += tr("Serial: %1").arg(rxbest.machine->serial()) + "<br>";
             html += QString("%1: %2").arg(ahitxt).arg(rdi ? double(rxbest.rdi) / rxbest.hours : double(rxbest.ahi) / rxbest.hours, 0, 'f', 2) + "<br>";
             html += tr("Total Hours: %1").arg(rxbest.hours, 0, 'f', 2) + "<br>";
             html += QString("%1").arg(rxbest.pressure) + "<br>";
@@ -2301,7 +2301,7 @@ QString Statistics::UpdateRecordsBox()
             html += QString("<a href='overview=%1,%2'>").arg(rxworst.start.toString(Qt::ISODate)).arg(rxworst.end.toString(Qt::ISODate)) +
                     tr("Date: %1 - %2").arg(rxworst.start.toString(QLocale::system().dateFormat(QLocale::ShortFormat))).arg(rxworst.end.toString(QLocale::system().dateFormat(QLocale::ShortFormat))) + "</a><br>";
             html += QString("%1").arg(rxworst.machine->model()) + "<br>";
-            html += QString("Serial: %1").arg(rxworst.machine->serial()) + "<br>";
+            html += tr("Serial: %1").arg(rxworst.machine->serial()) + "<br>";
             html += QString("%1: %2").arg(ahitxt).arg(rdi ? double(rxworst.rdi) / rxworst.hours : double(rxworst.ahi) / rxworst.hours, 0, 'f', 2) + "<br>";
             html += tr("Total Hours: %1").arg(rxworst.hours, 0, 'f', 2) + "<br>";
 
@@ -2444,7 +2444,7 @@ QString StatisticsRow::value(QDate start, QDate end, MachineType typeOverride)
         }
 
         if ((val == std::numeric_limits<EventDataType>::min()) || (val == std::numeric_limits<EventDataType>::max())) {
-            value = "Err";
+            value = QCoreApplication::translate("StatisticsRow", "Err");
         } else {
             value = fmt.arg(val, 0, 'f', decimals);
         }

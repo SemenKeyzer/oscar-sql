@@ -429,7 +429,7 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
     {
         ui->baseSpO2Option->clear();
         // First option
-        ui->baseSpO2Option->addItem("Default (Calculated from Hour 1)", -1);
+        ui->baseSpO2Option->addItem(tr("Default (Calculated from Hour 1)"), -1);
 
         // Add 99 down to 85
         for (int i = 99; i >= 85; --i) {
@@ -1025,11 +1025,8 @@ bool PreferencesDialog::Save()
     profile->oxi->setFlagPulseAbove(ui->flagPulseAbove->value());
     profile->oxi->setFlagPulseBelow(ui->flagPulseBelow->value());
     //added by Sheila 1/5/2026
-    QString combo_string = ui->baseSpO2Option->currentText();
-    if(combo_string==QString("Default (Calculated from Hour 1)"))
-        profile->oxi->setBaseSpO2Option(-1);
-    else
-        profile->oxi->setBaseSpO2Option(combo_string.toInt());
+    // the item's data, not its (translated) text: -1 for the default, else the percentage
+    profile->oxi->setBaseSpO2Option(ui->baseSpO2Option->currentData().toInt());
 
     profile->cpap->setAHIWindow(ui->ahiGraphWindowSize->value());
     profile->cpap->setAHIReset(ui->ahiGraphZeroReset->isChecked());
