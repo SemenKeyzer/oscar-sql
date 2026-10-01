@@ -508,6 +508,15 @@ void done()
 }
 
 
+void resetChannelNames()
+{
+    for (Channel *chan : std::as_const(channel.channels)) {
+        chan->setFullname(chan->defaultFullname());
+        chan->setLabel(chan->defaultLabel());
+        chan->setDescription(chan->defaultDescription());
+    }
+}
+
 void resetChannels()
 {
     done();

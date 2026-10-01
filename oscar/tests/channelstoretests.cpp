@@ -107,6 +107,23 @@ void ChannelStoreTests::testRegisteredOptionsWin()
     mode.m_options.remove(77);
 }
 
+// Preferences, Reset to defaults, Names only: the registered (translated) names come back,
+// the user's colours stay.
+void ChannelStoreTests::testResetNamesKeepsColours()
+{
+    schema::Channel &leak = schema::channel[CPAP_Leak];
+    const QColor original = leak.defaultColor();
+    const QColor colour(0x12, 0x34, 0x56);
+    leak.setDefaultColor(colour);
+    leak.setFullname(QStringLiteral("An old translation"));
+    leak.setLabel(QStringLiteral("Old"));
+    schema::resetChannelNames();
+    QCOMPARE(leak.fullname(), leak.defaultFullname());
+    QCOMPARE(leak.label(), leak.defaultLabel());
+    QCOMPARE(leak.defaultColor(), colour);
+    leak.setDefaultColor(original);
+}
+
 void ChannelStoreTests::cleanupTestCase()
 {
     Profiles::profiles.clear();

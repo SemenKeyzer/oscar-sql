@@ -13,6 +13,7 @@
 #include <QLabel>
 #include <QColorDialog>
 #include <QMessageBox>
+#include <QPushButton>
 #include <QStatusBar>
 #include <QProcess>
 #include <QDesktopServices>
@@ -1384,9 +1385,35 @@ void PreferencesDialog::on_gridLineOpacitySlider_valueChanged(int value)
     ui->gridLineOpacityDisplay->setText(QString::number(value));
 }
 
+// Names only: every channel's name, label and description back to the current translation,
+// keeping colours and settings (and the edits in both tables). Returns whether it was chosen;
+// otherwise *everything is whether the full reset was.
+static bool askChannelReset(QWidget *parent, const QString &question, bool *everything)
+{
+    QMessageBox box(QMessageBox::Question, STR_MessageBox_Warning,
+                    question + QStringLiteral("\n\n")
+                        + QObject::tr("Names only puts back the channel names and descriptions of this version "
+                                      "and language, and keeps your colours and settings."),
+                    QMessageBox::NoButton, parent);
+    QPushButton *names = box.addButton(QObject::tr("Names Only"), QMessageBox::AcceptRole);
+    QPushButton *all = box.addButton(QObject::tr("Everything"), QMessageBox::DestructiveRole);
+    box.addButton(QMessageBox::Cancel);
+    box.setDefaultButton(names);
+    box.exec();
+    *everything = box.clickedButton() == all;
+    return box.clickedButton() == names;
+}
+
 void PreferencesDialog::on_resetChannelDefaults_clicked()
 {
-    if (QMessageBox::question(this, STR_MessageBox_Warning, QObject::tr("Are you sure you want to reset all your channel colors and settings to defaults?"), QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::Yes) {
+    bool everything = false;
+    if (askChannelReset(this, QObject::tr("Are you sure you want to reset all your channel colors and settings to defaults?"), &everything)) {
+        saveChanInfo();
+        saveWaveInfo();
+        schema::resetChannelNames();
+        InitChanInfo();
+        InitWaveInfo();
+    } else if (everything) {
         schema::resetChannels();
         saveWaveInfo();
         InitChanInfo();
@@ -1486,7 +1513,14 @@ void PreferencesDialog::on_waveSearch_textChanged(const QString &arg1)
 
 void PreferencesDialog::on_resetWaveformChannels_clicked()
 {
-    if (QMessageBox::question(this, STR_MessageBox_Warning, QObject::tr("Are you sure you want to reset all your waveform channel colors and settings to defaults?"), QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::Yes) {
+    bool everything = false;
+    if (askChannelReset(this, QObject::tr("Are you sure you want to reset all your waveform channel colors and settings to defaults?"), &everything)) {
+        saveChanInfo();
+        saveWaveInfo();
+        schema::resetChannelNames();
+        InitChanInfo();
+        InitWaveInfo();
+    } else if (everything) {
         schema::resetChannels();
         saveChanInfo(); // reset clears EVERYTHING, so have to put these back in case they cancel.
         InitWaveInfo();

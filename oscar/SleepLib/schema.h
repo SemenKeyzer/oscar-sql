@@ -43,6 +43,9 @@ public:
 
 namespace schema {
 void resetChannels();
+//! Gives every channel back the name, label and description it was registered with (the
+//! current translation), keeping colours and settings.
+void resetChannelNames();
 void setOrders();
 
 

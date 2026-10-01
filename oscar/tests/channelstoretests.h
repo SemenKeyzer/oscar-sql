@@ -22,6 +22,7 @@ private slots:
     void initTestCase();
     void testOnlyTheUsersNamesAreKept();
     void testRegisteredOptionsWin();
+    void testResetNamesKeepsColours();
     void cleanupTestCase();
 
 private:
