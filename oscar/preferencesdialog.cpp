@@ -675,6 +675,8 @@ void PreferencesDialog::InitChanInfo()
 
     ui->chanView->expandAll();
     ui->chanView->setSortingEnabled(true);
+    // A rebuilt model (after "Reset to Defaults") isn't sorted again by itself.
+    ui->chanView->sortByColumn(ui->chanView->header()->sortIndicatorSection(), ui->chanView->header()->sortIndicatorOrder());
 }
 
 void PreferencesDialog::InitWaveInfo()
@@ -805,6 +807,7 @@ void PreferencesDialog::InitWaveInfo()
 
     ui->waveView->expandAll();
     ui->waveView->setSortingEnabled(true);
+    ui->waveView->sortByColumn(ui->waveView->header()->sortIndicatorSection(), ui->waveView->header()->sortIndicatorOrder());
 }
 
 
