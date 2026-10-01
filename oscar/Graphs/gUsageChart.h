@@ -28,6 +28,8 @@ public:
     virtual void preCalc();
     virtual void customCalc(Day *, QVector<SummaryChartSlice> &);
     virtual void afterDraw(QPainter &, gGraph &, QRectF);
+    //! The compliance hours, as a line.
+    virtual float targetValue() { return compliance_threshold; }
     virtual void populate(Day *day, int idx);
 
     virtual QString tooltipData(Day * day, int);

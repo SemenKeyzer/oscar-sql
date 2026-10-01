@@ -657,6 +657,13 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
     painter.setPen(QPen(Qt::black,1));
     painter.drawRects(outlines);
 
+    const float target = targetValue();
+    if (target > miny && target < maxy) {
+        const float y = rect.bottom() - (target - miny) * ymult;
+        painter.setPen(QPen(QColor(0x40, 0x40, 0x40), 1, Qt::DashLine));
+        painter.drawLine(QPointF(rect.left(), y), QPointF(rect.right(), y));
+    }
+
     if (hl) {
         QColor col2(255,0,0,64);
         painter.fillRect(hl_rect, QBrush(col2));

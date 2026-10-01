@@ -245,6 +245,9 @@ public:
     virtual void drawBarOverlay(QPainter &, int /*idx*/, const QRectF & /*column*/, float /*miny*/, float /*ymult*/) {}
     //! \brief The highest value drawBarOverlay() draws for a day, so the y-axis makes room for it.
     virtual float overlayPeak(int /*idx*/) { return 0; }
+    //! \brief A target to draw as a dashed line across the chart (when it is within the
+    //! y-axis), so that nights past it stand out; 0 for none.
+    virtual float targetValue() { return 0; }
 
     //! \brief Return any extra data to show beneath the date in the hover over tooltip
     virtual QString tooltipData(Day *, int);

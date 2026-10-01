@@ -69,6 +69,8 @@ class gAnalysisChart : public gSummaryChart
     virtual void afterDraw(QPainter &painter, gGraph &graph, QRectF rect);
     virtual void drawBarOverlay(QPainter &painter, int idx, const QRectF &column, float miny, float ymult);
     virtual float overlayPeak(int idx);
+    //! An AHI of 5 on the analysis' AHI, as a line.
+    virtual float targetValue() { return m_kind == Ahi ? 5 : 0; }
 
     virtual Layer *Clone() {
         gAnalysisChart *sc = new gAnalysisChart(m_kind);

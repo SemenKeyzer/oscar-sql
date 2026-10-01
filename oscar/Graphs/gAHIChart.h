@@ -38,6 +38,8 @@ public:
     virtual void preCalc();
     virtual void customCalc(Day *, QVector<SummaryChartSlice> &);
     virtual void afterDraw(QPainter &, gGraph &, QRectF);
+    //! An AHI of 5, as a line.
+    virtual float targetValue() { return 5; }
 
     virtual void populate(Day *, int idx);
 
