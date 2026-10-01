@@ -2184,6 +2184,7 @@ void MainWindow::refreshAnalysisViews()
     if (!p_profile) return;
     if (daily) daily->LoadDate(daily->getDate());
     if (overview) overview->ReloadGraphs();
+    if (welcome) welcome->refreshPage();   // "Last night" shows the analysis and how many days await it
     GenerateStatistics();
 }
 
