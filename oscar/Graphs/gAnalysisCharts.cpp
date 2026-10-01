@@ -8,6 +8,8 @@
 
 #include "Graphs/gAnalysisCharts.h"
 
+#include <cmath>
+
 #include "mainwindow.h"
 #include "SleepLib/analysis/analysis_channels.h"
 #include "SleepLib/analysis/analysis_service.h"
@@ -34,12 +36,11 @@ int secondsBelow(const QVector<int> &hist, double threshold)
     return s;
 }
 
-QColor rangeColor(int index, int count)
-{
-    // green for the highest range through orange to red for the lowest
-    const double f = count > 1 ? double(index) / (count - 1) : 0;
-    return QColor::fromHsvF(0.33 * (1 - f), 0.75, 0.85);
-}
+// ColorBrewer YlOrRd, without its palest step (too faint on white): a sequence that
+// reads by lightness, so it holds for colour-blind eyes and in greyscale prints.
+const QColor kLowSpo2[] = { QColor(0xfe, 0xd9, 0x76), QColor(0xfe, 0xb2, 0x4c), QColor(0xfd, 0x8d, 0x3c),
+                            QColor(0xfc, 0x4e, 0x2a), QColor(0xe3, 0x1a, 0x1c), QColor(0xb1, 0x00, 0x26) };
+constexpr int kLowSpo2Count = int(sizeof(kLowSpo2) / sizeof(kLowSpo2[0]));
 
 QString num(double v, int decimals = 1)
 {
@@ -95,7 +96,10 @@ QString gAnalysisChart::units(Kind kind)
     switch (kind) {
     case Ahi: return QObject::tr("Events/hour\n(analysis)");
     case Odi: return QObject::tr("Desaturations\nper hour");
-    case Spo2Ranges: return QObject::tr("% of time");
+    case Spo2Ranges: {
+        const QList<double> t = p_profile && p_profile->analysis ? p_profile->analysis->spo2Thresholds() : QList<double>();
+        return t.isEmpty() ? QObject::tr("% of time") : QObject::tr("% of time\nbelow %1%").arg(t.first());
+    }
     case ProblemZones: return QObject::tr("% of time");
     case HypoxicBurden: return QObject::tr("%·min/h");
     case FlowLimitation: return QObject::tr("% of time");
@@ -157,18 +161,27 @@ void gAnalysisChart::populate(Day *day, int idx)
     case Spo2Ranges: {
         if (!r.hasOximetry || r.oxiSeconds <= 0) return;
         weight = r.oxiSeconds / 3600.0f;
-        // Shares of the night, so short and long nights compare; the tooltip adds the minutes.
+        // The time below the highest threshold as a share of the night, so short and long
+        // nights compare, stacked by range with the lowest at the bottom. The time above it,
+        // most of a good night, would only flatten the ranges that matter: the tooltip
+        // gives it.
         const QList<double> t = p_profile->analysis->spo2Thresholds();
         const QVector<RangeShare> shares = spo2RangeShares(r.spo2Hist, r.oxiSeconds, t);
         QStringList detail;
+        int below = 0;
         for (const RangeShare &s : shares) {
-            add(s.percent, s.percent, s.name, rangeColor(s.colorIndex, t.size() + 1));
+            if (s.colorIndex > 0) {
+                add(s.percent, s.percent, s.name, rangeColor(s.colorIndex, t.size() + 1));
+                below += s.seconds;
+            }
             if (s.seconds > 0) {
                 detail.prepend(QObject::tr("%1: %2% (%3 min)").arg(s.name, num(s.percent), num(s.seconds / 60.0, 0)));
             }
         }
         m_ranges[idx] = shares;
         tip = QStringLiteral("\n") + QObject::tr("Recorded: %1 min").arg(num(r.oxiSeconds / 60.0, 0))
+            + QStringLiteral("\n") + QObject::tr("Below %1%: %2% of the time (%3 min)")
+                  .arg(t.first()).arg(num(100.0 * below / r.oxiSeconds), num(below / 60.0, 0))
             + QStringLiteral("\n") + detail.join(QStringLiteral("\n"));
         break;
     }
@@ -176,8 +189,8 @@ void gAnalysisChart::populate(Day *day, int idx)
         if (!r.hasOximetry) return;
         weight = r.oxiSeconds / 3600.0f;
         const QPair<double, double> share = problemZoneShares(r.zoneSeconds, r.zoneSevereSeconds, r.oxiSeconds);
-        add(share.second, share.second, QObject::tr("Marked"), QColor(0xd0, 0x40, 0x30));
-        add(share.first, share.first - share.second, QObject::tr("Moderate"), QColor(0xf0, 0xb0, 0x60));
+        add(share.second, share.second, QObject::tr("Marked"), kLowSpo2[4]);
+        add(share.first, share.first - share.second, QObject::tr("Moderate"), kLowSpo2[1]);
         tip = QStringLiteral("\n") + QObject::tr("Problem zones: %1, %2% of the time (%3 min), marked %4% (%5 min)")
                   .arg(r.nZones).arg(num(share.first), num(r.zoneSeconds / 60.0, 0),
                                      num(share.second), num(r.zoneSevereSeconds / 60.0, 0));
@@ -245,13 +258,18 @@ void gAnalysisChart::afterDraw(QPainter &, gGraph &graph, QRectF rect)
     SummaryCalcItem &calc = calcitems[0];
     if (calc.cnt == 0) return;
     if (m_kind == Spo2Ranges) {
-        // Every bar is the whole night (100 %), so show each range's share of all the shown nights.
+        // The share of all the shown nights below the highest threshold, then in each range.
+        graph.setUnits(units(m_kind));   // follows the thresholds when they change
+        if (m_rangeSeconds <= 0) return;
         QStringList parts;
+        qint64 below = 0;
         for (auto it = m_rangeTotals.cbegin(); it != m_rangeTotals.cend(); ++it) {   // highest range first
-            if (it->seconds > 0 && m_rangeSeconds > 0) {
-                parts << QStringLiteral("%1: %2%").arg(it->name, num(100.0 * it->seconds / m_rangeSeconds));
-            }
+            if (it.key() == 0) continue;
+            below += it->seconds;
+            if (it->seconds > 0) parts << QStringLiteral("%1: %2%").arg(it->name, num(100.0 * it->seconds / m_rangeSeconds));
         }
+        const QList<double> t = p_profile->analysis->spo2Thresholds();
+        parts.prepend(QObject::tr("Below %1%: %2%").arg(t.first()).arg(num(100.0 * below / m_rangeSeconds)));
         graph.renderText(parts.join(QStringLiteral("   ")), rect.left(), rect.top() - 5 * graph.printScaleY(), 0);
         return;
     }
@@ -272,9 +290,7 @@ QVector<gAnalysisChart::RangeShare> gAnalysisChart::spo2RangeShares(const QVecto
         const int below = i < t.size() ? secondsBelow(hist, t[i]) : 0;
         const int upto = i > 0 ? secondsBelow(hist, t[i - 1]) : oxiSeconds;
         RangeShare s;
-        s.name = i == t.size() ? QObject::tr("< %1%").arg(t.last())
-               : i == 0 ? QObject::tr(">= %1%").arg(t.first())
-               : QStringLiteral("%1-%2%").arg(t[i]).arg(t[i - 1]);
+        s.name = spo2RangeLabel(i < t.size() ? t[i] : -1, i > 0 ? t[i - 1] : 101);
         s.seconds = qMax(0, upto - below);
         s.percent = oxiSeconds > 0 ? 100.0 * s.seconds / oxiSeconds : 0;
         s.colorIndex = i;
@@ -289,3 +305,21 @@ QPair<double, double> gAnalysisChart::problemZoneShares(int zoneSeconds, int mar
     return { 100.0 * zoneSeconds / oxiSeconds, 100.0 * markedSeconds / oxiSeconds };
 }
 
+QString gAnalysisChart::spo2RangeLabel(double lower, double upper)
+{
+    if (lower < 0) return QStringLiteral("< %1 %").arg(upper);
+    if (upper > 100) return QStringLiteral("%1 %2 %").arg(QChar(0x2265)).arg(lower);   // ≥
+    // Readings are whole %: 90 up to (not including) 94 is 90, 91, 92 and 93.
+    const int lo = int(std::ceil(lower)), hi = int(std::ceil(upper)) - 1;
+    if (lo == hi) return QStringLiteral("%1 %").arg(lo);
+    if (lo < hi) return QStringLiteral("%1%2%3 %").arg(lo).arg(QChar(0x2013)).arg(hi);   // en dash
+    return QStringLiteral("%1%2<%3 %").arg(lower).arg(QChar(0x2013)).arg(upper);       // no whole reading inside
+}
+
+QColor gAnalysisChart::rangeColor(int index, int count)
+{
+    if (index <= 0) return QColor(0x9e, 0xca, 0xe1);   // the highest range: a calm blue
+    const int below = count - 1;                         // ranges below the highest threshold
+    const int step = below > 1 ? qRound(double(index - 1) * (kLowSpo2Count - 1) / (below - 1)) : kLowSpo2Count - 1;
+    return kLowSpo2[qBound(0, step, kLowSpo2Count - 1)];
+}

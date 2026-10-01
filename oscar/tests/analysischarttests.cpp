@@ -20,17 +20,46 @@ void AnalysisChartTests::testSpo2RangeSharesAddUpToTheNight()
     const QVector<gAnalysisChart::RangeShare> shares =
         gAnalysisChart::spo2RangeShares(hist, 3600, { 94, 90, 88, 85, 80 });
     QCOMPARE(shares.size(), 6);                                   // lowest range first
-    QCOMPARE(shares.first().name, QStringLiteral("< 80%"));
-    QCOMPARE(shares.last().name, QStringLiteral(">= 94%"));
+    QCOMPARE(shares.first().name, QStringLiteral("< 80 %"));
+    QCOMPARE(shares.last().name, QStringLiteral("\u2265 94 %"));
     QCOMPARE(shares.last().seconds, 3000);
-    QCOMPARE(shares[4].name, QStringLiteral("90-94%"));
+    QCOMPARE(shares.last().colorIndex, 0);
+    QCOMPARE(shares[4].name, QStringLiteral("90\u201393 %"));
     QCOMPARE(shares[4].seconds, 500);
-    QCOMPARE(shares[2].name, QStringLiteral("85-88%"));
+    QCOMPARE(shares[2].name, QStringLiteral("85\u201387 %"));
     QCOMPARE(shares[2].seconds, 100);
     double total = 0;
     for (const auto &s : shares) total += s.percent;
     QCOMPARE(qRound(total * 10), 1000);
     QCOMPARE(qRound(shares.last().percent * 100), 8333);
+}
+
+// Readings are whole %, so a range is named by the readings it holds, the same way in the
+// Overview and the Daily view.
+void AnalysisChartTests::testSpo2RangeLabels()
+{
+    QCOMPARE(gAnalysisChart::spo2RangeLabel(90, 94), QStringLiteral("90\u201393 %"));
+    QCOMPARE(gAnalysisChart::spo2RangeLabel(88, 89), QStringLiteral("88 %"));        // a single reading
+    QCOMPARE(gAnalysisChart::spo2RangeLabel(88.5, 90), QStringLiteral("89 %"));      // 89 is the only one inside
+    QCOMPARE(gAnalysisChart::spo2RangeLabel(85.5, 88.5), QStringLiteral("86\u201388 %"));
+    QCOMPARE(gAnalysisChart::spo2RangeLabel(90.2, 90.5), QStringLiteral("90.2\u2013<90.5 %"));   // none inside
+    QCOMPARE(gAnalysisChart::spo2RangeLabel(-1, 85), QStringLiteral("< 85 %"));
+    QCOMPARE(gAnalysisChart::spo2RangeLabel(94, 101), QStringLiteral("\u2265 94 %"));
+}
+
+// The ranges below the highest threshold go from light to dark as they go lower, whatever
+// their number, so the deepest is always the darkest.
+void AnalysisChartTests::testSpo2RangeColorsDarkenWithDepth()
+{
+    for (int count = 2; count <= 7; ++count) {
+        int lastLightness = 256;
+        for (int i = 1; i < count; ++i) {
+            const int l = gAnalysisChart::rangeColor(i, count).lightness();
+            QVERIFY2(l < lastLightness, qPrintable(QStringLiteral("count %1 range %2").arg(count).arg(i)));
+            lastLightness = l;
+        }
+        QCOMPARE(gAnalysisChart::rangeColor(count - 1, count), QColor(0xb1, 0x00, 0x26));
+    }
 }
 
 void AnalysisChartTests::testProblemZoneShares()

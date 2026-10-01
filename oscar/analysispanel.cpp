@@ -14,6 +14,7 @@
 #include <QVBoxLayout>
 #include <cmath>
 
+#include "Graphs/gAnalysisCharts.h"
 #include "SleepLib/day.h"
 #include "SleepLib/machine_common.h"
 #include "SleepLib/schema.h"
@@ -176,16 +177,12 @@ QString AnalysisPanel::sidebarHtml(Day *day, const DayResult &r, const QString &
         }
         html += QStringLiteral("</table>");
         if (!spo2Thresholds.isEmpty()) {
+            // the ranges as the Overview's SpO2 chart names and counts them, highest first
             html += kTable;
-            int above = o.spo2Seconds - o.spo2SecondsBelow(spo2Thresholds.first());
-            html += row3(QStringLiteral("&ge; %1 %").arg(spo2Thresholds.first()), number(above / 60.0), number(100.0 * above / qMax(1, o.spo2Seconds)));
-            for (int i = 1; i < spo2Thresholds.size(); ++i) {
-                const int s = o.spo2SecondsBelow(spo2Thresholds[i - 1]) - o.spo2SecondsBelow(spo2Thresholds[i]);
-                html += row3(QStringLiteral("%1&ndash;&lt;%2 %").arg(spo2Thresholds[i]).arg(spo2Thresholds[i - 1]),
-                             number(s / 60.0), number(100.0 * s / qMax(1, o.spo2Seconds)));
+            const QVector<gAnalysisChart::RangeShare> shares = gAnalysisChart::spo2RangeShares(o.spo2Hist, o.spo2Seconds, spo2Thresholds);
+            for (auto it = shares.crbegin(); it != shares.crend(); ++it) {
+                html += row3(it->name.toHtmlEscaped(), number(it->seconds / 60.0), number(it->percent));
             }
-            const int below = o.spo2SecondsBelow(spo2Thresholds.last());
-            html += row3(QStringLiteral("&lt; %1 %").arg(spo2Thresholds.last()), number(below / 60.0), number(100.0 * below / qMax(1, o.spo2Seconds)));
             html += QStringLiteral("</table>");
         }
 

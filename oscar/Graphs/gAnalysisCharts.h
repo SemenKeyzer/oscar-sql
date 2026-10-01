@@ -23,7 +23,7 @@ class gAnalysisChart : public gSummaryChart
     enum Kind {
         Ahi,            //!< the analysis' AHI by event type (the device's in the tooltip)
         Odi,            //!< ODI 4 % with the rest of ODI 3 % on top
-        Spo2Ranges,     //!< share of the night in each SpO2 range of the configured thresholds
+        Spo2Ranges,     //!< share of the night below the highest SpO2 threshold, by range
         ProblemZones,   //!< share of the night in problem zones, marked ones apart
         HypoxicBurden,  //!< %·min/h of desaturations linked to breathing events
         FlowLimitation, //!< % of the analysed time with limited breaths
@@ -42,6 +42,15 @@ class gAnalysisChart : public gSummaryChart
     //! The ranges of the profile's \a thresholds (highest first), lowest range first,
     //! from a night's SpO2 histogram (seconds per whole %).
     static QVector<RangeShare> spo2RangeShares(const QVector<int> &hist, int oxiSeconds, const QList<double> &thresholds);
+    //! The label of the SpO2 range from \a lower (inclusive) to \a upper (exclusive) on
+    //! whole-% readings, as the Overview and the Daily view show it: "90–93 %". A
+    //! negative \a lower is the lowest range ("< 85 %"), an \a upper above 100 the
+    //! highest ("≥ 94 %").
+    static QString spo2RangeLabel(double lower, double upper);
+    //! Colour of range \a index (0 the highest) of \a count: a colour-blind-safe sequence
+    //! from yellow for the mildest range below the highest to dark red for the lowest;
+    //! the problem zones use the same colours.
+    static QColor rangeColor(int index, int count);
     //! Shares (%) of the recorded time in problem zones: all of them, and the marked ones.
     static QPair<double, double> problemZoneShares(int zoneSeconds, int markedSeconds, int oxiSeconds);
     virtual ~gAnalysisChart() {}

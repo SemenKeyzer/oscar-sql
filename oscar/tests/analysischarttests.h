@@ -18,6 +18,8 @@ class AnalysisChartTests : public QObject
 
 private slots:
     void testSpo2RangeSharesAddUpToTheNight();
+    void testSpo2RangeLabels();
+    void testSpo2RangeColorsDarkenWithDepth();
     void testProblemZoneShares();
 };
 
