@@ -1245,7 +1245,7 @@ Size: %2</source>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/cms50_loader.cpp" line="492"/>
         <source>Please ensure you select &apos;upload&apos; from the oximeter devices menu.</source>
-        <translation>Убедитесь, что выбрана &apos;Загрузка&apos; в меню &apos;Устройства&apos; оксиметра.</translation>
+        <translation>Убедитесь, что в меню оксиметра выбран пункт отправки (&apos;Upload&apos;).</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/cms50_loader.cpp" line="560"/>
@@ -1348,7 +1348,7 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
     <message>
         <location filename="../oscar/network/cloud_uploader.cpp" line="67"/>
         <source>No file specified for upload.</source>
-        <translation>Файл для загрузки не указан.</translation>
+        <translation>Файл для отправки не указан.</translation>
     </message>
     <message>
         <location filename="../oscar/network/cloud_uploader.cpp" line="73"/>
@@ -1358,7 +1358,7 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
     <message>
         <location filename="../oscar/network/cloud_uploader.cpp" line="80"/>
         <source>File is too large for upload (%1 MB). The maximum is 512 MB.</source>
-        <translation>Файл слишком велик для загрузки (%1 МБ). Максимальный размер — 512 МБ.</translation>
+        <translation>Файл слишком велик для отправки (%1 МБ). Максимальный размер — 512 МБ.</translation>
     </message>
     <message>
         <location filename="../oscar/network/cloud_uploader.cpp" line="90"/>
@@ -1375,32 +1375,32 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
     <message>
         <location filename="../oscar/network/cloud_uploader.cpp" line="191"/>
         <source>Upload was cancelled.</source>
-        <translation>Загрузка была отменена.</translation>
+        <translation>Отправка отменена.</translation>
     </message>
     <message>
         <location filename="../oscar/network/cloud_uploader.cpp" line="202"/>
         <source>Upload rejected: too many requests. Please wait a moment and try again.</source>
-        <translation>Загрузка отклонена: слишком много запросов. Подождите немного и повторите попытку.</translation>
+        <translation>Отправка отклонена: слишком много запросов. Подождите немного и повторите попытку.</translation>
     </message>
     <message>
         <location filename="../oscar/network/cloud_uploader.cpp" line="204"/>
         <source>The upload service (0x0.st) is temporarily unavailable. Please try again later.</source>
-        <translation>Сервис загрузки (0x0.st) временно недоступен. Пожалуйста, повторите попытку позже.</translation>
+        <translation>Сервис отправки (0x0.st) временно недоступен. Пожалуйста, повторите попытку позже.</translation>
     </message>
     <message>
         <location filename="../oscar/network/cloud_uploader.cpp" line="206"/>
         <source>Upload failed (HTTP %1): %2</source>
-        <translation>Ошибка загрузки (HTTP %1): %2</translation>
+        <translation>Ошибка отправки (HTTP %1): %2</translation>
     </message>
     <message>
         <location filename="../oscar/network/cloud_uploader.cpp" line="210"/>
         <source>Upload failed: %1</source>
-        <translation>Ошибка загрузки: %1</translation>
+        <translation>Ошибка отправки: %1</translation>
     </message>
     <message>
         <location filename="../oscar/network/cloud_uploader.cpp" line="231"/>
         <source>Upload succeeded but no URL was returned.</source>
-        <translation>Загрузка выполнена успешно, но URL не был возвращён.</translation>
+        <translation>Файл отправлен, но URL не был возвращён.</translation>
     </message>
     <message>
         <location filename="../oscar/network/cloud_uploader.cpp" line="246"/>
@@ -3333,7 +3333,7 @@ Hint: Change the start date first</source>
     <message>
         <location filename="../oscar/network/dropbox_uploader.cpp" line="107"/>
         <source>No file specified for upload.</source>
-        <translation>Файл для загрузки не указан.</translation>
+        <translation>Файл для отправки не указан.</translation>
     </message>
     <message>
         <location filename="../oscar/network/dropbox_uploader.cpp" line="150"/>
@@ -3348,7 +3348,7 @@ Hint: Change the start date first</source>
     <message>
         <location filename="../oscar/network/dropbox_uploader.cpp" line="169"/>
         <source>File is too large for Dropbox simple upload (%1 MB). Maximum is 150 MB.</source>
-        <translation>Файл слишком велик для простой загрузки в Dropbox (%1 МБ). Максимальный размер — 150 МБ.</translation>
+        <translation>Файл слишком велик для простой отправки в Dropbox (%1 МБ). Максимальный размер — 150 МБ.</translation>
     </message>
     <message>
         <location filename="../oscar/network/dropbox_uploader.cpp" line="177"/>
@@ -3360,7 +3360,7 @@ Hint: Change the start date first</source>
     <message>
         <location filename="../oscar/network/dropbox_uploader.cpp" line="227"/>
         <source>Upload was cancelled.</source>
-        <translation>Загрузка была отменена.</translation>
+        <translation>Отправка отменена.</translation>
     </message>
     <message>
         <location filename="../oscar/network/dropbox_uploader.cpp" line="239"/>
@@ -3370,22 +3370,22 @@ Hint: Change the start date first</source>
     <message>
         <location filename="../oscar/network/dropbox_uploader.cpp" line="242"/>
         <source>Dropbox upload failed (HTTP %1): %2</source>
-        <translation>Ошибка загрузки в Dropbox (HTTP %1): %2</translation>
+        <translation>Ошибка отправки в Dropbox (HTTP %1): %2</translation>
     </message>
     <message>
         <location filename="../oscar/network/dropbox_uploader.cpp" line="260"/>
         <source>Upload succeeded but Dropbox did not return a file path.</source>
-        <translation>Загрузка выполнена успешно, но Dropbox не вернул путь к файлу.</translation>
+        <translation>Файл отправлен, но Dropbox не вернул путь к файлу.</translation>
     </message>
     <message>
         <location filename="../oscar/network/dropbox_uploader.cpp" line="321"/>
         <source>File uploaded to Dropbox but could not create a shared link (HTTP %1).</source>
-        <translation>Файл загружен в Dropbox, но не удалось создать ссылку для общего доступа (HTTP %1).</translation>
+        <translation>Файл отправлен в Dropbox, но не удалось создать ссылку для общего доступа (HTTP %1).</translation>
     </message>
     <message>
         <location filename="../oscar/network/dropbox_uploader.cpp" line="332"/>
         <source>File uploaded but Dropbox did not return a share link.</source>
-        <translation>Файл загружен, но Dropbox не вернул ссылку для общего доступа.</translation>
+        <translation>Файл отправлен, но Dropbox не вернул ссылку для общего доступа.</translation>
     </message>
 </context>
 <context>
@@ -3683,7 +3683,7 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
     <message>
         <location filename="../oscar/network/googledrive_uploader.cpp" line="129"/>
         <source>No file specified for upload.</source>
-        <translation>Файл для загрузки не указан.</translation>
+        <translation>Файл для отправки не указан.</translation>
     </message>
     <message>
         <location filename="../oscar/network/googledrive_uploader.cpp" line="172"/>
@@ -3696,7 +3696,7 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <location filename="../oscar/network/googledrive_uploader.cpp" line="337"/>
         <location filename="../oscar/network/googledrive_uploader.cpp" line="408"/>
         <source>Upload was cancelled.</source>
-        <translation>Загрузка была отменена.</translation>
+        <translation>Отправка отменена.</translation>
     </message>
     <message>
         <location filename="../oscar/network/googledrive_uploader.cpp" line="223"/>
@@ -3726,12 +3726,12 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
     <message>
         <location filename="../oscar/network/googledrive_uploader.cpp" line="352"/>
         <source>Google Drive upload failed to start (HTTP %1): %2</source>
-        <translation>Не удалось начать загрузку на Google Drive (HTTP %1): %2</translation>
+        <translation>Не удалось начать отправку на Google Drive (HTTP %1): %2</translation>
     </message>
     <message>
         <location filename="../oscar/network/googledrive_uploader.cpp" line="366"/>
         <source>Google Drive did not return an upload session URI.</source>
-        <translation>Google Drive не вернул URI сеанса загрузки.</translation>
+        <translation>Google Drive не вернул URI сеанса отправки.</translation>
     </message>
     <message>
         <location filename="../oscar/network/googledrive_uploader.cpp" line="382"/>
@@ -3743,17 +3743,17 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
     <message>
         <location filename="../oscar/network/googledrive_uploader.cpp" line="421"/>
         <source>Google Drive upload failed (HTTP %1): %2</source>
-        <translation>Загрузка на Google Drive завершилась ошибкой (HTTP %1): %2</translation>
+        <translation>Ошибка отправки на Google Drive (HTTP %1): %2</translation>
     </message>
     <message>
         <location filename="../oscar/network/googledrive_uploader.cpp" line="435"/>
         <source>Upload succeeded but Google Drive did not return a file ID.</source>
-        <translation>Загрузка выполнена успешно, но Google Drive не вернул идентификатор файла.</translation>
+        <translation>Файл отправлен, но Google Drive не вернул идентификатор файла.</translation>
     </message>
     <message>
         <location filename="../oscar/network/googledrive_uploader.cpp" line="480"/>
         <source>File uploaded to Google Drive but could not create a share link (HTTP %1).</source>
-        <translation>Файл загружен на Google Drive, но не удалось создать ссылку для общего доступа (HTTP %1).</translation>
+        <translation>Файл отправлен на Google Drive, но не удалось создать ссылку для общего доступа (HTTP %1).</translation>
     </message>
 </context>
 <context>
@@ -6627,7 +6627,7 @@ Outdated days need it after an update or a change of settings. All days runs eve
     <message>
         <location filename="../oscar/network/onedrive_uploader.cpp" line="109"/>
         <source>No file specified for upload.</source>
-        <translation>Файл для загрузки не указан.</translation>
+        <translation>Файл для отправки не указан.</translation>
     </message>
     <message>
         <location filename="../oscar/network/onedrive_uploader.cpp" line="152"/>
@@ -6642,13 +6642,13 @@ Outdated days need it after an update or a change of settings. All days runs eve
     <message>
         <location filename="../oscar/network/onedrive_uploader.cpp" line="181"/>
         <source>File is too large for OneDrive upload (%1 MB). Maximum is 60 MB.</source>
-        <translation>Файл слишком велик для загрузки на OneDrive (%1 Мбайт). Максимальный размер — 60 Мбайт.</translation>
+        <translation>Файл слишком велик для отправки на OneDrive (%1 Мбайт). Максимальный размер — 60 Мбайт.</translation>
     </message>
     <message>
         <location filename="../oscar/network/onedrive_uploader.cpp" line="224"/>
         <location filename="../oscar/network/onedrive_uploader.cpp" line="293"/>
         <source>Upload was cancelled.</source>
-        <translation>Загрузка была отменена.</translation>
+        <translation>Отправка отменена.</translation>
     </message>
     <message>
         <location filename="../oscar/network/onedrive_uploader.cpp" line="231"/>
@@ -6658,12 +6658,12 @@ Outdated days need it after an update or a change of settings. All days runs eve
     <message>
         <location filename="../oscar/network/onedrive_uploader.cpp" line="234"/>
         <source>OneDrive upload session creation failed (HTTP %1).</source>
-        <translation>Не удалось создать сеанс загрузки OneDrive (HTTP %1).</translation>
+        <translation>Не удалось создать сеанс отправки OneDrive (HTTP %1).</translation>
     </message>
     <message>
         <location filename="../oscar/network/onedrive_uploader.cpp" line="247"/>
         <source>OneDrive did not return an upload URL.</source>
-        <translation>OneDrive не вернул URL для загрузки.</translation>
+        <translation>OneDrive не вернул URL для отправки.</translation>
     </message>
     <message>
         <location filename="../oscar/network/onedrive_uploader.cpp" line="263"/>
@@ -6675,29 +6675,29 @@ Outdated days need it after an update or a change of settings. All days runs eve
     <message>
         <location filename="../oscar/network/onedrive_uploader.cpp" line="306"/>
         <source>OneDrive upload failed (HTTP %1): %2</source>
-        <translation>Загрузка на OneDrive не удалась (HTTP %1): %2</translation>
+        <translation>Ошибка отправки на OneDrive (HTTP %1): %2</translation>
     </message>
     <message>
         <location filename="../oscar/network/onedrive_uploader.cpp" line="315"/>
         <source>OneDrive upload returned unexpected status (HTTP %1).</source>
-        <translation>OneDrive вернул неожиданный статус при загрузке (HTTP %1).</translation>
+        <translation>OneDrive вернул неожиданный статус при отправке (HTTP %1).</translation>
     </message>
     <message>
         <location filename="../oscar/network/onedrive_uploader.cpp" line="328"/>
         <source>Upload succeeded but OneDrive did not return a file ID.</source>
-        <translation>Загрузка выполнена успешно, но OneDrive не вернул идентификатор файла.</translation>
+        <translation>Файл отправлен, но OneDrive не вернул идентификатор файла.</translation>
     </message>
     <message>
         <location filename="../oscar/network/onedrive_uploader.cpp" line="370"/>
         <source>File uploaded to OneDrive but could not create a share link (HTTP %1).
 Note: anonymous sharing may be disabled in your Microsoft account settings.</source>
-        <translation>Файл загружен на OneDrive, но не удалось создать ссылку для общего доступа (HTTP %1).
+        <translation>Файл отправлен на OneDrive, но не удалось создать ссылку для общего доступа (HTTP %1).
 Примечание: анонимный общий доступ может быть отключён в настройках вашей учётной записи Microsoft.</translation>
     </message>
     <message>
         <location filename="../oscar/network/onedrive_uploader.cpp" line="384"/>
         <source>File uploaded to OneDrive but the share link response was empty.</source>
-        <translation>Файл загружен на OneDrive, но ответ со ссылкой для общего доступа оказался пустым.</translation>
+        <translation>Файл отправлен на OneDrive, но ответ со ссылкой для общего доступа оказался пустым.</translation>
     </message>
 </context>
 <context>
@@ -6926,7 +6926,7 @@ Index</source>
     <message>
         <location filename="../oscar/oximeterimport.ui" line="648"/>
         <source>CMS50E/F users, when importing directly, please don&apos;t select upload on your device until OSCAR prompts you to.</source>
-        <translation>Пользователи CMS50E/F: при импорте с устройста, не начинайте загрузку на устройстве, пока OSCAR не предложит это сделать.</translation>
+        <translation>Пользователи CMS50E/F: при импорте напрямую не выбирайте на устройстве отправку (Upload), пока OSCAR не предложит это сделать.</translation>
     </message>
     <message>
         <location filename="../oscar/oximeterimport.ui" line="685"/>
@@ -6946,7 +6946,7 @@ Index</source>
     <message>
         <location filename="../oscar/oximeterimport.ui" line="787"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This option allows you to import (via cable) from your oximeters internal recordings.&lt;/p&gt;&lt;p&gt;After selecting on this option, old Contec oximeters will require you to use the device&apos;s menu to initiate the upload.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Этот вариант позволяет импортировать данные (через кабель) из оксиметра.&lt;/p&gt;&lt;p&gt;В cтарых оксиметрах Contec нужно использовать меню устройства для начала загрузки.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Этот вариант позволяет импортировать данные (через кабель) из оксиметра.&lt;/p&gt;&lt;p&gt;После выбора этого варианта на старых оксиметрах Contec нужно запустить отправку данных из меню устройства.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../oscar/oximeterimport.ui" line="829"/>
@@ -7119,7 +7119,7 @@ Index</source>
     <message>
         <location filename="../oscar/oximeterimport.ui" line="761"/>
         <source>Erase session after successful upload</source>
-        <translation>Удалить сеанс после успешной загрузки</translation>
+        <translation>Удалить сеанс после успешной отправки</translation>
     </message>
     <message>
         <location filename="../oscar/oximeterimport.ui" line="793"/>
@@ -7203,12 +7203,12 @@ Index</source>
     <message>
         <location filename="../oscar/oximeterimport.cpp" line="437"/>
         <source>Waiting for the device to start the upload process...</source>
-        <translation>Ожидание начала загрузки с устройства...</translation>
+        <translation>Ожидание, пока устройство начнёт отправку данных...</translation>
     </message>
     <message>
         <location filename="../oscar/oximeterimport.cpp" line="439"/>
         <source>Select upload option on %1</source>
-        <translation>Выберите опцию загрузки на %1</translation>
+        <translation>Выберите отправку (Upload) на %1</translation>
     </message>
     <message>
         <location filename="../oscar/oximeterimport.cpp" line="440"/>
@@ -7218,17 +7218,17 @@ Index</source>
     <message>
         <location filename="../oscar/oximeterimport.cpp" line="441"/>
         <source>Please connect your oximeter, enter it&apos;s menu and select upload to commence data transfer...</source>
-        <translation>Подключите свой оксиметр, зайдите в его меню и выберите Загрузить (upload), чтобы начать передачу данных...</translation>
+        <translation>Подключите оксиметр, откройте его меню и выберите отправку (Upload), чтобы начать передачу данных...</translation>
     </message>
     <message>
         <location filename="../oscar/oximeterimport.cpp" line="471"/>
         <source>%1 device is uploading data...</source>
-        <translation>Устройство %1 загружает данные...</translation>
+        <translation>Устройство %1 отправляет данные...</translation>
     </message>
     <message>
         <location filename="../oscar/oximeterimport.cpp" line="472"/>
         <source>Please wait until oximeter upload process completes. Do not unplug your oximeter.</source>
-        <translation>Дождитесь завершения процесса загрузки оксиметром. Не отключайте его.</translation>
+        <translation>Дождитесь, пока оксиметр закончит отправку данных. Не отключайте его.</translation>
     </message>
     <message>
         <location filename="../oscar/oximeterimport.cpp" line="491"/>
@@ -18645,7 +18645,7 @@ Common tables: daily_summaries, session_summaries, sessions, machines, session_s
     <message>
         <location filename="../oscar/sharedialog.ui" line="410"/>
         <source>Share link will appear here after upload</source>
-        <translation>Ссылка для общего доступа появится здесь после загрузки</translation>
+        <translation>Ссылка для общего доступа появится здесь после отправки</translation>
     </message>
     <message>
         <location filename="../oscar/sharedialog.ui" line="420"/>
@@ -18717,7 +18717,7 @@ Common tables: daily_summaries, session_summaries, sessions, machines, session_s
     <message>
         <location filename="../oscar/sharedialog.cpp" line="300"/>
         <source>Sign in to Dropbox to upload and create a share link.</source>
-        <translation>Войдите в Dropbox, чтобы загрузить файл и создать ссылку для общего доступа.</translation>
+        <translation>Войдите в Dropbox, чтобы отправить файл и создать ссылку для общего доступа.</translation>
     </message>
     <message>
         <location filename="../oscar/sharedialog.cpp" line="307"/>
@@ -18728,7 +18728,7 @@ Common tables: daily_summaries, session_summaries, sessions, machines, session_s
     <message>
         <location filename="../oscar/sharedialog.cpp" line="311"/>
         <source>Sign in to Google Drive to upload and create a share link.</source>
-        <translation>Войдите в Google Drive, чтобы загрузить файл и создать ссылку для общего доступа.</translation>
+        <translation>Войдите в Google Drive, чтобы отправить файл и создать ссылку для общего доступа.</translation>
     </message>
     <message>
         <location filename="../oscar/sharedialog.cpp" line="318"/>
@@ -18739,7 +18739,7 @@ Common tables: daily_summaries, session_summaries, sessions, machines, session_s
     <message>
         <location filename="../oscar/sharedialog.cpp" line="322"/>
         <source>Sign in to OneDrive to upload and create a share link.</source>
-        <translation>Войдите в OneDrive, чтобы загрузить файл и создать ссылку для общего доступа.</translation>
+        <translation>Войдите в OneDrive, чтобы отправить файл и создать ссылку для общего доступа.</translation>
     </message>
     <message>
         <location filename="../oscar/sharedialog.cpp" line="338"/>
@@ -18793,7 +18793,7 @@ Make sure you trust the recipient before sharing this data.</source>
 • Личные данные (имя, дата рождения, контакты и данные врача,
   записи дневника, имя профиля и пути к папкам) будут удалены;
   серийные номера устройств заменяются
-• При загрузке в облачный сервис любой, у кого есть ссылка, сможет
+• При отправке в облачный сервис любой, у кого есть ссылка, сможет
   скачать файл без входа, и срок действия ссылки не ограничен. Чтобы
   закрыть доступ, удалите файл из облачного хранилища.
 
@@ -18839,7 +18839,7 @@ Make sure you trust the recipient before sharing this data.</source>
     <message>
         <location filename="../oscar/sharedialog.cpp" line="675"/>
         <source>Could not create a temporary folder for the upload.</source>
-        <translation>Не удалось создать временную папку для загрузки.</translation>
+        <translation>Не удалось создать временную папку для отправки.</translation>
     </message>
     <message>
         <location filename="../oscar/sharedialog.cpp" line="708"/>
@@ -18867,7 +18867,7 @@ Make sure you trust the recipient before sharing this data.</source>
     <message>
         <location filename="../oscar/sharedialog.cpp" line="759"/>
         <source>Uploading...</source>
-        <translation>Загрузка...</translation>
+        <translation>Отправка...</translation>
     </message>
     <message>
         <location filename="../oscar/sharedialog.cpp" line="772"/>
@@ -18897,22 +18897,22 @@ Make sure you trust the recipient before sharing this data.</source>
     <message>
         <location filename="../oscar/sharedialog.cpp" line="797"/>
         <source>Uploading... (%1 / %2)</source>
-        <translation>Загрузка... (%1 / %2)</translation>
+        <translation>Отправка... (%1 / %2)</translation>
     </message>
     <message>
         <location filename="../oscar/sharedialog.cpp" line="810"/>
         <source>Upload complete. Link copied to clipboard.</source>
-        <translation>Загрузка завершена. Ссылка скопирована в буфер обмена.</translation>
+        <translation>Отправка завершена. Ссылка скопирована в буфер обмена.</translation>
     </message>
     <message>
         <location filename="../oscar/sharedialog.cpp" line="833"/>
         <source>Upload failed.</source>
-        <translation>Загрузка не удалась.</translation>
+        <translation>Отправка не удалась.</translation>
     </message>
     <message>
         <location filename="../oscar/sharedialog.cpp" line="834"/>
         <source>Upload Failed</source>
-        <translation>Ошибка загрузки</translation>
+        <translation>Ошибка отправки</translation>
     </message>
     <message>
         <location filename="../oscar/sharedialog.cpp" line="844"/>
