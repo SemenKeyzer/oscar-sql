@@ -868,11 +868,12 @@ void Profile::DataFormatError(Machine *m)
             arg(m->brand()).arg(m->model()).arg(m->serial())
             + "</font><br/><br/>";
 
+    // Only a backup the loader can actually rebuild from counts: telling the user their data will
+    // come back and then finding nothing to import would leave the device empty after the purge.
     bool backups = false;
     if (p_profile->session->backupCardData()) {
-        QString bpath = m->getBackupPath();
-        int cnt = dirCount(bpath);
-        if (cnt > 0) backups = true;
+        MachineLoader *loader = lookupLoader(m);
+        backups = loader ? loader->canRebuildFrom(m->getBackupPath()) : dirCount(m->getBackupPath()) > 0;
     }
 
     if (backups) {

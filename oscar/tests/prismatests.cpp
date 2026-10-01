@@ -10,6 +10,7 @@
 #include "../SleepLib/schema.h"
 #include "../SleepLib/common.h"
 
+#include <QDateTime>
 #include <QDir>
 #include <QFile>
 #include <QTemporaryDir>
@@ -186,6 +187,73 @@ void PrismaTests::testBackupKeepsTheOldTherapyFileWhenSessionsWouldBeLost()
     const QStringList kept = QDir(backup).entryList({ QStringLiteral("therapy.pdat.*") }, QDir::Files);
     QCOMPARE(kept.size(), 1);
     QCOMPARE(readFile(backup + QStringLiteral("/") + kept.first()), older);
+}
+
+// Earlier versions copied the card into Backup/<card name>/, where a rebuild never looks: the
+// copy moves up into the Backup folder, so the rebuild after a data-version change finds it.
+void PrismaTests::testLegacyBackupMovesUpIntoTheBackupFolder()
+{
+    QTemporaryDir tmp;
+    QVERIFY(tmp.isValid());
+    const QString backup = tmp.path() + QStringLiteral("/Backup");
+    const QString legacy = backup + QStringLiteral("/NO NAME");
+    QVERIFY(QDir().mkpath(legacy + QStringLiteral("/P2026")));
+    QVERIFY(writeFile(legacy + QStringLiteral("/config.pscfg"), "config"));
+    QVERIFY(writeFile(legacy + QStringLiteral("/P2026/session.wmedf"), "night"));
+
+    QVERIFY(!PrismaLoader::isCard(backup));
+    QVERIFY(PrismaLoader::migrateLegacyBackup(backup));
+    QVERIFY(PrismaLoader::isCard(backup));
+    QCOMPARE(readFile(backup + QStringLiteral("/config.pscfg")), QByteArray("config"));
+    QCOMPARE(readFile(backup + QStringLiteral("/P2026/session.wmedf")), QByteArray("night"));
+    QVERIFY(!QDir(legacy).exists());
+    QVERIFY(!PrismaLoader::migrateLegacyBackup(backup));   // nothing left to move
+}
+
+// Copies of several cards merge; where they overlap the newest configuration's card wins.
+void PrismaTests::testLegacyBackupsMergeNewestFirst()
+{
+    QTemporaryDir tmp;
+    QVERIFY(tmp.isValid());
+    const QString backup = tmp.path() + QStringLiteral("/Backup");
+    const QString older = backup + QStringLiteral("/OLD CARD");
+    const QString newer = backup + QStringLiteral("/NEW CARD");
+    QVERIFY(QDir().mkpath(older + QStringLiteral("/P1")));
+    QVERIFY(QDir().mkpath(newer + QStringLiteral("/P1")));
+    QVERIFY(writeFile(older + QStringLiteral("/config.pscfg"), "old config"));
+    QVERIFY(writeFile(older + QStringLiteral("/P1/a.wmedf"), "night a"));
+    QVERIFY(writeFile(older + QStringLiteral("/P1/b.wmedf"), "old b"));
+    QVERIFY(writeFile(newer + QStringLiteral("/config.pscfg"), "new config"));
+    QVERIFY(writeFile(newer + QStringLiteral("/P1/b.wmedf"), "new b"));
+    {
+        QFile f(older + QStringLiteral("/config.pscfg"));
+        QVERIFY(f.open(QIODevice::ReadWrite));
+        QVERIFY(f.setFileTime(QDateTime::currentDateTime().addDays(-30), QFileDevice::FileModificationTime));
+    }
+
+    QVERIFY(PrismaLoader::migrateLegacyBackup(backup));
+    QCOMPARE(readFile(backup + QStringLiteral("/config.pscfg")), QByteArray("new config"));
+    QCOMPARE(readFile(backup + QStringLiteral("/P1/b.wmedf")), QByteArray("new b"));
+    QCOMPARE(readFile(backup + QStringLiteral("/P1/a.wmedf")), QByteArray("night a"));   // only on the older card
+    QVERIFY(!QDir(newer).exists());
+    QVERIFY(QFile::exists(older + QStringLiteral("/P1/b.wmedf")));   // the older duplicate stays where it was
+}
+
+// The upgrade and Rebuild dialogs promise a rebuild only when there is a card to rebuild from.
+void PrismaTests::testRebuildNeedsACardInTheBackupFolder()
+{
+    QTemporaryDir tmp;
+    QVERIFY(tmp.isValid());
+    const QString backup = tmp.path() + QStringLiteral("/Backup");
+    PrismaLoader loader;
+    QVERIFY(!loader.canRebuildFrom(backup));                     // no folder
+    QVERIFY(QDir().mkpath(backup + QStringLiteral("/stray")));
+    QVERIFY(writeFile(backup + QStringLiteral("/stray/notes.txt"), "x"));
+    QVERIFY(!loader.canRebuildFrom(backup));                     // not empty, but no card
+    QVERIFY(QDir().mkpath(backup + QStringLiteral("/NO NAME")));
+    QVERIFY(writeFile(backup + QStringLiteral("/NO NAME/config.pcfg"), "config"));
+    QVERIFY(loader.canRebuildFrom(backup));                      // the old copy, moved into place
+    QVERIFY(QFile::exists(backup + QStringLiteral("/config.pcfg")));
 }
 
 // In CPAP and APAP the set pressure is OSCAR's "Pressure" (as for other brands), which also fills

@@ -10,6 +10,8 @@
 #include <QApplication>
 #include <QString>
 #include <QDateTime>
+#include <QFileInfo>
+#include <algorithm>
 #include <QBuffer>
 #include <QByteArray>
 #include <QDataStream>
@@ -583,11 +585,21 @@ PrismaLoader::~PrismaLoader()
 {
 }
 
+bool PrismaLoader::isCard(const QString &path)
+{
+    return QFile::exists(path + QDir::separator() + PRISMA_SMART_CONFIG_FILE)
+        || QFile::exists(path + QDir::separator() + PRISMA_LINE_CONFIG_FILE);
+}
+
 bool PrismaLoader::Detect(const QString & selectedPath)
 {
-    QFile prismaSmartConfigFile(selectedPath + QDir::separator() + PRISMA_SMART_CONFIG_FILE);
-    QFile prismaLineConfigFile(selectedPath + QDir::separator() + PRISMA_LINE_CONFIG_FILE);
-    return prismaSmartConfigFile.exists() || prismaLineConfigFile.exists();
+    return isCard(selectedPath);
+}
+
+bool PrismaLoader::canRebuildFrom(const QString & backupPath)
+{
+    migrateLegacyBackup(backupPath);
+    return isCard(backupPath);
 }
 
 int PrismaLoader::Open(const QString & selectedPath)
@@ -599,6 +611,8 @@ int PrismaLoader::Open(const QString & selectedPath)
     Q_ASSERT(m_ctx);
 
     qDebug() << "Prisma opening" << selectedPath;
+    // Rebuilding from the Backup folder: a copy an earlier version left in a sub-folder moves up first.
+    if (!isCard(selectedPath) && QDir(selectedPath).dirName() == QLatin1String("Backup")) migrateLegacyBackup(selectedPath);
 
 
     QFile prismaSmartConfigFile(selectedPath + QDir::separator() + PRISMA_SMART_CONFIG_FILE);
@@ -1354,3 +1368,51 @@ void PrismaLoader::readCurrentConfig(const QString &configPath)
     mz_zip_reader_end(&zip);
 }
 
+namespace {
+
+// Moves the contents of \a from into \a to. What \a to already has stays: the newer copy was
+// moved first. Empty folders left behind are removed.
+void moveInto(const QString &from, const QString &to)
+{
+    QDir src(from);
+    QDir().mkpath(to);
+    for (const QString &name : src.entryList(QDir::Files | QDir::Hidden)) {
+        const QString target = to + QLatin1Char('/') + name;
+        if (!QFile::exists(target) && !QFile::rename(src.filePath(name), target)) {
+            qWarning() << "Prisma backup: could not move" << src.filePath(name) << "to" << target;
+        }
+    }
+    for (const QString &name : src.entryList(QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden)) {
+        const QString target = to + QLatin1Char('/') + name;
+        if (!QFileInfo::exists(target) && QDir().rename(src.filePath(name), target)) continue;
+        moveInto(src.filePath(name), target);
+    }
+    QDir().rmdir(from);   // only when empty
+}
+
+QDateTime configTime(const QString &card)
+{
+    QFileInfo smart(card + QDir::separator() + PRISMA_SMART_CONFIG_FILE);
+    QFileInfo line(card + QDir::separator() + PRISMA_LINE_CONFIG_FILE);
+    return qMax(smart.exists() ? smart.lastModified() : QDateTime(), line.exists() ? line.lastModified() : QDateTime());
+}
+
+} // namespace
+
+bool PrismaLoader::migrateLegacyBackup(const QString &backup)
+{
+    if (isCard(backup)) return false;   // already where a rebuild looks
+    const QDir root(backup);
+    if (!root.exists()) return false;
+    QStringList cards;
+    for (const QString &name : root.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+        if (isCard(root.filePath(name))) cards << root.filePath(name);
+    }
+    if (cards.isEmpty()) return false;
+    std::sort(cards.begin(), cards.end(), [](const QString &a, const QString &b) { return configTime(a) > configTime(b); });
+    for (const QString &card : cards) {
+        qDebug() << "Prisma backup: moving the copy in" << card << "up into" << backup;
+        moveInto(card, backup);
+    }
+    return true;
+}

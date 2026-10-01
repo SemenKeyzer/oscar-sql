@@ -26,6 +26,9 @@ private slots:
     void testBackupGoesToTheBackupFolderRoot();
     void testBackupRefreshesAGrowingTherapyFile();
     void testBackupKeepsTheOldTherapyFileWhenSessionsWouldBeLost();
+    void testLegacyBackupMovesUpIntoTheBackupFolder();
+    void testLegacyBackupsMergeNewestFirst();
+    void testRebuildNeedsACardInTheBackupFolder();
     void testPressureWaveformForCpapAndApap();
     void testPeriodicBreathingEpochsAreImported();
     void testHumidifierLevelIsASessionSetting();

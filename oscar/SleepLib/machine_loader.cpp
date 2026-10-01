@@ -381,3 +381,8 @@ int MachineLoader::Open(const QStringList & paths)
     }
     return i;
 }
+
+bool MachineLoader::canRebuildFrom(const QString & backupPath)
+{
+    return dirCount(backupPath) > 0;
+}

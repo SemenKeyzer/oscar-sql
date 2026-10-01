@@ -65,6 +65,11 @@ class MachineLoader: public QObject
     //! \brief Look up and return device model information stored at path
     virtual MachineInfo PeekInfo(const QString & path) { Q_UNUSED(path); return MachineInfo(); }
 
+    //! \brief Whether a device can be rebuilt from its Backup folder at \a backupPath (after a
+    //! data-version change, or Data > Rebuild). A loader whose backups once went elsewhere can
+    //! move them into place here first.
+    virtual bool canRebuildFrom(const QString & backupPath);
+
     //! \brief Override this to scan path and detect new device data
     virtual int Open(const QString & path) = 0;
 

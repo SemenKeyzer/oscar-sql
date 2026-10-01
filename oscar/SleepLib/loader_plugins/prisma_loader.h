@@ -226,6 +226,12 @@ class PrismaLoader : public CPAPLoader
   public:
     //! \brief Copies a Prisma card into \a backup, the device's Backup folder (see PrismaLoader::Open).
     static void backupCard(const QString &card, const QString &backup);
+    //! \brief True when \a path holds a Prisma card (a Prisma SMART or Prisma Line configuration).
+    static bool isCard(const QString &path);
+    //! \brief Earlier versions copied the card into a sub-folder of the Backup folder named after
+    //! the card ("NO NAME"), where a rebuild never looks: moves such copies up into \a backup.
+    //! Several are merged, the newest configuration first. Returns whether anything moved.
+    static bool migrateLegacyBackup(const QString &backup);
     //! \brief The <P id="..." val="..."/> parameters of a Prisma Line configuration.xml.
     static QHash<int, int> parseConfigurationXml(const QByteArray &xml);
 
@@ -239,6 +245,9 @@ class PrismaLoader : public CPAPLoader
 
     //! \brief Detect if the given path contains a valid Folder structure
     virtual bool Detect(const QString & path);
+
+    //! \brief A Prisma device rebuilds only from a card in the Backup folder itself.
+    virtual bool canRebuildFrom(const QString & backupPath);
 
     //! \brief Load MachineInfo structure for Prisma Line machines.
     virtual MachineInfo PeekInfoFromPrismaLineConfig(const QString & path);

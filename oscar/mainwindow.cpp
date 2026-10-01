@@ -2864,7 +2864,8 @@ void MainWindow::on_actionRebuildCPAP(QAction *action)
     }
     if (!mach) return;
     QString bpath = mach->getBackupPath();
-    bool backups = (dirCount(bpath) > 0) ? true : false;
+    MachineLoader *backupLoader = lookupLoader(mach);
+    bool backups = backupLoader ? backupLoader->canRebuildFrom(bpath) : dirCount(bpath) > 0;
 
     if (backups) {
         if (staticQMessageBox::question(this, STR_MessageBox_Question,
@@ -2944,7 +2945,8 @@ void MainWindow::on_actionPurgeMachine(QAction *action)
 
     QString backupnotice;
     QString bpath = mach->getBackupPath();
-    bool backups = (dirCount(bpath) > 0) ? true : false;
+    MachineLoader *backupLoader = lookupLoader(mach);
+    bool backups = backupLoader ? backupLoader->canRebuildFrom(bpath) : dirCount(bpath) > 0;
     if (backups) {
         backupnotice = "<p>" + tr("Note as a precaution, the backup folder will be left in place.") + "</p>";
     } else {
