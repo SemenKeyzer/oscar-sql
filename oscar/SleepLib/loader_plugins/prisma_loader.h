@@ -24,7 +24,7 @@ class QDir;
 //********************************************************************************************
 // Please INCREMENT the following value when making changes to this loaders implementation
 // BEFORE making a release
-const int prisma_data_version = 2;
+const int prisma_data_version = 3;
 //
 //********************************************************************************************
 const QString prisma_class_name = STR_MACH_Prisma;
@@ -57,7 +57,9 @@ enum Prisma_Parameters {
     PRISMA_LINE_AUTOSTART = 1084,
     PRISMA_LINE_TUBE_TYPE = 1091,
     PRISMA_LINE_BACTERIUMFILTER = 1092,
+    PRISMA_LINE_HUMIDIFIER_LEVEL = 1083,
     PRISMA_LINE_SOFT_PAP_LEVEL = 1123,
+    PRISMA_LINE_SOFT_PAP_LOCK = 1124,     //!< only in configuration.xml, never in a session file
     PRISMA_LINE_SOFT_START_PRESS = 1125,
     PRISMA_LINE_SOFT_START_TIME = 1127,
     PRISMA_LINE_EEPAP_MIN = 1138,
@@ -167,7 +169,7 @@ class WMEDFInfo : public EDFInfo {
 class PrismaLoader;
 class PrismaEventFile;
 
-extern ChannelID Prisma_Mode, Prisma_SoftPAP, Prisma_TubeType;
+extern ChannelID Prisma_Mode, Prisma_SoftPAP, Prisma_TubeType, Prisma_HumidifierLevel, Prisma_SoftPAPLock;
 
 /*! \class PrismaImport
  *  \brief Contains the functions to parse a single session... multithreaded */
@@ -184,6 +186,12 @@ public:
     static void applySettings(QHash<ChannelID, QVariant> &settings, const QHash<int, int> &parameters);
     //! \brief The OSCAR channel each imported Prisma event type is stored in.
     static QList<QPair<ChannelID, QList<Prisma_Event_Type>>> eventChannels();
+    //! \brief The OSCAR channel for each EDF signal label, given the session's CPAP_Mode.
+    static QList<QPair<ChannelID, QString>> waveformChannels(int cpapMode);
+    //! \brief Settings known only from the device's current configuration (\a current, last changed
+    //! at \a changedAt): applied to a session only if it started after that change.
+    static void applyCurrentSettings(QHash<ChannelID, QVariant> &settings, const QHash<int, int> &current,
+                                     const QDateTime &changedAt, const QDateTime &sessionStart);
 
 protected:    
     PrismaLoader * loader;
@@ -218,6 +226,13 @@ class PrismaLoader : public CPAPLoader
   public:
     //! \brief Copies a Prisma card into \a backup, the device's Backup folder (see PrismaLoader::Open).
     static void backupCard(const QString &card, const QString &backup);
+    //! \brief The <P id="..." val="..."/> parameters of a Prisma Line configuration.xml.
+    static QHash<int, int> parseConfigurationXml(const QByteArray &xml);
+
+    //! \brief The device's current configuration from the card being imported (Prisma Line).
+    const QHash<int, int> &currentConfig() const { return m_currentConfig; }
+    //! \brief When the device last changed that configuration (device-local time).
+    QDateTime currentConfigChanged() const { return m_currentConfigChanged; }
 
     PrismaLoader();
     virtual ~PrismaLoader();
@@ -266,6 +281,11 @@ class PrismaLoader : public CPAPLoader
 
     //! \brief Scans the given directories for session data and create an import task for each logical session.
     void ScanFiles(const MachineInfo& info, const QString & path);
+
+private:
+    void readCurrentConfig(const QString &configPath);
+    QHash<int, int> m_currentConfig;
+    QDateTime m_currentConfigChanged;
 };
 
 //********************************************************************************************

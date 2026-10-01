@@ -18,6 +18,7 @@
 #include <QJsonObject>
 #include <QDebug>
 #include <QSet>
+#include <QRegularExpression>
 #include <QDir>
 #include <QFile>
 
@@ -46,7 +47,7 @@
 //********************************************************************************************
 
 // parameters
-ChannelID Prisma_Mode = 0, Prisma_SoftPAP = 0, Prisma_BiSoft = 0, Prisma_PSoft = 0, Prisma_PSoft_Min = 0, Prisma_AutoStart = 0, Prisma_Softstart_Time = 0, Prisma_Softstart_TimeMax = 0, Prisma_Softstart_Pressure = 0, Prisma_TubeType = 0, Prisma_PMaxOA = 0, Prisma_HumidifierLevel = 0;
+ChannelID Prisma_Mode = 0, Prisma_SoftPAP = 0, Prisma_BiSoft = 0, Prisma_PSoft = 0, Prisma_PSoft_Min = 0, Prisma_AutoStart = 0, Prisma_Softstart_Time = 0, Prisma_Softstart_TimeMax = 0, Prisma_Softstart_Pressure = 0, Prisma_TubeType = 0, Prisma_PMaxOA = 0, Prisma_HumidifierLevel = 0, Prisma_SoftPAPLock = 0;
 
 // waveforms
 ChannelID Prisma_ObstructLevel = 0, Prisma_rMVFluctuation = 0, Prisma_rRMV= 0, Prisma_PressureMeasured = 0, Prisma_FlowFull = 0, Prisma_EEPAP = 0;
@@ -188,30 +189,16 @@ void PrismaImport::run()
 
     // set session parameters
     applySettings(session->settings, eventFile->getParameters());
+    applyCurrentSettings(session->settings, loader->currentConfig(), loader->currentConfigChanged(),
+                         QDateTime::fromMSecsSinceEpoch(startdate));
 
     // add waveforms
-    // common waveforms, these exists on all prisma devices
-    AddWaveform(CPAP_MaskPressure, QString("Pressure"));
-    AddWaveform(CPAP_FlowRate, QString("RespFlow"));
-    AddWaveform(CPAP_Leak, QString("LeakFlowBreath"));
-    AddWaveform(Prisma_ObstructLevel, QString("ObstructLevel"));
-
-    // prisma smart
-    // waweforms specific for prisma smart / soft devices
-    AddWaveform(CPAP_EPAP, QString("EPAP"));
-    AddWaveform(CPAP_IPAP, QString("IPAP"));
-    AddWaveform(Prisma_rMVFluctuation, QString("rMVFluctuation"));
-    AddWaveform(Prisma_rRMV, QString("rRMV"));
-    AddWaveform(Prisma_PressureMeasured, QString("PressureMeasured"));
-    AddWaveform(Prisma_FlowFull, QString("FlowFull"));
+    for (const auto &entry : waveformChannels(session->settings.value(CPAP_Mode).toInt())) {
+        AddWaveform(entry.first, entry.second);
+    }
 
     // The CPAPPressure exitst but is not used
     // AddWaveform(CPAP_Pressure, QString("CPAPPressure"));
-
-    // prisma line
-    AddWaveform(CPAP_EPAP, QString("EPAPsoll"));
-    AddWaveform(CPAP_IPAP, QString("IPAPsoll"));
-    AddWaveform(CPAP_EEPAP, QString("EEPAPsoll"));
 
     // Channels that exist on varous Prisma Line devices, but are not handled yet
 
@@ -283,6 +270,9 @@ void PrismaImport::applySettings(QHash<ChannelID, QVariant> &settings, const QHa
 
     bool found = true;
     if (parameters.contains(PRISMA_LINE_MODE)) {
+        if (parameters.contains(PRISMA_LINE_HUMIDIFIER_LEVEL)) {
+            settings[Prisma_HumidifierLevel] = parameters[PRISMA_LINE_HUMIDIFIER_LEVEL];
+        }
 
         if (parameters[PRISMA_LINE_MODE] == PRISMA_MODE_AUTO_ST ||
             parameters[PRISMA_LINE_MODE] == PRISMA_MODE_AUTO_S) {
@@ -450,6 +440,7 @@ QList<QPair<ChannelID, QList<Prisma_Event_Type>>> PrismaImport::eventChannels()
         { CPAP_RERA, { PRISMA_EVENT_RERA } },
         { CPAP_VSnore, { PRISMA_EVENT_SNORE } },
         { CPAP_CSR, { PRISMA_EVENT_CS_RESPIRATION } },
+        { CPAP_PB, { PRISMA_EVENT_EPOCH_PERIODIC_BREATHING } },
         { CPAP_FlowLimit, { PRISMA_EVENT_FLOW_LIMITATION } },
 
         { Prisma_Artifact, { PRISMA_EVENT_ARTIFACT } },
@@ -654,6 +645,7 @@ int PrismaLoader::Open(const QString & selectedPath)
     }
     else if (prismaLineConfigFile.exists())
     {
+        readCurrentConfig(prismaLineConfigFile.fileName());
         // TODO AXT: this is just a quick hack to load the zipped therapy files for the
         // Prisma Line devices. This should be extracted into a loader class, like the
         // PrismaEventFile. If this extraction is done, then loading the machine info
@@ -1078,6 +1070,16 @@ void PrismaLoader::initChannels()
     chan->addOption(1, "Mode is not supported yet, please send sample data.");
     chan->addOption(2, "Mode partially supported, please send sample data.");
 
+    // Known only from the device's current configuration, so only for nights after it last changed.
+    channel.add(GRP_CPAP, chan = new Channel(Prisma_SoftPAPLock=0xe40e, SETTING,  MT_CPAP,  SESSION,
+        "Prisma_SoftPAPLock",
+        QObject::tr("SoftPAP lock"),
+        QObject::tr("Whether the softPAP level is locked on the device"),
+        QObject::tr("SoftPAP lock"),
+        "", LOOKUP, Qt::green));
+    chan->addOption(0, QObject::tr("Off"));
+    chan->addOption(1, QObject::tr("On"));
+
 
     channel.add(GRP_CPAP, chan = new Channel(Prisma_ObstructLevel=0xe440, WAVEFORM,  MT_CPAP,   SESSION,
         "Prisma_ObstructLevel",
@@ -1281,3 +1283,74 @@ void PrismaLoader::backupCard(const QString &card, const QString &backup)
         copyPath(src.filePath(dir), dst.filePath(dir));
     }
 }
+
+QList<QPair<ChannelID, QString>> PrismaImport::waveformChannels(int cpapMode)
+{
+    // In CPAP and APAP the set pressure is the therapy pressure, kept in CPAP_Pressure as for
+    // other brands (and read by the day's pressure summary); bilevel modes keep it as IPAP.
+    const ChannelID setPressure = (cpapMode == MODE_CPAP || cpapMode == MODE_APAP) ? CPAP_Pressure : CPAP_IPAP;
+    return {
+        // common waveforms, these exist on all prisma devices
+        { CPAP_MaskPressure, QStringLiteral("Pressure") },
+        { CPAP_FlowRate, QStringLiteral("RespFlow") },
+        { CPAP_Leak, QStringLiteral("LeakFlowBreath") },
+        { Prisma_ObstructLevel, QStringLiteral("ObstructLevel") },
+        // prisma smart / soft
+        { CPAP_EPAP, QStringLiteral("EPAP") },
+        { setPressure, QStringLiteral("IPAP") },
+        { Prisma_rMVFluctuation, QStringLiteral("rMVFluctuation") },
+        { Prisma_rRMV, QStringLiteral("rRMV") },
+        { Prisma_PressureMeasured, QStringLiteral("PressureMeasured") },
+        { Prisma_FlowFull, QStringLiteral("FlowFull") },
+        // prisma line
+        { CPAP_EPAP, QStringLiteral("EPAPsoll") },
+        { setPressure, QStringLiteral("IPAPsoll") },
+        { CPAP_EEPAP, QStringLiteral("EEPAPsoll") },
+    };
+}
+
+void PrismaImport::applyCurrentSettings(QHash<ChannelID, QVariant> &settings, const QHash<int, int> &current,
+                                        const QDateTime &changedAt, const QDateTime &sessionStart)
+{
+    if (!changedAt.isValid() || !sessionStart.isValid() || sessionStart < changedAt) return;
+    if (current.contains(PRISMA_LINE_SOFT_PAP_LOCK)) {
+        settings[Prisma_SoftPAPLock] = current.value(PRISMA_LINE_SOFT_PAP_LOCK);
+    }
+}
+
+QHash<int, int> PrismaLoader::parseConfigurationXml(const QByteArray &xml)
+{
+    QHash<int, int> parameters;
+    static const QRegularExpression re(QStringLiteral("<P\\s+id=\"(-?\\d+)\"\\s+val=\"(-?\\d+)\""));
+    auto it = re.globalMatch(QString::fromUtf8(xml));
+    while (it.hasNext()) {
+        const QRegularExpressionMatch m = it.next();
+        parameters.insert(m.captured(1).toInt(), m.captured(2).toInt());
+    }
+    return parameters;
+}
+
+void PrismaLoader::readCurrentConfig(const QString &configPath)
+{
+    m_currentConfig.clear();
+    m_currentConfigChanged = QDateTime();
+    QFile file(configPath);
+    if (!file.open(QIODevice::ReadOnly)) return;
+    const QByteArray data = file.readAll();
+    mz_zip_archive zip;
+    memset(&zip, 0, sizeof(zip));
+    if (!mz_zip_reader_init_mem(&zip, data.constData(), size_t(data.size()), 0)) return;
+    const int index = mz_zip_reader_locate_file(&zip, "mnt/flash/conf/configuration.xml", nullptr, 0);
+    mz_zip_archive_file_stat stat;
+    if (index >= 0 && mz_zip_reader_file_stat(&zip, mz_uint(index), &stat)) {
+        size_t size = 0;
+        void *xml = mz_zip_reader_extract_to_heap(&zip, mz_uint(index), &size, 0);
+        if (xml) {
+            m_currentConfig = parseConfigurationXml(QByteArray(static_cast<const char *>(xml), int(size)));
+            m_currentConfigChanged = QDateTime::fromSecsSinceEpoch(qint64(stat.m_time));   // device-local, like session starts
+            mz_free(xml);
+        }
+    }
+    mz_zip_reader_end(&zip);
+}
+

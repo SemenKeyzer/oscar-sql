@@ -26,6 +26,10 @@ private slots:
     void testBackupGoesToTheBackupFolderRoot();
     void testBackupRefreshesAGrowingTherapyFile();
     void testBackupKeepsTheOldTherapyFileWhenSessionsWouldBeLost();
+    void testPressureWaveformForCpapAndApap();
+    void testPeriodicBreathingEpochsAreImported();
+    void testHumidifierLevelIsASessionSetting();
+    void testSoftPapLockOnlyForNightsAfterTheSettingsChanged();
 };
 
 DECLARE_TEST(PrismaTests)

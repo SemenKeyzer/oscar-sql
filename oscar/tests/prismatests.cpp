@@ -188,3 +188,55 @@ void PrismaTests::testBackupKeepsTheOldTherapyFileWhenSessionsWouldBeLost()
     QCOMPARE(readFile(backup + QStringLiteral("/") + kept.first()), older);
 }
 
+// In CPAP and APAP the set pressure is OSCAR's "Pressure" (as for other brands), which also fills
+// the day's pressure summary; bilevel modes keep IPAP. The exhalation curve stays EPAP.
+void PrismaTests::testPressureWaveformForCpapAndApap()
+{
+    auto channelFor = [](int mode, const QString &label) {
+        for (const auto &entry : PrismaImport::waveformChannels(mode)) {
+            if (entry.second == label) return entry.first;
+        }
+        return ChannelID(0);
+    };
+    QCOMPARE(channelFor(MODE_APAP, QStringLiteral("IPAPsoll")), CPAP_Pressure);
+    QCOMPARE(channelFor(MODE_CPAP, QStringLiteral("IPAPsoll")), CPAP_Pressure);
+    QCOMPARE(channelFor(MODE_APAP, QStringLiteral("IPAP")), CPAP_Pressure);      // Prisma SMART
+    QCOMPARE(channelFor(MODE_APAP, QStringLiteral("EPAPsoll")), CPAP_EPAP);
+    QCOMPARE(channelFor(MODE_BILEVEL_AUTO_FIXED_PS, QStringLiteral("IPAPsoll")), CPAP_IPAP);
+}
+
+void PrismaTests::testPeriodicBreathingEpochsAreImported()
+{
+    ChannelID channel = 0;
+    for (const auto &entry : PrismaImport::eventChannels()) {
+        if (entry.second.contains(PRISMA_EVENT_EPOCH_PERIODIC_BREATHING)) channel = entry.first;
+    }
+    QCOMPARE(channel, CPAP_PB);
+}
+
+// P1083 is the humidifier level the device shows on its home screen; each session file carries it.
+void PrismaTests::testHumidifierLevelIsASessionSetting()
+{
+    QHash<int, int> parameters = lineApapParameters();
+    parameters[PRISMA_LINE_HUMIDIFIER_LEVEL] = 6;
+    QHash<ChannelID, QVariant> settings;
+    PrismaImport::applySettings(settings, parameters);
+    QCOMPARE(settings.value(Prisma_HumidifierLevel).toInt(), 6);
+}
+
+// The softPAP lock (P1124) is only in the device's current settings, never in a session file,
+// so it is known only for nights that started after those settings were last changed.
+void PrismaTests::testSoftPapLockOnlyForNightsAfterTheSettingsChanged()
+{
+    const QHash<int, int> current = PrismaLoader::parseConfigurationXml(
+        "<P id=\"1123\"  val=\"1\" />\n<P id=\"1124\"  val=\"1\" />\n<P id=\"1205\"  val=\"-2115965707\" />");
+    QCOMPARE(current.value(PRISMA_LINE_SOFT_PAP_LOCK), 1);
+    QCOMPARE(current.value(1205), -2115965707);
+    const QDateTime changed(QDate(2026, 10, 1), QTime(13, 33));
+    QHash<ChannelID, QVariant> later, earlier;
+    PrismaImport::applyCurrentSettings(later, current, changed, changed.addSecs(8 * 3600));
+    PrismaImport::applyCurrentSettings(earlier, current, changed, changed.addSecs(-3600));
+    QCOMPARE(later.value(Prisma_SoftPAPLock).toInt(), 1);
+    QVERIFY(!earlier.contains(Prisma_SoftPAPLock));
+}
+
