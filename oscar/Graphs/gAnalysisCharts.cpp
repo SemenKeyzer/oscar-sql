@@ -248,6 +248,23 @@ void gAnalysisChart::customCalc(Day *day, QVector<SummaryChartSlice> &slices)
     }
 }
 
+float gAnalysisChart::overlayPeak(int idx)
+{
+    return m_kind == Ahi ? m_device.value(idx) : 0;
+}
+
+void gAnalysisChart::drawBarOverlay(QPainter &painter, int idx, const QRectF &column, float miny, float ymult)
+{
+    // The device's AHI as a dark mark across the analysis' bar, so the two read together.
+    if (m_kind != Ahi || !m_device.contains(idx) || column.width() < 3) return;
+    const double y = column.bottom() - (m_device.value(idx) - miny) * ymult;
+    if (y < column.top()) return;
+    painter.save();
+    painter.setPen(QPen(QColor(0x20, 0x20, 0x20), 2));
+    painter.drawLine(QPointF(column.left(), y), QPointF(column.right(), y));
+    painter.restore();
+}
+
 QString gAnalysisChart::tooltipData(Day *, int idx)
 {
     return m_tooltip.value(idx);
@@ -276,7 +293,7 @@ void gAnalysisChart::afterDraw(QPainter &, gGraph &graph, QRectF rect)
     const QString midName = midcalc == 0 ? QObject::tr("Med.") : midcalc == 1 ? QObject::tr("W-Avg") : QObject::tr("Avg");
     QString txt = QObject::tr("Min: %1  %2: %3  Max: %4").arg(num(calc.min, 2), midName, num(calc.mid(), 2), num(calc.max, 2));
     if (m_kind == Ahi && m_deviceCalc.cnt > 0) {
-        txt += QStringLiteral("   ") + QObject::tr("Device %1: %2").arg(midName, num(m_deviceCalc.mid(), 2));
+        txt += QStringLiteral("   ") + QObject::tr("Device (dark mark) %1: %2").arg(midName, num(m_deviceCalc.mid(), 2));
     }
     graph.renderText(txt, rect.left(), rect.top() - 5 * graph.printScaleY(), 0);
 }

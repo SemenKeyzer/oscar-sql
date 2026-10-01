@@ -9736,7 +9736,7 @@ Would you like do this now?</source>
         <translation>см H2O</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gAnalysisCharts.cpp" line="276"/>
+        <location filename="../oscar/Graphs/gAnalysisCharts.cpp" line="293"/>
         <location filename="../oscar/Graphs/gSummaryChart.cpp" line="224"/>
         <source>Med.</source>
         <translation>Сред.</translation>
@@ -10843,14 +10843,14 @@ TTIA: %1</translation>
         <translation>Медиана</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gAnalysisCharts.cpp" line="276"/>
+        <location filename="../oscar/Graphs/gAnalysisCharts.cpp" line="293"/>
         <location filename="../oscar/Graphs/gSummaryChart.cpp" line="228"/>
         <location filename="../oscar/SleepLib/common.cpp" line="1116"/>
         <source>Avg</source>
         <translation>Сред</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gAnalysisCharts.cpp" line="276"/>
+        <location filename="../oscar/Graphs/gAnalysisCharts.cpp" line="293"/>
         <location filename="../oscar/Graphs/gSummaryChart.cpp" line="226"/>
         <location filename="../oscar/SleepLib/common.cpp" line="1117"/>
         <source>W-Avg</source>
@@ -14266,17 +14266,17 @@ You may continue, but some data may be incomplete or incorrect.</source>
         <translation type="vanished">%1, записано %2 ч %3 мин</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="426"/>
+        <location filename="../oscar/welcome.cpp" line="430"/>
         <source>%1 SpO2 spot checks, %2 pulse readings.</source>
         <translation>Разовых замеров SpO2: %1, пульса: %2.</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="429"/>
+        <location filename="../oscar/welcome.cpp" line="433"/>
         <source>Average SpO2 %1%, lowest %2%.</source>
         <translation>Средняя SpO2 %1%, минимальная %2%.</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="430"/>
+        <location filename="../oscar/welcome.cpp" line="434"/>
         <source>Below 90%: %1% of the time (%2 min).</source>
         <translation>Ниже 90%: %1% времени (%2 мин).</translation>
     </message>
@@ -14285,57 +14285,57 @@ You may continue, but some data may be incomplete or incorrect.</source>
         <translation type="vanished">Десатураций: %1, это %2 в час.</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="422"/>
+        <location filename="../oscar/welcome.cpp" line="426"/>
         <source>recorded %1 h %2 min</source>
         <translation>записано %1 ч %2 мин</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="423"/>
+        <location filename="../oscar/welcome.cpp" line="427"/>
         <source>SpO2 recorded %1 h %2 min</source>
         <translation>SpO2 записана %1 ч %2 мин</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="432"/>
+        <location filename="../oscar/welcome.cpp" line="436"/>
         <source>ODI 3%: %1 per hour (%2 desaturations).</source>
         <translation>ODI 3%: %1 в час (десатураций: %2).</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="434"/>
+        <location filename="../oscar/welcome.cpp" line="438"/>
         <source>Problem zones: %1, %2 min.</source>
         <translation>Проблемных зон: %1, %2 мин.</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="437"/>
+        <location filename="../oscar/welcome.cpp" line="441"/>
         <source>SpO2 drops (classic method, %1% below baseline for %2 s or longer): %3, %4 per hour.</source>
         <translation>Падений SpO2 (классический метод: на %1% ниже базовой линии на %2 с и дольше): %3, это %4 в час.</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="442"/>
+        <location filename="../oscar/welcome.cpp" line="446"/>
         <source>Pulse averaged %1, from %2 to %3 bpm.</source>
         <translation>Пульс в среднем %1, от %2 до %3 уд/мин.</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="508"/>
+        <location filename="../oscar/welcome.cpp" line="512"/>
         <source>Most recent Oximetry data: &lt;a onclick=&apos;alert(&quot;daily=%2&quot;);&apos;&gt;%1&lt;/a&gt; </source>
         <translation>Последние данные оксиметрии: &lt;a onclick=&apos;alert(&quot;daily=%2&quot;);&apos;&gt;%1&lt;/a&gt; </translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="509"/>
+        <location filename="../oscar/welcome.cpp" line="513"/>
         <source>(last night)</source>
         <translation>(вчера)</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="510"/>
+        <location filename="../oscar/welcome.cpp" line="514"/>
         <source>(1 day ago)</source>
         <translation>(1 день назад)</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="511"/>
+        <location filename="../oscar/welcome.cpp" line="515"/>
         <source>(%2 days ago)</source>
         <translation>(%2 дней назад)</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="521"/>
+        <location filename="../oscar/welcome.cpp" line="525"/>
         <source>No oximetry data has been imported yet.</source>
         <translation>Данные оксиметрии еще не импортированы.</translation>
     </message>
@@ -15977,6 +15977,11 @@ below %1%</source>
         <translation>%·мин/ч</translation>
     </message>
     <message>
+        <location filename="../oscar/Graphs/gAnalysisCharts.cpp" line="296"/>
+        <source>Device (dark mark) %1: %2</source>
+        <translation>Аппарат (тёмная черта) %1: %2</translation>
+    </message>
+    <message>
         <location filename="../oscar/Graphs/gAnalysisCharts.cpp" line="101"/>
         <location filename="../oscar/Graphs/gAnalysisCharts.cpp" line="103"/>
         <location filename="../oscar/Graphs/gAnalysisCharts.cpp" line="105"/>
@@ -16082,19 +16087,18 @@ Pulse rises: %1 per hour</source>
 Подъёмы пульса: %1 в час</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gAnalysisCharts.cpp" line="272"/>
+        <location filename="../oscar/Graphs/gAnalysisCharts.cpp" line="289"/>
         <source>Below %1%: %2%</source>
         <translation>Ниже %1%: %2%</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gAnalysisCharts.cpp" line="277"/>
+        <location filename="../oscar/Graphs/gAnalysisCharts.cpp" line="294"/>
         <source>Min: %1  %2: %3  Max: %4</source>
         <translation>Мин: %1  %2: %3  Макс: %4</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gAnalysisCharts.cpp" line="279"/>
         <source>Device %1: %2</source>
-        <translation>Аппарат %1: %2</translation>
+        <translation type="vanished">Аппарат %1: %2</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/analysis/analysis_channels.cpp" line="52"/>
@@ -19867,151 +19871,151 @@ Make sure you trust the recipient before sharing this data.</source>
         <translation>&lt;span style=&quot; font-weight:600;&quot;&gt;Предупреждение: &lt;/span&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Нужно заблокировать SD-карту ResMed S9 &lt;/span&gt;&lt;span style=&quot; font-weight:600; color:#ff0000;&quot;&gt;прежде чем вставлять в компьютер.&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;span style=&quot; color:#000000;&quot;&gt;&lt;br&gt;Некоторые операционные системы записывают индексные файлы на карту без предупреждения, что может сделать карту нечитаемой для вашего CPAP аппарата.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="212"/>
+        <location filename="../oscar/welcome.cpp" line="216"/>
         <source>It would be a good idea to check File-&gt;Preferences first,</source>
         <translation>Рекомедуется открыть Файл-&gt;Настройки,</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="213"/>
+        <location filename="../oscar/welcome.cpp" line="217"/>
         <source>as there are some options that affect import.</source>
         <translation>так как там есть ряд параметров, касающихся импорта данных.</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="214"/>
+        <location filename="../oscar/welcome.cpp" line="218"/>
         <source>Note that some preferences are forced when a ResMed device is detected</source>
         <translation>Обратите внимание, что некоторые настройки активируются при обнаружении аппарата ResMed</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="215"/>
+        <location filename="../oscar/welcome.cpp" line="219"/>
         <source>First import can take a few minutes.</source>
         <translation>Первый импорт данных может занять несколько минут.</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="227"/>
+        <location filename="../oscar/welcome.cpp" line="231"/>
         <source>The last time you used your %1...</source>
         <translation>Последний раз, когда вы использовали %1...</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="231"/>
+        <location filename="../oscar/welcome.cpp" line="235"/>
         <source>last night</source>
         <translation>вчера</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="233"/>
+        <location filename="../oscar/welcome.cpp" line="237"/>
         <source>today</source>
         <translation>сегодня</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="234"/>
+        <location filename="../oscar/welcome.cpp" line="238"/>
         <source>%2 days ago</source>
         <translation>%2 дней назад</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="236"/>
+        <location filename="../oscar/welcome.cpp" line="240"/>
         <source>was %1 (on %2)</source>
         <translation>был %1 (%2)</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="244"/>
+        <location filename="../oscar/welcome.cpp" line="248"/>
         <source>%1 hours, %2 minutes and %3 seconds</source>
         <translation>%1 ч, %2 мин и %3 сек</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="248"/>
+        <location filename="../oscar/welcome.cpp" line="252"/>
         <source>&lt;font color = red&gt;You only had the mask on for %1.&lt;/font&gt;</source>
         <translation>&lt;font color=red&gt;Маска была надета только в течение %1.&lt;/font&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="262"/>
+        <location filename="../oscar/welcome.cpp" line="266"/>
         <source>under</source>
         <translation>ниже</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="263"/>
+        <location filename="../oscar/welcome.cpp" line="267"/>
         <source>over</source>
         <translation>выше</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="264"/>
+        <location filename="../oscar/welcome.cpp" line="268"/>
         <source>reasonably close to</source>
         <translation>достаточно близко к</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="265"/>
+        <location filename="../oscar/welcome.cpp" line="269"/>
         <source>equal to</source>
         <translation>равно</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="279"/>
+        <location filename="../oscar/welcome.cpp" line="283"/>
         <source>You had an AHI of %1, which is %2 your %3 day average of %4.</source>
         <translation>У вас был AHI %1, что %2 вашего %3-дневного среднего значения %4.</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="318"/>
+        <location filename="../oscar/welcome.cpp" line="322"/>
         <source>Your pressure was under %1 %2 for %3% of the time.</source>
         <translation>Давление было ниже %1 %2 в %3% времени.</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="341"/>
-        <location filename="../oscar/welcome.cpp" line="360"/>
+        <location filename="../oscar/welcome.cpp" line="345"/>
+        <location filename="../oscar/welcome.cpp" line="364"/>
         <source>Your EPAP pressure fixed at %1 %2.</source>
         <translation>Давление EPAP установлено в %1 %2.</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="344"/>
-        <location filename="../oscar/welcome.cpp" line="364"/>
-        <location filename="../oscar/welcome.cpp" line="373"/>
-        <location filename="../oscar/welcome.cpp" line="379"/>
+        <location filename="../oscar/welcome.cpp" line="348"/>
+        <location filename="../oscar/welcome.cpp" line="368"/>
+        <location filename="../oscar/welcome.cpp" line="377"/>
+        <location filename="../oscar/welcome.cpp" line="383"/>
         <source>Your IPAP pressure was under %1 %2 for %3% of the time.</source>
         <translation>Давление IPAP было ниже %1 %2 в %3% времени.</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="354"/>
+        <location filename="../oscar/welcome.cpp" line="358"/>
         <source>Your EPAP pressure ranged from %1 to %2 %3.</source>
         <translation>Давление EPAP было в пределах от %1 до %2 %3.</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="372"/>
+        <location filename="../oscar/welcome.cpp" line="376"/>
         <source>Your EPAP pressure was under %1 %2 for %3% of the time.</source>
         <translation>Давление EPAP было ниже %1 %2 в %3% времени.</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="232"/>
+        <location filename="../oscar/welcome.cpp" line="236"/>
         <source>1 day ago</source>
         <translation>1 день назад</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="247"/>
+        <location filename="../oscar/welcome.cpp" line="251"/>
         <source>Your device was on for %1.</source>
         <translation>Ваш аппарат был включен в течении %1.</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="313"/>
+        <location filename="../oscar/welcome.cpp" line="317"/>
         <source>Your CPAP device used a constant %1 %2 of air</source>
         <translation>Ваш CPAP аппарат использовал постоянные %1 %2 воздуха</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="326"/>
+        <location filename="../oscar/welcome.cpp" line="330"/>
         <source>Your device used a constant %1-%2 %3 of air.</source>
         <translation>Аппарат использовал постоянное %1-%2 %3 воздуха.</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="333"/>
+        <location filename="../oscar/welcome.cpp" line="337"/>
         <source>Your device was under %1-%2 %3 for %4% of the time.</source>
         <translation>Ваш аппарат был менее %1-%2 %3 %4% времени.</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="378"/>
+        <location filename="../oscar/welcome.cpp" line="382"/>
         <source>Your EEPAP pressure was under %1 %2 for %3% of the time.</source>
         <translation>Давление EEPAP было ниже %1 %2 в %3% времени.</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="399"/>
+        <location filename="../oscar/welcome.cpp" line="403"/>
         <source>Your average leaks were %1 %2, which is %3 your %4 day average of %5.</source>
         <translation>Ваши средние утечки составили %1 %2, что составляет %3 вашего %4-дневного среднего значения %5.</translation>
     </message>
     <message>
-        <location filename="../oscar/welcome.cpp" line="405"/>
+        <location filename="../oscar/welcome.cpp" line="409"/>
         <source>No CPAP data has been imported yet.</source>
         <translation>Данные CPAP еще не импортированы.</translation>
     </message>

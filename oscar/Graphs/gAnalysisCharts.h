@@ -67,6 +67,8 @@ class gAnalysisChart : public gSummaryChart
     virtual void customCalc(Day *day, QVector<SummaryChartSlice> &slices);
     virtual QString tooltipData(Day *day, int idx);
     virtual void afterDraw(QPainter &painter, gGraph &graph, QRectF rect);
+    virtual void drawBarOverlay(QPainter &painter, int idx, const QRectF &column, float miny, float ymult);
+    virtual float overlayPeak(int idx);
 
     virtual Layer *Clone() {
         gAnalysisChart *sc = new gAnalysisChart(m_kind);

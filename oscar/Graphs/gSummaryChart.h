@@ -240,6 +240,12 @@ public:
     //! \brief Override to call stuff after draw is complete
     virtual void afterDraw(QPainter &, gGraph &, QRectF);
 
+    //! \brief Override to draw over a day's bar: \a column is the day's full-height column,
+    //! a value v sits at column.bottom() - (v - miny) * ymult.
+    virtual void drawBarOverlay(QPainter &, int /*idx*/, const QRectF & /*column*/, float /*miny*/, float /*ymult*/) {}
+    //! \brief The highest value drawBarOverlay() draws for a day, so the y-axis makes room for it.
+    virtual float overlayPeak(int /*idx*/) { return 0; }
+
     //! \brief Return any extra data to show beneath the date in the hover over tooltip
     virtual QString tooltipData(Day *, int);
 

@@ -543,6 +543,7 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
             }
             peak_value = qMax(peak_value, base);
         }
+        peak_value = qMax(peak_value, overlayPeak(i));
     }
     m_miny = 0;
     m_maxy = ceil(peak_value);
@@ -647,6 +648,7 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
 
                 lastval += val;
             }
+            drawBarOverlay(painter, idx, QRectF(lastx1, rect.top(), barw, rect.height()), miny, ymult);
         }
 
         lastx1 = x1;
