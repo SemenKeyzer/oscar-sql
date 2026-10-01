@@ -95,8 +95,8 @@ QString gAnalysisChart::units(Kind kind)
     switch (kind) {
     case Ahi: return QObject::tr("Events/hour\n(analysis)");
     case Odi: return QObject::tr("Desaturations\nper hour");
-    case Spo2Ranges: return QObject::tr("Minutes");
-    case ProblemZones: return QObject::tr("Minutes");
+    case Spo2Ranges: return QObject::tr("% of time");
+    case ProblemZones: return QObject::tr("% of time");
     case HypoxicBurden: return QObject::tr("%·min/h");
     case FlowLimitation: return QObject::tr("% of time");
     case PulseRises: break;
@@ -108,6 +108,8 @@ void gAnalysisChart::preCalc()
 {
     gSummaryChart::preCalc();
     m_deviceCalc.reset(idx_end - idx_start, midcalc);
+    m_rangeTotals.clear();
+    m_rangeSeconds = 0;
 }
 
 void gAnalysisChart::populate(Day *day, int idx)
@@ -155,29 +157,30 @@ void gAnalysisChart::populate(Day *day, int idx)
     case Spo2Ranges: {
         if (!r.hasOximetry || r.oxiSeconds <= 0) return;
         weight = r.oxiSeconds / 3600.0f;
+        // Shares of the night, so short and long nights compare; the tooltip adds the minutes.
         const QList<double> t = p_profile->analysis->spo2Thresholds();
+        const QVector<RangeShare> shares = spo2RangeShares(r.spo2Hist, r.oxiSeconds, t);
         QStringList detail;
-        // from the lowest range up, so the worst minutes sit at the bottom of the bar
-        for (int i = t.size(); i >= 0; --i) {
-            const int below = i < t.size() ? secondsBelow(r.spo2Hist, t[i]) : 0;
-            const int upto = i > 0 ? secondsBelow(r.spo2Hist, t[i - 1]) : r.oxiSeconds;
-            const float minutes = (upto - below) / 60.0f;
-            const QString name = i == t.size() ? QObject::tr("< %1%").arg(t.last())
-                               : i == 0 ? QObject::tr(">= %1%").arg(t.first())
-                               : QStringLiteral("%1-%2%").arg(t[i]).arg(t[i - 1]);
-            add(minutes, minutes, name, rangeColor(i, t.size() + 1));
-            if (minutes > 0) detail.prepend(QStringLiteral("%1: %2 min").arg(name, num(minutes, 0)));
+        for (const RangeShare &s : shares) {
+            add(s.percent, s.percent, s.name, rangeColor(s.colorIndex, t.size() + 1));
+            if (s.seconds > 0) {
+                detail.prepend(QObject::tr("%1: %2% (%3 min)").arg(s.name, num(s.percent), num(s.seconds / 60.0, 0)));
+            }
         }
-        tip = QStringLiteral("\n") + detail.join(QStringLiteral("\n"));
+        m_ranges[idx] = shares;
+        tip = QStringLiteral("\n") + QObject::tr("Recorded: %1 min").arg(num(r.oxiSeconds / 60.0, 0))
+            + QStringLiteral("\n") + detail.join(QStringLiteral("\n"));
         break;
     }
     case ProblemZones: {
         if (!r.hasOximetry) return;
         weight = r.oxiSeconds / 3600.0f;
-        const float marked = r.zoneSevereSeconds / 60.0f, all = r.zoneSeconds / 60.0f;
-        add(marked, marked, QObject::tr("Marked"), QColor(0xd0, 0x40, 0x30));
-        add(all, all - marked, QObject::tr("Moderate"), QColor(0xf0, 0xb0, 0x60));
-        tip = QObject::tr("\nProblem zones: %1 (%2 min, marked %3 min)").arg(r.nZones).arg(num(all, 0), num(marked, 0));
+        const QPair<double, double> share = problemZoneShares(r.zoneSeconds, r.zoneSevereSeconds, r.oxiSeconds);
+        add(share.second, share.second, QObject::tr("Marked"), QColor(0xd0, 0x40, 0x30));
+        add(share.first, share.first - share.second, QObject::tr("Moderate"), QColor(0xf0, 0xb0, 0x60));
+        tip = QStringLiteral("\n") + QObject::tr("Problem zones: %1, %2% of the time (%3 min), marked %4% (%5 min)")
+                  .arg(r.nZones).arg(num(share.first), num(r.zoneSeconds / 60.0, 0),
+                                     num(share.second), num(r.zoneSevereSeconds / 60.0, 0));
         break;
     }
     case HypoxicBurden: {
@@ -221,6 +224,15 @@ void gAnalysisChart::customCalc(Day *day, QVector<SummaryChartSlice> &slices)
     if (m_kind == Odi && !slices.isEmpty()) total = slices.last().value;   // ODI 3 %, which ODI 4 % is part of
     calcitems[0].update(total, m_weight.value(idx));
     if (m_kind == Ahi && m_device.contains(idx)) m_deviceCalc.update(m_device.value(idx), day->hours(MT_CPAP));
+    if (m_kind == Spo2Ranges && m_ranges.contains(idx)) {
+        for (const RangeShare &s : m_ranges.value(idx)) {
+            RangeShare &total = m_rangeTotals[s.colorIndex];
+            total.name = s.name;
+            total.colorIndex = s.colorIndex;
+            total.seconds += s.seconds;
+            m_rangeSeconds += s.seconds;
+        }
+    }
 }
 
 QString gAnalysisChart::tooltipData(Day *, int idx)
@@ -232,6 +244,17 @@ void gAnalysisChart::afterDraw(QPainter &, gGraph &graph, QRectF rect)
 {
     SummaryCalcItem &calc = calcitems[0];
     if (calc.cnt == 0) return;
+    if (m_kind == Spo2Ranges) {
+        // Every bar is the whole night (100 %), so show each range's share of all the shown nights.
+        QStringList parts;
+        for (auto it = m_rangeTotals.cbegin(); it != m_rangeTotals.cend(); ++it) {   // highest range first
+            if (it->seconds > 0 && m_rangeSeconds > 0) {
+                parts << QStringLiteral("%1: %2%").arg(it->name, num(100.0 * it->seconds / m_rangeSeconds));
+            }
+        }
+        graph.renderText(parts.join(QStringLiteral("   ")), rect.left(), rect.top() - 5 * graph.printScaleY(), 0);
+        return;
+    }
     const QString midName = midcalc == 0 ? QObject::tr("Med.") : midcalc == 1 ? QObject::tr("W-Avg") : QObject::tr("Avg");
     QString txt = QObject::tr("Min: %1  %2: %3  Max: %4").arg(num(calc.min, 2), midName, num(calc.mid(), 2), num(calc.max, 2));
     if (m_kind == Ahi && m_deviceCalc.cnt > 0) {
@@ -239,3 +262,30 @@ void gAnalysisChart::afterDraw(QPainter &, gGraph &graph, QRectF rect)
     }
     graph.renderText(txt, rect.left(), rect.top() - 5 * graph.printScaleY(), 0);
 }
+
+QVector<gAnalysisChart::RangeShare> gAnalysisChart::spo2RangeShares(const QVector<int> &hist, int oxiSeconds,
+                                                                      const QList<double> &t)
+{
+    QVector<RangeShare> shares;
+    // from the lowest range up, so the worst time sits at the bottom of the bar
+    for (int i = t.size(); i >= 0; --i) {
+        const int below = i < t.size() ? secondsBelow(hist, t[i]) : 0;
+        const int upto = i > 0 ? secondsBelow(hist, t[i - 1]) : oxiSeconds;
+        RangeShare s;
+        s.name = i == t.size() ? QObject::tr("< %1%").arg(t.last())
+               : i == 0 ? QObject::tr(">= %1%").arg(t.first())
+               : QStringLiteral("%1-%2%").arg(t[i]).arg(t[i - 1]);
+        s.seconds = qMax(0, upto - below);
+        s.percent = oxiSeconds > 0 ? 100.0 * s.seconds / oxiSeconds : 0;
+        s.colorIndex = i;
+        shares.append(s);
+    }
+    return shares;
+}
+
+QPair<double, double> gAnalysisChart::problemZoneShares(int zoneSeconds, int markedSeconds, int oxiSeconds)
+{
+    if (oxiSeconds <= 0) return { 0, 0 };
+    return { 100.0 * zoneSeconds / oxiSeconds, 100.0 * markedSeconds / oxiSeconds };
+}
+

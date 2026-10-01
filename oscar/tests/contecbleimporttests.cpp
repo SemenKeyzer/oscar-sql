@@ -20,6 +20,7 @@
 #include "SleepLib/loader_plugins/contec_ble_loader.h"
 #include "database/database_manager.h"
 #include "bluetoothoximeterpage.h"
+#include "SleepLib/oximetry_summary.h"
 
 #include <QCoreApplication>
 #include <QDir>
@@ -323,5 +324,34 @@ void ContecBleImportTests::testBluetoothBadgeIcon()
     QVERIFY2(badge.blue() > 150 && badge.red() < 80, qPrintable(badge.name()));
     const QColor rune = icon.pixelColor(98, 98);                           // badge centre: the white rune
     QVERIFY2(rune.red() > 200 && rune.green() > 200 && rune.blue() > 200, qPrintable(rune.name()));
+}
+
+// The start screen's oximetry summary: the same figures the Daily view's oximeter block uses,
+// plus the time below 90 % as a share of the night.
+void ContecBleImportTests::testOximetryNightSummary()
+{
+    Machine *mach = p_profile->CreateMachine(ContecBleLoader::infoForModel(QStringLiteral("CMS50FW")));
+    ContecBleImporter imp(mach);
+    const QDateTime start(QDate(2026, 9, 12), QTime(23, 0, 0));
+    Record r;
+    r.header = header(start, 600);
+    for (int i = 0; i < 600; ++i) {
+        r.spo2.append(i >= 300 && i < 360 ? 88 : 96);
+        r.pulse.append(i < 300 ? 60 : 70);
+    }
+    QCOMPARE(imp.save(r, Decision::Import), Outcome::Imported);
+    Day *day = p_profile->GetDay(QDate(2026, 9, 12), MT_OXIMETER);
+    QVERIFY(day);
+    const OximetryNight n = summarizeOximetry(day, MT_OXIMETER);
+    QVERIFY(n.valid);
+    QVERIFY(!n.spotChecks);
+    QCOMPARE(qRound(n.hours * 60), 10);
+    QCOMPARE(n.spo2Min, 88.0);
+    QVERIFY2(qAbs(n.spo2Avg - (540 * 96 + 60 * 88) / 600.0) < 0.2, qPrintable(QString::number(n.spo2Avg)));
+    QCOMPARE(qRound(n.minutesBelow90), 1);
+    QCOMPARE(qRound(n.percentBelow90), 10);
+    QCOMPARE(n.pulseMin, 60.0);
+    QCOMPARE(n.pulseMax, 70.0);
+    QCOMPARE(n.desaturations, int(day->count(OXI_SPO2Drop)));
 }
 

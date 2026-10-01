@@ -23,14 +23,27 @@ class gAnalysisChart : public gSummaryChart
     enum Kind {
         Ahi,            //!< the analysis' AHI by event type (the device's in the tooltip)
         Odi,            //!< ODI 4 % with the rest of ODI 3 % on top
-        Spo2Ranges,     //!< minutes in each SpO2 range of the configured thresholds
-        ProblemZones,   //!< minutes in problem zones, marked ones apart
+        Spo2Ranges,     //!< share of the night in each SpO2 range of the configured thresholds
+        ProblemZones,   //!< share of the night in problem zones, marked ones apart
         HypoxicBurden,  //!< %·min/h of desaturations linked to breathing events
         FlowLimitation, //!< % of the analysed time with limited breaths
         PulseRises,     //!< pulse rises per hour
     };
 
     explicit gAnalysisChart(Kind kind);
+
+    //! One SpO2 range of a night: its label, seconds and share of the recorded time.
+    struct RangeShare {
+        QString name;
+        int seconds = 0;
+        double percent = 0;
+        int colorIndex = 0;      //!< 0 for the highest range
+    };
+    //! The ranges of the profile's \a thresholds (highest first), lowest range first,
+    //! from a night's SpO2 histogram (seconds per whole %).
+    static QVector<RangeShare> spo2RangeShares(const QVector<int> &hist, int oxiSeconds, const QList<double> &thresholds);
+    //! Shares (%) of the recorded time in problem zones: all of them, and the marked ones.
+    static QPair<double, double> problemZoneShares(int zoneSeconds, int markedSeconds, int oxiSeconds);
     virtual ~gAnalysisChart() {}
 
     //! Graph code, title and y-axis units of a kind, for the Overview.
@@ -58,6 +71,9 @@ class gAnalysisChart : public gSummaryChart
     QHash<int, float> m_device;     //!< the device's AHI (Ahi only)
     QHash<int, QString> m_tooltip;
     SummaryCalcItem m_deviceCalc;
+    QHash<int, QVector<RangeShare>> m_ranges;   //!< each night's SpO2 ranges (Spo2Ranges only)
+    QMap<int, RangeShare> m_rangeTotals;       //!< seconds per range over the shown nights
+    qint64 m_rangeSeconds = 0;                  //!< recorded seconds over the shown nights
 };
 
 #endif // GANALYSISCHARTS_H

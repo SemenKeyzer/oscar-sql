@@ -440,6 +440,7 @@ SOURCES += \
     SleepLib/schema.cpp \
     SleepLib/serialoximeter.cpp \
     SleepLib/oximetry_session_builder.cpp \
+    SleepLib/oximetry_summary.cpp \
     SleepLib/analysis/analysis_service.cpp \
     SleepLib/analysis/day_analysis.cpp \
     SleepLib/analysis/day_scorer.cpp \
@@ -638,6 +639,7 @@ HEADERS  += \
     SleepLib/xmlreplay.h \
     SleepLib/serialoximeter.h \
     SleepLib/oximetry_session_builder.h \
+    SleepLib/oximetry_summary.h \
     SleepLib/analysis/analysis_service.h \
     SleepLib/analysis/day_analysis.h \
     SleepLib/analysis/day_scorer.h \
@@ -867,6 +869,7 @@ test {
         tests/zeotests.cpp \
         tests/applehealthtests.cpp \
         tests/prismatests.cpp \
+        tests/analysischarttests.cpp \
         tests/machinetests.cpp \
         tests/timealignsessiontests.cpp \
         tests/contecbleprotocoltests.cpp \
@@ -902,6 +905,7 @@ test {
         tests/zeotests.h \
         tests/applehealthtests.h \
         tests/prismatests.h \
+        tests/analysischarttests.h \
         tests/machinetests.h \
         tests/backuprestoretests.h \
         tests/loaderrobustnesstests.h \
