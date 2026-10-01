@@ -21,7 +21,7 @@ int defaultTimeoutSeconds = 4 ;
         : QObject(parent), m_title(title), m_message(message), m_timeoutSeconds(timeoutSeconds), m_timeoutMessage(timeoutMessage), m_state(nmb_init)
     {
         if (timeoutSeconds<defaultTimeoutSeconds) m_timeoutSeconds=defaultTimeoutSeconds;
-        if ( timeoutMessage.isEmpty() ) m_timeoutMessage = QObject::tr("Notifcation expires in %1 seconds.");
+        if ( timeoutMessage.isEmpty() ) m_timeoutMessage = QObject::tr("Notification expires in %1 seconds.");
         setupTimer();
 
     }

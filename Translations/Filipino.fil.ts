@@ -13691,7 +13691,7 @@ popout window, burahin ito, pagkatapos ay i-pop out muli ang graph na ito.</tran
     </message>
     <message>
         <location filename="../oscar/notifyMessageBox.cpp" line="18"/>
-        <source>Notifcation expires in %1 seconds.</source>
+        <source>Notification expires in %1 seconds.</source>
         <translation type="unfinished">Mag-e-expire ang notification sa loob ng %1 segundo.</translation>
     </message>
     <message>

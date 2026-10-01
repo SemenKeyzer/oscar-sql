@@ -13951,7 +13951,7 @@ Length: %1</source>
     </message>
     <message>
         <location filename="../oscar/notifyMessageBox.cpp" line="18"/>
-        <source>Notifcation expires in %1 seconds.</source>
+        <source>Notification expires in %1 seconds.</source>
         <translation>通知會在 %1 秒後過期。</translation>
     </message>
     <message>

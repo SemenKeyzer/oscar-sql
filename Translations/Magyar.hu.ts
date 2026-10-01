@@ -13851,7 +13851,7 @@ kiemelési ablakot, törölje azt, majd emelje ki újra ezt a grafikont.</transl
     </message>
     <message>
         <location filename="../oscar/notifyMessageBox.cpp" line="18"/>
-        <source>Notifcation expires in %1 seconds.</source>
+        <source>Notification expires in %1 seconds.</source>
         <translation type="unfinished">Az értesítés %1 másodperc múlva lejár.</translation>
     </message>
     <message>

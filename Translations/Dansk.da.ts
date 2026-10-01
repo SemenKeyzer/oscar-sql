@@ -14531,7 +14531,7 @@ Dreem-data skal være formateret som en semikolon-afgrænset CSV-fil. Sørg venl
     </message>
     <message>
         <location filename="../oscar/notifyMessageBox.cpp" line="18"/>
-        <source>Notifcation expires in %1 seconds.</source>
+        <source>Notification expires in %1 seconds.</source>
         <translation type="unfinished">Notifikation udløber om %1 sekunder.</translation>
     </message>
     <message>

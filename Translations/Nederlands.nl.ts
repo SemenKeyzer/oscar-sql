@@ -14013,7 +14013,7 @@ popout venster verwijderen en dan deze grafiek weer vastzetten.</translation>
     </message>
     <message>
         <location filename="../oscar/notifyMessageBox.cpp" line="18"/>
-        <source>Notifcation expires in %1 seconds.</source>
+        <source>Notification expires in %1 seconds.</source>
         <translation>De melding verloopt over %1 seconden.</translation>
     </message>
     <message>

@@ -13796,7 +13796,7 @@ popout-vinduet, slette det, og deretter poppe ut denne grafen igjen.</translatio
     </message>
     <message>
         <location filename="../oscar/notifyMessageBox.cpp" line="18"/>
-        <source>Notifcation expires in %1 seconds.</source>
+        <source>Notification expires in %1 seconds.</source>
         <translation type="unfinished">Varselet utløper om %1 sekunder.</translation>
     </message>
     <message>

@@ -13966,7 +13966,7 @@ Per opzioni di recupero avanzate, consultare la documentazione di OSCAR.
     </message>
     <message>
         <location filename="../oscar/notifyMessageBox.cpp" line="18"/>
-        <source>Notifcation expires in %1 seconds.</source>
+        <source>Notification expires in %1 seconds.</source>
         <translation type="unfinished">La notifica scade tra %1 secondi.</translation>
     </message>
     <message>

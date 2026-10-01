@@ -13911,7 +13911,7 @@ janela popout , apagá-lo e, em seguida, gerar este gráfico novamente.</transla
     </message>
     <message>
         <location filename="../oscar/notifyMessageBox.cpp" line="18"/>
-        <source>Notifcation expires in %1 seconds.</source>
+        <source>Notification expires in %1 seconds.</source>
         <translation type="unfinished">Notificação expira em %1 segundos.</translation>
     </message>
     <message>

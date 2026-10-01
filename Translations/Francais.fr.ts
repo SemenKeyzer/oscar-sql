@@ -9856,7 +9856,7 @@ OSCAR ne connaît pas votre %1 %2 (%3).</translation>
     </message>
     <message>
         <location filename="../oscar/notifyMessageBox.cpp" line="18"/>
-        <source>Notifcation expires in %1 seconds.</source>
+        <source>Notification expires in %1 seconds.</source>
         <translation>La notification disparaîtra automatiquement dans%1 secondes.</translation>
     </message>
     <message>

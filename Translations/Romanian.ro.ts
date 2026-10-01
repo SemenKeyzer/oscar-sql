@@ -13882,7 +13882,7 @@ fereastra popout, să o ștergeți, apoi să deschideți din nou acest grafic.</
     </message>
     <message>
         <location filename="../oscar/notifyMessageBox.cpp" line="18"/>
-        <source>Notifcation expires in %1 seconds.</source>
+        <source>Notification expires in %1 seconds.</source>
         <translation type="unfinished">Notificarea expiră în %1 secunde.</translation>
     </message>
     <message>

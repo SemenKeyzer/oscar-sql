@@ -13623,7 +13623,7 @@ vyskakovací okno, smazat ho a poté znovu otevřít tento graf.</translation>
     </message>
     <message>
         <location filename="../oscar/notifyMessageBox.cpp" line="18"/>
-        <source>Notifcation expires in %1 seconds.</source>
+        <source>Notification expires in %1 seconds.</source>
         <translation type="unfinished">Oznámení vyprší za %1 sekund.</translation>
     </message>
     <message>

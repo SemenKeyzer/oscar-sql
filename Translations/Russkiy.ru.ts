@@ -15516,7 +15516,7 @@ popout window, delete it, then pop out this graph again.</source>
     </message>
     <message>
         <location filename="../oscar/notifyMessageBox.cpp" line="24"/>
-        <source>Notifcation expires in %1 seconds.</source>
+        <source>Notification expires in %1 seconds.</source>
         <translation>Уведомление закроется через %1 с.</translation>
     </message>
     <message>

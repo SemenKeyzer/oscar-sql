@@ -13860,7 +13860,7 @@ vang, uitvee en dan hierdie grafiek weer laat opspring.</translation>
     </message>
     <message>
         <location filename="../oscar/notifyMessageBox.cpp" line="18"/>
-        <source>Notifcation expires in %1 seconds.</source>
+        <source>Notification expires in %1 seconds.</source>
         <translation type="unfinished">Kennisgewing verval in %1 sekondes.</translation>
     </message>
     <message>
