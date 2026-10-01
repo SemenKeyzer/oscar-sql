@@ -8,6 +8,14 @@
 
 #include "prismatests.h"
 #include "../SleepLib/schema.h"
+#include "../SleepLib/common.h"
+
+#include <QDir>
+#include <QFile>
+#include <QTemporaryDir>
+
+#define MINIZ_NO_ZLIB_COMPATIBLE_NAMES
+#include "../SleepLib/thirdparty/miniz.h"
 
 namespace {
 
@@ -25,6 +33,41 @@ QHash<int, int> lineApapParameters()
         { PRISMA_LINE_TUBE_TYPE, 150 },
     };
 }
+
+bool writeFile(const QString &path, const QByteArray &data)
+{
+    QFile f(path);
+    return f.open(QIODevice::WriteOnly) && f.write(data) == data.size();
+}
+
+QByteArray readFile(const QString &path)
+{
+    QFile f(path);
+    return f.open(QIODevice::ReadOnly) ? f.readAll() : QByteArray();
+}
+
+// A synthetic therapy.pdat: a zip holding one small member per session file name.
+bool writeTherapyArchive(const QString &path, const QStringList &members)
+{
+    mz_zip_archive zip;
+    memset(&zip, 0, sizeof(zip));
+    if (!mz_zip_writer_init_heap(&zip, 0, 0)) return false;
+    bool ok = true;
+    for (const QString &m : members) {
+        const QByteArray name = m.toUtf8();
+        ok = ok && mz_zip_writer_add_mem(&zip, name.constData(), name.constData(), size_t(name.size()), MZ_DEFAULT_COMPRESSION);
+    }
+    void *buf = nullptr;
+    size_t size = 0;
+    ok = ok && mz_zip_writer_finalize_heap_archive(&zip, &buf, &size);
+    if (ok) ok = writeFile(path, QByteArray(static_cast<const char *>(buf), int(size)));
+    mz_free(buf);
+    mz_zip_writer_end(&zip);
+    return ok;
+}
+
+const char *const kNight1 = "mnt/flash/data/therapy/events/20260925/event_000600.xml";
+const char *const kNight2 = "mnt/flash/data/therapy/events/20260926/event_000625.xml";
 
 } // namespace
 
@@ -81,3 +124,67 @@ void PrismaTests::testSoftPapLabelsShowTheLevel()
                  qPrintable(QStringLiteral("level %1: \"%2\"").arg(level).arg(softPap.option(level))));
     }
 }
+
+// A Prisma Line card has only files in its root; copying it must still create the destination.
+void PrismaTests::testCopyPathCreatesTheDestination()
+{
+    QTemporaryDir tmp;
+    QVERIFY(tmp.isValid());
+    const QString card = tmp.path() + QStringLiteral("/card");
+    QVERIFY(QDir().mkpath(card));
+    QVERIFY(writeFile(card + QStringLiteral("/config.pcfg"), "config"));
+    copyPath(card, tmp.path() + QStringLiteral("/copy"));
+    QCOMPARE(readFile(tmp.path() + QStringLiteral("/copy/config.pcfg")), QByteArray("config"));
+}
+
+// After a data-version change OSCAR rebuilds a device from its Backup folder, reading the card
+// files from that folder itself, so the backup must not go into a sub-folder named after the card.
+void PrismaTests::testBackupGoesToTheBackupFolderRoot()
+{
+    QTemporaryDir tmp;
+    QVERIFY(tmp.isValid());
+    const QString card = tmp.path() + QStringLiteral("/NO NAME");
+    const QString backup = tmp.path() + QStringLiteral("/Backup");
+    QVERIFY(QDir().mkpath(card));
+    QVERIFY(writeFile(card + QStringLiteral("/config.pcfg"), "config"));
+    QVERIFY(writeTherapyArchive(card + QStringLiteral("/therapy.pdat"), { kNight1 }));
+    PrismaLoader::backupCard(card, backup);
+    QCOMPARE(readFile(backup + QStringLiteral("/config.pcfg")), QByteArray("config"));
+    QCOMPARE(readFile(backup + QStringLiteral("/therapy.pdat")), readFile(card + QStringLiteral("/therapy.pdat")));
+}
+
+// therapy.pdat holds the whole history and only grows on the card: the copy follows it.
+void PrismaTests::testBackupRefreshesAGrowingTherapyFile()
+{
+    QTemporaryDir tmp;
+    QVERIFY(tmp.isValid());
+    const QString card = tmp.path() + QStringLiteral("/card");
+    const QString backup = tmp.path() + QStringLiteral("/Backup");
+    QVERIFY(QDir().mkpath(card));
+    QVERIFY(writeTherapyArchive(card + QStringLiteral("/therapy.pdat"), { kNight1 }));
+    PrismaLoader::backupCard(card, backup);
+    QVERIFY(writeTherapyArchive(card + QStringLiteral("/therapy.pdat"), { kNight1, kNight2 }));
+    PrismaLoader::backupCard(card, backup);
+    QCOMPARE(readFile(backup + QStringLiteral("/therapy.pdat")), readFile(card + QStringLiteral("/therapy.pdat")));
+    QCOMPARE(QDir(backup).entryList({ QStringLiteral("therapy.pdat.*") }, QDir::Files).size(), 0);
+}
+
+// A replaced or formatted card lacks sessions the old copy has: keep the old copy, dated.
+void PrismaTests::testBackupKeepsTheOldTherapyFileWhenSessionsWouldBeLost()
+{
+    QTemporaryDir tmp;
+    QVERIFY(tmp.isValid());
+    const QString card = tmp.path() + QStringLiteral("/card");
+    const QString backup = tmp.path() + QStringLiteral("/Backup");
+    QVERIFY(QDir().mkpath(card));
+    QVERIFY(writeTherapyArchive(card + QStringLiteral("/therapy.pdat"), { kNight1, kNight2 }));
+    PrismaLoader::backupCard(card, backup);
+    const QByteArray older = readFile(backup + QStringLiteral("/therapy.pdat"));
+    QVERIFY(writeTherapyArchive(card + QStringLiteral("/therapy.pdat"), { kNight2 }));
+    PrismaLoader::backupCard(card, backup);
+    QCOMPARE(readFile(backup + QStringLiteral("/therapy.pdat")), readFile(card + QStringLiteral("/therapy.pdat")));
+    const QStringList kept = QDir(backup).entryList({ QStringLiteral("therapy.pdat.*") }, QDir::Files);
+    QCOMPARE(kept.size(), 1);
+    QCOMPARE(readFile(backup + QStringLiteral("/") + kept.first()), older);
+}
+

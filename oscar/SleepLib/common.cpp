@@ -649,6 +649,10 @@ bool copyPath(QString src, QString dst, bool overwrite)
     QDir dir(src);
     if (!dir.exists())
         return false;
+    if (!QDir().mkpath(dst)) {   // a folder holding only files would otherwise never be created
+        qWarning() << "copyPath: could not create" << dst;
+        return false;
+    }
 
     bool ok = true;
 

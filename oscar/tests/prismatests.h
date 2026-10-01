@@ -22,6 +22,10 @@ private slots:
     void testLineTubeType();
     void testHypopneaDuringLeakIsImported();
     void testSoftPapLabelsShowTheLevel();
+    void testCopyPathCreatesTheDestination();
+    void testBackupGoesToTheBackupFolderRoot();
+    void testBackupRefreshesAGrowingTherapyFile();
+    void testBackupKeepsTheOldTherapyFileWhenSessionsWouldBeLost();
 };
 
 DECLARE_TEST(PrismaTests)

@@ -216,6 +216,9 @@ class PrismaLoader : public CPAPLoader
     Q_OBJECT
     static bool initialized;
   public:
+    //! \brief Copies a Prisma card into \a backup, the device's Backup folder (see PrismaLoader::Open).
+    static void backupCard(const QString &card, const QString &backup);
+
     PrismaLoader();
     virtual ~PrismaLoader();
 

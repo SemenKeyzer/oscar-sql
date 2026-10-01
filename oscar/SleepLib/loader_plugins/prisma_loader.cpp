@@ -17,6 +17,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QDebug>
+#include <QSet>
 #include <QDir>
 #include <QFile>
 
@@ -633,9 +634,9 @@ int PrismaLoader::Open(const QString & selectedPath)
     QCoreApplication::processEvents();
 
 
-    QString backupPath = context()->GetBackupPath() + selectedPath.section("/", -1);
+    const QString backupPath = context()->GetBackupPath();
     if (QDir::cleanPath(selectedPath).compare(QDir::cleanPath(backupPath)) != 0) {
-        copyPath(selectedPath, backupPath);
+        backupCard(selectedPath, backupPath);   // not when rebuilding from the backup itself
     }
 
     emit updateMessage(QObject::tr("Scanning Files..."));
@@ -1210,4 +1211,73 @@ void PrismaLoader::Register()
     qDebug() << "Registering PrismaLoader";
     RegisterLoader(new PrismaLoader());
     initialized = true;
+}
+
+namespace {
+
+bool sameContent(const QString &a, const QString &b)
+{
+    QFile fa(a), fb(b);
+    if (fa.size() != fb.size()) return false;
+    if (!fa.open(QIODevice::ReadOnly) || !fb.open(QIODevice::ReadOnly)) return false;
+    return fa.readAll() == fb.readAll();
+}
+
+//! Member names of a zip archive; false if it can't be read as one.
+bool archiveMembers(const QString &path, QSet<QString> &members)
+{
+    QFile f(path);
+    if (!f.open(QIODevice::ReadOnly)) return false;
+    const QByteArray data = f.readAll();
+    mz_zip_archive zip;
+    memset(&zip, 0, sizeof(zip));
+    if (!mz_zip_reader_init_mem(&zip, data.constData(), size_t(data.size()), 0)) return false;
+    const int n = int(mz_zip_reader_get_num_files(&zip));
+    for (int i = 0; i < n; ++i) {
+        mz_zip_archive_file_stat stat;
+        if (mz_zip_reader_file_stat(&zip, mz_uint(i), &stat)) members.insert(QString::fromUtf8(stat.m_filename));
+    }
+    mz_zip_reader_end(&zip);
+    return true;
+}
+
+//! True when every file in the archive at \a older is also in the archive at \a newer.
+bool archiveCovers(const QString &newer, const QString &older)
+{
+    QSet<QString> n, o;
+    if (!archiveMembers(newer, n) || !archiveMembers(older, o)) return false;
+    return n.contains(o);
+}
+
+} // namespace
+
+// A rebuild after a data-version change reads the card back from the device's Backup folder
+// itself, so the card's files go straight into it. A Prisma Line card keeps the whole history
+// in therapy.pdat, which only grows, so the copy follows the card on every import; if the card
+// lacks sessions the old copy has (a replaced or formatted card), the old copy is kept, dated.
+// Prisma SMART cards keep one file per session in sub-folders, which accumulate as before.
+void PrismaLoader::backupCard(const QString &card, const QString &backup)
+{
+    const QDir src(card);
+    const QDir dst(backup);
+    QDir().mkpath(backup);
+    for (const QString &name : src.entryList(QDir::Files)) {
+        const QString from = src.filePath(name);
+        const QString to = dst.filePath(name);
+        if (QFile::exists(to)) {
+            if (sameContent(from, to)) continue;
+            if (name == QLatin1String(PRISMA_LINE_THERAPY_FILE) && !archiveCovers(from, to)) {
+                const QString kept = to + QLatin1Char('.')
+                                   + QDateTime::currentDateTime().toString(QStringLiteral("yyyyMMdd-HHmmss"));
+                qWarning() << "Prisma backup: the card lacks sessions of the previous copy; keeping it as" << kept;
+                QFile::rename(to, kept);
+            } else {
+                QFile::remove(to);
+            }
+        }
+        if (!QFile::copy(from, to)) qWarning() << "Prisma backup: could not copy" << from << "to" << to;
+    }
+    for (const QString &dir : src.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+        copyPath(src.filePath(dir), dst.filePath(dir));
+    }
 }
