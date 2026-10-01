@@ -49,6 +49,7 @@
 #include "SleepLib/analysis/analysis_service.h"
 #include "analysispanel.h"
 #include "SleepLib/loader_plugins/applehealth_loader.h"
+#include "SleepLib/loader_plugins/prisma_loader.h"
 #include "database/session_repository.h"
 
 #include "Graphs/gLineOverlay.h"
@@ -1572,6 +1573,25 @@ QString Daily::getMachineSettings(Day * day) {
                 first[code] = tmp;
             } else {
                 other[schema::channel[code].label()] = tmp;
+            }
+        }
+
+        // A setting the device reports for some nights only: the Prisma's softPAP lock comes
+        // from its current configuration, so only nights since that last changed have it.
+        // The other nights show a dash, so that the row doesn't come and go between days.
+        if (sess && Prisma_SoftPAPLock != 0 && !sess->settings.contains(Prisma_SoftPAPLock)) {
+            bool reported = false;
+            for (Session *s : std::as_const(cpap->sessionlist)) {
+                if (s->settings.contains(Prisma_SoftPAPLock)) {
+                    reported = true;
+                    break;
+                }
+            }
+            if (reported) {
+                const QString label = schema::channel[Prisma_SoftPAPLock].label();
+                other[label] = QString(fmt).arg(label)
+                        .arg(tr("Not known for this night: the device reports it only for nights since its settings were last changed."))
+                        .arg(QStringLiteral("&mdash;"));
             }
         }
 

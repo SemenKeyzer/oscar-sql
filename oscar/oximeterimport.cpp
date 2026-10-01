@@ -52,6 +52,10 @@ OximeterImport::OximeterImport(QWidget *parent) :
     // The 'frame' left-panel has its own gradient stylesheet and is unaffected.
     // All other containers (stackedWidget, its 6 pages, group boxes, frames) need
     // explicit backgrounds because QPalette changes are ignored by native renderers.
+    // A palette set here would not help either: widgets under a style sheet take the
+    // application's palette, not their parent's, so whatever a style would paint from the
+    // palette (check box and radio button indicators, the calendar's day names) is styled
+    // here too.
     setStyleSheet(
         // --- Container backgrounds ---
         "QDialog                { background-color: #f0f0f0; }"
@@ -74,17 +78,36 @@ OximeterImport::OximeterImport(QWidget *parent) :
         // --- Other input controls ---
         "QCheckBox   { color: black; }"
         "QRadioButton { color: black; }"
+        "QCheckBox::indicator, QRadioButton::indicator { width: 13px; height: 13px;"
+        "    border: 1px solid #808080; background-color: white; }"
+        "QCheckBox::indicator { border-radius: 2px; }"
+        "QRadioButton::indicator { border-radius: 7px; }"
+        "QCheckBox::indicator:hover, QRadioButton::indicator:hover { border-color: #0078d7; }"
+        "QCheckBox::indicator:checked { background-color: #3a7fc2; border-color: #3a7fc2;"
+        "    image: url(:/icons/white_tick.png); }"
+        "QRadioButton::indicator:checked { border-color: #3a7fc2; background: qradialgradient("
+        "    cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0 #3a7fc2, stop:0.5 #3a7fc2, stop:0.6 white, stop:1 white); }"
+        "QCheckBox::indicator:disabled, QRadioButton::indicator:disabled { background-color: #e8e8e8; border-color: #c0c0c0; }"
+        "QCheckBox::indicator:checked:disabled { background-color: #a0b8d0; }"
         "QComboBox   { color: black; background-color: white; border: 1px solid #adadad; border-radius: 2px; }"
         "QSpinBox    { color: black; background-color: white; border: 1px solid #adadad; }"
         "QTimeEdit   { color: black; background-color: white; border: 1px solid #adadad; }"
+        "QDateTimeEdit#dateTimeEdit { color: black; background-color: white; }"   // keeps its arrows
         "QLineEdit   { color: black; background-color: white; border: 1px solid #adadad; }"
         "QListWidget { color: black; background-color: white; }"
         "QTreeWidget { color: black; background-color: white; }"
+        "QTableWidget { color: black; background-color: white; gridline-color: #d0d0d0; }"
+        "QHeaderView::section { color: black; background-color: #e8e8e8; border: none;"
+        "    border-right: 1px solid #c0c0c0; border-bottom: 1px solid #c0c0c0; padding: 2px 4px; }"
+        "QProgressBar { color: black; background-color: white; border: 1px solid #adadad;"
+        "    border-radius: 3px; text-align: center; }"
+        "QProgressBar::chunk { background-color: #3a7fc2; border-radius: 2px; }"
         // --- Calendar widget internals ---
         "#qt_calendar_monthbutton { color: black; }"
         "#qt_calendar_yearbutton  { color: black; }"
         "QCalendarWidget QWidget#qt_calendar_navigationbar { background-color: #e0e0e0; }"
         "QCalendarWidget QAbstractItemView:enabled { background-color: white; color: black;"
+        "    alternate-background-color: #e8e8e8;"   // the day names
         "    selection-background-color: #3a7fc2; selection-color: white; }"
         "QCalendarWidget QAbstractItemView:disabled { color: #808080; }"
         "QCalendarWidget QHeaderView::section { background-color: #e0e0e0; color: black; }"
