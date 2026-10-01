@@ -17,6 +17,7 @@
 
 #include "welcome.h"
 #include "SleepLib/oximetry_summary.h"
+#include "SleepLib/analysis/analysis_service.h"
 #include "ui_welcome.h"
 
 #include "mainwindow.h"
@@ -386,19 +387,32 @@ QString Welcome::GenerateCPAPHTML()
 }
 
 
-// The night's oximetry in figures, under the date of the most recent oximetry.
+// The night's oximetry in figures, under the date of the most recent oximetry: OSCAR's
+// analysis when the night has one (the figures the Daily view and the Overview show),
+// else the classic SpO2 drop count, labelled as such.
 static QString oximetryNightHtml(const OximetryNight &n)
 {
     if (!n.valid) return QString();
     const int minutes = qRound(n.hours * 60);
-    QString html = "<p>" + QObject::tr("%1, recorded %2 h %3 min").arg(n.device).arg(minutes / 60).arg(minutes % 60) + "<br/>";
+    const QString recorded = n.spotChecks
+        ? QObject::tr("recorded %1 h %2 min").arg(minutes / 60).arg(minutes % 60)
+        : QObject::tr("SpO2 recorded %1 h %2 min").arg(minutes / 60).arg(minutes % 60);
+    QString html = "<p>" + (n.device.isEmpty() ? recorded : n.device.toHtmlEscaped() + ", " + recorded) + "<br/>";
     if (n.spotChecks) {
         html += QObject::tr("%1 SpO2 spot checks, %2 pulse readings.").arg(n.spotSpo2).arg(n.spotPulse);
     } else {
         if (n.spo2Avg > 0) {
             html += QObject::tr("Average SpO2 %1%, lowest %2%.").arg(n.spo2Avg, 0, 'f', 1).arg(n.spo2Min, 0, 'f', 0) + "<br/>";
             html += QObject::tr("Below 90%: %1% of the time (%2 min).").arg(n.percentBelow90, 0, 'f', 1).arg(qRound(n.minutesBelow90)) + "<br/>";
-            html += QObject::tr("Desaturations: %1, %2 per hour.").arg(n.desaturations).arg(n.desaturations / n.hours, 0, 'f', 1) + "<br/>";
+            if (n.fromAnalysis) {
+                html += QObject::tr("ODI 3%: %1 per hour (%2 desaturations).").arg(n.desaturations / n.hours, 0, 'f', 1).arg(n.desaturations) + "<br/>";
+                if (n.zones > 0) {
+                    html += QObject::tr("Problem zones: %1, %2 min.").arg(n.zones).arg(qRound(n.zoneMinutes)) + "<br/>";
+                }
+            } else {
+                html += QObject::tr("SpO2 drops (classic method, %1% below baseline for %2 s or longer): %3, %4 per hour.")
+                            .arg(n.dropPercent).arg(n.dropSeconds).arg(n.desaturations).arg(n.desaturations / n.hours, 0, 'f', 1) + "<br/>";
+            }
         }
         if (n.pulseAvg > 0) {
             html += QObject::tr("Pulse averaged %1, from %2 to %3 bpm.").arg(n.pulseAvg, 0, 'f', 0).arg(n.pulseMin, 0, 'f', 0).arg(n.pulseMax, 0, 'f', 0);
@@ -472,7 +486,11 @@ QString Welcome::GenerateOxiHTML()
         else if (daysto == 2) html += QObject::tr("(1 day ago)");
         else html += QObject::tr("(%2 days ago)").arg(oxidate.daysTo(QDate::currentDate()));
         html+="</p>";
-        html += oximetryNightHtml(summarizeOximetry(p_profile->GetDay(oxidate, oxiSourceType), oxiSourceType));
+        OximetryNight night;
+        analysis::AnalysisService *service = mainwin ? mainwin->analysisService() : nullptr;
+        if (service && service->params().enabled) night = summarizeOximetry(service->row(oxidate));
+        if (!night.valid) night = summarizeOximetry(p_profile->GetDay(oxidate, oxiSourceType), oxiSourceType);
+        html += oximetryNightHtml(night);
         ui->oxiIcon->setVisible(true);
         ui->oxiInfoFrame->setVisible(true);
     } else {

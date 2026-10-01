@@ -21,6 +21,7 @@
 #include "database/database_manager.h"
 #include "bluetoothoximeterpage.h"
 #include "SleepLib/oximetry_summary.h"
+#include "database/analysis_daily_repository.h"
 
 #include <QCoreApplication>
 #include <QDir>
@@ -326,24 +327,29 @@ void ContecBleImportTests::testBluetoothBadgeIcon()
     QVERIFY2(rune.red() > 200 && rune.green() > 200 && rune.blue() > 200, qPrintable(rune.name()));
 }
 
-// The start screen's oximetry summary: the same figures the Daily view's oximeter block uses,
-// plus the time below 90 % as a share of the night.
+// The start screen's oximetry summary without an analysed night: figures from the cleaned
+// samples over the time with valid readings (a probe-off stretch doesn't dilute them), and
+// the classic SpO2 drop count with the thresholds it was counted with.
 void ContecBleImportTests::testOximetryNightSummary()
 {
     Machine *mach = p_profile->CreateMachine(ContecBleLoader::infoForModel(QStringLiteral("CMS50FW")));
     ContecBleImporter imp(mach);
     const QDateTime start(QDate(2026, 9, 12), QTime(23, 0, 0));
     Record r;
-    r.header = header(start, 600);
-    for (int i = 0; i < 600; ++i) {
-        r.spo2.append(i >= 300 && i < 360 ? 88 : 96);
-        r.pulse.append(i < 300 ? 60 : 70);
+    r.header = header(start, 720);
+    for (int i = 0; i < 720; ++i) {
+        const int j = i - 120;   // the first two minutes: probe off
+        r.spo2.append(j < 0 ? 0 : j >= 300 && j < 360 ? 88 : 96);
+        r.pulse.append(j < 0 ? 0 : j < 300 ? 60 : 70);
     }
     QCOMPARE(imp.save(r, Decision::Import), Outcome::Imported);
     Day *day = p_profile->GetDay(QDate(2026, 9, 12), MT_OXIMETER);
     QVERIFY(day);
+    for (Session *s : day->sessions) s->TrashEvents();   // as at start-up: summaries only
     const OximetryNight n = summarizeOximetry(day, MT_OXIMETER);
+    for (Session *s : day->sessions) QVERIFY(s->eventlist.isEmpty());   // put away again
     QVERIFY(n.valid);
+    QVERIFY(!n.fromAnalysis);
     QVERIFY(!n.spotChecks);
     QCOMPARE(qRound(n.hours * 60), 10);
     QCOMPARE(n.spo2Min, 88.0);
@@ -353,5 +359,53 @@ void ContecBleImportTests::testOximetryNightSummary()
     QCOMPARE(n.pulseMin, 60.0);
     QCOMPARE(n.pulseMax, 70.0);
     QCOMPARE(n.desaturations, int(day->count(OXI_SPO2Drop)));
+    QCOMPARE(n.dropPercent, p_profile->oxi->spO2DropPercentage());
+    QCOMPARE(n.dropSeconds, p_profile->oxi->spO2DropDuration());
+}
+
+// With an analysed night the start screen shows the analysis' own figures: ODI 3 %, the time
+// below 90 % from its histogram over the valid time, the nadir, problem zones and pulse.
+void ContecBleImportTests::testOximetryNightFromAnalysis()
+{
+    AnalysisDailyData row;
+    QVERIFY(!summarizeOximetry(row).valid);   // no stored row
+    row.id = 7;
+    QVERIFY(!summarizeOximetry(row).valid);   // a row without oximetry
+    row.hasOximetry = true;
+    row.oxiSeconds = 7200;
+    row.oxiSource = QStringLiteral("Contec CMS50FW");
+    row.spo2Hist.fill(0, 51);
+    row.spo2Hist[88 - 50] = 360;              // 6 min at 88 %
+    row.spo2Hist[89 - 50] = 360;              // 6 min at 89 %
+    row.spo2Hist[90 - 50] = 480;              // 90 % is not below 90
+    row.spo2Hist[95 - 50] = 6000;
+    row.spo2Sum = 88.0 * 360 + 89.0 * 360 + 90.0 * 480 + 95.0 * 6000;
+    row.spo2Nadir = 86;
+    row.nDesat3 = 9;
+    row.nDesat4 = 4;
+    row.nZones = 2;
+    row.zoneSeconds = 900;
+    row.hasPulse = true;
+    row.pulseSeconds = 7000;
+    row.pulseSum = 62.0 * 7000;
+    row.pulseMin = 51;
+    row.pulseMax = 98;
+
+    const OximetryNight n = summarizeOximetry(row);
+    QVERIFY(n.valid);
+    QVERIFY(n.fromAnalysis);
+    QCOMPARE(n.device, QStringLiteral("Contec CMS50FW"));
+    QCOMPARE(n.hours, 2.0);
+    QCOMPARE(n.spo2Min, 86.0);
+    QVERIFY(qAbs(n.spo2Avg - row.spo2Sum / 7200) < 1e-9);
+    QCOMPARE(n.minutesBelow90, 12.0);
+    QCOMPARE(n.percentBelow90, 10.0);
+    QCOMPARE(n.desaturations, 9);
+    QCOMPARE(n.desaturations4, 4);
+    QCOMPARE(n.zones, 2);
+    QCOMPARE(n.zoneMinutes, 15.0);
+    QCOMPARE(n.pulseAvg, 62.0);
+    QCOMPARE(n.pulseMin, 51.0);
+    QCOMPARE(n.pulseMax, 98.0);
 }
 

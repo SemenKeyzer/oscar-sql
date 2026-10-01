@@ -30,6 +30,7 @@ private slots:
     void testImporterReportsMissingSamples();
     void testBluetoothBadgeIcon();
     void testOximetryNightSummary();
+    void testOximetryNightFromAnalysis();
     void cleanupTestCase();
 private:
     QCoreApplication *m_app = nullptr;

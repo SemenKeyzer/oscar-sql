@@ -1616,8 +1616,12 @@ QString Daily::getOximeterInformation(Day * day)
             html+=QString("<tr><td colspan=3 width='60%'>%1</td><td colspan=2 width='40%'>%2</td></tr>").arg(tr("Pulse readings")).arg(int(pulseCount));
             html+=QString("<tr><td colspan=5><i>%1</i></td></tr>").arg(tr("Spot-check data; desaturation detection is not applicable"));
         } else {
-            // Include SpO2 and PC drops per hour of Oximetry data in case CPAP data is missing
-            html+=QString("<tr><td colspan=5 align=center>%1: %2 (%3%) %4/h</td></tr>").arg(tr("SpO2 Desaturations")).arg(day->count(OXI_SPO2Drop)).arg((100.0/day->hours(MT_OXIMETER)) * (day->sum(OXI_SPO2Drop)/3600.0),0,'f',2).arg((day->count(OXI_SPO2Drop)/day->hours(MT_OXIMETER)),0,'f',2);
+            // Include SpO2 and PC drops per hour of Oximetry data in case CPAP data is missing.
+            // OSCAR's classic drop count, named with its thresholds so that it is not taken for
+            // the analysis panel's ODI.
+            const QString drops = tr("SpO2 drops (classic, %1% for %2 s)")
+                                      .arg(p_profile->oxi->spO2DropPercentage()).arg(p_profile->oxi->spO2DropDuration());
+            html+=QString("<tr><td colspan=5 align=center>%1: %2 (%3%) %4/h</td></tr>").arg(drops).arg(day->count(OXI_SPO2Drop)).arg((100.0/day->hours(MT_OXIMETER)) * (day->sum(OXI_SPO2Drop)/3600.0),0,'f',2).arg((day->count(OXI_SPO2Drop)/day->hours(MT_OXIMETER)),0,'f',2);
             html+=QString("<tr><td colspan=5 align=center>%1: %2 (%3%) %4/h</td></tr>").arg(tr("Pulse Change events")).arg(day->count(OXI_PulseChange)).arg((100.0/day->hours(MT_OXIMETER)) * (day->sum(OXI_PulseChange)/3600.0),0,'f',2).arg((day->count(OXI_PulseChange)/day->hours(MT_OXIMETER)),0,'f',2);
             html+=QString("<tr><td colspan=5 align=center>%1: %2%</td></tr>").arg(tr("SpO2 Baseline Used")).arg(day->settings_wavg(OXI_SPO2Drop),0,'f',2); // CHECKME: Should this value be wavg OXI_SPO2 isntead?
         }
