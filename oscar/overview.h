@@ -27,6 +27,7 @@
 #include "Graphs/gOverviewGraph.h"
 #endif
 #include "Graphs/gSummaryChart.h"
+#include "overviewpresets.h"
 
 #include <QRegularExpression>
 #include <QListWidget>
@@ -118,6 +119,9 @@ class Overview : public QWidget
 
     void RebuildGraphs(bool reset = true);
 
+    //! Saves the graph layout with the user's own choice of graphs, not what a preset shows.
+    void SaveGraphSettings();
+
   public slots:
     void onRebuildGraphs() { RebuildGraphs(true); }
 
@@ -154,6 +158,12 @@ class Overview : public QWidget
 
   private:
     class QLabel *m_analysisNotice = nullptr;
+    class QButtonGroup *m_presetButtons = nullptr;
+    OverviewPresets::State m_presets;
+    //! Shows the graphs of \a preset and remembers it for the next start.
+    void showPreset(OverviewPresets::Preset preset);
+    OverviewPresets::Visibility graphVisibility() const;
+    void setGraphVisibility(const OverviewPresets::Visibility &visibility);
     void CreateAllGraphs();
     void timedUpdateOverview(int ms=0);
 

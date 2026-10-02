@@ -2909,36 +2909,36 @@ Recommended actions:
 <context>
     <name>DateErrorDisplay</name>
     <message>
-        <location filename="../oscar/overview.cpp" line="872"/>
+        <location filename="../oscar/overview.cpp" line="935"/>
         <source>ERROR
 The start date MUST be before the end date</source>
         <translation>ОШИБКА
 Дата начала должна быть раньше конечной даты</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="875"/>
+        <location filename="../oscar/overview.cpp" line="938"/>
         <source>The entered start date %1 is after the end date %2</source>
         <translation>Выбранная дата начала %1 позже конечной даты %2</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="876"/>
+        <location filename="../oscar/overview.cpp" line="939"/>
         <source>
 Hint: Change the end date first</source>
         <translation>
 Совет: сначала выберите конечную дату</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="878"/>
+        <location filename="../oscar/overview.cpp" line="941"/>
         <source>The entered end date %1 </source>
         <translation>Выбранная конечная дата %1 </translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="879"/>
+        <location filename="../oscar/overview.cpp" line="942"/>
         <source>is before the start date %1</source>
         <translation>раньше даты начала %1</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="880"/>
+        <location filename="../oscar/overview.cpp" line="943"/>
         <source>
 Hint: Change the start date first</source>
         <translation>
@@ -6877,12 +6877,22 @@ Note: anonymous sharing may be disabled in your Microsoft account settings.</sou
         <translation>Графики</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="166"/>
+        <location filename="../oscar/overview.cpp" line="99"/>
+        <source>Your own choice of graphs from the graph list</source>
+        <translation>Ваш собственный выбор графиков из списка графиков</translation>
+    </message>
+    <message>
+        <location filename="../oscar/overview.cpp" line="100"/>
+        <source>Only the graphs on this topic; &quot;All&quot; brings your own choice back</source>
+        <translation>Только графики на эту тему; «Все» возвращает ваш собственный выбор</translation>
+    </message>
+    <message>
+        <location filename="../oscar/overview.cpp" line="185"/>
         <source>[Date Widget]</source>
         <translation>[Виджет даты]</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="292"/>
+        <location filename="../oscar/overview.cpp" line="312"/>
         <source>Respiratory
 Disturbance
 Index</source>
@@ -6891,7 +6901,7 @@ Index</source>
 дыхания (RDI)</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="294"/>
+        <location filename="../oscar/overview.cpp" line="314"/>
         <source>Apnea
 Hypopnea
 Index</source>
@@ -6900,37 +6910,37 @@ Index</source>
 гипоапноэ (AHI)</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="301"/>
+        <location filename="../oscar/overview.cpp" line="321"/>
         <source>Usage</source>
         <translation>Использование</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="301"/>
+        <location filename="../oscar/overview.cpp" line="321"/>
         <source>Usage
 (hours)</source>
         <translation>Использование
 (часы)</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="306"/>
-        <location filename="../oscar/overview.cpp" line="306"/>
+        <location filename="../oscar/overview.cpp" line="326"/>
+        <location filename="../oscar/overview.cpp" line="326"/>
         <source>Session Times</source>
         <translation>Время сеанса</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="315"/>
+        <location filename="../oscar/overview.cpp" line="335"/>
         <source>Total Time in Apnea</source>
         <translation>Время в апноэ</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="315"/>
+        <location filename="../oscar/overview.cpp" line="335"/>
         <source>Total Time in Apnea
 (Minutes)</source>
         <translation>Время в апноэ
 (минуты)</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="388"/>
+        <location filename="../oscar/overview.cpp" line="408"/>
         <source>Body
 Mass
 Index</source>
@@ -6939,24 +6949,24 @@ Index</source>
 тела (BMI)</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="394"/>
+        <location filename="../oscar/overview.cpp" line="414"/>
         <source>How you felt
 (1-10)</source>
         <translation>Самочувствие
 (1-10)</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.h" line="210"/>
+        <location filename="../oscar/overview.h" line="220"/>
         <source>Hide All Graphs</source>
         <translation>Скрыть все графики</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.h" line="211"/>
+        <location filename="../oscar/overview.h" line="221"/>
         <source>Show All Graphs</source>
         <translation>Показать все графики</translation>
     </message>
     <message numerus="yes">
-        <location filename="../oscar/overview.cpp" line="491"/>
+        <location filename="../oscar/overview.cpp" line="554"/>
         <source>Analysis is outdated for %n day(s).</source>
         <translation>
             <numerusform>Анализ устарел для %n дня.</numerusform>
@@ -6965,9 +6975,37 @@ Index</source>
         </translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="492"/>
+        <location filename="../oscar/overview.cpp" line="555"/>
         <source>Recalculate</source>
         <translation>Пересчитать</translation>
+    </message>
+</context>
+<context>
+    <name>OverviewPresets</name>
+    <message>
+        <location filename="../oscar/overviewpresets.cpp" line="39"/>
+        <source>All</source>
+        <translation>Все</translation>
+    </message>
+    <message>
+        <location filename="../oscar/overviewpresets.cpp" line="40"/>
+        <source>Therapy</source>
+        <translation>Терапия</translation>
+    </message>
+    <message>
+        <location filename="../oscar/overviewpresets.cpp" line="41"/>
+        <source>Mask &amp; Leaks</source>
+        <translation>Маска и утечки</translation>
+    </message>
+    <message>
+        <location filename="../oscar/overviewpresets.cpp" line="42"/>
+        <source>Oxygen</source>
+        <translation>Кислород</translation>
+    </message>
+    <message>
+        <location filename="../oscar/overviewpresets.cpp" line="45"/>
+        <source>Analysis</source>
+        <translation>Анализ</translation>
     </message>
 </context>
 <context>
@@ -15465,7 +15503,7 @@ popout window, delete it, then pop out this graph again.</source>
         <translation>Доступно не для всех аппаратов за этот период</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="811"/>
+        <location filename="../oscar/overview.cpp" line="874"/>
         <source>Loading summaries</source>
         <translation>Загрузка статистики</translation>
     </message>
@@ -15613,13 +15651,13 @@ popout window, delete it, then pop out this graph again.</source>
     </message>
     <message>
         <location filename="../oscar/daily.cpp" line="3511"/>
-        <location filename="../oscar/overview.cpp" line="526"/>
+        <location filename="../oscar/overview.cpp" line="589"/>
         <source>%1 Graphs</source>
         <translation>%1 графиков</translation>
     </message>
     <message>
         <location filename="../oscar/daily.cpp" line="3515"/>
-        <location filename="../oscar/overview.cpp" line="530"/>
+        <location filename="../oscar/overview.cpp" line="593"/>
         <source>%1 of %2 Graphs</source>
         <translation>%1 из %2 графиков</translation>
     </message>

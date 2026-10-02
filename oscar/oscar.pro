@@ -359,6 +359,7 @@ SOURCES += \
     version.cpp \
     welcome.cpp \
     nightsummary.cpp \
+    overviewpresets.cpp \
     zip.cpp \
     Graphs/gAHIChart.cpp \
     Graphs/gdailysummary.cpp \
@@ -673,6 +674,7 @@ HEADERS  += \
     aboutdialog.h \
     welcome.h \
     nightsummary.h \
+    overviewpresets.h \
     mytextbrowser.h \
     staticQMessageBox.h \
     git_info.h \
@@ -875,6 +877,7 @@ test {
         tests/prismatests.cpp \
         tests/analysischarttests.cpp \
         tests/nightsummarytests.cpp \
+        tests/overviewpresetstests.cpp \
         tests/channelstoretests.cpp \
         tests/machinetests.cpp \
         tests/timealignsessiontests.cpp \
@@ -913,6 +916,7 @@ test {
         tests/prismatests.h \
         tests/analysischarttests.h \
         tests/nightsummarytests.h \
+        tests/overviewpresetstests.h \
         tests/channelstoretests.h \
         tests/machinetests.h \
         tests/backuprestoretests.h \

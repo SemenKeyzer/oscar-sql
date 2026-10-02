@@ -441,6 +441,7 @@ const QString STR_US_LastOverviewRange = "LastOverviewRange";
 const QString STR_US_CustomOverviewRangeStart = "CustomOverviewRangeStart";
 const QString STR_US_CustomOverviewRangeEnd = "CustomOverviewRangeEnd";
 const QString STR_US_SkipTimeAlignWelcome = "SkipTimeAlignWelcome";
+const QString STR_US_LastOverviewPreset = "LastOverviewPreset";
 
 // Values for StatReportMode
 const int STAT_MODE_STANDARD = 0;
@@ -979,6 +980,7 @@ class UserSettings : public PrefSettings
         m_showUnownFlags = initPref(STR_US_ShowUnknownFlags, false).toBool();
         initPref(STR_US_LastOverviewRange, 4);
         initPref(STR_US_SkipTimeAlignWelcome, false);
+        initPref(STR_US_LastOverviewPreset, QStringLiteral("all"));
     }
 
     UnitSystem unitSystem() const { return (UnitSystem)getPref(STR_US_UnitSystem).toInt(); }
@@ -998,6 +1000,8 @@ class UserSettings : public PrefSettings
     QDate customOverviewRangeStart () const { return getPref(STR_US_CustomOverviewRangeStart).toDate(); }
     QDate customOverviewRangeEnd () const { return getPref(STR_US_CustomOverviewRangeEnd).toDate(); }
     bool skipTimeAlignWelcome() const { return getPref(STR_US_SkipTimeAlignWelcome).toBool(); }
+    //! The Overview graph preset last shown, as OverviewPresets::key().
+    QString lastOverviewPreset() const { return getPref(STR_US_LastOverviewPreset).toString(); }
 
     void setUnitSystem(UnitSystem us) { setPref(STR_US_UnitSystem, (int)us); }
     void setEventWindowSize(double size) { setPref(STR_US_EventWindowSize, size); }
@@ -1016,6 +1020,7 @@ class UserSettings : public PrefSettings
     void setCustomOverviewRangeStart(QDate i) { setPref(STR_US_CustomOverviewRangeStart, i); }
     void setCustomOverviewRangeEnd(QDate i) { setPref(STR_US_CustomOverviewRangeEnd, i); }
     void setSkipTimeAlignWelcome(bool skip) { setPref(STR_US_SkipTimeAlignWelcome, skip); }
+    void setLastOverviewPreset(const QString &key) { setPref(STR_US_LastOverviewPreset, key); }
 
     //! \brief Refresh cached member variables from the underlying preference map (call after loading from DB).
     void refreshCachedValues() {

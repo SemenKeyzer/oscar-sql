@@ -22,6 +22,8 @@
 #include <QCalendarWidget>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QButtonGroup>
+#include <QToolButton>
 
 #include "SleepLib/profiles.h"
 #include "overview.h"
@@ -84,6 +86,29 @@ Overview::Overview(QWidget *parent, gGraphView *shared) :
         if (!mainwin) return;
         mainwin->updateAnalysis(true);
         mainwin->refreshAnalysisViews();
+    });
+
+    // Ready-made sets of graphs; "All" is the user's own choice from the graph list
+    m_presetButtons = new QButtonGroup(this);
+    int presetIndex = ui->horizontalLayout->indexOf(m_analysisNotice);
+    for (OverviewPresets::Preset preset : OverviewPresets::presets()) {
+        QToolButton *button = new QToolButton(this);
+        button->setText(OverviewPresets::title(preset));
+        button->setCheckable(true);
+        button->setStyleSheet(QStringLiteral(
+            "QToolButton { border: 1px solid #b8b8b8; border-radius: 4px; padding: 1px 7px;"
+            " background: #f6f6f6; color: black; }"
+            "QToolButton:hover { background: #e6edf8; }"
+            "QToolButton:checked { background: #2f6fd0; border-color: #2f6fd0; color: white; }"));
+        button->setToolTip(preset == OverviewPresets::All
+                           ? tr("Your own choice of graphs from the graph list")
+                           : tr("Only the graphs on this topic; \"All\" brings your own choice back"));
+        m_presetButtons->addButton(button, preset);
+        ui->horizontalLayout->insertWidget(presetIndex++, button);
+    }
+    // toggled rather than clicked: the accessibility press (VoiceOver) only toggles the button
+    connect(m_presetButtons, &QButtonGroup::idToggled, this, [this](int id, bool checked) {
+        if (checked) showPreset(static_cast<OverviewPresets::Preset>(id));
     });
 
     // Set Date controls locale to 4 digit years
@@ -191,6 +216,7 @@ Overview::Overview(QWidget *parent, gGraphView *shared) :
     GraphView->resetLayout();
     GraphView->SaveDefaultSettings();
     GraphView->LoadSettings("Overview"); //no trans
+    showPreset(OverviewPresets::fromKey(p_profile->general->lastOverviewPreset()));
 
     GraphView->setEmptyImage(QPixmap(":/icons/logo-md.png"));
 	dateErrorDisplay = new DateErrorDisplay(this);
@@ -215,7 +241,7 @@ Overview::~Overview()
     disconnectgSummaryCharts() ;
 
     // Save graph orders and pin status, etc...
-    GraphView->SaveSettings("Overview");//no trans
+    SaveGraphSettings();
 
     delete ui;
 	delete dateErrorDisplay;
@@ -409,7 +435,7 @@ void Overview::RebuildGraphs(bool reset)
     if (reset) {
         GraphView->GetXBounds(minx, maxx);
     }
-    if (settingsLoaded) GraphView->SaveSettings("Overview");
+    if (settingsLoaded) SaveGraphSettings();
     settingsLoaded=false;
     minRangeStartDate=p_profile->LastDay(MT_CPAP);
     maxRangeEndDate=minRangeStartDate.addDays(-1);      // force a range change;
@@ -428,6 +454,51 @@ void Overview::RebuildGraphs(bool reset)
     // Load after resetLayout so user-adjusted heights are not overwritten by defaults.
     GraphView->LoadSettings("Overview");
     settingsLoaded = true;
+
+    // A preset shown before the rebuild shows again, over the user's own choice just loaded
+    if (m_presets.preset() != OverviewPresets::All) {
+        setGraphVisibility(m_presets.reload(graphVisibility()));
+        updateGraphCombo();
+    }
+}
+
+void Overview::SaveGraphSettings()
+{
+    const OverviewPresets::Visibility shown = graphVisibility();
+    setGraphVisibility(m_presets.own(shown));
+    GraphView->SaveSettings("Overview"); //no trans
+    setGraphVisibility(shown);
+}
+
+void Overview::showPreset(OverviewPresets::Preset preset)
+{
+    setGraphVisibility(m_presets.switchTo(preset, graphVisibility()));
+    p_profile->general->setLastOverviewPreset(OverviewPresets::key(preset));
+    if (QAbstractButton *button = m_presetButtons->button(preset)) {
+        const QSignalBlocker blocker(m_presetButtons);
+        button->setChecked(true);
+    }
+    updateGraphCombo();
+    GraphView->updateScale();
+    GraphView->redraw();
+}
+
+OverviewPresets::Visibility Overview::graphVisibility() const
+{
+    OverviewPresets::Visibility visibility;
+    for (int i = 0; i < GraphView->size(); i++) {
+        gGraph *g = (*GraphView)[i];
+        if (g && !g->isSnapshot()) visibility.insert(g->name(), g->visible());
+    }
+    return visibility;
+}
+
+void Overview::setGraphVisibility(const OverviewPresets::Visibility &visibility)
+{
+    for (int i = 0; i < GraphView->size(); i++) {
+        gGraph *g = (*GraphView)[i];
+        if (g && visibility.contains(g->name())) g->setVisible(visibility.value(g->name()));
+    }
 }
 
 // Create an overview graph, adding it to the overview gGraphView object
@@ -1008,6 +1079,8 @@ void Overview::on_graphHelp_clicked() {
 }
 
 void Overview::on_layout_clicked() {
+    // saved layouts hold the user's own choice of graphs
+    if (m_presets.preset() != OverviewPresets::All) showPreset(OverviewPresets::All);
     if (!saveGraphLayoutSettings) {
         saveGraphLayoutSettings= new SaveGraphLayoutSettings("overview",this);
     }

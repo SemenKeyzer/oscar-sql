@@ -1168,7 +1168,7 @@ bool PreferencesDialog::Save()
         mainwin->getDaily()->LoadDate(mainwin->getDaily()->getDate());
         // Save early.. just in case..
         mainwin->getDaily()->graphView()->SaveSettings("Daily");
-        mainwin->getOverview()->graphView()->SaveSettings("Overview");
+        mainwin->getOverview()->SaveGraphSettings();
     }
 
     // after the dialog has closed: hand the settings on, offer to recalculate
