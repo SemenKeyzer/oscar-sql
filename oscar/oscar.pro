@@ -360,6 +360,7 @@ SOURCES += \
     welcome.cpp \
     nightsummary.cpp \
     overviewpresets.cpp \
+    settingscomparison.cpp \
     zip.cpp \
     Graphs/gAHIChart.cpp \
     Graphs/gdailysummary.cpp \
@@ -675,6 +676,7 @@ HEADERS  += \
     welcome.h \
     nightsummary.h \
     overviewpresets.h \
+    settingscomparison.h \
     mytextbrowser.h \
     staticQMessageBox.h \
     git_info.h \
@@ -878,6 +880,7 @@ test {
         tests/analysischarttests.cpp \
         tests/nightsummarytests.cpp \
         tests/overviewpresetstests.cpp \
+        tests/settingscomparisontests.cpp \
         tests/channelstoretests.cpp \
         tests/machinetests.cpp \
         tests/timealignsessiontests.cpp \
@@ -917,6 +920,7 @@ test {
         tests/analysischarttests.h \
         tests/nightsummarytests.h \
         tests/overviewpresetstests.h \
+        tests/settingscomparisontests.h \
         tests/channelstoretests.h \
         tests/machinetests.h \
         tests/backuprestoretests.h \
