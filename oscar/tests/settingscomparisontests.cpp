@@ -8,6 +8,7 @@
 
 #include "settingscomparisontests.h"
 
+#include <QCoreApplication>
 #include <QLocale>
 #include <cmath>
 
@@ -139,4 +140,72 @@ void SettingsComparisonTests::testDateList()
     QCOMPARE(dateList({ a, a.addDays(1), c, d }), expected);
     QCOMPARE(dateList({ d }), locale.toString(d, QLocale::ShortFormat));
     QCOMPARE(dateList({}), QString());
+}
+
+namespace {
+
+Row tableRow(const QString &pressure, int nightCount, double ahi)
+{
+    Group g;
+    g.mode = QStringLiteral("APAP");
+    g.pressure = pressure;
+    g.relief = QStringLiteral("SoftPAP: 1");
+    g.deviceKey = g.deviceLabel = QStringLiteral("Prisma 20A");
+    g.dates = nights(QDate(2026, 9, 1), nightCount);
+    g.hours = 7.0 * nightCount;
+    g.events = ahi * g.hours;
+    return row(g);
+}
+
+QString number(double value, int decimals) { return QLocale().toString(value, 'f', decimals); }
+
+} // namespace
+
+void SettingsComparisonTests::testHtmlMarksBestAndFewNights()
+{
+    const QList<Row> rows { tableRow(QStringLiteral("9-16"), 4, 3.0), tableRow(QStringLiteral("6-9"), 5, 5.0),
+                            tableRow(QStringLiteral("7-10"), 1, 1.0) };
+    const QString html = SettingsComparison::html(rows, Options());
+
+    // the best reliable AHI is green, the 1-night row's lower AHI is not
+    QVERIFY2(html.contains(QStringLiteral("<td align=right bgcolor='%1'>%2</td>").arg(kBestColor, number(3.0, 2))),
+             qPrintable(html));
+    QVERIFY(!html.contains(QStringLiteral("bgcolor='%1'><font color='%2'>%3").arg(kBestColor, kFewColor, number(1.0, 2))));
+
+    // the 1-night row is grey and says why
+    QVERIFY(html.contains(QStringLiteral("<font color='%1'>APAP · 7-10 · SoftPAP: 1</font>").arg(kFewColor)));
+    QVERIFY(html.contains(QCoreApplication::translate("SettingsComparison", "%1 (few nights)").arg(1)));
+
+    // the dates of a row are in its tooltip
+    QVERIFY(html.contains(QStringLiteral("title='%1'").arg(dateList(rows[0].group.dates))));
+}
+
+void SettingsComparisonTests::testHtmlShowsDashWithoutData()
+{
+    Row r = tableRow(QStringLiteral("9-16"), 4, 3.0);
+    r.values[Usage] = std::nan("");
+    const QString html = SettingsComparison::html({ r }, Options());
+    QVERIFY(html.contains(QStringLiteral("<td align=right>%1</td>").arg(kNoData)));     // analysis not filled in
+    QVERIFY(!html.contains(QStringLiteral("nan"), Qt::CaseInsensitive));
+    QVERIFY(!html.contains(QStringLiteral("inf"), Qt::CaseInsensitive));
+}
+
+void SettingsComparisonTests::testHtmlDeviceColumn()
+{
+    const QList<Row> rows { tableRow(QStringLiteral("9-16"), 4, 3.0) };
+    const QString device = QCoreApplication::translate("SettingsComparison", "Device");
+    Options options;
+    QVERIFY(!SettingsComparison::html(rows, options).contains(QStringLiteral("<th align=left>%1</th>").arg(device)));
+    options.showDevice = true;
+    const QString html = SettingsComparison::html(rows, options);
+    QVERIFY(html.contains(QStringLiteral("<th align=left>%1</th>").arg(device)));
+    QVERIFY(html.contains(QStringLiteral("<td>Prisma 20A</td>")));
+}
+
+void SettingsComparisonTests::testHtmlEscapesSettings()
+{
+    Row r = tableRow(QStringLiteral("Min <4 & Max 7"), 4, 3.0);
+    const QString html = SettingsComparison::html({ r }, Options());
+    QVERIFY(html.contains(QStringLiteral("Min &lt;4 &amp; Max 7")));
+    QVERIFY(!html.contains(QStringLiteral("Min <4")));
 }

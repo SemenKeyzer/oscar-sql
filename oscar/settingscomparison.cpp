@@ -8,6 +8,7 @@
 
 #include "settingscomparison.h"
 
+#include <QCoreApplication>
 #include <QHash>
 #include <QLocale>
 #include <algorithm>
@@ -128,6 +129,108 @@ int decimals(Column column)
         break;
     }
     return 1;
+}
+
+namespace {
+
+const QList<Column> kTableColumns { Nights, Usage, DeviceAhi, AnalysisAhi, Leak, Pressure, FlowLimitation, Odi3, Below90 };
+
+QString columnTitle(Column column, const Options &options)
+{
+    const QLocale locale;
+    switch (column) {
+    case Nights: return QCoreApplication::translate("SettingsComparison", "Nights");
+    case Usage: return QCoreApplication::translate("SettingsComparison", "Usage, h");
+    case DeviceAhi: return QCoreApplication::translate("SettingsComparison", "Device %1").arg(options.ahiName);
+    case AnalysisAhi: return QCoreApplication::translate("SettingsComparison", "Analysis AHI");
+    case Leak: return QCoreApplication::translate("SettingsComparison", "Leak");
+    case Pressure:
+        return QCoreApplication::translate("SettingsComparison", "Pressure %1%").arg(locale.toString(options.percentile));
+    case FlowLimitation: return QCoreApplication::translate("SettingsComparison", "Flow limitation, %");
+    case Odi3: return QCoreApplication::translate("SettingsComparison", "ODI 3%");
+    case Below90: return QCoreApplication::translate("SettingsComparison", "SpO2 < 90%");
+    case ColumnCount: break;
+    }
+    return QString();
+}
+
+QString formatValue(double value, Column column)
+{
+    if (std::isnan(value) || std::isinf(value)) return kNoData;
+    if (column == Nights) return QString::number(qRound(value));
+    return QLocale().toString(value, 'f', decimals(column));
+}
+
+QString settingsText(const Group &g)
+{
+    QStringList parts;
+    for (const QString &part : { g.mode, g.pressure, g.relief }) {
+        if (!part.trimmed().isEmpty()) parts << part.trimmed();
+    }
+    return parts.join(QStringLiteral(" · "));
+}
+
+} // namespace
+
+QString html(const QList<Row> &rows, const Options &options)
+{
+    const QLocale locale;
+    QVector<QSet<int>> winners(ColumnCount);
+    for (Column c : kTableColumns) winners[c] = best(rows, c);
+
+    const int span = 1 + (options.showDevice ? 1 : 0) + kTableColumns.size();
+    QString html = QStringLiteral("<table class=curved width='100%' cellpadding=2>");
+    html += QStringLiteral("<tr bgcolor='%1'><th colspan=%2 align=center><font size='+2'>%3</font></th></tr>")
+                .arg(options.headingColor).arg(span)
+                .arg(QCoreApplication::translate("SettingsComparison", "Device Settings Compared").toHtmlEscaped());
+
+    html += QStringLiteral("<tr><th align=left>%1</th>")
+                .arg(QCoreApplication::translate("SettingsComparison", "Settings").toHtmlEscaped());
+    if (options.showDevice) {
+        html += QStringLiteral("<th align=left>%1</th>")
+                    .arg(QCoreApplication::translate("SettingsComparison", "Device").toHtmlEscaped());
+    }
+    for (Column c : kTableColumns) {
+        QString head = columnTitle(c, options).toHtmlEscaped();
+        if (c == Pressure) {
+            const QString tip = QCoreApplication::translate("SettingsComparison",
+                                    "Average over the nights of each night's %1th percentile")
+                                    .arg(locale.toString(options.percentile));
+            head = QStringLiteral("<span title='%1'>%2</span>").arg(tip.toHtmlEscaped(), head);
+        }
+        html += QStringLiteral("<th align=right>%1</th>").arg(head);
+    }
+    html += QStringLiteral("</tr>");
+
+    for (int i = 0; i < rows.size(); ++i) {
+        const Row &r = rows[i];
+        const bool few = !reliable(r);
+        auto look = [few](const QString &text) {
+            return few ? QStringLiteral("<font color='%1'>%2</font>").arg(kFewColor, text) : text;
+        };
+        const QString background = options.rowColors.isEmpty() ? QStringLiteral("#ffffff")
+                                                               : options.rowColors[i % options.rowColors.size()];
+        html += QStringLiteral("<tr bgcolor='%1'>").arg(background);
+        html += QStringLiteral("<td><span title='%1'>%2</span></td>")
+                    .arg(dateList(r.group.dates).toHtmlEscaped(), look(settingsText(r.group).toHtmlEscaped()));
+        if (options.showDevice) html += QStringLiteral("<td>%1</td>").arg(look(r.group.deviceLabel.toHtmlEscaped()));
+        for (Column c : kTableColumns) {
+            QString text = formatValue(r.values[c], c);
+            if (c == Nights && few) {
+                text = QCoreApplication::translate("SettingsComparison", "%1 (few nights)").arg(r.nights());
+            }
+            const QString mark = winners[c].contains(i) ? QStringLiteral(" bgcolor='%1'").arg(kBestColor) : QString();
+            html += QStringLiteral("<td align=right%1>%2</td>").arg(mark, look(text.toHtmlEscaped()));
+        }
+        html += QStringLiteral("</tr>");
+    }
+
+    const QString note = QCoreApplication::translate("SettingsComparison",
+        "Green marks the best value among settings used for at least %1 nights. Grey rows have fewer "
+        "nights, too few to judge. Pressure is the average over the nights.").arg(kMinNights);
+    html += QStringLiteral("<tr><td colspan=%1 align=center><i>%2</i></td></tr>").arg(span).arg(note.toHtmlEscaped());
+    html += QStringLiteral("</table>");
+    return html;
 }
 
 } // namespace SettingsComparison

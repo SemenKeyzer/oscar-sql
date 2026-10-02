@@ -70,6 +70,24 @@ QString dateList(const QList<QDate> &dates);
 //! Decimals \a column is shown with.
 int decimals(Column column);
 
+//! Background of the best value in a column.
+const QString kBestColor = QStringLiteral("#c8f0c8");
+//! Text colour of rows with too few nights.
+const QString kFewColor = QStringLiteral("#909090");
+//! Shown where a row has no data for a column.
+const QString kNoData = QStringLiteral("–");
+
+struct Options {
+    bool showDevice = false;            //!< more than one device in the history
+    QString ahiName = QStringLiteral("AHI");
+    double percentile = 95;             //!< of the pressure column
+    QString headingColor = QStringLiteral("#ffffff");
+    QStringList rowColors;              //!< background per row, cycled; white when empty
+};
+
+//! The whole comparison table: title, column heads, one row per group and the note.
+QString html(const QList<Row> &rows, const Options &options);
+
 } // namespace SettingsComparison
 
 #endif // SETTINGSCOMPARISON_H

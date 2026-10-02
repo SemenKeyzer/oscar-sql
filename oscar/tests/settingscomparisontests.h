@@ -21,6 +21,10 @@ private slots:
     void testRowFigures();
     void testBest();
     void testDateList();
+    void testHtmlMarksBestAndFewNights();
+    void testHtmlShowsDashWithoutData();
+    void testHtmlDeviceColumn();
+    void testHtmlEscapesSettings();
 };
 DECLARE_TEST(SettingsComparisonTests)
 
