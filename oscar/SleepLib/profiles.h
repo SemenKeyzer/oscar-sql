@@ -452,6 +452,7 @@ const QString STR_OS_baseSpO2Option = "baseSpO2Option";
 
 // AnalysisSettings Strings: the switches, then every parameter of analysis::AnalysisParams
 const QString STR_AN_Enabled = "AnEnabled";
+const QString STR_AN_ShowFlowDifferences = "AnShowFlowDifferences";
 const QString STR_AN_HypopneaRule = "AnHypopneaRule";
 const QString STR_AN_LimitOxiToCpap = "AnLimitOxiToCpap";
 const QString STR_AN_PulseRiseAsArousal = "AnPulseRiseAsArousal";
@@ -675,6 +676,11 @@ class AnalysisSettings : public PrefSettings
 
     bool enabled() const { return getPref(STR_AN_Enabled).toBool(); }
     void setEnabled(bool enabled) { setPref(STR_AN_Enabled, enabled); }
+
+    //! Mark the differences from the device on the Daily flow graph (a display choice,
+    //! not a parameter: resetToDefaults() leaves it).
+    bool showFlowDifferences() const { return getPref(STR_AN_ShowFlowDifferences).toBool(); }
+    void setShowFlowDifferences(bool show) { setPref(STR_AN_ShowFlowDifferences, show); }
 
     //! Up to six SpO2 thresholds (%), highest first; 94, 90, 88, 85, 80 by default.
     QList<double> spo2Thresholds() const;

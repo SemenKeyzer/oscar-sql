@@ -20,6 +20,19 @@ class Day;
 class QTreeWidget;
 class QTreeWidgetItem;
 
+/*! \struct DifferenceSpan
+    \brief One place where the device and the analysis disagree, as the flow graph marks it.
+    */
+struct DifferenceSpan {
+    enum Kind { DeviceOnly, AnalysisOnly, DifferentType };
+    Kind kind = DeviceOnly;
+    qint64 start = 0, end = 0;   //!< device-corrected, as the graphs show them
+    QString device;              //!< the device's event, e.g. "OA" (none for AnalysisOnly)
+    QString analysis;            //!< the analysis' event, e.g. "H" (none for DeviceOnly)
+    //! "OA", "aH" or "OA \u2194 aOH".
+    QString label() const;
+};
+
 /*! \class AnalysisPanel
     \brief The Daily view's text parts for OSCAR's own sleep analysis (spec §5.1).
     */
@@ -41,6 +54,9 @@ class AnalysisPanel
     static QString duration(qint64 ms);
     //! An offset as "+0:02:00".
     static QString offset(qint64 ms);
+
+    //! The day's differences from the device, in time order (none without a comparison).
+    static QVector<DifferenceSpan> differences(const analysis::DayResult &result);
 };
 
 /*! \class AnalysisTab
@@ -62,6 +78,10 @@ class AnalysisTab : public QWidget
   signals:
     //! Show this span (device-corrected times) in the graphs.
     void showRange(qint64 from, qint64 to);
+    //! The difference now shown (its own span), or an empty one when something else is.
+    void differenceShown(qint64 start, qint64 end);
+    //! The "show on the flow graph" check box changed.
+    void showOnFlowChanged(bool show);
 
   private:
     void onItemClicked(QTreeWidgetItem *item);

@@ -23,6 +23,8 @@ private slots:
     void testSidebarForOximetryOnlyNight();
     void testTabListsDifferences();
     void testTabStepsThroughDifferences();
+    void testDifferenceSpans();
+    void testTabTellsTheFlowGraphWhichDifference();
     void testStatisticsFigures();
     void testPreferencesPage();
 

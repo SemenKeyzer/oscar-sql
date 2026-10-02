@@ -12,6 +12,7 @@
 #include <QPushButton>
 #include <QSignalSpy>
 #include <QTreeWidget>
+#include <QCheckBox>
 
 #include "analysispanel.h"
 #include "analysisprefs.h"
@@ -290,3 +291,62 @@ void AnalysisPanelTests::testPreferencesPage()
     thresholds->setText(QStringLiteral("85, 94, x, 120, 90, 88, 80, 75, 70"));
     QCOMPARE(page.spo2Thresholds(), QList<double>({ 94, 90, 88, 85, 80, 75 }));
 }
+
+// What the flow graph marks: each difference from the device with its kind, its span and a
+// short label, in time order. Matched events of the same group are no difference.
+void AnalysisPanelTests::testDifferenceSpans()
+{
+    DayResult r;
+    r.hasComparison = true;
+    r.deviceEvents = { ev(10, 20, RespEvent::ObstructiveApnea), ev(30, 40, RespEvent::Hypopnea),
+                       ev(50, 60, RespEvent::ObstructiveApnea), ev(80, 90, RespEvent::ObstructiveApnea) };
+    r.analysisEvents = { ev(11, 21, RespEvent::ObstructiveApnea), ev(51, 58, RespEvent::ObstructiveHypopnea),
+                         ev(70, 75, RespEvent::Hypopnea), ev(81, 92, RespEvent::CentralApnea) };
+    r.match.matched = { { 0, 0 }, { 2, 1 }, { 3, 3 } };   // OA-aOA, OA-aOH (other group), OA-aCA (same group)
+    r.match.deviceOnly = { 1 };
+    r.match.analysisOnly = { 2 };
+    r.match.typeMismatch = 1;
+
+    const QVector<DifferenceSpan> d = AnalysisPanel::differences(r);
+    QCOMPARE(d.size(), 3);
+    QCOMPARE(int(d[0].kind), int(DifferenceSpan::DeviceOnly));
+    QCOMPARE(d[0].start, at(30));
+    QCOMPARE(d[0].end, at(40));
+    QCOMPARE(d[0].label(), QStringLiteral("H"));
+    QCOMPARE(int(d[1].kind), int(DifferenceSpan::DifferentType));
+    QCOMPARE(d[1].start, at(50));                      // the union of both events
+    QCOMPARE(d[1].end, at(60));
+    QCOMPARE(d[1].label(), QStringLiteral("OA \u2194 aOH"));
+    QCOMPARE(int(d[2].kind), int(DifferenceSpan::AnalysisOnly));
+    QCOMPARE(d[2].start, at(70));
+    QCOMPARE(d[2].label(), QStringLiteral("aH"));
+
+    r.hasComparison = false;
+    QVERIFY(AnalysisPanel::differences(r).isEmpty());
+}
+
+// The flow graph draws the difference the tab is showing stronger: stepping tells it which
+// one (its own span, without the context around it), and a problem zone clears it. The
+// check box switches the marks on the flow graph on and off.
+void AnalysisPanelTests::testTabTellsTheFlowGraphWhichDifference()
+{
+    AnalysisTab tab;
+    const DayResult night = cpapNight();
+    tab.setResult(night);
+    const QVector<DifferenceSpan> diffs = AnalysisPanel::differences(night);
+    QVERIFY(!diffs.isEmpty());
+    QSignalSpy shown(&tab, &AnalysisTab::differenceShown);
+    tab.stepDifference(1);
+    QCOMPARE(shown.count(), 1);
+    QCOMPARE(shown.last().at(0).toLongLong(), diffs.first().start);
+    QCOMPARE(shown.last().at(1).toLongLong(), diffs.first().end);
+
+    QCheckBox *onFlow = tab.findChild<QCheckBox *>();
+    QVERIFY(onFlow != nullptr);
+    QVERIFY(onFlow->isChecked());
+    QSignalSpy toggled(&tab, &AnalysisTab::showOnFlowChanged);
+    onFlow->click();
+    QCOMPARE(toggled.count(), 1);
+    QCOMPARE(toggled.last().at(0).toBool(), false);
+}
+

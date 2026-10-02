@@ -3454,6 +3454,7 @@ AnalysisSettings::AnalysisSettings(Profile *profile)
 {
     analysis::AnalysisParams defaults;
     initPref(STR_AN_Enabled, defaults.enabled);
+    initPref(STR_AN_ShowFlowDifferences, true);
     initPref(STR_AN_HypopneaRule, int(defaults.day.rule));
     initPref(STR_AN_LimitOxiToCpap, defaults.day.limitOxiToCpap);
     initPref(STR_AN_PulseRiseAsArousal, defaults.day.pulseRiseAsArousal);

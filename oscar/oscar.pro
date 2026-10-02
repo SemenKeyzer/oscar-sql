@@ -370,6 +370,7 @@ SOURCES += \
     Graphs/glcommon.cpp \
     Graphs/gLineChart.cpp \
     Graphs/gLineOverlay.cpp \
+    Graphs/gDifferenceOverlay.cpp \
     Graphs/gOverviewGraph.cpp \
     Graphs/gPressureChart.cpp \
     Graphs/gSegmentChart.cpp \
@@ -569,6 +570,7 @@ HEADERS  += \
     Graphs/glcommon.h \
     Graphs/gLineChart.h \
     Graphs/gLineOverlay.h \
+    Graphs/gDifferenceOverlay.h \
     Graphs/gSegmentChart.h\
     Graphs/gspacer.h \
     Graphs/gStatsLine.h \

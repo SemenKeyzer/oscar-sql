@@ -53,6 +53,7 @@
 #include "database/session_repository.h"
 
 #include "Graphs/gLineOverlay.h"
+#include "Graphs/gDifferenceOverlay.h"
 #include "Graphs/gFlagsLine.h"
 #include "Graphs/gSleepStageChart.h"
 #include "Graphs/gSessionBarLayer.h"
@@ -248,6 +249,13 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     ui->tabWidget->insertTab(ui->tabWidget->indexOf(ui->events) + 1, m_analysisTab, tr("Analysis"));
     connect(m_analysisTab, &AnalysisTab::showRange, this, [this](qint64 from, qint64 to) {
         GraphView->SetXBounds(from, to);
+    });
+    connect(m_analysisTab, &AnalysisTab::differenceShown, this, [this](qint64 start, qint64 end) {
+        if (m_differenceOverlay) m_differenceOverlay->setCurrent(start, end);
+    });
+    connect(m_analysisTab, &AnalysisTab::showOnFlowChanged, this, [this](bool) {
+        updateDifferenceOverlay();
+        GraphView->redraw();
     });
     if (mainwin && mainwin->analysisService()) {
         connect(mainwin->analysisService(), &analysis::AnalysisService::daysChanged, this, &Daily::onAnalysisDaysChanged);
@@ -453,6 +461,9 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
 
     gLineChart *l = new gLineChart(CPAP_FlowRate,false,false);
     if (gGraph *FRW = graphlist.value(schema::channel[CPAP_FlowRate].code())) {
+        // under the trace: where the device and OSCAR's analysis disagree
+        m_differenceOverlay = new gDifferenceOverlay();
+        FRW->AddLayer(m_differenceOverlay);
         FRW->AddLayer(l);
         l->setMinimumHeight(80);      // set the layer height to 80. or about 130 graph height.
 //      FRW->AddLayer(AddOXI(new gLineOverlayBar(OXI_SPO2Drop, COLOR_SPO2Drop, STR_TR_O2)));
@@ -4011,9 +4022,17 @@ void Daily::loadAnalysis(Day *day)
         m_loadingAnalysis = false;
         m_analysisShown = m_analysisResult.hasCpap || m_analysisResult.hasOximetry;
     }
+    updateDifferenceOverlay();
     if (!m_analysisTab) return;
     if (m_analysisShown) m_analysisTab->setResult(m_analysisResult);
     else m_analysisTab->clear();
+}
+
+void Daily::updateDifferenceOverlay()
+{
+    if (!m_differenceOverlay) return;
+    const bool show = m_analysisShown && p_profile && p_profile->analysis->showFlowDifferences();
+    m_differenceOverlay->setSpans(show ? AnalysisPanel::differences(m_analysisResult) : QVector<DifferenceSpan>());
 }
 
 QString Daily::getAnalysisInformation(Day *day)

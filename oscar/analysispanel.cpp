@@ -7,7 +7,9 @@
  * for more details. */
 
 #include "analysispanel.h"
+#include "SleepLib/profiles.h"
 
+#include <QCheckBox>
 #include <QDateTime>
 #include <QHBoxLayout>
 #include <QHeaderView>
@@ -275,6 +277,15 @@ AnalysisTab::AnalysisTab(QWidget *parent)
     layout->addLayout(stepper);
     connect(m_prev, &QPushButton::clicked, this, [this]() { stepDifference(-1); });
     connect(m_next, &QPushButton::clicked, this, [this]() { stepDifference(1); });
+    auto *onFlow = new QCheckBox(tr("Show the differences on the flow graph"), this);
+    onFlow->setToolTip(tr("Marks where the device and the analysis disagree: amber, the device only; "
+                          "purple, the analysis only; yellow, a different type of event."));
+    onFlow->setChecked(!p_profile || p_profile->analysis->showFlowDifferences());
+    layout->addWidget(onFlow);
+    connect(onFlow, &QCheckBox::toggled, this, [this](bool on) {
+        if (p_profile) p_profile->analysis->setShowFlowDifferences(on);
+        emit showOnFlowChanged(on);
+    });
     m_tree = new QTreeWidget(this);
     m_tree->setColumnCount(1);
     m_tree->header()->hide();
@@ -342,23 +353,27 @@ void AnalysisTab::setResult(const DayResult &r)
         }
     }
     if (r.hasComparison) {
-        const MatchResult &m = r.match;
-        QTreeWidgetItem *g = group(tr("Device only"), m.deviceOnly.size());
-        for (int i : m.deviceOnly) {
-            const DayEvent &e = r.deviceEvents[i];
-            m_differences << item(g, QStringLiteral("%1 %2, %3 s").arg(clock(e.start), eventLabel(e.type)).arg((e.end - e.start) / 1000), e.start, e.end);
-        }
-        g = group(tr("Analysis only"), m.analysisOnly.size());
-        for (int j : m.analysisOnly) {
-            const DayEvent &e = r.analysisEvents[j];
-            m_differences << item(g, QStringLiteral("%1 a%2, %3 s").arg(clock(e.start), eventLabel(e.type)).arg((e.end - e.start) / 1000), e.start, e.end);
-        }
-        g = group(tr("Different type"), m.typeMismatch);
-        for (const auto &pair : m.matched) {
-            const DayEvent &d = r.deviceEvents[pair.first], &a = r.analysisEvents[pair.second];
-            if (groupOf(d.type) == groupOf(a.type)) continue;
-            m_differences << item(g, tr("%1 device %2, analysis a%3").arg(clock(qMin(d.start, a.start)), eventLabel(d.type), eventLabel(a.type)),
-                                  qMin(d.start, a.start), qMax(d.end, a.end));
+        // The same differences the flow graph marks (AnalysisPanel::differences()).
+        const QVector<DifferenceSpan> diffs = AnalysisPanel::differences(r);
+        auto count = [&diffs](DifferenceSpan::Kind k) {
+            return int(std::count_if(diffs.cbegin(), diffs.cend(), [k](const DifferenceSpan &d) { return d.kind == k; }));
+        };
+        QTreeWidgetItem *deviceOnly = group(tr("Device only"), count(DifferenceSpan::DeviceOnly));
+        QTreeWidgetItem *analysisOnly = group(tr("Analysis only"), count(DifferenceSpan::AnalysisOnly));
+        QTreeWidgetItem *differentType = group(tr("Different type"), count(DifferenceSpan::DifferentType));
+        for (const DifferenceSpan &d : diffs) {
+            const qint64 seconds = (d.end - d.start) / 1000;
+            switch (d.kind) {
+            case DifferenceSpan::DeviceOnly:
+                m_differences << item(deviceOnly, QStringLiteral("%1 %2, %3 s").arg(clock(d.start), d.label()).arg(seconds), d.start, d.end);
+                break;
+            case DifferenceSpan::AnalysisOnly:
+                m_differences << item(analysisOnly, QStringLiteral("%1 %2, %3 s").arg(clock(d.start), d.label()).arg(seconds), d.start, d.end);
+                break;
+            case DifferenceSpan::DifferentType:
+                m_differences << item(differentType, tr("%1 device %2, analysis a%3").arg(clock(d.start), d.device, d.analysis), d.start, d.end);
+                break;
+            }
         }
     }
     if (!r.unexplained.isEmpty()) {
@@ -385,7 +400,59 @@ void AnalysisTab::onItemClicked(QTreeWidgetItem *item)
     if (!item || item->data(0, Qt::UserRole).isNull()) return;
     const qint64 from = item->data(0, Qt::UserRole).toLongLong();
     const qint64 to = item->data(0, Qt::UserRole + 1).toLongLong();
+    // the flow graph draws the difference shown stronger; anything else clears it
+    if (m_differences.contains(item)) emit differenceShown(from, to);
+    else emit differenceShown(0, 0);
     // some context on both sides, a minute at least
     const qint64 pad = qMax<qint64>(60000, (to - from) / 2);
     emit showRange(from - pad, to + pad);
 }
+
+QString DifferenceSpan::label() const
+{
+    switch (kind) {
+    case DeviceOnly: return device;
+    case AnalysisOnly: return QStringLiteral("a") + analysis;
+    case DifferentType: break;
+    }
+    return device + QStringLiteral(" \u2194 a") + analysis;
+}
+
+QVector<DifferenceSpan> AnalysisPanel::differences(const DayResult &r)
+{
+    QVector<DifferenceSpan> out;
+    if (!r.hasComparison) return out;
+    const MatchResult &m = r.match;
+    for (int i : m.deviceOnly) {
+        const DayEvent &e = r.deviceEvents[i];
+        DifferenceSpan d;
+        d.kind = DifferenceSpan::DeviceOnly;
+        d.start = e.start;
+        d.end = e.end;
+        d.device = eventLabel(e.type);
+        out.append(d);
+    }
+    for (int j : m.analysisOnly) {
+        const DayEvent &e = r.analysisEvents[j];
+        DifferenceSpan d;
+        d.kind = DifferenceSpan::AnalysisOnly;
+        d.start = e.start;
+        d.end = e.end;
+        d.analysis = eventLabel(e.type);
+        out.append(d);
+    }
+    for (const auto &pair : m.matched) {
+        const DayEvent &dev = r.deviceEvents[pair.first], &an = r.analysisEvents[pair.second];
+        if (groupOf(dev.type) == groupOf(an.type)) continue;
+        DifferenceSpan d;
+        d.kind = DifferenceSpan::DifferentType;
+        d.start = qMin(dev.start, an.start);
+        d.end = qMax(dev.end, an.end);
+        d.device = eventLabel(dev.type);
+        d.analysis = eventLabel(an.type);
+        out.append(d);
+    }
+    std::stable_sort(out.begin(), out.end(), [](const DifferenceSpan &a, const DifferenceSpan &b) { return a.start < b.start; });
+    return out;
+}
+
