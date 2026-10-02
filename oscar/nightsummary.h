@@ -86,6 +86,10 @@ struct NightSummary {
 //! Builds the summary of the profile's most recent night (CPAP or oximetry). \a service
 //! may be null (no analysis figures then).
 NightSummary buildNightSummary(Profile *profile, analysis::AnalysisService *service, const QDate &today);
+//! The summary of the night of \a date, as the start screen shows the latest one. Without
+//! \a withTrends it leaves out the 30 nights before it and the count of outdated days.
+NightSummary buildNightSummaryFor(Profile *profile, analysis::AnalysisService *service, const QDate &date,
+                                  const QDate &today, bool withTrends = true);
 
 /*! \class NightTrend
     \brief Up to 30 nights as small bars against a target line: bars at or past the target
@@ -122,6 +126,9 @@ class NightSummaryView : public QWidget
 
     //! The colours the view uses for a level (also in the trends).
     static QColor levelColor(NightSummary::Level level);
+    //! The night's usage, leak, pressure and SpO2 as small HTML tiles, two to a row, for
+    //! the Daily view's sidebar; empty when there is nothing to show.
+    static QString keyFiguresHtml(const NightSummary &s);
 
   signals:
     //! A link was clicked: daily=, import=cpap or analysis=recalculate.

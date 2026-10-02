@@ -415,7 +415,8 @@ private:
     DailySearchTab* dailySearchTab = nullptr;
 
 
-    QString getAHI (Day * day, bool isBrick);
+    //! \a analysisAhi: OSCAR's analysis of that night, shown under the device's; < 0 for none.
+    QString getAHI (Day * day, bool isBrick, double analysisAhi = -1);
     QString getSessionInformation(Day *);
     QString getMachineSettings(Day *);
     QString getStatisticsInfo(Day *);

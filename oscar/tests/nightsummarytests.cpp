@@ -221,3 +221,33 @@ void NightSummaryTests::testSpo2AgainstTargets()
     QCOMPARE(s.spo2Level(), NightSummary::Unknown);
 }
 
+// The Daily view's sidebar strip: usage, leak, pressure and SpO2 as small tiles, each with
+// the start screen's colour for its level; a night without CPAP shows only what it has.
+void NightSummaryTests::testKeyFiguresHtml()
+{
+    NightSummary s = goodNight();
+    s.oxi.valid = true;
+    s.oxi.spo2Avg = 94;
+    s.oxi.hours = 8;
+    s.oxi.fromAnalysis = true;
+    s.oxi.percentBelow90 = 1.0;
+    s.oxi.desaturations = 160;                         // 20 an hour: attention
+    const QString html = NightSummaryView::keyFiguresHtml(s);
+    const int usage = html.indexOf(QStringLiteral("Usage")), leak = html.indexOf(QStringLiteral("Leak"));
+    const int pressure = html.indexOf(QStringLiteral("Pressure")), spo2 = html.indexOf(QStringLiteral("SpO2 below 90%"));
+    QVERIFY(usage >= 0 && leak > usage && pressure > leak && spo2 > pressure);
+    const QString good = NightSummaryView::levelColor(NightSummary::Good).name();
+    const QString attention = NightSummaryView::levelColor(NightSummary::Attention).name();
+    QVERIFY(html.contains(good));                      // usage and leak within their targets
+    QVERIFY(html.indexOf(attention, spo2) > spo2);     // SpO2 over the ODI target
+    QVERIFY(html.contains(QStringLiteral("20.0")));    // ODI 3 % an hour
+
+    s.hasCpap = false;
+    s.hasLeak = false;
+    s.pressure.clear();
+    const QString oxiOnly = NightSummaryView::keyFiguresHtml(s);
+    QVERIFY(!oxiOnly.contains(QStringLiteral("Usage")));
+    QVERIFY(oxiOnly.contains(QStringLiteral("SpO2 below 90%")));
+    QVERIFY(NightSummaryView::keyFiguresHtml(NightSummary()).isEmpty());
+}
+

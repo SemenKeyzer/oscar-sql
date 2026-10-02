@@ -214,12 +214,21 @@ QStringList NightSummary::actions() const
 
 NightSummary buildNightSummary(Profile *profile, analysis::AnalysisService *service, const QDate &today)
 {
-    NightSummary s;
-    if (!profile) return s;
+    if (!profile) return NightSummary();
     const QDate cpapDate = profile->LastDay(MT_CPAP);
     const QDate oxiDate = profile->LastDay(MT_OXIMETER);
-    s.date = cpapDate.isValid() && (!oxiDate.isValid() || cpapDate >= oxiDate) ? cpapDate : oxiDate;
-    if (!s.date.isValid()) return s;
+    const QDate latest = cpapDate.isValid() && (!oxiDate.isValid() || cpapDate >= oxiDate) ? cpapDate : oxiDate;
+    if (!latest.isValid()) return NightSummary();
+    return buildNightSummaryFor(profile, service, latest, today);
+}
+
+NightSummary buildNightSummaryFor(Profile *profile, analysis::AnalysisService *service, const QDate &date,
+                                  const QDate &today, bool withTrends)
+{
+    NightSummary s;
+    if (!profile || !date.isValid()) return s;
+    const QDate oxiDate = profile->LastDay(MT_OXIMETER);
+    s.date = date;
     s.daysSinceData = int(s.date.daysTo(today));
     s.complianceHours = profile->cpap->complianceHours();
     const bool analysisOn = service && service->params().enabled;
@@ -263,7 +272,7 @@ NightSummary buildNightSummary(Profile *profile, analysis::AnalysisService *serv
     s.offsetHintMs = row.oxiOffsetHintMs;
 
     // The nights before, for the trends: no further back than the first CPAP night.
-    if (s.hasCpap) {
+    if (withTrends && s.hasCpap) {
         QDate from = s.date.addDays(1 - NightSummary::kTrendNights);
         const QDate first = profile->FirstDay(MT_CPAP);
         if (first.isValid() && first > from) from = first;
@@ -274,7 +283,7 @@ NightSummary buildNightSummary(Profile *profile, analysis::AnalysisService *serv
             s.ahiTrend.append(h > 0 ? dd->calcAHI() : std::numeric_limits<double>::quiet_NaN());
         }
     }
-    s.outdatedAnalysis = analysisOn ? service->outdatedCount() : 0;
+    s.outdatedAnalysis = withTrends && analysisOn ? service->outdatedCount() : 0;
     return s;
 }
 
@@ -403,6 +412,50 @@ QColor NightSummaryView::levelColor(NightSummary::Level level)
     case NightSummary::Unknown: break;
     }
     return QColor(0xb0, 0xb0, 0xb0);
+}
+
+QString NightSummaryView::keyFiguresHtml(const NightSummary &s)
+{
+    struct Tile {
+        QString caption, value, note;
+        NightSummary::Level level;
+    };
+    QVector<Tile> tiles;
+    if (s.hasCpap) {
+        tiles.append({ tr("Usage"), duration(s.hours), tr("target %1 h or more").arg(s.complianceHours), s.usageLevel() });
+        if (s.hasLeak) {
+            tiles.append({ tr("Leak"), num(s.leak) + QLatin1Char(' ') + s.leakUnits,
+                           s.leakRedline > 0 ? tr("average; red line %1").arg(s.leakRedline) : tr("average"), s.leakLevel() });
+        }
+        if (!s.pressure.isEmpty()) {
+            tiles.append({ tr("Pressure"), s.pressure + QLatin1Char(' ') + s.pressureUnits, s.pressureNote, NightSummary::Unknown });
+        }
+    }
+    if (s.oxi.valid && !s.oxi.spotChecks && s.oxi.spo2Avg > 0 && s.oxi.hours > 0) {
+        const QString note = s.oxi.fromAnalysis
+            ? tr("ODI 3%: %1 per hour").arg(num(s.oxi.desaturations / s.oxi.hours))
+            : tr("SpO2 drops (classic): %1 per hour").arg(num(s.oxi.desaturations / s.oxi.hours));
+        tiles.append({ tr("SpO2 below 90%"), num(s.oxi.percentBelow90) + QStringLiteral(" %"), note, s.spo2Level() });
+    }
+    if (tiles.isEmpty()) return QString();
+
+    // QTextBrowser HTML: a coloured cell stands in for the tile's left border.
+    QString html = QStringLiteral("<table width='100%' cellspacing=3 cellpadding=0 border=0>");
+    for (int i = 0; i < tiles.size(); ++i) {
+        const Tile &t = tiles[i];
+        if (i % 2 == 0) html += QStringLiteral("<tr>");
+        const QString color = levelColor(t.level).name();
+        QString sign;
+        if (t.level == NightSummary::Good) sign = QStringLiteral("<font color='%1'>&#x2713;</font> ").arg(color);
+        else if (t.level == NightSummary::Attention) sign = QStringLiteral("<font color='%1'><b>!</b></font> ").arg(color);
+        html += QStringLiteral("<td width='50%' valign=top><table width='100%' cellspacing=0 cellpadding=3 border=0 bgcolor='#ffffff'><tr>"
+                               "<td width=4 bgcolor='%1'></td><td><font color='#5f5f5f'>%2</font><br/><b>%3</b><br/><small>%4%5</small></td>"
+                               "</tr></table></td>")
+                    .arg(color, t.caption.toHtmlEscaped(), t.value.toHtmlEscaped(), sign, t.note.toHtmlEscaped());
+        if (i % 2 == 1) html += QStringLiteral("</tr>");
+    }
+    if (tiles.size() % 2) html += QStringLiteral("<td></td></tr>");
+    return html + QStringLiteral("</table>");
 }
 
 QLabel *NightSummaryView::richLabel(const QString &text, const QString &objectName)

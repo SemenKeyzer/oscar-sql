@@ -22,6 +22,7 @@ private slots:
     void testTrendFigures();
     void testConcerns();
     void testSpo2AgainstTargets();
+    void testKeyFiguresHtml();
     void testActions();
     void testViewShowsTheNight();
 

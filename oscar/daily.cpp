@@ -48,6 +48,7 @@
 #include "SleepLib/analysis/analysis_channels.h"
 #include "SleepLib/analysis/analysis_service.h"
 #include "analysispanel.h"
+#include "nightsummary.h"
 #include "SleepLib/loader_plugins/applehealth_loader.h"
 #include "SleepLib/loader_plugins/prisma_loader.h"
 #include "database/session_repository.h"
@@ -71,6 +72,7 @@ extern MainWindow * mainwin;
 
 QString htmlLeftHeader;
 QString htmlLeftAHI;
+QString htmlLeftKeyFigures;   // usage, leak, pressure and SpO2 against their targets
 QString htmlLeftMachineInfo;
 QString htmlLeftSleepTime;
 QString htmlLeftIndices;
@@ -1911,7 +1913,7 @@ QString Daily::getSleepTime(Day * day)
 }
 
 
-QString Daily::getAHI(Day * day, bool isBrick) {
+QString Daily::getAHI(Day * day, bool isBrick, double analysisAhi) {
     QString html;
 
     float hours=day->hours(MT_CPAP);
@@ -1958,6 +1960,11 @@ QString Daily::getAHI(Day * day, bool isBrick) {
                 .arg(STR_TR_OAHI).arg(oahi,0,'f',2)
                 .arg(STR_TR_CAHI).arg(cahi,0,'f',2);
         html +="</tr>\n";
+    }
+    // The analysis' AHI under the device's, so the two read side by side.
+    if (!isBrick && analysisAhi >= 0) {
+        html += QString("<tr><td colspan=5 bgcolor='%1' align=center><font color='%2'>%3</font></td></tr>\n")
+                    .arg("#F88017", COLOR_Text.name(), tr("OSCAR's analysis: %1").arg(analysisAhi, 0, 'f', 1));
     }
 
     html +="</table>\n";
@@ -2263,6 +2270,7 @@ QString Daily::getPieChart (float values, Day * day) {
 QString Daily::getLeftSidebar (bool honorPieChart) {
     QString html =   htmlLeftHeader
                    + htmlLeftAHI
+                   + htmlLeftKeyFigures
                    + htmlLeftMachineInfo
                    + htmlLeftSleepTime
                    + htmlLeftIndices;
@@ -2343,6 +2351,7 @@ void Daily::Load(QDate date)
 
     // Clear the components of the left sidebar prior to recreating them
     htmlLeftAHI.clear();
+    htmlLeftKeyFigures.clear();
     htmlLeftMachineInfo.clear();
     htmlLeftSleepTime.clear();
     htmlLeftIndices.clear();
@@ -2396,6 +2405,11 @@ void Daily::Load(QDate date)
     if (!cpap) {
         GraphView->setEmptyImage(QPixmap(":/icons/logo-md.png"));
     }
+    // The night's key figures, as the start screen shows them for the latest night.
+    const NightSummary figures = day ? buildNightSummaryFor(p_profile, mainwin ? mainwin->analysisService() : nullptr,
+                                                            day->date(), QDate::currentDate(), false)
+                                     : NightSummary();
+    htmlLeftKeyFigures = NightSummaryView::keyFiguresHtml(figures);
     if (cpap) {
         float hours=day->hours(MT_CPAP);
         if (GraphView->isEmpty() && (hours>0)) {
@@ -2420,7 +2434,7 @@ void Daily::Load(QDate date)
         PERF_TIMER_START("Daily::Load::LeftPanel");
         modestr=schema::channel[CPAP_Mode].m_options[mode];
         if (hours>0) {
-            htmlLeftAHI= getAHI(day,isBrick);
+            htmlLeftAHI= getAHI(day,isBrick, figures.hasAnalysisAhi ? figures.analysisAhi : -1);
 
             htmlLeftMachineInfo = getCPAPInformation(day);
 

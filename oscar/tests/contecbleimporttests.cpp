@@ -21,6 +21,7 @@
 #include "database/database_manager.h"
 #include "bluetoothoximeterpage.h"
 #include "SleepLib/oximetry_summary.h"
+#include "nightsummary.h"
 #include "database/analysis_daily_repository.h"
 
 #include <QCoreApplication>
@@ -407,5 +408,22 @@ void ContecBleImportTests::testOximetryNightFromAnalysis()
     QCOMPARE(n.pulseAvg, 62.0);
     QCOMPARE(n.pulseMin, 51.0);
     QCOMPARE(n.pulseMax, 98.0);
+}
+
+// The Daily view summarises the night it shows, not only the latest: the same figures as
+// the start screen, for any date, without the 30-night trends it does not need.
+void ContecBleImportTests::testNightSummaryForAnyDate()
+{
+    Machine *mach = p_profile->CreateMachine(ContecBleLoader::infoForModel(QStringLiteral("CMS50FW")));
+    ContecBleImporter imp(mach);
+    const QDateTime start(QDate(2026, 8, 5), QTime(23, 0, 0));
+    QCOMPARE(imp.save(record(start, 600), Decision::Import), Outcome::Imported);
+    const NightSummary s = buildNightSummaryFor(p_profile, nullptr, QDate(2026, 8, 5), QDate(2026, 8, 6), false);
+    QCOMPARE(s.date, QDate(2026, 8, 5));
+    QCOMPARE(s.daysSinceData, 1);
+    QVERIFY(!s.hasCpap);
+    QVERIFY(s.oxi.valid);
+    QVERIFY(s.usage.isEmpty());                        // no trends asked for
+    QVERIFY(!buildNightSummaryFor(p_profile, nullptr, QDate(2026, 8, 4), QDate(2026, 8, 6), false).oxi.valid);
 }
 
