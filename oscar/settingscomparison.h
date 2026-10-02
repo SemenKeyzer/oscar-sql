@@ -71,7 +71,7 @@ QString dateList(const QList<QDate> &dates);
 int decimals(Column column);
 
 //! Background of the best value in a column.
-const QString kBestColor = QStringLiteral("#c8f0c8");
+const QString kBestColor = QStringLiteral("#a8e0a8");
 //! Text colour of rows with too few nights.
 const QString kFewColor = QStringLiteral("#909090");
 //! Shown where a row has no data for a column.

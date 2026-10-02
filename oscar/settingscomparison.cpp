@@ -196,7 +196,7 @@ QString html(const QList<Row> &rows, const Options &options)
             const QString tip = QCoreApplication::translate("SettingsComparison",
                                     "Average over the nights of each night's %1th percentile")
                                     .arg(locale.toString(options.percentile));
-            head = QStringLiteral("<span title='%1'>%2</span>").arg(tip.toHtmlEscaped(), head);
+            head = QStringLiteral("<span title=\"%1\">%2</span>").arg(tip.toHtmlEscaped(), head);
         }
         html += QStringLiteral("<th align=right>%1</th>").arg(head);
     }
@@ -211,7 +211,7 @@ QString html(const QList<Row> &rows, const Options &options)
         const QString background = options.rowColors.isEmpty() ? QStringLiteral("#ffffff")
                                                                : options.rowColors[i % options.rowColors.size()];
         html += QStringLiteral("<tr bgcolor='%1'>").arg(background);
-        html += QStringLiteral("<td><span title='%1'>%2</span></td>")
+        html += QStringLiteral("<td><span title=\"%1\">%2</span></td>")
                     .arg(dateList(r.group.dates).toHtmlEscaped(), look(settingsText(r.group).toHtmlEscaped()));
         if (options.showDevice) html += QStringLiteral("<td>%1</td>").arg(look(r.group.deviceLabel.toHtmlEscaped()));
         for (Column c : kTableColumns) {
@@ -219,8 +219,12 @@ QString html(const QList<Row> &rows, const Options &options)
             if (c == Nights && few) {
                 text = QCoreApplication::translate("SettingsComparison", "%1 (few nights)").arg(r.nights());
             }
-            const QString mark = winners[c].contains(i) ? QStringLiteral(" bgcolor='%1'").arg(kBestColor) : QString();
-            html += QStringLiteral("<td align=right%1>%2</td>").arg(mark, look(text.toHtmlEscaped()));
+            // bold as well: Statistics shades every other row a light green of its own
+            const bool won = winners[c].contains(i);
+            QString shown = look(text.toHtmlEscaped());
+            if (won) shown = QStringLiteral("<b>%1</b>").arg(shown);
+            const QString mark = won ? QStringLiteral(" bgcolor='%1'").arg(kBestColor) : QString();
+            html += QStringLiteral("<td align=right%1>%2</td>").arg(mark, shown);
         }
         html += QStringLiteral("</tr>");
     }

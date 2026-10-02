@@ -168,7 +168,8 @@ void SettingsComparisonTests::testHtmlMarksBestAndFewNights()
     const QString html = SettingsComparison::html(rows, Options());
 
     // the best reliable AHI is green, the 1-night row's lower AHI is not
-    QVERIFY2(html.contains(QStringLiteral("<td align=right bgcolor='%1'>%2</td>").arg(kBestColor, number(3.0, 2))),
+    // bold too: Statistics shades every other row a light green of its own
+    QVERIFY2(html.contains(QStringLiteral("<td align=right bgcolor='%1'><b>%2</b></td>").arg(kBestColor, number(3.0, 2))),
              qPrintable(html));
     QVERIFY(!html.contains(QStringLiteral("bgcolor='%1'><font color='%2'>%3").arg(kBestColor, kFewColor, number(1.0, 2))));
 
@@ -177,7 +178,12 @@ void SettingsComparisonTests::testHtmlMarksBestAndFewNights()
     QVERIFY(html.contains(QCoreApplication::translate("SettingsComparison", "%1 (few nights)").arg(1)));
 
     // the dates of a row are in its tooltip
-    QVERIFY(html.contains(QStringLiteral("title='%1'").arg(dateList(rows[0].group.dates))));
+    QVERIFY(html.contains(QStringLiteral("title=\"%1\"").arg(dateList(rows[0].group.dates))));
+
+    // tooltips in double quotes, which toHtmlEscaped() escapes: the English one has an apostrophe
+    const QString tip = QCoreApplication::translate("SettingsComparison",
+                            "Average over the nights of each night's %1th percentile").arg(95);
+    QVERIFY(html.contains(QStringLiteral("title=\"%1\"").arg(tip.toHtmlEscaped())));
 }
 
 void SettingsComparisonTests::testHtmlShowsDashWithoutData()
