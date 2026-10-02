@@ -23,6 +23,7 @@ server= red 30+
 #include <QDataStream>
 #include <QBuffer>
 #include <cmath>
+#include <limits>
 #include <QSet>
 
 #include <QPrinter>
@@ -124,9 +125,8 @@ QString analysisValue(const QString &key, const QDate &start, const QDate &end)
 
 } // namespace
 
-QString analysisFigure(const QString &key, const QList<AnalysisDailyData> &rows)
+double analysisFigureValue(const QString &key, const QList<AnalysisDailyData> &rows)
 {
-    const QString none = QStringLiteral("-");
     double num = 0, den = 0;
     double nadir = 101;
     for (const AnalysisDailyData &d : rows) {
@@ -167,9 +167,17 @@ QString analysisFigure(const QString &key, const QList<AnalysisDailyData> &rows)
             else if (key == QLatin1String("dhr")) { num += d.dhrSum; den += d.nDhr; }
         }
     }
-    if (den <= 0) return none;
-    if (key == QLatin1String("nadir")) return QString::number(nadir, 'f', 0);
-    return QString::number(num / den, 'f', 2);
+    if (den <= 0) return std::numeric_limits<double>::quiet_NaN();
+    if (key == QLatin1String("nadir")) return nadir;
+    return num / den;
+}
+
+QString analysisFigure(const QString &key, const QList<AnalysisDailyData> &rows)
+{
+    const double value = analysisFigureValue(key, rows);
+    if (std::isnan(value)) return QStringLiteral("-");
+    if (key == QLatin1String("nadir")) return QString::number(value, 'f', 0);
+    return QString::number(value, 'f', 2);
 }
 
 // HTML components that make up Statistics page and printed report

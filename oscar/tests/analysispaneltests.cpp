@@ -8,6 +8,8 @@
 
 #include "analysispaneltests.h"
 
+#include <cmath>
+
 #include <QApplication>
 #include <QPushButton>
 #include <QSignalSpy>
@@ -247,6 +249,37 @@ void AnalysisPanelTests::testStatisticsFigures()
     QCOMPARE(analysisFigure(QStringLiteral("nadir"), rows), QStringLiteral("86"));
     QCOMPARE(analysisFigure(QStringLiteral("pri"), rows), QStringLiteral("-"));   // no pulse
     QCOMPARE(analysisFigure(QStringLiteral("ahi"), {}), QStringLiteral("-"));
+}
+
+void AnalysisPanelTests::testStatisticsFigureValues()
+{
+    // the numbers behind the Statistics figures, for tables that compare them
+    AnalysisDailyData a, b;
+    a.hasFlow = b.hasFlow = true;
+    a.flowSeconds = 3600;
+    b.flowSeconds = 7200;
+    a.nObstructiveApnea = 5;
+    b.nObstructiveApnea = 1;
+    a.hasOximetry = true;
+    a.oxiSeconds = 3600;
+    a.nDesat3 = 6;
+    a.spo2Nadir = 86;
+    a.spo2Hist = QVector<int>(51, 0);
+    a.spo2Hist[96 - 50] = 3240;
+    a.spo2Hist[89 - 50] = 360;   // 10 % below 90
+    const QList<AnalysisDailyData> rows { a, b };
+
+    QCOMPARE(analysisFigureValue(QStringLiteral("ahi"), rows), 2.0);    // 6 events over 3 hours
+    QCOMPARE(analysisFigureValue(QStringLiteral("odi3"), rows), 6.0);
+    QCOMPARE(analysisFigureValue(QStringLiteral("below:90"), rows), 10.0);
+    QCOMPARE(analysisFigureValue(QStringLiteral("nadir"), rows), 86.0);
+    QVERIFY(std::isnan(analysisFigureValue(QStringLiteral("pri"), rows)));   // no pulse
+    QVERIFY(std::isnan(analysisFigureValue(QStringLiteral("ahi"), {})));
+
+    // the text figures are these numbers, formatted
+    QCOMPARE(analysisFigure(QStringLiteral("ahi"), rows), QStringLiteral("2.00"));
+    QCOMPARE(analysisFigure(QStringLiteral("nadir"), rows), QStringLiteral("86"));
+    QCOMPARE(analysisFigure(QStringLiteral("pri"), rows), QStringLiteral("-"));
 }
 
 void AnalysisPanelTests::testPreferencesPage()

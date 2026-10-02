@@ -76,6 +76,8 @@ enum StatCalcType {
 //! SC_ANALYSIS, \a key as their src): counts and seconds are summed over the days and
 //! then divided, so a long night weighs more than a short one. "-" without data.
 QString analysisFigure(const QString &key, const QList<AnalysisDailyData> &rows);
+//! The number behind analysisFigure(): NaN when there is no data for \a key.
+double analysisFigureValue(const QString &key, const QList<AnalysisDailyData> &rows);
 
 /*! \struct StatisticsRow
     \brief Describes a single row on the statistics page

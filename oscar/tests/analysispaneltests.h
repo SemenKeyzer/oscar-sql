@@ -26,6 +26,7 @@ private slots:
     void testDifferenceSpans();
     void testTabTellsTheFlowGraphWhichDifference();
     void testStatisticsFigures();
+    void testStatisticsFigureValues();
     void testPreferencesPage();
 
 private:
