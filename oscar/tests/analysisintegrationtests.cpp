@@ -36,6 +36,7 @@
 #include "database/profile_repository.h"
 #include "database/session_channels_repository.h"
 #include "database/session_settings_repository.h"
+#include "statistics.h"
 #include "tests/analysis_synth.h"
 
 using namespace analysis;
@@ -905,4 +906,46 @@ void AnalysisIntegrationTests::testAnalysisReportQuery()
     QVERIFY(q.value(QStringLiteral("T90_Min")).isNull());
     QVERIFY(!q.next());
     QVERIFY(AnalysisDailyRepository().removeRange(m_profileId, date, date.addDays(1)));
+}
+
+namespace {
+
+// Statistics' settings periods, opened up for the test
+class RXStatistics : public Statistics
+{
+  public:
+    using Statistics::updateRXChanges;
+    using Statistics::rxitems;
+};
+
+} // namespace
+
+void AnalysisIntegrationTests::testSettingsPeriodCountsCpapHoursOnly()
+{
+    // A night on the CPAP with an oximeter worn longer: the settings period's usage, and the
+    // device AHI divided by it, count the CPAP's time alone.
+    const qint64 oxiRow = insertRow(QStringLiteral("INSERT INTO machines (profile_id, machine_id, loader_name, machine_type, serial_number) "
+                                                   "VALUES (?, 3003, 'TestOxi', ?, 'OX2')"), { m_profileId, int(MT_OXIMETER) });
+    QVERIFY(oxiRow > 0);
+    Machine cpap(p_profile, 50);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Machine oxi(p_profile, 51);
+    oxi.info.type = MT_OXIMETER;
+    oxi.setDatabaseId(oxiRow);
+    Day *day = new Day();
+    day->setDate(kNightDate);
+    day->addSession(hypopneaSession(&cpap, 70, m_machineRow));
+    day->addSession(oximetrySession(&oxi, 71, oxiRow));
+    const double cpapHours = day->hours(MT_CPAP);
+    QVERIFY(day->hours() > cpapHours);   // the oximeter session runs longer
+
+    p_profile->daylist.insert(kNightDate, day);
+    RXStatistics stats;
+    stats.updateRXChanges();
+    p_profile->daylist.remove(kNightDate);
+
+    QCOMPARE(stats.rxitems.size(), 1);
+    QCOMPARE(stats.rxitems.first().hours, cpapHours);
+    delete day;
 }

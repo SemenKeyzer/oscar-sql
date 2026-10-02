@@ -38,6 +38,7 @@ private slots:
     void testAnalysisServiceKeepsDaysCurrent();
     void testFlagsGraphsSplitDeviceAndAnalysis();
     void testAnalysisReportQuery();
+    void testSettingsPeriodCountsCpapHoursOnly();
 
 private:
     class QCoreApplication *m_app = nullptr;

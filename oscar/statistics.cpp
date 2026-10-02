@@ -317,8 +317,9 @@ void Statistics::loadRXChanges()
     quint16 version;
     in >> version;
     // The items hold ready-made texts (mode, relief, pressure): a cache from before the
-    // language was kept, or in another language, is rebuilt.
-    if (version < 1) {
+    // language was kept, or in another language, is rebuilt. Before version 2 a period's
+    // first night counted the oximeter's time as well, so those caches are rebuilt too.
+    if (version < 2) {
         return;
     }
     QString language;
@@ -355,7 +356,7 @@ void Statistics::saveRXChanges()
     out.setByteOrder(QDataStream::LittleEndian);
     out.setVersion(QDataStream::Qt_5_0);
     out << magic;
-    out << (quint16)1;
+    out << (quint16)2;
     out << currentLanguage();
     out << rxitems;
 
@@ -815,7 +816,7 @@ void Statistics::updateRXChanges()
                 rx.s_sum[code] = day->sum(code);
             }
 
-            rx.hours = day->hours();
+            rx.hours = day->hours(MT_CPAP);
 
             // Store settings, etc..
             rx.relief = relief;
