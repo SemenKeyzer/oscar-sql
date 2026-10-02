@@ -596,6 +596,16 @@
               </widget>
              </item>
              <item>
+              <widget class="QRadioButton" name="reportModeSettings">
+               <property name="toolTip">
+                <string>Compare how the nights went on each set of device settings</string>
+               </property>
+               <property name="text">
+                <string>Settings</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QDateEdit" name="statStartDate">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Minimum">

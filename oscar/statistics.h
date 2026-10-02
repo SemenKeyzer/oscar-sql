@@ -245,6 +245,8 @@ class Statistics : public QObject
 
     QString GenerateMachineList();
     QString GenerateRXChanges();
+    //! The "Settings" mode: how the nights went on each set of device settings.
+    QString GenerateSettingsComparison();
     QString GenerateCPAPUsage();
 
     // Using a map to maintain order

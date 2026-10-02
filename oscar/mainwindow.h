@@ -377,9 +377,9 @@ class MainWindow : public QMainWindow
     //! \brief Populates the statistics with information.
     void on_statisticsButton_clicked();
 
-    void on_reportModeMonthly_clicked();
+    void on_reportModeMonthly_toggled(bool checked);
 
-    void on_reportModeStandard_clicked();
+    void on_reportModeStandard_toggled(bool checked);
 
     void init_reportModeUi();
     void reset_reportModeUi();
@@ -388,7 +388,8 @@ class MainWindow : public QMainWindow
 
     void on_actionPurgeMachine(QAction *action);
 
-    void on_reportModeRange_clicked();
+    void on_reportModeRange_toggled(bool checked);
+    void on_reportModeSettings_toggled(bool checked);
 
     void on_statEndDate_dateChanged(const QDate &date);
 

@@ -447,6 +447,7 @@ const QString STR_US_LastOverviewPreset = "LastOverviewPreset";
 const int STAT_MODE_STANDARD = 0;
 const int STAT_MODE_MONTHLY = 1;
 const int STAT_MODE_RANGE = 2;
+const int STAT_MODE_SETTINGS = 3;   //!< one table comparing every set of device settings
 
 //added by Sheila 1/5/2026
 const QString STR_OS_baseSpO2Option = "baseSpO2Option";

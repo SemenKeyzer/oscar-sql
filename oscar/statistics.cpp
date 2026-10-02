@@ -42,6 +42,7 @@ server= red 30+
 #include "SleepLib/analysis/analysis_service.h"
 #include "SleepLib/analysis/oxi_analyzer.h"
 #include "analysispanel.h"
+#include "settingscomparison.h"
 
 #include "speedcheck.h"
 
@@ -1614,6 +1615,94 @@ QString Statistics::GenerateRXChanges()
 }
 
 // Report no data available
+QString Statistics::GenerateSettingsComparison()
+{
+    if (p_profile->GetMachines(MT_CPAP).isEmpty()) return QString();
+    updateRXChanges();
+    if (rxitems.isEmpty()) return QString();
+
+    const bool rdi = p_profile->general->calculateRDI();
+    const bool byBrand = AppSetting->combineSimilarMachines();
+
+    // every settings period, then the periods with the same settings merged
+    QList<SettingsComparison::Period> periods;
+    QSet<QString> devices;
+    for (const RXItem &rx : std::as_const(rxitems)) {
+        if (!rx.machine) continue;
+        SettingsComparison::Period p;
+        p.mode = rx.mode;
+        p.pressure = rx.pressure;
+        p.relief = formatRelief(rx.relief);
+        p.deviceKey = byBrand ? rx.machine->brand() : rx.machine->model() + QLatin1Char(' ') + rx.machine->serial();
+        p.deviceLabel = byBrand ? rx.machine->brand()
+                                : QString("%1 (%2)").arg(rx.machine->model(), rx.machine->modelnumber());
+        p.dates = rx.dates.keys();
+        p.hours = rx.hours;
+        p.events = rdi ? rx.rdi : rx.ahi;
+        periods << p;
+        devices.insert(p.deviceKey);
+    }
+    const QList<SettingsComparison::Group> groups = SettingsComparison::group(periods);
+
+    const QList<AnalysisDailyData> analysis = analysisRows(p_profile->FirstDay(), p_profile->LastDay());
+    const double percentile = p_profile->general->prefCalcPercentile();
+    QList<SettingsComparison::Row> rows;
+    for (const SettingsComparison::Group &g : groups) {
+        SettingsComparison::Row row = SettingsComparison::row(g);
+        const QSet<QDate> dates(g.dates.cbegin(), g.dates.cend());
+
+        QList<AnalysisDailyData> own;
+        for (const AnalysisDailyData &d : analysis) {
+            if (dates.contains(d.date)) own << d;
+        }
+        row.values[SettingsComparison::AnalysisAhi] = analysisFigureValue(QStringLiteral("ahi"), own);
+        row.values[SettingsComparison::FlowLimitation] = analysisFigureValue(QStringLiteral("fl"), own);
+        row.values[SettingsComparison::Odi3] = analysisFigureValue(QStringLiteral("odi3"), own);
+        row.values[SettingsComparison::Below90] = analysisFigureValue(QStringLiteral("below:90"), own);
+
+        // leak and pressure: each night's figure, weighted by its hours
+        double leak = 0, leakHours = 0, pressure = 0, pressureHours = 0;
+        for (const QDate &date : g.dates) {
+            Day *day = p_profile->GetDay(date, MT_CPAP);
+            if (!day) continue;
+            day->OpenSummary();   // nights read from RXChanges.cache may not have it yet
+            const double h = day->hours(MT_CPAP);
+            if (h <= 0) continue;
+            if (day->channelHasData(CPAP_Leak)) {
+                leak += day->wavg(CPAP_Leak) * h;
+                leakHours += h;
+            }
+            if (day->channelHasData(CPAP_Pressure)) {
+                pressure += day->percentile(CPAP_Pressure, percentile / 100.0) * h;
+                pressureHours += h;
+            }
+        }
+        if (leakHours > 0) row.values[SettingsComparison::Leak] = leak / leakHours;
+        if (pressureHours > 0) row.values[SettingsComparison::Pressure] = pressure / pressureHours;
+        rows << row;
+    }
+
+    SettingsComparison::Options options;
+    options.showDevice = devices.size() > 1;
+    options.ahiName = rdi ? STR_TR_RDI : STR_TR_AHI;
+    options.percentile = percentile;
+    options.headingColor = heading_color;
+    int counter = 0;
+    for (int i = 0; i < rows.size(); ++i) options.rowColors << alternatingColor(counter);
+
+    QString html = QStringLiteral("<div align=center><br>");
+    html += QString("<p><i>%1</i></p>").arg(AnalysisPanel::disclaimer().toHtmlEscaped());
+    analysis::AnalysisService *service = mainwin ? mainwin->analysisService() : nullptr;
+    const int outdated = service ? service->outdatedCount() : 0;
+    if (outdated > 0) {
+        html += QString("<p>%1 <a href='analysis=recalculate'>%2</a></p>")
+                    .arg(tr("Analysis is outdated for %n day(s).", "", outdated), tr("Recalculate"));
+    }
+    html += SettingsComparison::html(rows, options);
+    html += QStringLiteral("</div>");
+    return html;
+}
+
 QString Statistics::htmlNoData()
 {
             QString html = "<div align=center>";
@@ -1954,6 +2043,15 @@ QString Statistics::GenerateHTML()
     htmlReportHeader = generateHeader(true);
     htmlReportHeaderPrint = generateHeader(false);
     htmlReportFooter = generateFooter(true);
+
+    if (p_profile->general->statReportMode() == STAT_MODE_SETTINGS) {
+        // one table; the blocks of the other modes stay empty so printing shows just this
+        htmlUsage = GenerateSettingsComparison();
+        htmlMachineSettings.clear();
+        htmlMachines.clear();
+        if (htmlUsage.isEmpty()) return htmlReportHeader + htmlNoData() + htmlReportFooter;
+        return htmlReportHeader + htmlUsage + htmlReportFooter;
+    }
 
     htmlUsage = GenerateCPAPUsage();
 

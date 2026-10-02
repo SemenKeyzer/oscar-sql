@@ -3939,22 +3939,33 @@ void MainWindow::reset_reportModeUi()
                 ui->statEndDate->setDate( p_profile->general->statReportRangeEnd());
             }
             break;
+        case STAT_MODE_SETTINGS:
+            // the whole history, so no dates to pick
+            ui->reportModeSettings->setChecked(true);
+            ui->statStartDate->setVisible(false);
+            ui->statEndDate->setVisible(false);
+            ui->statEnableEndDisplay->setVisible(false);
+            break;
     }
     ui->statStartDate->blockSignals(false);
     ui->statEndDate->blockSignals(false);
     return;
 };
 
-void MainWindow::on_reportModeMonthly_clicked()
+// The report modes follow the radio buttons' toggled signal: an accessibility press
+// (VoiceOver) only toggles a radio button and never sends clicked.
+void MainWindow::on_reportModeMonthly_toggled(bool checked)
 {
+    if (!checked || !p_profile) return;
     if (p_profile->general->statReportMode() != STAT_MODE_MONTHLY) {
         p_profile->general->setStatReportMode(STAT_MODE_MONTHLY);
         GenerateStatistics();
     }
 }
 
-void MainWindow::on_reportModeStandard_clicked()
+void MainWindow::on_reportModeStandard_toggled(bool checked)
 {
+    if (!checked || !p_profile) return;
     if (p_profile->general->statReportMode() != STAT_MODE_STANDARD) {
         p_profile->general->setStatReportMode(STAT_MODE_STANDARD);
         GenerateStatistics();
@@ -3962,10 +3973,20 @@ void MainWindow::on_reportModeStandard_clicked()
 }
 
 
-void MainWindow::on_reportModeRange_clicked()
+void MainWindow::on_reportModeRange_toggled(bool checked)
 {
+    if (!checked || !p_profile) return;
     if (p_profile->general->statReportMode() != STAT_MODE_RANGE) {
         p_profile->general->setStatReportMode(STAT_MODE_RANGE);
+        GenerateStatistics();
+    }
+}
+
+void MainWindow::on_reportModeSettings_toggled(bool checked)
+{
+    if (!checked || !p_profile) return;
+    if (p_profile->general->statReportMode() != STAT_MODE_SETTINGS) {
+        p_profile->general->setStatReportMode(STAT_MODE_SETTINGS);
         GenerateStatistics();
     }
 }
