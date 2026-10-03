@@ -949,3 +949,35 @@ void AnalysisIntegrationTests::testSettingsPeriodCountsCpapHoursOnly()
     QCOMPARE(stats.rxitems.first().hours, cpapHours);
     delete day;
 }
+
+void AnalysisIntegrationTests::testSettingsComparisonRowsTrimmedToDates()
+{
+    // Two nights on the same settings; the comparison for the second night alone counts
+    // just that night, its hours recounted from the night itself.
+    QFile::remove(p_profile->Get("{" + STR_GEN_DataFolder + "}/RXChanges.cache"));
+    const QDate first = kNightDate.addDays(50), second = first.addDays(1);
+    Machine cpap(p_profile, 62);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day *a = new Day();
+    a->setDate(first);
+    a->addSession(hypopneaSession(&cpap, 90, m_machineRow));
+    Day *b = new Day();
+    b->setDate(second);
+    b->addSession(hypopneaSession(&cpap, 91, m_machineRow));
+    p_profile->daylist.insert(first, a);
+    p_profile->daylist.insert(second, b);
+
+    Statistics stats;
+    bool showDevice = true;
+    const QList<SettingsComparison::Row> rows = stats.settingsComparisonRows(second, second, &showDevice);
+    p_profile->daylist.remove(first);
+    p_profile->daylist.remove(second);
+
+    QCOMPARE(rows.size(), 1);
+    QCOMPARE(rows.first().group.dates, QList<QDate>({ second }));
+    QCOMPARE(rows.first().group.hours, double(b->hours(MT_CPAP)));
+    QVERIFY(!showDevice);
+    delete a;
+    delete b;
+}

@@ -67,6 +67,8 @@ bool reliable(const Row &row);
 QSet<int> best(const QList<Row> &rows, Column column);
 //! \a dates (ascending) as text, nights in a row shown as one range.
 QString dateList(const QList<QDate> &dates);
+//! "mode · pressure · relief": each part trimmed, empty ones left out.
+QString settingsLabel(const QString &mode, const QString &pressure, const QString &relief);
 //! Decimals \a column is shown with.
 int decimals(Column column);
 

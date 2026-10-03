@@ -21,6 +21,7 @@
 #include "SleepLib/schema.h"
 #include "database/analysis_daily_repository.h"
 #include "SleepLib/machine.h"
+#include "settingscomparison.h"
 
 
 class SummaryInfo
@@ -223,6 +224,10 @@ class Statistics : public QObject
     QString GenerateHTML();
 
     QString UpdateRecordsBox();
+
+    //! The settings comparison over the nights in [from, to]; \a showDevice says whether
+    //! more than one device took part.
+    QList<SettingsComparison::Row> settingsComparisonRows(const QDate &from, const QDate &to, bool *showDevice = nullptr);
 
     static void printReport(QWidget *parent = nullptr);
 

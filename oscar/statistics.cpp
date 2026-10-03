@@ -1615,17 +1615,17 @@ QString Statistics::GenerateRXChanges()
     return html;
 }
 
-// Report no data available
-QString Statistics::GenerateSettingsComparison()
+QList<SettingsComparison::Row> Statistics::settingsComparisonRows(const QDate &from, const QDate &to, bool *showDevice)
 {
-    if (p_profile->GetMachines(MT_CPAP).isEmpty()) return QString();
-    updateRXChanges();
-    if (rxitems.isEmpty()) return QString();
+    QList<SettingsComparison::Row> rows;
+    if (showDevice) *showDevice = false;
+    updateRXChanges();   // no CPAP nights, no periods: nothing to compare
 
     const bool rdi = p_profile->general->calculateRDI();
     const bool byBrand = AppSetting->combineSimilarMachines();
 
-    // every settings period, then the periods with the same settings merged
+    // every settings period cut to the nights in [from, to], then equal settings merged;
+    // hours and events are counted per night so a period cut in two counts only its part
     QList<SettingsComparison::Period> periods;
     QSet<QString> devices;
     for (const RXItem &rx : std::as_const(rxitems)) {
@@ -1637,17 +1637,25 @@ QString Statistics::GenerateSettingsComparison()
         p.deviceKey = byBrand ? rx.machine->brand() : rx.machine->model() + QLatin1Char(' ') + rx.machine->serial();
         p.deviceLabel = byBrand ? rx.machine->brand()
                                 : QString("%1 (%2)").arg(rx.machine->model(), rx.machine->modelnumber());
-        p.dates = rx.dates.keys();
-        p.hours = rx.hours;
-        p.events = rdi ? rx.rdi : rx.ahi;
+        for (auto it = rx.dates.cbegin(); it != rx.dates.cend(); ++it) {
+            const QDate &date = it.key();
+            if (date < from || date > to) continue;
+            Day *day = p_profile->GetDay(date, MT_CPAP);
+            if (!day) continue;
+            const double h = day->hours(MT_CPAP);
+            if (h <= 0) continue;
+            p.dates << date;
+            p.hours += h;
+            p.events += day->count(AllAhiChannels) + (rdi ? day->count(CPAP_RERA) : 0);
+        }
+        if (p.dates.isEmpty()) continue;
         periods << p;
         devices.insert(p.deviceKey);
     }
     const QList<SettingsComparison::Group> groups = SettingsComparison::group(periods);
 
-    const QList<AnalysisDailyData> analysis = analysisRows(p_profile->FirstDay(), p_profile->LastDay());
+    const QList<AnalysisDailyData> analysis = analysisRows(from, to);
     const double percentile = p_profile->general->prefCalcPercentile();
-    QList<SettingsComparison::Row> rows;
     for (const SettingsComparison::Group &g : groups) {
         SettingsComparison::Row row = SettingsComparison::row(g);
         const QSet<QDate> dates(g.dates.cbegin(), g.dates.cend());
@@ -1664,9 +1672,8 @@ QString Statistics::GenerateSettingsComparison()
         // leak and pressure: each night's figure, weighted by its hours
         double leak = 0, leakHours = 0, pressure = 0, pressureHours = 0;
         for (const QDate &date : g.dates) {
-            Day *day = p_profile->GetDay(date, MT_CPAP);
+            Day *day = p_profile->GetDay(date, MT_CPAP);   // opens the night's summary
             if (!day) continue;
-            day->OpenSummary();   // nights read from RXChanges.cache may not have it yet
             const double h = day->hours(MT_CPAP);
             if (h <= 0) continue;
             if (day->channelHasData(CPAP_Leak)) {
@@ -1682,11 +1689,22 @@ QString Statistics::GenerateSettingsComparison()
         if (pressureHours > 0) row.values[SettingsComparison::Pressure] = pressure / pressureHours;
         rows << row;
     }
+    if (showDevice) *showDevice = devices.size() > 1;
+    return rows;
+}
 
+QString Statistics::GenerateSettingsComparison()
+{
+    bool showDevice = false;
+    const QList<SettingsComparison::Row> rows =
+        settingsComparisonRows(p_profile->FirstDay(), p_profile->LastDay(), &showDevice);
+    if (rows.isEmpty()) return QString();
+
+    const bool rdi = p_profile->general->calculateRDI();
     SettingsComparison::Options options;
-    options.showDevice = devices.size() > 1;
+    options.showDevice = showDevice;
     options.ahiName = rdi ? STR_TR_RDI : STR_TR_AHI;
-    options.percentile = percentile;
+    options.percentile = p_profile->general->prefCalcPercentile();
     options.headingColor = heading_color;
     int counter = 0;
     for (int i = 0; i < rows.size(); ++i) options.rowColors << alternatingColor(counter);
@@ -1704,6 +1722,7 @@ QString Statistics::GenerateSettingsComparison()
     return html;
 }
 
+// Report no data available
 QString Statistics::htmlNoData()
 {
             QString html = "<div align=center>";

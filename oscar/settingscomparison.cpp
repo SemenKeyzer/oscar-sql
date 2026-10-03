@@ -111,6 +111,15 @@ QString dateList(const QList<QDate> &dates)
     return parts.join(QStringLiteral("; "));
 }
 
+QString settingsLabel(const QString &mode, const QString &pressure, const QString &relief)
+{
+    QStringList parts;
+    for (const QString &part : { mode, pressure, relief }) {
+        if (!part.trimmed().isEmpty()) parts << part.trimmed();
+    }
+    return parts.join(QStringLiteral(" · "));
+}
+
 int decimals(Column column)
 {
     switch (column) {
@@ -163,11 +172,7 @@ QString formatValue(double value, Column column)
 
 QString settingsText(const Group &g)
 {
-    QStringList parts;
-    for (const QString &part : { g.mode, g.pressure, g.relief }) {
-        if (!part.trimmed().isEmpty()) parts << part.trimmed();
-    }
-    return parts.join(QStringLiteral(" · "));
+    return settingsLabel(g.mode, g.pressure, g.relief);
 }
 
 } // namespace

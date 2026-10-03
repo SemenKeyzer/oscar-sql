@@ -215,3 +215,10 @@ void SettingsComparisonTests::testHtmlEscapesSettings()
     QVERIFY(html.contains(QStringLiteral("Min &lt;4 &amp; Max 7")));
     QVERIFY(!html.contains(QStringLiteral("Min <4")));
 }
+
+void SettingsComparisonTests::testSettingsLabel()
+{
+    QCOMPARE(settingsLabel(QStringLiteral("APAP"), QStringLiteral("Min 7 Max 10"), QStringLiteral(" SoftPAP: 1 ")),
+             QStringLiteral("APAP · Min 7 Max 10 · SoftPAP: 1"));
+    QCOMPARE(settingsLabel(QStringLiteral("CPAP"), QString(), QStringLiteral("  ")), QStringLiteral("CPAP"));
+}

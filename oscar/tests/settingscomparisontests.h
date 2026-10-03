@@ -21,6 +21,7 @@ private slots:
     void testRowFigures();
     void testBest();
     void testDateList();
+    void testSettingsLabel();
     void testHtmlMarksBestAndFewNights();
     void testHtmlShowsDashWithoutData();
     void testHtmlDeviceColumn();
