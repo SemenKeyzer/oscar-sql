@@ -10,9 +10,11 @@
 
 #include <QApplication>
 #include <QFile>
+#include <QFileInfo>
 #include <QLocale>
 #include <QRegularExpression>
 #include <QTemporaryDir>
+#include <QTranslator>
 #include <cmath>
 
 #include "doctorreport.h"
@@ -356,4 +358,57 @@ void DoctorReportTests::testHtmlAnalysisMissing()
     QVERIFY(!DoctorReportPage::html(r, QStringLiteral("chart.png"), kChart).contains(note.arg(2).arg(4)));
     r.analysisMissing = 2;
     QVERIFY(DoctorReportPage::html(r, QStringLiteral("chart.png"), kChart).contains(note.arg(2).arg(4)));
+}
+
+void DoctorReportTests::testWritePdfRussian()
+{
+    // The Russian page has longer headers and settings labels: still one page for a month
+    // like the father's (18 nights of 30, 11 settings rows, the footer included).
+    QTranslator russian;
+    const QString qm = QFileInfo(QStringLiteral(__FILE__)).absolutePath() + QStringLiteral("/../translations/Russkiy.ru.qm");
+    if (!russian.load(qm)) QSKIP("Russkiy.ru.qm not built");
+    QCoreApplication::installTranslator(&russian);
+
+    DoctorReport r = fullReport();
+    r.from = QDate(2026, 9, 3);
+    r.to = QDate(2026, 10, 2);
+    r.nights = 18;
+    r.analysisMissing = 0;
+    r.nightList.clear();
+    for (int i = 0; i < 30; ++i) {
+        DoctorReport::Night n;
+        n.date = r.from.addDays(i);
+        if (i >= 12) {
+            n.hours = 6 + (i % 4);
+            n.ahi = 3 + i % 9;
+        }
+        r.nightList << n;
+    }
+    r.currentSettings = QStringLiteral("APAP (дин) · Мин 7.5 Макс 14.0 (см H2O) · SoftPAP: 1 - Слабый");
+    r.comparison.clear();
+    for (int i = 0; i < 11; ++i) {
+        SettingsComparison::Group g;
+        g.mode = QStringLiteral("APAP (дин)");
+        g.pressure = QStringLiteral("Мин %1.0 Макс %2.0 (см H2O)").arg(4 + i).arg(10 + i);
+        g.relief = i % 3 ? QStringLiteral("SoftPAP: 1 - Слабый") : QStringLiteral("SoftPAP: 2 - Стандартный");
+        for (int d = 0; d <= i % 4; ++d) g.dates << r.from.addDays(12 + i + d);
+        g.hours = 8.0 * g.dates.size();
+        g.events = 6.0 * g.hours;
+        SettingsComparison::Row row = SettingsComparison::row(g);
+        for (SettingsComparison::Column c : { SettingsComparison::AnalysisAhi, SettingsComparison::Leak, SettingsComparison::Pressure,
+                                              SettingsComparison::FlowLimitation, SettingsComparison::Odi3, SettingsComparison::Below90 })
+            row.values[c] = 10.5 + i;
+        r.comparison << row;
+    }
+
+    QTemporaryDir dir;
+    const QString path = dir.filePath(QStringLiteral("report.pdf"));
+    QString error;
+    const bool written = DoctorReportPage::writePdf(r, path, &error);
+    QCoreApplication::removeTranslator(&russian);
+    QVERIFY2(written, qPrintable(error));
+    QFile file(path);
+    QVERIFY(file.open(QIODevice::ReadOnly));
+    const int pages = int(QString::fromLatin1(file.readAll()).count(QRegularExpression(QStringLiteral("/Type\\s*/Page[^s]"))));
+    QCOMPARE(pages, 1);
 }

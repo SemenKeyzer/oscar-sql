@@ -271,7 +271,8 @@ QString html(const DoctorReport &r, const QString &chartUrl, const QSizeF &chart
         options.percentile = r.percentile;
         options.rowColors = { QStringLiteral("#ffffff"), QStringLiteral("#f2f2f2") };
         options.settingsWidth = QStringLiteral("30%");   // otherwise the narrow page wraps it line by line
-        html += QStringLiteral("<br>") + SettingsComparison::html(r.comparison, options);
+        // a size smaller: the Russian headers and settings labels would push the page to two
+        html += QStringLiteral("<font size='-1'>%1</font>").arg(SettingsComparison::html(r.comparison, options));
     }
 
     html += QStringLiteral("<p><font size='-1' color='#606060'><i>%1</i><br>%2</font></p>")
