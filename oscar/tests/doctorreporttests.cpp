@@ -9,6 +9,10 @@
 #include "doctorreporttests.h"
 
 #include <QApplication>
+#include <QFile>
+#include <QLocale>
+#include <QRegularExpression>
+#include <QTemporaryDir>
 #include <cmath>
 
 #include "doctorreport.h"
@@ -38,6 +42,43 @@ DoctorReport sampleReport()
 }
 
 QColor pixel(const QImage &image, double x, int y) { return QColor(image.pixel(int(x), y)); }
+
+QString reportText(const char *source) { return QCoreApplication::translate("DoctorReport", source); }
+
+// A full report: personal data, oximetry, analysis, current settings and a comparison.
+DoctorReport fullReport()
+{
+    DoctorReport r = sampleReport();
+    r.patient = QStringLiteral("Иван Петров");
+    r.birthDate = QDate(1954, 1, 1);
+    r.cpapDevices << QStringLiteral("Löwenstein Prisma 20A");
+    r.oximeter = QStringLiteral("Contec CMS50FW");
+    r.oximetryNights = 3;
+    r.currentSettings = QStringLiteral("APAP · Min 7 Max 10 · SoftPAP: 1");
+    r.settingsSince = QDate(2026, 8, 20);
+    r.meanHours = 6.1;
+    r.compliantNights = 3;
+    r.deviceAhi = 4.3;
+    r.analysisAhi = 5.2;
+    r.flowLimitation = 11;
+    r.leak = 3.1;
+    r.leakUnits = QStringLiteral("L/min");
+    r.leakRedline = 24;
+    r.pressure = 9.4;
+    r.pressureUnits = QStringLiteral("cmH2O");
+    r.odi3 = 7.5;
+    r.below90 = 0.4;
+    SettingsComparison::Group g;
+    g.mode = QStringLiteral("APAP");
+    g.pressure = QStringLiteral("Min 7 Max 10");
+    g.dates << QDate(2026, 9, 4) << QDate(2026, 9, 5);
+    g.hours = 14;
+    g.events = 42;
+    r.comparison << SettingsComparison::row(g);
+    return r;
+}
+
+const QSizeF kChart(500, 150);
 
 } // namespace
 
@@ -165,4 +206,134 @@ void DoctorReportTests::testChartLongPeriod()
         const double x = l.left + (night + 0.5) * l.column;
         QCOMPARE(pixel(image, x, l.ahi.top() + l.ahi.height() - 3), NightSummaryView::levelColor(NightSummary::Good));
     }
+}
+
+void DoctorReportTests::testHtmlHeader()
+{
+    const DoctorReport r = fullReport();
+    const QLocale locale;
+    const QString html = DoctorReportPage::html(r, QStringLiteral("chart.png"), kChart);
+    QVERIFY(html.contains(reportText("CPAP Therapy Report")));
+    QVERIFY(html.contains(reportText("%1, born %2").arg(r.patient, locale.toString(r.birthDate, QLocale::ShortFormat))));
+    QVERIFY(html.contains(QStringLiteral("Löwenstein Prisma 20A")));
+    QVERIFY(html.contains(QStringLiteral("Contec CMS50FW")));
+    QVERIFY(html.contains(reportText("%1 — since %2").arg(r.currentSettings, locale.toString(r.settingsSince, QLocale::ShortFormat))
+                              .toHtmlEscaped()));
+    QVERIFY(html.contains(reportText("%1 – %2 · nights with data %3 of %4 · with an oximeter %5")
+                              .arg(locale.toString(r.from, QLocale::ShortFormat), locale.toString(r.to, QLocale::ShortFormat))
+                              .arg(4).arg(5).arg(3)));
+    QVERIFY(html.contains(QStringLiteral("<img src='chart.png' width=500 height=150>")));
+    QVERIFY(html.contains(QCoreApplication::translate("SettingsComparison", "Device Settings Compared")));
+}
+
+void DoctorReportTests::testHtmlWithoutPersonalData()
+{
+    DoctorReport r = fullReport();
+    r.patient.clear();
+    r.birthDate = QDate();
+    const QString html = DoctorReportPage::html(r, QStringLiteral("chart.png"), kChart);
+    QVERIFY(!html.contains(reportText("Patient:")));
+    QVERIFY(!html.contains(QLocale().toString(QDate(1954, 1, 1), QLocale::ShortFormat)));
+}
+
+void DoctorReportTests::testHtmlWithoutOximetry()
+{
+    DoctorReport r = fullReport();
+    r.oximeter.clear();
+    r.oximetryNights = 0;
+    r.odi3 = DoctorReport::kNoValue;
+    r.below90 = DoctorReport::kNoValue;
+    const QString html = DoctorReportPage::html(r, QStringLiteral("chart.png"), kChart);
+    QVERIFY(!html.contains(reportText("Oximeter:")));
+    QVERIFY(html.contains(QStringLiteral("<b>%1</b>").arg(SettingsComparison::kNoData)));
+}
+
+void DoctorReportTests::testHtmlWithoutAnalysis()
+{
+    DoctorReport r = fullReport();
+    r.analysisAhi = DoctorReport::kNoValue;
+    r.flowLimitation = DoctorReport::kNoValue;
+    r.odi3 = DoctorReport::kNoValue;
+    r.below90 = DoctorReport::kNoValue;
+    const QString html = DoctorReportPage::html(r, QStringLiteral("chart.png"), kChart);
+    QVERIFY(html.contains(reportText("OSCAR's analysis: %1 · flow limitation %2%")
+                              .arg(SettingsComparison::kNoData, SettingsComparison::kNoData).toHtmlEscaped()));
+    QVERIFY(!html.contains(QStringLiteral("nan"), Qt::CaseInsensitive));
+}
+
+void DoctorReportTests::testHtmlRdi()
+{
+    DoctorReport r = fullReport();
+    r.ahiName = QStringLiteral("RDI");
+    const QString html = DoctorReportPage::html(r, QStringLiteral("chart.png"), kChart);
+    QVERIFY(html.contains(QStringLiteral("<font color='#606060'>RDI</font>")));                  // the tile
+    QVERIFY(html.contains(QCoreApplication::translate("SettingsComparison", "Device %1").arg(QStringLiteral("RDI"))));
+}
+
+void DoctorReportTests::testHtmlSigns()
+{
+    DoctorReport r = fullReport();   // usage, AHI, leak and SpO2 fine; ODI 7.5 is not
+    QString html = DoctorReportPage::html(r, QStringLiteral("chart.png"), kChart);
+    QCOMPARE(html.count(QStringLiteral("<b>✓</b>")), 4);
+    QCOMPARE(html.count(QStringLiteral("<b>!</b>")), 1);
+
+    r.odi3 = 2;
+    html = DoctorReportPage::html(r, QStringLiteral("chart.png"), kChart);
+    QCOMPARE(html.count(QStringLiteral("<b>!</b>")), 0);
+}
+
+void DoctorReportTests::testHtmlEscapes()
+{
+    DoctorReport r = fullReport();
+    r.currentSettings = QStringLiteral("Min <4 & Max 7");
+    r.patient = QStringLiteral("A <b>B</b>");
+    const QString html = DoctorReportPage::html(r, QStringLiteral("chart.png"), kChart);
+    QVERIFY(html.contains(QStringLiteral("Min &lt;4 &amp; Max 7")));
+    QVERIFY(html.contains(QStringLiteral("A &lt;b&gt;B&lt;/b&gt;")));
+    QVERIFY(!html.contains(QStringLiteral("Min <4")));
+}
+
+void DoctorReportTests::testWritePdf()
+{
+    // 12 nights and 11 settings rows: still one page
+    DoctorReport r = fullReport();
+    r.to = r.from.addDays(11);
+    r.nightList.clear();
+    for (int i = 0; i < 12; ++i) {
+        DoctorReport::Night n;
+        n.date = r.from.addDays(i);
+        n.hours = 6 + (i % 3);
+        n.ahi = 2 + i % 5;
+        r.nightList << n;
+    }
+    r.comparison.clear();
+    for (int i = 0; i < 11; ++i) {
+        SettingsComparison::Group g;
+        g.mode = QStringLiteral("APAP (dyn)");
+        g.pressure = QStringLiteral("Min %1 Max %2 (cmH2O)").arg(4 + i).arg(10 + i);
+        g.relief = QStringLiteral("SoftPAP: 1 - Slight");
+        g.dates << r.from.addDays(i);
+        g.hours = 7;
+        g.events = 20;
+        r.comparison << SettingsComparison::row(g);
+    }
+
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    const QString path = dir.filePath(QStringLiteral("report.pdf"));
+    QString error;
+    QVERIFY2(DoctorReportPage::writePdf(r, path, &error), qPrintable(error));
+    QFile file(path);
+    QVERIFY(file.open(QIODevice::ReadOnly));
+    const QByteArray pdf = file.readAll();
+    QVERIFY(pdf.startsWith("%PDF"));
+    const int pages = int(QString::fromLatin1(pdf).count(QRegularExpression(QStringLiteral("/Type\\s*/Page[^s]"))));
+    QCOMPARE(pages, 1);
+}
+
+void DoctorReportTests::testWritePdfFailsOnBadPath()
+{
+    QString error;
+    QVERIFY(!DoctorReportPage::writePdf(fullReport(), QStringLiteral("/nonexistent-folder-oscar/report.pdf"), &error));
+    QVERIFY(!error.isEmpty());
 }

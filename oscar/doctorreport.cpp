@@ -13,10 +13,33 @@
 #include <QPainter>
 #include <QPen>
 #include <cmath>
+#include <QDateTime>
+#include <QFileInfo>
+#include <QPageLayout>
+#include <QPageSize>
+#include <QPrinter>
+#include <QTextDocument>
+#include <QUrl>
+
+#include "analysispanel.h"
+#include "version.h"
 
 namespace {
 
 bool known(double value) { return !std::isnan(value); }
+
+// A tile: a coloured stripe, the caption, the figure with its sign and a short note.
+QString tile(const QString &caption, const QString &value, const QString &note, NightSummary::Level level)
+{
+    const QString color = NightSummaryView::levelColor(level).name();
+    QString sign;
+    if (level == NightSummary::Good) sign = QStringLiteral(" <font color='%1'><b>✓</b></font>").arg(color);
+    if (level == NightSummary::Attention) sign = QStringLiteral(" <font color='%1'><b>!</b></font>").arg(color);
+    return QStringLiteral("<table width='100%' cellspacing=0 cellpadding=3><tr><td width=4 bgcolor='%1'></td>"
+                          "<td><font color='#606060'>%2</font><br><font size='+2'><b>%3</b></font>%4"
+                          "<br><font size='-1' color='#606060'>%5</font></td></tr></table>")
+        .arg(color, caption.toHtmlEscaped(), value.toHtmlEscaped(), sign, note.toHtmlEscaped());
+}
 
 NightSummary::Level below(double value, double target)
 {
@@ -160,6 +183,127 @@ QImage chart(const DoctorReport &r, const QSize &size)
                    r.nightList[i].date.toString(QStringLiteral("dd.MM")));
     }
     return image;
+}
+
+QString html(const DoctorReport &r, const QString &chartUrl, const QSizeF &chartSize)
+{
+    const QLocale locale;
+    const QString none = SettingsComparison::kNoData;
+    auto number = [&](double value, int decimals) { return known(value) ? locale.toString(value, 'f', decimals) : none; };
+    auto withUnits = [&](double value, int decimals, const QString &units) {
+        return known(value) ? QStringLiteral("%1 %2").arg(locale.toString(value, 'f', decimals), units).trimmed() : none;
+    };
+    auto date = [&](const QDate &d) { return locale.toString(d, QLocale::ShortFormat); };
+
+    QString html = QStringLiteral("<p><font size='+3'><b>%1</b></font></p>").arg(DoctorReport::tr("CPAP Therapy Report").toHtmlEscaped());
+
+    // who, on what, when
+    html += QStringLiteral("<table cellspacing=0 cellpadding=1>");
+    auto line = [&](const QString &label, const QString &text) {
+        html += QStringLiteral("<tr><td><font color='#606060'>%1</font>&nbsp;&nbsp;</td><td>%2</td></tr>")
+                    .arg(label.toHtmlEscaped(), text.toHtmlEscaped());
+    };
+    if (!r.patient.isEmpty()) {
+        line(DoctorReport::tr("Patient:"), r.birthDate.isValid() ? DoctorReport::tr("%1, born %2").arg(r.patient, date(r.birthDate)) : r.patient);
+    }
+    if (!r.cpapDevices.isEmpty()) line(DoctorReport::tr("Device:"), r.cpapDevices.join(QStringLiteral(", ")));
+    if (!r.oximeter.isEmpty()) line(DoctorReport::tr("Oximeter:"), r.oximeter);
+    line(DoctorReport::tr("Period:"), DoctorReport::tr("%1 – %2 · nights with data %3 of %4 · with an oximeter %5")
+                            .arg(date(r.from), date(r.to)).arg(r.nights).arg(r.days()).arg(r.oximetryNights));
+    html += QStringLiteral("</table>");
+    if (!r.currentSettings.isEmpty()) {
+        html += QStringLiteral("<table width='100%' border=1 cellspacing=0 cellpadding=4><tr><td><b>%1</b> %2</td></tr></table>")
+                    .arg(DoctorReport::tr("Current settings:").toHtmlEscaped(),
+                         DoctorReport::tr("%1 — since %2").arg(r.currentSettings, date(r.settingsSince)).toHtmlEscaped());
+    }
+
+    // the six tiles
+    QString usage = none;
+    if (known(r.meanHours)) {
+        const int minutes = qRound(r.meanHours * 60);
+        usage = DoctorReport::tr("%1 h %2 min").arg(minutes / 60).arg(minutes % 60);
+    }
+    const QStringList tiles {
+        tile(DoctorReport::tr("Usage"), usage,
+             DoctorReport::tr("%1 of %2 nights ≥ %3 h").arg(r.compliantNights).arg(r.days()).arg(locale.toString(r.complianceHours)),
+             r.usageLevel()),
+        tile(r.ahiName, number(r.deviceAhi, 1),
+             DoctorReport::tr("OSCAR's analysis: %1 · flow limitation %2%").arg(number(r.analysisAhi, 1), number(r.flowLimitation, 0)),
+             r.ahiLevel()),
+        tile(DoctorReport::tr("Leak"), withUnits(r.leak, 1, r.leakUnits),
+             r.leakRedline > 0 ? DoctorReport::tr("red line %1").arg(locale.toString(r.leakRedline)) : DoctorReport::tr("no red line set"),
+             r.leakLevel()),
+        tile(DoctorReport::tr("Pressure %1%").arg(locale.toString(r.percentile)), withUnits(r.pressure, 1, r.pressureUnits),
+             DoctorReport::tr("average over the nights"), NightSummary::Unknown),
+        tile(DoctorReport::tr("ODI 3%"), known(r.odi3) ? DoctorReport::tr("%1 an hour").arg(number(r.odi3, 1)) : none,
+             DoctorReport::tr("nights with an oximeter: %1").arg(r.oximetryNights), r.odiLevel()),
+        tile(DoctorReport::tr("SpO2 below 90%"), known(r.below90) ? QStringLiteral("%1 %").arg(number(r.below90, 1)) : none,
+             DoctorReport::tr("nights with an oximeter: %1").arg(r.oximetryNights), r.below90Level()),
+    };
+    html += QStringLiteral("<p><b>%1</b></p><table width='100%' cellspacing=4 cellpadding=0><tr>")
+                .arg(DoctorReport::tr("Summary for the period").toHtmlEscaped());
+    for (int i = 0; i < tiles.size(); ++i) {
+        if (i == 3) html += QStringLiteral("</tr><tr>");
+        html += QStringLiteral("<td width='33%'>%1</td>").arg(tiles[i]);
+    }
+    html += QStringLiteral("</tr></table>");
+
+    // night by night
+    html += QStringLiteral("<p><b>%1</b></p><img src='%2' width=%3 height=%4><br><font size='-1' color='#606060'>%5</font>")
+                .arg(DoctorReport::tr("Night by night").toHtmlEscaped(), chartUrl)
+                .arg(qRound(chartSize.width())).arg(qRound(chartSize.height()))
+                .arg(DoctorReport::tr("AHI per night (dashed: %1) · hours of use (dashed: %2 h) · grey lines: settings changed")
+                         .arg(locale.toString(NightSummary::kAhiTarget), locale.toString(r.complianceHours)).toHtmlEscaped());
+
+    // the settings over the period
+    if (!r.comparison.isEmpty()) {
+        SettingsComparison::Options options;
+        options.showDevice = r.showDevice;
+        options.ahiName = r.ahiName;
+        options.percentile = r.percentile;
+        options.rowColors = { QStringLiteral("#ffffff"), QStringLiteral("#f2f2f2") };
+        options.settingsWidth = QStringLiteral("30%");   // otherwise the narrow page wraps it line by line
+        html += QStringLiteral("<br>") + SettingsComparison::html(r.comparison, options);
+    }
+
+    html += QStringLiteral("<p><font size='-1' color='#606060'><i>%1</i><br>%2</font></p>")
+                .arg(AnalysisPanel::disclaimer().toHtmlEscaped(),
+                     DoctorReport::tr("Prepared by OSCAR %1 on %2")
+                         .arg(getVersion().displayString(), locale.toString(QDateTime::currentDateTime(), QLocale::ShortFormat))
+                         .toHtmlEscaped());
+    return html;
+}
+
+bool writePdf(const DoctorReport &report, const QString &path, QString *error)
+{
+    QPrinter printer(QPrinter::HighResolution);
+    printer.setOutputFormat(QPrinter::PdfFormat);
+    printer.setOutputFileName(path);
+    printer.setPageSize(QPageSize(QPageSize::A4));
+    printer.setPageOrientation(QPageLayout::Portrait);
+    printer.setPageMargins(QMarginsF(12, 12, 12, 12), QPageLayout::Millimeter);
+
+    QTextDocument doc;
+    const QSizeF page = printer.pageRect(QPrinter::Point).size();
+    doc.setPageSize(page);
+    doc.setDocumentMargin(0);
+    QFont font(QStringLiteral("Helvetica"));
+    font.setPointSizeF(8.5);
+    doc.setDefaultFont(font);
+
+    const QSize chartPixels(2400, 720);
+    const QString url = QStringLiteral("doctorreport-chart.png");
+    doc.addResource(QTextDocument::ImageResource, QUrl(url), chart(report, chartPixels));
+    const QSizeF chartSize(page.width(), page.width() * chartPixels.height() / chartPixels.width());
+    doc.setHtml(html(report, url, chartSize));
+    doc.print(&printer);
+
+    const QFileInfo written(path);
+    if (printer.printerState() == QPrinter::Error || !written.exists() || written.size() == 0) {
+        if (error) *error = DoctorReport::tr("Could not write %1.").arg(path);
+        return false;
+    }
+    return true;
 }
 
 } // namespace DoctorReportPage

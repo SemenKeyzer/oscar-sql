@@ -189,8 +189,10 @@ QString html(const QList<Row> &rows, const Options &options)
                 .arg(options.headingColor).arg(span)
                 .arg(QCoreApplication::translate("SettingsComparison", "Device Settings Compared").toHtmlEscaped());
 
-    html += QStringLiteral("<tr><th align=left>%1</th>")
-                .arg(QCoreApplication::translate("SettingsComparison", "Settings").toHtmlEscaped());
+    const QString width = options.settingsWidth.isEmpty() ? QString()
+                                                          : QStringLiteral(" width='%1'").arg(options.settingsWidth);
+    html += QStringLiteral("<tr><th align=left%1>%2</th>")
+                .arg(width, QCoreApplication::translate("SettingsComparison", "Settings").toHtmlEscaped());
     if (options.showDevice) {
         html += QStringLiteral("<th align=left>%1</th>")
                     .arg(QCoreApplication::translate("SettingsComparison", "Device").toHtmlEscaped());

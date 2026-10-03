@@ -85,6 +85,7 @@ struct Options {
     double percentile = 95;             //!< of the pressure column
     QString headingColor = QStringLiteral("#ffffff");
     QStringList rowColors;              //!< background per row, cycled; white when empty
+    QString settingsWidth;              //!< width of the settings column, e.g. "34%"; empty: as wide as it needs
 };
 
 //! The whole comparison table: title, column heads, one row per group and the note.

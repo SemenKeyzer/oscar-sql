@@ -222,3 +222,14 @@ void SettingsComparisonTests::testSettingsLabel()
              QStringLiteral("APAP · Min 7 Max 10 · SoftPAP: 1"));
     QCOMPARE(settingsLabel(QStringLiteral("CPAP"), QString(), QStringLiteral("  ")), QStringLiteral("CPAP"));
 }
+
+void SettingsComparisonTests::testHtmlSettingsWidth()
+{
+    // a narrow page (the doctor report) keeps the settings column wide enough to read
+    const QList<Row> rows { tableRow(QStringLiteral("9-16"), 4, 3.0) };
+    const QString settings = QCoreApplication::translate("SettingsComparison", "Settings");
+    QVERIFY(SettingsComparison::html(rows, Options()).contains(QStringLiteral("<th align=left>%1</th>").arg(settings)));
+    Options options;
+    options.settingsWidth = QStringLiteral("34%");
+    QVERIFY(SettingsComparison::html(rows, options).contains(QStringLiteral("<th align=left width='34%'>%1</th>").arg(settings)));
+}

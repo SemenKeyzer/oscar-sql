@@ -101,6 +101,11 @@ QColor changeColor();
 //! AHI (top) and hours of use (bottom) for every night, settings changes as grey lines.
 QImage chart(const DoctorReport &report, const QSize &size);
 
+//! The whole page; the chart is the image at \a chartUrl, shown \a chartSize big.
+QString html(const DoctorReport &report, const QString &chartUrl, const QSizeF &chartSize);
+//! Writes the page as an A4 PDF at \a path; false, with \a error set, when that failed.
+bool writePdf(const DoctorReport &report, const QString &path, QString *error = nullptr);
+
 } // namespace DoctorReportPage
 
 #endif // DOCTORREPORT_H

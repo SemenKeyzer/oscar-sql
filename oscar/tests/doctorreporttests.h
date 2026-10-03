@@ -22,6 +22,15 @@ private slots:
     void testChartLayout();
     void testChart();
     void testChartLongPeriod();
+    void testHtmlHeader();
+    void testHtmlWithoutPersonalData();
+    void testHtmlWithoutOximetry();
+    void testHtmlWithoutAnalysis();
+    void testHtmlRdi();
+    void testHtmlSigns();
+    void testHtmlEscapes();
+    void testWritePdf();
+    void testWritePdfFailsOnBadPath();
 
 private:
     class QApplication *m_app = nullptr;

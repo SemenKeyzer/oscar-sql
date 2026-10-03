@@ -26,6 +26,7 @@ private slots:
     void testHtmlShowsDashWithoutData();
     void testHtmlDeviceColumn();
     void testHtmlEscapesSettings();
+    void testHtmlSettingsWidth();
 };
 DECLARE_TEST(SettingsComparisonTests)
 
