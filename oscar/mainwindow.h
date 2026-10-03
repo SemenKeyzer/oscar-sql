@@ -298,6 +298,7 @@ class MainWindow : public QMainWindow
 
     //! \brief Passes the Daily, Overview & Oximetry object to Print Report, based on current tab
     void on_actionPrint_Report_triggered();
+    void on_actionDoctor_Report_triggered();
 
     //! \brief Opens the Profile Editor
     void on_action_Edit_Profile_triggered();

@@ -442,6 +442,7 @@ const QString STR_US_CustomOverviewRangeStart = "CustomOverviewRangeStart";
 const QString STR_US_CustomOverviewRangeEnd = "CustomOverviewRangeEnd";
 const QString STR_US_SkipTimeAlignWelcome = "SkipTimeAlignWelcome";
 const QString STR_US_LastOverviewPreset = "LastOverviewPreset";
+const QString STR_US_DoctorReportFrom = "DoctorReportFrom";
 
 // Values for StatReportMode
 const int STAT_MODE_STANDARD = 0;
@@ -982,6 +983,7 @@ class UserSettings : public PrefSettings
         initPref(STR_US_LastOverviewRange, 4);
         initPref(STR_US_SkipTimeAlignWelcome, false);
         initPref(STR_US_LastOverviewPreset, QStringLiteral("all"));
+        initPref(STR_US_DoctorReportFrom, QDate());
     }
 
     UnitSystem unitSystem() const { return (UnitSystem)getPref(STR_US_UnitSystem).toInt(); }
@@ -1003,6 +1005,8 @@ class UserSettings : public PrefSettings
     bool skipTimeAlignWelcome() const { return getPref(STR_US_SkipTimeAlignWelcome).toBool(); }
     //! The Overview graph preset last shown, as OverviewPresets::key().
     QString lastOverviewPreset() const { return getPref(STR_US_LastOverviewPreset).toString(); }
+    //! The first date of the last report for the doctor; invalid before the first one.
+    QDate doctorReportFrom() const { return getPref(STR_US_DoctorReportFrom).toDate(); }
 
     void setUnitSystem(UnitSystem us) { setPref(STR_US_UnitSystem, (int)us); }
     void setEventWindowSize(double size) { setPref(STR_US_EventWindowSize, size); }
@@ -1022,6 +1026,7 @@ class UserSettings : public PrefSettings
     void setCustomOverviewRangeEnd(QDate i) { setPref(STR_US_CustomOverviewRangeEnd, i); }
     void setSkipTimeAlignWelcome(bool skip) { setPref(STR_US_SkipTimeAlignWelcome, skip); }
     void setLastOverviewPreset(const QString &key) { setPref(STR_US_LastOverviewPreset, key); }
+    void setDoctorReportFrom(const QDate &date) { setPref(STR_US_DoctorReportFrom, date); }
 
     //! \brief Refresh cached member variables from the underlying preference map (call after loading from DB).
     void refreshCachedValues() {

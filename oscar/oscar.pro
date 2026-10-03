@@ -362,6 +362,7 @@ SOURCES += \
     overviewpresets.cpp \
     settingscomparison.cpp \
     doctorreport.cpp \
+    doctorreportdialog.cpp \
     zip.cpp \
     Graphs/gAHIChart.cpp \
     Graphs/gdailysummary.cpp \
@@ -679,6 +680,7 @@ HEADERS  += \
     overviewpresets.h \
     settingscomparison.h \
     doctorreport.h \
+    doctorreportdialog.h \
     mytextbrowser.h \
     staticQMessageBox.h \
     git_info.h \
