@@ -40,6 +40,8 @@ private slots:
     void testAnalysisReportQuery();
     void testSettingsPeriodCountsCpapHoursOnly();
     void testSettingsComparisonRowsTrimmedToDates();
+    void testDoctorReportCountsCpapHoursOnly();
+    void testDoctorReportSettingsSince();
 
 private:
     class QCoreApplication *m_app = nullptr;

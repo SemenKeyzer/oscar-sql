@@ -1693,6 +1693,92 @@ QList<SettingsComparison::Row> Statistics::settingsComparisonRows(const QDate &f
     return rows;
 }
 
+DoctorReport Statistics::doctorReport(const QDate &from, const QDate &to)
+{
+    DoctorReport r;
+    r.from = from;
+    r.to = to;
+    const bool rdi = p_profile->general->calculateRDI();
+    r.ahiName = rdi ? STR_TR_RDI : STR_TR_AHI;
+    r.complianceHours = p_profile->cpap->complianceHours();
+    r.leakRedline = p_profile->cpap->leakRedline();
+    r.leakUnits = schema::channel[CPAP_Leak].units();
+    r.pressureUnits = schema::channel[CPAP_Pressure].units();
+    r.percentile = p_profile->general->prefCalcPercentile();
+    if (AppSetting->showPersonalData()) {
+        r.patient = (p_profile->user->firstName() + QLatin1Char(' ') + p_profile->user->lastName()).trimmed();
+        r.birthDate = p_profile->user->DOB();
+    }
+
+    auto label = [](Machine *m) {
+        QString text = QStringList { m->brand(), m->model() }.join(QLatin1Char(' ')).trimmed();
+        if (AppSetting->includeSerial() && !m->serial().isEmpty()) text += QStringLiteral(" (%1)").arg(m->serial());
+        return text;
+    };
+
+    // night by night: CPAP hours only, events per the AHI or RDI setting
+    double hours = 0, events = 0, leak = 0, leakHours = 0, pressure = 0, pressureHours = 0;
+    QDate firstNight, lastNight;
+    for (QDate date = from; date.isValid() && date <= to; date = date.addDays(1)) {
+        DoctorReport::Night night;
+        night.date = date;
+        Day *day = p_profile->GetDay(date);
+        Machine *cpap = day ? day->machine(MT_CPAP) : nullptr;
+        if (day && r.oximeter.isEmpty()) {
+            if (Machine *oxi = day->machine(MT_OXIMETER)) r.oximeter = label(oxi);
+        }
+        const double h = cpap ? day->hours(MT_CPAP) : 0;
+        if (h > 0) {
+            const QString device = label(cpap);
+            if (!device.isEmpty() && !r.cpapDevices.contains(device)) r.cpapDevices << device;
+            const double e = day->count(AllAhiChannels) + (rdi ? day->count(CPAP_RERA) : 0);
+            night.hours = h;
+            night.ahi = e / h;
+            ++r.nights;
+            hours += h;
+            events += e;
+            if (h >= r.complianceHours) ++r.compliantNights;
+            if (day->channelHasData(CPAP_Leak)) {
+                leak += day->wavg(CPAP_Leak) * h;
+                leakHours += h;
+            }
+            if (day->channelHasData(CPAP_Pressure)) {
+                pressure += day->percentile(CPAP_Pressure, r.percentile / 100.0) * h;
+                pressureHours += h;
+            }
+            if (!firstNight.isValid()) firstNight = date;
+            lastNight = date;
+        }
+        r.nightList << night;
+    }
+    if (r.nights > 0) r.meanHours = hours / r.nights;
+    if (hours > 0) r.deviceAhi = events / hours;
+    if (leakHours > 0) r.leak = leak / leakHours;
+    if (pressureHours > 0) r.pressure = pressure / pressureHours;
+
+    // OSCAR's analysis
+    const QList<AnalysisDailyData> analysis = analysisRows(from, to);
+    for (const AnalysisDailyData &d : analysis) {
+        if (d.hasOximetry) ++r.oximetryNights;
+    }
+    r.analysisAhi = analysisFigureValue(QStringLiteral("ahi"), analysis);
+    r.flowLimitation = analysisFigureValue(QStringLiteral("fl"), analysis);
+    r.odi3 = analysisFigureValue(QStringLiteral("odi3"), analysis);
+    r.below90 = analysisFigureValue(QStringLiteral("below:90"), analysis);
+
+    // the settings: compared over the period, changed on, and in use on the last night
+    r.comparison = settingsComparisonRows(from, to, &r.showDevice);   // brings rxitems up to date
+    for (const RXItem &rx : std::as_const(rxitems)) {
+        // a change follows an earlier night of the period; the first night's settings are not one
+        if (firstNight.isValid() && rx.start > firstNight && rx.start <= to) r.settingsChanges << rx.start;
+        if (lastNight.isValid() && rx.dates.contains(lastNight)) {
+            r.currentSettings = SettingsComparison::settingsLabel(rx.mode, rx.pressure, formatRelief(rx.relief));
+            r.settingsSince = rx.start;
+        }
+    }
+    return r;
+}
+
 QString Statistics::GenerateSettingsComparison()
 {
     bool showDevice = false;

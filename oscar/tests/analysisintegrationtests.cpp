@@ -37,6 +37,7 @@
 #include "database/session_channels_repository.h"
 #include "database/session_settings_repository.h"
 #include "statistics.h"
+#include "doctorreport.h"
 #include "tests/analysis_synth.h"
 
 using namespace analysis;
@@ -978,6 +979,72 @@ void AnalysisIntegrationTests::testSettingsComparisonRowsTrimmedToDates()
     QCOMPARE(rows.first().group.dates, QList<QDate>({ second }));
     QCOMPARE(rows.first().group.hours, double(b->hours(MT_CPAP)));
     QVERIFY(!showDevice);
+    delete a;
+    delete b;
+}
+
+void AnalysisIntegrationTests::testDoctorReportCountsCpapHoursOnly()
+{
+    // A two-day report around one night on the CPAP with an oximeter worn longer.
+    QFile::remove(p_profile->Get("{" + STR_GEN_DataFolder + "}/RXChanges.cache"));
+    const qint64 oxiRow = insertRow(QStringLiteral("INSERT INTO machines (profile_id, machine_id, loader_name, machine_type, serial_number) "
+                                                   "VALUES (?, 3004, 'TestOxi', ?, 'OX3')"), { m_profileId, int(MT_OXIMETER) });
+    QVERIFY(oxiRow > 0);
+    Machine cpap(p_profile, 63);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Machine oxi(p_profile, 64);
+    oxi.info.type = MT_OXIMETER;
+    oxi.setDatabaseId(oxiRow);
+    const QDate date = kNightDate.addDays(60);
+    Day *day = new Day();
+    day->setDate(date);
+    day->addSession(hypopneaSession(&cpap, 92, m_machineRow));
+    day->addSession(oximetrySession(&oxi, 93, oxiRow));
+    const double cpapHours = day->hours(MT_CPAP);
+    p_profile->daylist.insert(date, day);
+
+    Statistics stats;
+    const DoctorReport r = stats.doctorReport(date.addDays(-1), date);
+    p_profile->daylist.remove(date);
+
+    QCOMPARE(r.days(), 2);
+    QCOMPARE(r.nights, 1);
+    QCOMPARE(r.nightList.size(), 2);
+    QVERIFY(std::isnan(r.nightList[0].hours));
+    QCOMPARE(r.nightList[1].hours, cpapHours);
+    QCOMPARE(r.meanHours, cpapHours);
+    QCOMPARE(r.comparison.size(), 1);
+    QCOMPARE(r.settingsSince, date);
+    QVERIFY(r.settingsChanges.isEmpty());
+    delete day;
+}
+
+void AnalysisIntegrationTests::testDoctorReportSettingsSince()
+{
+    // Settings unchanged since the night before the period: «since» names that night.
+    QFile::remove(p_profile->Get("{" + STR_GEN_DataFolder + "}/RXChanges.cache"));
+    Machine cpap(p_profile, 65);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    const QDate first = kNightDate.addDays(70), second = first.addDays(1);
+    Day *a = new Day();
+    a->setDate(first);
+    a->addSession(hypopneaSession(&cpap, 94, m_machineRow));
+    Day *b = new Day();
+    b->setDate(second);
+    b->addSession(hypopneaSession(&cpap, 95, m_machineRow));
+    p_profile->daylist.insert(first, a);
+    p_profile->daylist.insert(second, b);
+
+    Statistics stats;
+    const DoctorReport r = stats.doctorReport(second, second);
+    p_profile->daylist.remove(first);
+    p_profile->daylist.remove(second);
+
+    QCOMPARE(r.nights, 1);
+    QCOMPARE(r.settingsSince, first);
+    QVERIFY(r.settingsChanges.isEmpty());
     delete a;
     delete b;
 }

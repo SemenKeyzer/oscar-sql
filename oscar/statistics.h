@@ -22,6 +22,7 @@
 #include "database/analysis_daily_repository.h"
 #include "SleepLib/machine.h"
 #include "settingscomparison.h"
+#include "doctorreport.h"
 
 
 class SummaryInfo
@@ -228,6 +229,8 @@ class Statistics : public QObject
     //! The settings comparison over the nights in [from, to]; \a showDevice says whether
     //! more than one device took part.
     QList<SettingsComparison::Row> settingsComparisonRows(const QDate &from, const QDate &to, bool *showDevice = nullptr);
+    //! Everything the report for the doctor shows for the nights in [from, to].
+    DoctorReport doctorReport(const QDate &from, const QDate &to);
 
     static void printReport(QWidget *parent = nullptr);
 
