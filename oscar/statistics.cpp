@@ -1695,6 +1695,13 @@ QList<SettingsComparison::Row> Statistics::settingsComparisonRows(const QDate &f
 
 DoctorReport Statistics::doctorReport(const QDate &from, const QDate &to)
 {
+    analysis::AnalysisService *service = mainwin ? mainwin->analysisService() : nullptr;
+    return doctorReport(from, to, analysisRows(from, to), service ? service->outdatedDays() : QList<QDate>());
+}
+
+DoctorReport Statistics::doctorReport(const QDate &from, const QDate &to, const QList<AnalysisDailyData> &analysis,
+                                      const QList<QDate> &outdated)
+{
     DoctorReport r;
     r.from = from;
     r.to = to;
@@ -1756,15 +1763,28 @@ DoctorReport Statistics::doctorReport(const QDate &from, const QDate &to)
     if (leakHours > 0) r.leak = leak / leakHours;
     if (pressureHours > 0) r.pressure = pressure / pressureHours;
 
-    // OSCAR's analysis
-    const QList<AnalysisDailyData> analysis = analysisRows(from, to);
-    for (const AnalysisDailyData &d : analysis) {
-        if (d.hasOximetry) ++r.oximetryNights;
+    // OSCAR's analysis over the CPAP nights only, as in the settings table; with any of them
+    // unanalysed or out of date its figures are left out rather than showing part of the period
+    QSet<QDate> cpapNights;
+    for (const DoctorReport::Night &night : std::as_const(r.nightList)) {
+        if (!std::isnan(night.hours)) cpapNights.insert(night.date);
     }
-    r.analysisAhi = analysisFigureValue(QStringLiteral("ahi"), analysis);
-    r.flowLimitation = analysisFigureValue(QStringLiteral("fl"), analysis);
-    r.odi3 = analysisFigureValue(QStringLiteral("odi3"), analysis);
-    r.below90 = analysisFigureValue(QStringLiteral("below:90"), analysis);
+    const QSet<QDate> stale(outdated.cbegin(), outdated.cend());
+    QList<AnalysisDailyData> own;
+    QSet<QDate> current;
+    for (const AnalysisDailyData &d : analysis) {
+        if (!cpapNights.contains(d.date)) continue;
+        own << d;
+        if (d.hasOximetry) ++r.oximetryNights;
+        if (!stale.contains(d.date)) current.insert(d.date);
+    }
+    r.analysisMissing = int(cpapNights.size() - current.size());
+    if (r.analysisMissing == 0) {
+        r.analysisAhi = analysisFigureValue(QStringLiteral("ahi"), own);
+        r.flowLimitation = analysisFigureValue(QStringLiteral("fl"), own);
+        r.odi3 = analysisFigureValue(QStringLiteral("odi3"), own);
+        r.below90 = analysisFigureValue(QStringLiteral("below:90"), own);
+    }
 
     // the settings: compared over the period, changed on, and in use on the last night
     r.comparison = settingsComparisonRows(from, to, &r.showDevice);   // brings rxitems up to date

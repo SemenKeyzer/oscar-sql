@@ -64,6 +64,7 @@ struct DoctorReport {
     double percentile = 95;
     double odi3 = kNoValue;
     double below90 = kNoValue;
+    int analysisMissing = 0;        //!< CPAP nights without an up-to-date analysis
 
     QVector<Night> nightList;       //!< every date of the period, oldest first
     QList<QDate> settingsChanges;   //!< nights a new settings period started on

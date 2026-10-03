@@ -231,6 +231,10 @@ class Statistics : public QObject
     QList<SettingsComparison::Row> settingsComparisonRows(const QDate &from, const QDate &to, bool *showDevice = nullptr);
     //! Everything the report for the doctor shows for the nights in [from, to].
     DoctorReport doctorReport(const QDate &from, const QDate &to);
+    //! The same with OSCAR's analysis given: its rows over the period and the dates whose
+    //! analysis is out of date.
+    DoctorReport doctorReport(const QDate &from, const QDate &to, const QList<AnalysisDailyData> &analysis,
+                              const QList<QDate> &outdated);
 
     static void printReport(QWidget *parent = nullptr);
 

@@ -24,6 +24,9 @@
 #include "analysispanel.h"
 #include "version.h"
 
+// The DPI QTextDocument lays text out at (QtGui, private header qfont_p.h).
+Q_GUI_EXPORT int qt_defaultDpiY();
+
 namespace {
 
 bool known(double value) { return !std::isnan(value); }
@@ -247,6 +250,11 @@ QString html(const DoctorReport &r, const QString &chartUrl, const QSizeF &chart
         html += QStringLiteral("<td width='33%'>%1</td>").arg(tiles[i]);
     }
     html += QStringLiteral("</tr></table>");
+    if (r.analysisMissing > 0) {
+        html += QStringLiteral("<p><font size='-1' color='#606060'>%1</font></p>")
+                    .arg(DoctorReport::tr("OSCAR's analysis is missing or out of date for %1 of %2 nights, so its figures are left out.")
+                             .arg(r.analysisMissing).arg(r.nights).toHtmlEscaped());
+    }
 
     // night by night
     html += QStringLiteral("<p><b>%1</b></p><img src='%2' width=%3 height=%4><br><font size='-1' color='#606060'>%5</font>")
@@ -283,8 +291,10 @@ bool writePdf(const DoctorReport &report, const QString &path, QString *error)
     printer.setPageOrientation(QPageLayout::Portrait);
     printer.setPageMargins(QMarginsF(12, 12, 12, 12), QPageLayout::Millimeter);
 
+    // QTextDocument turns point sizes into layout units at the screen's DPI (72 on macOS, 96
+    // on Windows and Linux); sizing the page the same way keeps the text's size on paper
     QTextDocument doc;
-    const QSizeF page = printer.pageRect(QPrinter::Point).size();
+    const QSizeF page = printer.pageRect(QPrinter::Point).size() * (qt_defaultDpiY() / 72.0);
     doc.setPageSize(page);
     doc.setDocumentMargin(0);
     QFont font(QStringLiteral("Helvetica"));

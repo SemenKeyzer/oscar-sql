@@ -3200,143 +3200,148 @@ Hint: Change the start date first</source>
 <context>
     <name>DoctorReport</name>
     <message>
-        <location filename="../oscar/doctorreport.cpp" line="177"/>
+        <location filename="../oscar/doctorreport.cpp" line="180"/>
         <source>h</source>
         <translation>ч</translation>
     </message>
     <message>
-        <location filename="../oscar/doctorreport.cpp" line="198"/>
+        <location filename="../oscar/doctorreport.cpp" line="201"/>
         <source>CPAP Therapy Report</source>
         <translation>Отчёт о CPAP-терапии</translation>
     </message>
     <message>
-        <location filename="../oscar/doctorreport.cpp" line="207"/>
+        <location filename="../oscar/doctorreport.cpp" line="210"/>
         <source>Patient:</source>
         <translation>Пациент:</translation>
     </message>
     <message>
-        <location filename="../oscar/doctorreport.cpp" line="207"/>
+        <location filename="../oscar/doctorreport.cpp" line="210"/>
         <source>%1, born %2</source>
         <translation>%1, дата рождения %2</translation>
     </message>
     <message>
-        <location filename="../oscar/doctorreport.cpp" line="209"/>
+        <location filename="../oscar/doctorreport.cpp" line="212"/>
         <source>Device:</source>
         <translation>Аппарат:</translation>
     </message>
     <message>
-        <location filename="../oscar/doctorreport.cpp" line="210"/>
+        <location filename="../oscar/doctorreport.cpp" line="213"/>
         <source>Oximeter:</source>
         <translation>Оксиметр:</translation>
     </message>
     <message>
-        <location filename="../oscar/doctorreport.cpp" line="211"/>
+        <location filename="../oscar/doctorreport.cpp" line="214"/>
         <source>Period:</source>
         <translation>Период:</translation>
     </message>
     <message>
-        <location filename="../oscar/doctorreport.cpp" line="211"/>
+        <location filename="../oscar/doctorreport.cpp" line="214"/>
         <source>%1 – %2 · nights with data %3 of %4 · with an oximeter %5</source>
         <translation>%1 – %2 · ночей с данными %3 из %4 · с оксиметром %5</translation>
     </message>
     <message>
-        <location filename="../oscar/doctorreport.cpp" line="216"/>
+        <location filename="../oscar/doctorreport.cpp" line="219"/>
         <source>Current settings:</source>
         <translation>Текущие настройки:</translation>
     </message>
     <message>
-        <location filename="../oscar/doctorreport.cpp" line="217"/>
+        <location filename="../oscar/doctorreport.cpp" line="220"/>
         <source>%1 — since %2</source>
         <translation>%1 — с %2</translation>
     </message>
     <message>
-        <location filename="../oscar/doctorreport.cpp" line="224"/>
+        <location filename="../oscar/doctorreport.cpp" line="227"/>
         <source>%1 h %2 min</source>
         <translation>%1 ч %2 мин</translation>
     </message>
     <message>
-        <location filename="../oscar/doctorreport.cpp" line="227"/>
+        <location filename="../oscar/doctorreport.cpp" line="230"/>
         <source>Usage</source>
         <translation>Использование</translation>
     </message>
     <message>
-        <location filename="../oscar/doctorreport.cpp" line="228"/>
+        <location filename="../oscar/doctorreport.cpp" line="231"/>
         <source>%1 of %2 nights ≥ %3 h</source>
         <translation>%1 из %2 ночей ≥ %3 ч</translation>
     </message>
     <message>
-        <location filename="../oscar/doctorreport.cpp" line="231"/>
+        <location filename="../oscar/doctorreport.cpp" line="234"/>
         <source>OSCAR&apos;s analysis: %1 · flow limitation %2%</source>
         <translation>анализ OSCAR: %1 · огр. потока %2 %</translation>
     </message>
     <message>
-        <location filename="../oscar/doctorreport.cpp" line="233"/>
+        <location filename="../oscar/doctorreport.cpp" line="236"/>
         <source>Leak</source>
         <translation>Утечка</translation>
     </message>
     <message>
-        <location filename="../oscar/doctorreport.cpp" line="234"/>
+        <location filename="../oscar/doctorreport.cpp" line="237"/>
         <source>red line %1</source>
         <translation>красная линия %1</translation>
     </message>
     <message>
-        <location filename="../oscar/doctorreport.cpp" line="234"/>
+        <location filename="../oscar/doctorreport.cpp" line="237"/>
         <source>no red line set</source>
         <translation>красная линия не задана</translation>
     </message>
     <message>
-        <location filename="../oscar/doctorreport.cpp" line="236"/>
+        <location filename="../oscar/doctorreport.cpp" line="239"/>
         <source>Pressure %1%</source>
         <translation>Давление %1 %</translation>
     </message>
     <message>
-        <location filename="../oscar/doctorreport.cpp" line="237"/>
+        <location filename="../oscar/doctorreport.cpp" line="240"/>
         <source>average over the nights</source>
         <translation>среднее по ночам</translation>
     </message>
     <message>
-        <location filename="../oscar/doctorreport.cpp" line="238"/>
+        <location filename="../oscar/doctorreport.cpp" line="241"/>
         <source>ODI 3%</source>
         <translation>ODI 3 %</translation>
     </message>
     <message>
-        <location filename="../oscar/doctorreport.cpp" line="238"/>
+        <location filename="../oscar/doctorreport.cpp" line="241"/>
         <source>%1 an hour</source>
         <translation>%1 в час</translation>
     </message>
     <message>
-        <location filename="../oscar/doctorreport.cpp" line="239"/>
-        <location filename="../oscar/doctorreport.cpp" line="241"/>
+        <location filename="../oscar/doctorreport.cpp" line="242"/>
+        <location filename="../oscar/doctorreport.cpp" line="244"/>
         <source>nights with an oximeter: %1</source>
         <translation>ночей с оксиметром: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/doctorreport.cpp" line="240"/>
+        <location filename="../oscar/doctorreport.cpp" line="243"/>
         <source>SpO2 below 90%</source>
         <translation>SpO2 ниже 90 %</translation>
     </message>
     <message>
-        <location filename="../oscar/doctorreport.cpp" line="244"/>
+        <location filename="../oscar/doctorreport.cpp" line="247"/>
         <source>Summary for the period</source>
         <translation>Итог за период</translation>
     </message>
     <message>
-        <location filename="../oscar/doctorreport.cpp" line="253"/>
+        <location filename="../oscar/doctorreport.cpp" line="255"/>
+        <source>OSCAR&apos;s analysis is missing or out of date for %1 of %2 nights, so its figures are left out.</source>
+        <translation>Анализ OSCAR отсутствует или устарел для %1 из %2 ночей, поэтому его цифры не показаны.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/doctorreport.cpp" line="261"/>
         <source>Night by night</source>
         <translation>По ночам</translation>
     </message>
     <message>
-        <location filename="../oscar/doctorreport.cpp" line="255"/>
+        <location filename="../oscar/doctorreport.cpp" line="263"/>
         <source>AHI per night (dashed: %1) · hours of use (dashed: %2 h) · grey lines: settings changed</source>
         <translation>AHI за ночь (пунктир — %1) · часы использования (пунктир — %2 ч) · серые линии — смена настроек</translation>
     </message>
     <message>
-        <location filename="../oscar/doctorreport.cpp" line="271"/>
+        <location filename="../oscar/doctorreport.cpp" line="279"/>
         <source>Prepared by OSCAR %1 on %2</source>
         <translation>Отчёт подготовлен OSCAR %1, %2</translation>
     </message>
     <message>
-        <location filename="../oscar/doctorreport.cpp" line="303"/>
+        <location filename="../oscar/doctorreport.cpp" line="313"/>
         <source>Could not write %1.</source>
         <translation>Не удалось записать %1.</translation>
     </message>
@@ -15715,7 +15720,7 @@ popout window, delete it, then pop out this graph again.</source>
         <translation>Всё</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2593"/>
+        <location filename="../oscar/statistics.cpp" line="2613"/>
         <source>Not available for all devices in this period</source>
         <translation>Доступно не для всех аппаратов за этот период</translation>
     </message>
@@ -19525,7 +19530,7 @@ Make sure you trust the recipient before sharing this data.</source>
     </message>
     <message>
         <location filename="../oscar/statistics.cpp" line="913"/>
-        <location filename="../oscar/statistics.cpp" line="2273"/>
+        <location filename="../oscar/statistics.cpp" line="2293"/>
         <source>CPAP Usage</source>
         <translation>Использование CPAP</translation>
     </message>
@@ -19700,85 +19705,85 @@ Make sure you trust the recipient before sharing this data.</source>
         <translation>Изменения настроек аппарата</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="1973"/>
+        <location filename="../oscar/statistics.cpp" line="1993"/>
         <source>Everything</source>
         <translation>Всё</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2047"/>
+        <location filename="../oscar/statistics.cpp" line="2067"/>
         <source>Database has No %1 data available.</source>
         <translation>В базе данных нет доступных данных %1.</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2050"/>
+        <location filename="../oscar/statistics.cpp" line="2070"/>
         <source>Database has %1 day of %2 Data on %3</source>
         <translation>В базе данных есть %1 день данных %2 за %3</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2056"/>
+        <location filename="../oscar/statistics.cpp" line="2076"/>
         <source>Database has %1 days of %2 Data, between %3 and %4</source>
         <translation>В базе данных есть данные %2 за %1 дн., с %3 по %4</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2276"/>
+        <location filename="../oscar/statistics.cpp" line="2296"/>
         <source>Total Days: %1</source>
         <translation>Всего дней: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2277"/>
+        <location filename="../oscar/statistics.cpp" line="2297"/>
         <source>Days Not Used: %1</source>
         <translation>Дней без использования: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2279"/>
+        <location filename="../oscar/statistics.cpp" line="2299"/>
         <source>Days Used: %1</source>
         <translation>Дней использования: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2280"/>
+        <location filename="../oscar/statistics.cpp" line="2300"/>
         <source>Days %1 %2 %3%</source>
         <translation>Дней %1 %2 %3%</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2281"/>
-        <location filename="../oscar/statistics.cpp" line="2282"/>
+        <location filename="../oscar/statistics.cpp" line="2301"/>
+        <location filename="../oscar/statistics.cpp" line="2302"/>
         <source>Days %1 %2 Hours: %3</source>
         <translation>Дней %1 %2 ч: %3</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2305"/>
+        <location filename="../oscar/statistics.cpp" line="2325"/>
         <source>Days %1 of 5 or greater: %2</source>
         <translation>Дней с %1 5 и более: %2</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2312"/>
+        <location filename="../oscar/statistics.cpp" line="2332"/>
         <source>Best %1</source>
         <translation>Лучший %1</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2316"/>
-        <location filename="../oscar/statistics.cpp" line="2329"/>
+        <location filename="../oscar/statistics.cpp" line="2336"/>
+        <location filename="../oscar/statistics.cpp" line="2349"/>
         <source>Date: %1 %2: %3</source>
         <translation>Дата: %1 %2: %3</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2322"/>
+        <location filename="../oscar/statistics.cpp" line="2342"/>
         <source>Worst %1</source>
         <translation>Худший %1</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2512"/>
+        <location filename="../oscar/statistics.cpp" line="2532"/>
         <source>Best Device Setting</source>
         <translation>Лучшие настройки аппарата</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2517"/>
-        <location filename="../oscar/statistics.cpp" line="2529"/>
+        <location filename="../oscar/statistics.cpp" line="2537"/>
+        <location filename="../oscar/statistics.cpp" line="2549"/>
         <source>Serial: %1</source>
         <translation>Серийный номер: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2524"/>
+        <location filename="../oscar/statistics.cpp" line="2544"/>
         <source>Worst Device Setting</source>
         <translation>Худшие настройки аппарата</translation>
     </message>
@@ -19799,89 +19804,89 @@ Make sure you trust the recipient before sharing this data.</source>
         <translation type="vanished">Худший ИАГ</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2360"/>
+        <location filename="../oscar/statistics.cpp" line="2380"/>
         <source>Best Flow Limitation</source>
         <translation>Лучшее ограничение потока</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2364"/>
-        <location filename="../oscar/statistics.cpp" line="2377"/>
+        <location filename="../oscar/statistics.cpp" line="2384"/>
+        <location filename="../oscar/statistics.cpp" line="2397"/>
         <source>Date: %1 FL: %2</source>
         <translation>Дата: %1, ограничение: %2</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2370"/>
+        <location filename="../oscar/statistics.cpp" line="2390"/>
         <source>Worst Flow Limtation</source>
         <translation>Худшее ограничение потока</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2382"/>
+        <location filename="../oscar/statistics.cpp" line="2402"/>
         <source>No Flow Limitation on record</source>
         <translation>Нет ограничений потока</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2403"/>
+        <location filename="../oscar/statistics.cpp" line="2423"/>
         <source>Worst Large Leaks</source>
         <translation>Худшие утечки</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2411"/>
+        <location filename="../oscar/statistics.cpp" line="2431"/>
         <source>Date: %1 Leak: %2%</source>
         <translation>Дата: %1, утечка: %2</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2417"/>
+        <location filename="../oscar/statistics.cpp" line="2437"/>
         <source>No Large Leaks on record</source>
         <translation>Нет больших утечек</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2440"/>
+        <location filename="../oscar/statistics.cpp" line="2460"/>
         <source>Worst CSR</source>
         <translation>Худшее дыхание Чейна-Стокса (ДЧС)</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2448"/>
+        <location filename="../oscar/statistics.cpp" line="2468"/>
         <source>Date: %1 CSR: %2%</source>
         <translation>Дата: %1, ЧСД: %2</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2453"/>
+        <location filename="../oscar/statistics.cpp" line="2473"/>
         <source>No CSR on record</source>
         <translation>Нет эпизодов ЧСД</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2470"/>
+        <location filename="../oscar/statistics.cpp" line="2490"/>
         <source>Worst PB</source>
         <translation>Худшее периодическое дыхание (ПД)</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2478"/>
+        <location filename="../oscar/statistics.cpp" line="2498"/>
         <source>Date: %1 PB: %2%</source>
         <translation>Дата: %1, ПД: %2</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2483"/>
+        <location filename="../oscar/statistics.cpp" line="2503"/>
         <source>No PB on record</source>
         <translation>Нет эпизодов ПД</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2491"/>
+        <location filename="../oscar/statistics.cpp" line="2511"/>
         <source>Want more information?</source>
         <translation>Хотите больше информации?</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2492"/>
+        <location filename="../oscar/statistics.cpp" line="2512"/>
         <source>OSCAR needs all summary data loaded to calculate best/worst data for individual days.</source>
         <translation>OSCAR требует загрузки всех итоговых данных для вычисления лучших и худших данных для конкретных дней.</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2493"/>
+        <location filename="../oscar/statistics.cpp" line="2513"/>
         <source>Please enable Pre-Load Summaries checkbox in preferences to make sure this data is available.</source>
         <translation>Включите &quot;Предзагружать итоги&quot; в настройках и убедитесь, что данные доступны.</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2515"/>
-        <location filename="../oscar/statistics.cpp" line="2527"/>
+        <location filename="../oscar/statistics.cpp" line="2535"/>
+        <location filename="../oscar/statistics.cpp" line="2547"/>
         <source>Date: %1 - %2</source>
         <translation>Дата: %1 - %2</translation>
     </message>
@@ -19890,13 +19895,13 @@ Make sure you trust the recipient before sharing this data.</source>
         <translation type="vanished">ИАГ: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2519"/>
-        <location filename="../oscar/statistics.cpp" line="2531"/>
+        <location filename="../oscar/statistics.cpp" line="2539"/>
+        <location filename="../oscar/statistics.cpp" line="2551"/>
         <source>Total Hours: %1</source>
         <translation>Всего часов: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="1966"/>
+        <location filename="../oscar/statistics.cpp" line="1986"/>
         <source>Most Recent</source>
         <translation>Последнее</translation>
     </message>
@@ -19906,42 +19911,42 @@ Make sure you trust the recipient before sharing this data.</source>
         <translation>OSCAR является программой для отчетов CPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="1816"/>
+        <location filename="../oscar/statistics.cpp" line="1836"/>
         <source>No data found?!?</source>
         <translation>Данные не найдены?!?</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="1818"/>
+        <location filename="../oscar/statistics.cpp" line="1838"/>
         <source>Oscar has no data to report :(</source>
         <translation>У OSCAR нет данных</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="1967"/>
+        <location filename="../oscar/statistics.cpp" line="1987"/>
         <source>Last Week</source>
         <translation>Неделя</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="1968"/>
+        <location filename="../oscar/statistics.cpp" line="1988"/>
         <source>Last 30 Days</source>
         <translation>Последние 30 дней</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="1969"/>
+        <location filename="../oscar/statistics.cpp" line="1989"/>
         <source>Last 6 Months</source>
         <translation>Последние полгода</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="1971"/>
+        <location filename="../oscar/statistics.cpp" line="1991"/>
         <source>Last Year</source>
         <translation>Последний год</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="1942"/>
+        <location filename="../oscar/statistics.cpp" line="1962"/>
         <source>Last Session</source>
         <translation>Последний сеанс</translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2031"/>
+        <location filename="../oscar/statistics.cpp" line="2051"/>
         <source>Details</source>
         <translation>Подробности</translation>
     </message>
@@ -20076,8 +20081,8 @@ Make sure you trust the recipient before sharing this data.</source>
         <translation>Анализ (второе мнение)</translation>
     </message>
     <message numerus="yes">
-        <location filename="../oscar/statistics.cpp" line="1804"/>
-        <location filename="../oscar/statistics.cpp" line="1993"/>
+        <location filename="../oscar/statistics.cpp" line="1824"/>
+        <location filename="../oscar/statistics.cpp" line="2013"/>
         <source>Analysis is outdated for %n day(s).</source>
         <translation>
             <numerusform>Анализ устарел для %n дня.</numerusform>
@@ -20086,8 +20091,8 @@ Make sure you trust the recipient before sharing this data.</source>
         </translation>
     </message>
     <message>
-        <location filename="../oscar/statistics.cpp" line="1804"/>
-        <location filename="../oscar/statistics.cpp" line="1993"/>
+        <location filename="../oscar/statistics.cpp" line="1824"/>
+        <location filename="../oscar/statistics.cpp" line="2013"/>
         <source>Recalculate</source>
         <translation>Пересчитать</translation>
     </message>
@@ -20095,7 +20100,7 @@ Make sure you trust the recipient before sharing this data.</source>
 <context>
     <name>StatisticsRow</name>
     <message>
-        <location filename="../oscar/statistics.cpp" line="2672"/>
+        <location filename="../oscar/statistics.cpp" line="2692"/>
         <source>Err</source>
         <translation>Ошибка</translation>
     </message>

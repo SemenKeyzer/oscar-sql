@@ -1048,3 +1048,46 @@ void AnalysisIntegrationTests::testDoctorReportSettingsSince()
     delete a;
     delete b;
 }
+
+void AnalysisIntegrationTests::testDoctorReportAnalysisOnCpapNightsOnly()
+{
+    // A CPAP night and, the next day, a baseline night on the oximeter alone: the report's
+    // oximetry is the CPAP night's, as in the settings table.
+    QFile::remove(p_profile->Get("{" + STR_GEN_DataFolder + "}/RXChanges.cache"));
+    Machine cpap(p_profile, 66);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    const QDate date = kNightDate.addDays(80), baselineDate = date.addDays(1);
+    Day *day = new Day();
+    day->setDate(date);
+    day->addSession(hypopneaSession(&cpap, 96, m_machineRow));
+    p_profile->daylist.insert(date, day);
+
+    AnalysisDailyData night, baseline;
+    night.date = date;
+    night.hasCpap = true;
+    night.hasOximetry = true;
+    night.oxiSeconds = 3600;
+    night.nDesat3 = 6;
+    baseline.date = baselineDate;
+    baseline.hasOximetry = true;
+    baseline.oxiSeconds = 3600;
+    baseline.nDesat3 = 60;
+
+    Statistics stats;
+    const DoctorReport r = stats.doctorReport(date, baselineDate, { night, baseline }, {});
+    QCOMPARE(r.oximetryNights, 1);
+    QCOMPARE(r.odi3, 6.0);
+    QCOMPARE(r.analysisMissing, 0);
+
+    // out of date, or never analysed: the analysis' figures are left out, and counted
+    const DoctorReport stale = stats.doctorReport(date, baselineDate, { night, baseline }, { date });
+    const DoctorReport none = stats.doctorReport(date, baselineDate, {}, {});
+    p_profile->daylist.remove(date);
+    QCOMPARE(stale.analysisMissing, 1);
+    QVERIFY(std::isnan(stale.odi3));
+    QVERIFY(std::isnan(stale.analysisAhi));
+    QCOMPARE(none.analysisMissing, 1);
+    QVERIFY(std::isnan(none.below90));
+    delete day;
+}

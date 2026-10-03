@@ -32,6 +32,7 @@ private slots:
     void testWritePdf();
     void testWritePdfFailsOnBadPath();
     void testDefaultFrom();
+    void testHtmlAnalysisMissing();
 
 private:
     class QApplication *m_app = nullptr;

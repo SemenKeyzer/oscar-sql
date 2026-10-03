@@ -348,3 +348,12 @@ void DoctorReportTests::testDefaultFrom()
     QCOMPARE(DoctorReportDialog::defaultFrom(QDate(2025, 1, 1), first, last), QDate(2026, 9, 3));   // before the data
     QCOMPARE(DoctorReportDialog::defaultFrom(QDate(), last.addDays(-5), last), last.addDays(-5));   // shorter history
 }
+
+void DoctorReportTests::testHtmlAnalysisMissing()
+{
+    DoctorReport r = fullReport();
+    const QString note = reportText("OSCAR's analysis is missing or out of date for %1 of %2 nights, so its figures are left out.");
+    QVERIFY(!DoctorReportPage::html(r, QStringLiteral("chart.png"), kChart).contains(note.arg(2).arg(4)));
+    r.analysisMissing = 2;
+    QVERIFY(DoctorReportPage::html(r, QStringLiteral("chart.png"), kChart).contains(note.arg(2).arg(4)));
+}
