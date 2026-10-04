@@ -175,8 +175,9 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
     connect(m_search, &QLineEdit::textChanged, this, &PreferencesDialog::searchChanged);
     connect(m_searchResults, &QListWidget::itemActivated, this,
             [this](QListWidgetItem *item) { searchChosen(m_searchResults->row(item)); });
-    connect(m_searchResults, &QListWidget::itemClicked, this,
-            [this](QListWidgetItem *item) { searchChosen(m_searchResults->row(item)); });
+    // following the current row rather than clicks: an accessibility press (VoiceOver) only
+    // selects a row, and the arrow keys then show each setting as they pass it
+    connect(m_searchResults, &QListWidget::currentRowChanged, this, &PreferencesDialog::searchChosen);
     m_search->installEventFilter(this);
     m_searchResults->installEventFilter(this);
     QTimer::singleShot(0, m_search, [this]() { m_search->setFocus(); });
