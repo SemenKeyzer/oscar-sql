@@ -8,6 +8,10 @@
  * for more details. */
 
 #define TEST_MACROS_ENABLEDoff
+#include <QKeyEvent>
+#include <QLineEdit>
+#include <QListWidget>
+#include <QTimer>
 #include <test_macros.h>
 
 #include <QLabel>
@@ -158,6 +162,24 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
     analysisScroll->setWidgetResizable(true);
     analysisScroll->setFrameShape(QFrame::NoFrame);
     ui->tabWidget->addTab(analysisScroll, tr("Analysis"));
+
+    // search across every tab: type a word, pick the setting from the list
+    m_search = new QLineEdit(this);
+    m_search->setPlaceholderText(tr("Search settings..."));
+    m_search->setClearButtonEnabled(true);
+    m_searchResults = new QListWidget(this);
+    m_searchResults->setMaximumHeight(m_searchResults->fontMetrics().height() * 9);
+    m_searchResults->setVisible(false);
+    ui->mainlayout->insertWidget(0, m_search);
+    ui->mainlayout->insertWidget(1, m_searchResults);
+    connect(m_search, &QLineEdit::textChanged, this, &PreferencesDialog::searchChanged);
+    connect(m_searchResults, &QListWidget::itemActivated, this,
+            [this](QListWidgetItem *item) { searchChosen(m_searchResults->row(item)); });
+    connect(m_searchResults, &QListWidget::itemClicked, this,
+            [this](QListWidgetItem *item) { searchChosen(m_searchResults->row(item)); });
+    m_search->installEventFilter(this);
+    m_searchResults->installEventFilter(this);
+    QTimer::singleShot(0, m_search, [this]() { m_search->setFocus(); });
     m_analysisPage->load(profile->analysis->params(), profile->analysis->spo2Thresholds());
 
     //i=ui->timeZoneCombo->findText((*profile)["TimeZone"].toString());
@@ -1571,3 +1593,51 @@ void PreferencesDialog::on_combineSimilarMachines_toggled(bool checked)
     ui->includeSerial->setEnabled(!checked);
 }
 
+void PreferencesDialog::searchChanged(const QString &text)
+{
+    // the tabs change (channel lists rebuilt, settings shown or hidden), so look afresh each time
+    m_searchFound = PreferencesSearch::find(PreferencesSearch::index(ui->tabWidget), text);
+    m_searchResults->clear();
+    for (const PreferencesSearch::Entry &e : std::as_const(m_searchFound)) {
+        m_searchResults->addItem(PreferencesSearch::label(e));
+    }
+    const bool searching = PreferencesSearch::normalized(text).size() >= 2;
+    if (searching && m_searchFound.isEmpty()) {
+        auto *none = new QListWidgetItem(tr("Nothing found"), m_searchResults);
+        none->setFlags(Qt::NoItemFlags);
+    }
+    m_searchResults->setVisible(searching);
+}
+
+void PreferencesDialog::searchChosen(int row)
+{
+    if (row < 0 || row >= m_searchFound.size()) return;
+    PreferencesSearch::reveal(ui->tabWidget, m_searchFound[row]);
+}
+
+bool PreferencesDialog::eventFilter(QObject *watched, QEvent *event)
+{
+    if ((watched == m_search || watched == m_searchResults) && event->type() == QEvent::KeyPress) {
+        const int key = static_cast<QKeyEvent *>(event)->key();
+        if (watched == m_search && (key == Qt::Key_Return || key == Qt::Key_Enter)) {
+            // Enter shows the first match, never presses OK
+            searchChosen(m_searchResults->currentRow() >= 0 ? m_searchResults->currentRow() : 0);
+            return true;
+        }
+        if (watched == m_search && key == Qt::Key_Down && m_searchResults->isVisible() && m_searchResults->count() > 0) {
+            m_searchResults->setFocus();
+            m_searchResults->setCurrentRow(0);
+            return true;
+        }
+        if ((key == Qt::Key_Return || key == Qt::Key_Enter) && watched == m_searchResults) {
+            searchChosen(m_searchResults->currentRow());
+            return true;
+        }
+        if (key == Qt::Key_Escape && !m_search->text().isEmpty()) {
+            m_search->clear();
+            m_search->setFocus();
+            return true;
+        }
+    }
+    return QDialog::eventFilter(watched, event);
+}

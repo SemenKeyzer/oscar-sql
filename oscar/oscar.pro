@@ -363,6 +363,7 @@ SOURCES += \
     settingscomparison.cpp \
     doctorreport.cpp \
     doctorreportdialog.cpp \
+    preferencessearch.cpp \
     zip.cpp \
     Graphs/gAHIChart.cpp \
     Graphs/gdailysummary.cpp \
@@ -681,6 +682,7 @@ HEADERS  += \
     settingscomparison.h \
     doctorreport.h \
     doctorreportdialog.h \
+    preferencessearch.h \
     mytextbrowser.h \
     staticQMessageBox.h \
     git_info.h \
@@ -886,6 +888,7 @@ test {
         tests/overviewpresetstests.cpp \
         tests/settingscomparisontests.cpp \
         tests/doctorreporttests.cpp \
+        tests/preferencessearchtests.cpp \
         tests/channelstoretests.cpp \
         tests/machinetests.cpp \
         tests/timealignsessiontests.cpp \
@@ -927,6 +930,7 @@ test {
         tests/overviewpresetstests.h \
         tests/settingscomparisontests.h \
         tests/doctorreporttests.h \
+        tests/preferencessearchtests.h \
         tests/channelstoretests.h \
         tests/machinetests.h \
         tests/backuprestoretests.h \

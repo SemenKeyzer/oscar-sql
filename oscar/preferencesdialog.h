@@ -18,6 +18,7 @@
 #include <QStandardItemModel>
 #include <QTextEdit>
 #include "SleepLib/profiles.h"
+#include "preferencessearch.h"
 
 namespace Ui {
 class PreferencesDialog;
@@ -57,12 +58,20 @@ class PreferencesDialog : public QDialog
     bool Save();
 
     QString clinicalHelp();
+
+  protected:
+    //! Enter and the arrow keys work the search; Escape clears it before it closes the dialog.
+    bool eventFilter(QObject *watched, QEvent *event) override;
 #ifndef NO_CHECKUPDATES
     //! \brief Updates the date text of the last time updates where checked
     void RefreshLastChecked();
 #endif
 
   private slots:
+    //! Lists the settings matching what was typed in the search field.
+    void searchChanged(const QString &text);
+    //! Shows the setting at \a row of the list.
+    void searchChosen(int row);
     void on_combineSlider_valueChanged(int value);
 
     void on_IgnoreSlider_valueChanged(int value);
@@ -117,6 +126,9 @@ private:
 
     Ui::PreferencesDialog *ui;
     AnalysisPreferencesPage *m_analysisPage = nullptr;
+    class QLineEdit *m_search = nullptr;
+    class QListWidget *m_searchResults = nullptr;
+    QList<PreferencesSearch::Entry> m_searchFound;
     Profile *profile;
     QHash<ChannelID, QColor> m_new_colors;
 
