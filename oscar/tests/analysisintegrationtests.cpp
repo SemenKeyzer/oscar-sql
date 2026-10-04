@@ -38,6 +38,7 @@
 #include "database/session_settings_repository.h"
 #include "statistics.h"
 #include "doctorreport.h"
+#include "nightsummary.h"
 #include "tests/analysis_synth.h"
 
 using namespace analysis;
@@ -1089,5 +1090,39 @@ void AnalysisIntegrationTests::testDoctorReportAnalysisOnCpapNightsOnly()
     QVERIFY(std::isnan(stale.analysisAhi));
     QCOMPARE(none.analysisMissing, 1);
     QVERIFY(std::isnan(none.below90));
+    delete day;
+}
+
+void AnalysisIntegrationTests::testNightSummaryTimeAtMaximum()
+{
+    // An APAP hour at 10 with its last 10 minutes at the upper limit of 14: the start screen
+    // says 10 min at the maximum.
+    Machine cpap(p_profile, 67);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    const QDate date = kNightDate.addDays(90);
+    const qint64 start = QDateTime(date, QTime(23, 0)).toMSecsSinceEpoch();
+    Session *sess = new Session(&cpap, 97);
+    QVector<qint16> pressure(3600, 1000);
+    for (int i = 3000; i < 3600; ++i) pressure[i] = 1400;
+    EventList *el = sess->AddEventList(CPAP_Pressure, EVL_Waveform, 0.01f, 0, 0, 0, 1000);
+    el->AddWaveform(start, pressure.data(), pressure.size(), qint64(pressure.size()) * 1000);
+    sess->settings[CPAP_Mode] = int(MODE_APAP);
+    sess->settings[CPAP_PressureMax] = 14.0;
+    sess->really_set_first(start);
+    sess->really_set_last(start + qint64(pressure.size()) * 1000);
+    sess->UpdateSummaries();
+    Day *day = new Day();
+    day->setDate(date);
+    day->addSession(sess);
+    p_profile->daylist.insert(date, day);
+
+    const NightSummary s = buildNightSummaryFor(p_profile, nullptr, date, date, false);
+    p_profile->daylist.remove(date);
+
+    QCOMPARE(s.pressureMax, 14.0);
+    QVERIFY2(std::abs(s.secondsAtMax - 600) < 2, qPrintable(QString::number(s.secondsAtMax)));
+    QVERIFY2(s.pressureMaxNote().contains(QCoreApplication::translate("NightSummary", "%1 min").arg(10)),
+             qPrintable(s.pressureMaxNote()));
     delete day;
 }

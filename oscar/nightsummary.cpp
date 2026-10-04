@@ -274,8 +274,10 @@ NightSummary buildNightSummaryFor(Profile *profile, analysis::AnalysisService *s
         pressureFigures(day, s.pressure, s.pressureUnits, s.pressureNote);
         if (CPAPMode(int(day->settings_max(CPAP_Mode))) == MODE_APAP && day->getPressureChannelID() != NoChannel) {
             s.pressureMax = day->settings_max(CPAP_PressureMax);
-            // the stored values carry a gain, so 14 reads 13.99998: allow a hair below the limit
-            if (s.pressureMax > 0) s.secondsAtMax = day->timeAboveThreshold(day->getPressureChannelID(), s.pressureMax - 0.05);
+            // the stored values carry a gain, so 14 reads 13.99998: allow a hair below the limit;
+            // timeAboveThreshold() counts minutes
+            if (s.pressureMax > 0)
+                s.secondsAtMax = 60.0 * day->timeAboveThreshold(day->getPressureChannelID(), s.pressureMax - 0.05);
         }
     }
 
