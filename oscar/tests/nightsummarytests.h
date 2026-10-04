@@ -23,6 +23,7 @@ private slots:
     void testConcerns();
     void testSpo2AgainstTargets();
     void testKeyFiguresHtml();
+    void testPressureAtMaximum();
     void testActions();
     void testViewShowsTheNight();
 

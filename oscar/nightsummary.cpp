@@ -51,6 +51,13 @@ QString duration(double hours)
     return QCoreApplication::translate("NightSummary", "%1 h %2 min").arg(minutes / 60).arg(minutes % 60);
 }
 
+// The pressure tile's note: what the figure is, then how long the APAP sat at its limit.
+QString pressureTileNote(const NightSummary &s)
+{
+    const QString atMax = s.pressureMaxNote();
+    return atMax.isEmpty() ? s.pressureNote : s.pressureNote + QStringLiteral("; ") + atMax;
+}
+
 // A figure with its unit in smaller type, so that the number reads first and the tile
 // keeps to one line: "7 h 12 min", "9.8 cmH2O".
 QString figure(const QString &number, const QString &unit)
@@ -149,6 +156,16 @@ NightSummary::Level NightSummary::leakLevel() const
 {
     if (!hasLeak || leakRedline <= 0) return Unknown;
     return leak < leakRedline ? Good : Attention;
+}
+
+QString NightSummary::pressureMaxNote() const
+{
+    if (pressureMax <= 0 || hours <= 0) return QString();
+    const int minutes = int(std::lround(secondsAtMax / 60));
+    const QString time = minutes >= 60 ? duration(minutes / 60.0)
+                                       : QCoreApplication::translate("NightSummary", "%1 min").arg(minutes);
+    return QCoreApplication::translate("NightSummary", "at the maximum %1: %2 (%3%)")
+        .arg(pressureText(pressureMax), time, num(100.0 * secondsAtMax / (hours * 3600)));
 }
 
 int NightSummary::compliantNights() const
@@ -255,6 +272,11 @@ NightSummary buildNightSummaryFor(Profile *profile, analysis::AnalysisService *s
             s.leakUnits = schema::channel[CPAP_Leak].units();
         }
         pressureFigures(day, s.pressure, s.pressureUnits, s.pressureNote);
+        if (CPAPMode(int(day->settings_max(CPAP_Mode))) == MODE_APAP && day->getPressureChannelID() != NoChannel) {
+            s.pressureMax = day->settings_max(CPAP_PressureMax);
+            // the stored values carry a gain, so 14 reads 13.99998: allow a hair below the limit
+            if (s.pressureMax > 0) s.secondsAtMax = day->timeAboveThreshold(day->getPressureChannelID(), s.pressureMax - 0.05);
+        }
     }
 
     // That night's oximetry: the analysis' figures where it ran, else the classic count.
@@ -428,7 +450,7 @@ QString NightSummaryView::keyFiguresHtml(const NightSummary &s)
                            s.leakRedline > 0 ? tr("average; red line %1").arg(s.leakRedline) : tr("average"), s.leakLevel() });
         }
         if (!s.pressure.isEmpty()) {
-            tiles.append({ tr("Pressure"), s.pressure + QLatin1Char(' ') + s.pressureUnits, s.pressureNote, NightSummary::Unknown });
+            tiles.append({ tr("Pressure"), s.pressure + QLatin1Char(' ') + s.pressureUnits, pressureTileNote(s), NightSummary::Unknown });
         }
     }
     if (s.oxi.valid && !s.oxi.spotChecks && s.oxi.spo2Avg > 0 && s.oxi.hours > 0) {
@@ -561,7 +583,7 @@ void NightSummaryView::setSummary(const NightSummary &s)
             addTile(col++, tr("Leak"), figure(num(s.leak), s.leakUnits), note, s.leakLevel());
         }
         if (!s.pressure.isEmpty()) {
-            addTile(col++, tr("Pressure"), figure(s.pressure, s.pressureUnits), s.pressureNote.toHtmlEscaped(),
+            addTile(col++, tr("Pressure"), figure(s.pressure, s.pressureUnits), pressureTileNote(s).toHtmlEscaped(),
                     NightSummary::Unknown);
         }
     }

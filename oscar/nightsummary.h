@@ -55,6 +55,8 @@ struct NightSummary {
     QString pressure;               //!< e.g. "9.8", or "5 / 9.8" for EPAP / IPAP
     QString pressureUnits;
     QString pressureNote;           //!< what the figure is, e.g. "95% of the time under"
+    double pressureMax = 0;         //!< the APAP's upper limit; 0 when there is none
+    double secondsAtMax = 0;        //!< time the pressure spent at that limit
 
     OximetryNight oxi;              //!< that night's oximetry (invalid without)
     QDate lastOximetry;             //!< the latest night with oximetry, when it is not this one
@@ -78,6 +80,8 @@ struct NightSummary {
     double medianAhi() const;
     //! What is off its target that night, one short sentence each; empty when nothing is.
     QStringList concerns() const;
+    //! "at the maximum 14: 25 min (5.8%)"; empty without an upper limit.
+    QString pressureMaxNote() const;
     //! What the user may want to do now, as rich text with links (daily=, import=,
     //! analysis=recalculate) for MainWindow::sendStatsUrl().
     QStringList actions() const;

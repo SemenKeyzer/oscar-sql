@@ -251,3 +251,31 @@ void NightSummaryTests::testKeyFiguresHtml()
     QVERIFY(NightSummaryView::keyFiguresHtml(NightSummary()).isEmpty());
 }
 
+void NightSummaryTests::testPressureAtMaximum()
+{
+    // An APAP night that spent 25 minutes of its 7.2 hours at the upper limit of 14
+    NightSummary s = goodNight();
+    QVERIFY(s.pressureMaxNote().isEmpty());            // no limit known: nothing to say
+    s.pressureMax = 14;
+    s.secondsAtMax = 1500;
+    const QString note = QCoreApplication::translate("NightSummary", "at the maximum %1: %2 (%3%)")
+                             .arg(QStringLiteral("14"), QCoreApplication::translate("NightSummary", "%1 min").arg(25),
+                                  QStringLiteral("5.8"));
+    QCOMPARE(s.pressureMaxNote(), note);
+
+    // over an hour reads in hours and minutes; never at the limit says so too
+    s.secondsAtMax = 3900;
+    QVERIFY(s.pressureMaxNote().contains(QCoreApplication::translate("NightSummary", "%1 h %2 min").arg(1).arg(5)));
+    s.secondsAtMax = 0;
+    QVERIFY(s.pressureMaxNote().contains(QCoreApplication::translate("NightSummary", "%1 min").arg(0)));
+
+    // both tiles show it after the percentile note
+    s.secondsAtMax = 1500;
+    const QString html = NightSummaryView::keyFiguresHtml(s);
+    QVERIFY2(html.contains((s.pressureNote + QStringLiteral("; ") + note).toHtmlEscaped()), qPrintable(html));
+    NightSummaryView view;
+    view.setSummary(s);
+    bool shown = false;
+    for (QLabel *l : view.findChildren<QLabel *>()) shown = shown || l->text().contains(note.toHtmlEscaped());
+    QVERIFY(shown);
+}
