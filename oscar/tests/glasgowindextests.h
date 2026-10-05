@@ -22,6 +22,10 @@ private slots:
     void testSampleRateIndependent();
     void testShortChunks();
     void testCountsText();
+    void testAdaptedMatchesOriginalAt30();
+    void testAdaptedIgnoresWeakAmplitude();
+    void testAdaptedSkipsBlocked();
+    void testSeries();
 };
 DECLARE_TEST(GlasgowIndexTests)
 

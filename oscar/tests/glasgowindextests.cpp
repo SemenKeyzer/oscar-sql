@@ -55,15 +55,51 @@ void appendSeries(QVector<float> &out, const SeriesSpec &sp, double fs, double p
     }
 }
 
-FlowChunk synthSeries(const QString &name, double fs = 25)
+FlowChunk synthSeries(const QString &name, double fs = 25, double peakScale = 1)
 {
     FlowChunk c;
     c.start = 1000000;
     c.rateMs = 1000.0 / fs;
     for (const SeriesSpec &sp : kSpecs) {
-        if (name == QLatin1String("mixed") || name == QLatin1String(sp.name)) appendSeries(c.samples, sp, fs);
+        if (name == QLatin1String("mixed") || name == QLatin1String(sp.name)) appendSeries(c.samples, sp, fs, peakScale);
     }
     return c;
+}
+
+// Our breaths for a synthetic series, as segmentBreaths would mark them: inspiration from the
+// first sample of the hump to the first expiratory sample.
+QVector<Breath> synthBreaths(const QString &name, const FlowChunk &c)
+{
+    QVector<Breath> out;
+    int offset = 0;
+    for (const SeriesSpec &sp : kSpecs) {
+        if (name != QLatin1String("mixed") && name != QLatin1String(sp.name)) continue;
+        for (int b = 0; b < 60; ++b) {
+            int peak = 0;
+            for (int k = offset; k < offset + sp.insp; ++k) peak = c.samples[k] > c.samples[peak] ? k : peak;
+            Breath br;
+            br.start = c.start + qint64(offset * c.rateMs);
+            br.inspEnd = br.start + qint64(sp.insp * c.rateMs);
+            br.end = br.start + qint64((sp.insp + sp.exp + sp.rest) * c.rateMs);
+            float lo = 0, hi = 0;
+            for (int k = offset; k < offset + sp.insp + sp.exp + sp.rest; ++k) {
+                hi = std::max(hi, c.samples[k]);
+                lo = std::min(lo, c.samples[k]);
+            }
+            br.pif = hi;
+            br.pef = lo;
+            br.amplitude = hi - lo;
+            out << br;
+            offset += sp.insp + sp.exp + sp.rest;
+        }
+    }
+    return out;
+}
+
+GlasgowCounts adapted(const QString &name, double peakScale = 1, const QVector<Span> &blocked = {})
+{
+    const FlowChunk c = synthSeries(name, 25, peakScale);
+    return glasgowAdapted({ c }, synthBreaths(name, c), blocked).counts;
 }
 
 // FlowLimits.js's answers for these series (reference/glasgow/golden.json):
@@ -156,4 +192,75 @@ void GlasgowIndexTests::testCountsText()
     b += a;
     QCOMPARE(b.breaths, 200);
     QCOMPARE(b.flagged[GiAmpVar], 2 * a.flagged[GiAmpVar]);
+}
+
+void GlasgowIndexTests::testAdaptedMatchesOriginalAt30()
+{
+    for (const char *name : { "normal", "flat", "double", "spike", "nopause", "fast", "varamp", "skew" }) {
+        const GlasgowCounts o = glasgowOriginal({ synthSeries(QLatin1String(name)) }).counts;
+        const GlasgowCounts a = adapted(QLatin1String(name));
+        QVERIFY2(a.breaths >= 55, name);
+        QVERIFY2(std::fabs(a.index() - o.index()) <= 0.05,
+                 qPrintable(QStringLiteral("%1: adapted %2, original %3").arg(name).arg(a.index()).arg(o.index())));
+        for (int k = 0; k < GiComponentCount; ++k) {
+            QVERIFY2(std::fabs(a.fraction(GlasgowComponent(k)) - o.fraction(GlasgowComponent(k))) <= 0.1,
+                     qPrintable(QStringLiteral("%1 component %2: %3 vs %4").arg(name).arg(k)
+                                .arg(a.fraction(GlasgowComponent(k))).arg(o.fraction(GlasgowComponent(k)))));
+        }
+    }
+}
+
+// The original's thresholds are in L/min: weak breaths look flat, and a small wobble of strong
+// breaths looks like unsettled breathing. Relative to the breath's size, neither is.
+void GlasgowIndexTests::testAdaptedIgnoresWeakAmplitude()
+{
+    const double weak = 8.0 / 30;
+    QVERIFY(glasgowOriginal({ synthSeries(QStringLiteral("normal"), 25, weak) }).counts.fraction(GiFlatTop) > 0.5);
+    QVERIFY(adapted(QStringLiteral("normal"), weak).fraction(GiFlatTop) < 0.2);
+
+    // varamp alternates 24/36 L/min; scaled so the peaks are 57.5/62.5 it becomes a wobble of ±2.5
+    FlowChunk c;
+    c.start = 1000000;
+    c.rateMs = 40;
+    const SeriesSpec strong { "strong", "parabola", 0, 40, 60, 25 };
+    QVector<Breath> breaths;
+    for (int b = 0; b < 60; ++b) {
+        const double P = b % 2 ? 62.5 : 57.5;
+        Breath br;
+        br.start = c.start + qint64(c.samples.size() * c.rateMs);
+        for (int k = 0; k < strong.insp; ++k) c.samples << float(round2(shape(QStringLiteral("parabola"), double(k) / strong.insp) * P));
+        br.inspEnd = c.start + qint64(c.samples.size() * c.rateMs);
+        for (int k = 0; k < strong.exp; ++k) c.samples << float(round2(-0.8 * P * std::sin(M_PI * k / strong.exp)));
+        for (int k = 0; k < strong.rest; ++k) c.samples << 0.0f;
+        br.end = c.start + qint64(c.samples.size() * c.rateMs);
+        br.pif = float(P);
+        br.pef = float(-0.8 * P);
+        breaths << br;
+    }
+    QVERIFY(glasgowOriginal({ c }).counts.fraction(GiAmpVar) > 0.5);
+    QVERIFY(glasgowAdapted({ c }, breaths, {}).counts.fraction(GiAmpVar) < 0.2);
+}
+
+void GlasgowIndexTests::testAdaptedSkipsBlocked()
+{
+    const FlowChunk c = synthSeries(QStringLiteral("normal"));
+    const QVector<Breath> breaths = synthBreaths(QStringLiteral("normal"), c);
+    const QVector<Span> blocked { Span { breaths.first().start, breaths[29].end - 1, 0 } };
+    const GlasgowResult r = glasgowAdapted({ c }, breaths, blocked);
+    QCOMPARE(r.counts.breaths, 30);
+    QCOMPARE(r.breaths.size(), 60);
+    QVERIFY(!r.breaths.first().counted);
+}
+
+void GlasgowIndexTests::testSeries()
+{
+    const FlowChunk c = synthSeries(QStringLiteral("mixed"));
+    const GlasgowResult r = glasgowAdapted({ c }, synthBreaths(QStringLiteral("mixed"), c), {});
+    const QVector<TimedValue> series = glasgowSeries(r.breaths);
+    QCOMPARE(series.size(), r.counts.breaths);
+    QCOMPARE(series.first().t, r.breaths.first().start);
+    // 60 normal breaths of 5 s fill the window; the flat block follows them
+    const float duringNormal = series[59].v;
+    const float duringFlat = series[119].v;
+    QVERIFY2(duringFlat > duringNormal + 0.5f, qPrintable(QStringLiteral("%1 vs %2").arg(duringFlat).arg(duringNormal)));
 }

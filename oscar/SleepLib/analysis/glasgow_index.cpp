@@ -13,6 +13,7 @@
 #include "glasgow_index.h"
 
 #include <QStringList>
+#include <algorithm>
 #include <cmath>
 #include <limits>
 
@@ -243,6 +244,190 @@ GlasgowResult glasgowOriginal(const QVector<FlowChunk> &chunks)
     }
     result.counts.breaths = insp.size();
     return result;
+}
+
+namespace {
+
+// The samples of one breath's time range, from the chunk that holds its start.
+struct Samples {
+    const FlowChunk *chunk = nullptr;
+    int from = 0, to = 0;   // [from, to)
+    float at(int i) const { return chunk->samples[i]; }
+    int size() const { return to - from; }
+};
+
+Samples samplesOf(const QVector<FlowChunk> &chunks, qint64 start, qint64 end)
+{
+    Samples s;
+    for (const FlowChunk &c : chunks) {
+        if (c.samples.isEmpty() || c.rateMs <= 0) continue;
+        const qint64 cEnd = c.start + qint64(c.samples.size() * c.rateMs);
+        if (start < c.start || start >= cEnd) continue;
+        s.chunk = &c;
+        s.from = int(std::lround((start - c.start) / c.rateMs));
+        s.to = std::min<int>(c.samples.size(), int(std::lround((end - c.start) / c.rateMs)));
+        s.from = std::min(s.from, s.to);
+        return s;
+    }
+    return s;
+}
+
+bool overlaps(const QVector<Span> &spans, qint64 start, qint64 end)
+{
+    for (const Span &sp : spans) {
+        if (start < sp.end && end > sp.start) return true;
+    }
+    return false;
+}
+
+double median(QVector<double> v)
+{
+    if (v.isEmpty()) return 0;
+    std::sort(v.begin(), v.end());
+    return v[v.size() / 2];
+}
+
+} // namespace
+
+// The same signs on our breaths. Signs that do not depend on how strong the flow is keep the
+// author's rule in seconds; the L/min thresholds are taken relative to the peak P, chosen to
+// give the original's answer at P = 30 L/min.
+GlasgowResult glasgowAdapted(const QVector<FlowChunk> &chunks, const QVector<Breath> &breaths,
+                             const QVector<Span> &blocked)
+{
+    GlasgowResult result;
+    const int n = breaths.size();
+    QVector<double> peak(n, 0);
+    QVector<Samples> insp(n), exp(n);
+    for (int k = 0; k < n; ++k) {
+        insp[k] = samplesOf(chunks, breaths[k].start, breaths[k].inspEnd);
+        exp[k] = samplesOf(chunks, breaths[k].inspEnd, breaths[k].end);
+        for (int i = insp[k].from; insp[k].chunk && i < insp[k].to; ++i) peak[k] = std::max(peak[k], double(insp[k].at(i)));
+    }
+
+    for (int k = 0; k < n; ++k) {
+        const Breath &br = breaths[k];
+        GlasgowBreath b;
+        b.start = br.start;
+        const Samples &s = insp[k];
+        const double P = peak[k];
+        b.counted = s.chunk && s.size() >= 2 && P > 0 && !overlaps(blocked, br.start, br.end);
+        if (!b.counted) {
+            result.breaths << b;
+            continue;
+        }
+        const double rateMs = s.chunk->rateMs;
+        const int len = s.size();
+        const int mid = s.from + int(jsRound(len / 2.0));
+
+        // Skew, Spike, Top Heavy: shares of the inspiration, benign for one of 0.48 s or less
+        double left = 0, right = 0;
+        int top90 = 0;
+        for (int i = s.from; i < s.to; ++i) {
+            if (i < mid) left += s.at(i);
+            else if (i > mid) right += s.at(i);
+            if (s.at(i) > 0.9 * P) ++top90;
+        }
+        double leftPercent = 50, top90Percent = 32;
+        if (len * rateMs > 480) {
+            leftPercent = 100 * left / (left + right);
+            top90Percent = 100.0 * top90 / len;
+        }
+        b.flags[GiSkew] = leftPercent < 45 || leftPercent > 55;
+        b.flags[GiSpike] = top90Percent < 20;
+        b.flags[GiTopHeavy] = top90Percent > 40;
+
+        // Flat Top: variance of the middle half, relative to P²
+        const int varStart = int(jsRound(mid - 0.25 * len)), varEnd = int(jsRound(mid + 0.25 * len));
+        const double half = 0.5 * len;
+        double midSum = 0, midVar = 0;
+        for (int i = varStart; i < varEnd; ++i) midSum += s.at(i);
+        const double midMean = midSum / half;
+        for (int i = varStart; i < varEnd; ++i) midVar += (midMean - s.at(i)) * (midMean - s.at(i));
+        b.flags[GiFlatTop] = midVar / half / (P * P) < 0.75 / 900;
+
+        // Multi-Peak: the original's state machine, the step 3.3 % of P
+        const double bump = 0.033 * P;
+        bool firstPeakFound = false, lookingForNextPeak = false, multiPeak = false;
+        double lastMax = 0, lowest = 0;
+        for (int i = s.from; i < s.to; ++i) {
+            const double v = s.at(i);
+            if (!firstPeakFound) {
+                if (v > lastMax) lastMax = v;
+                else if (v < lastMax) firstPeakFound = true;
+            } else if (!lookingForNextPeak && lastMax - v > bump) {
+                lookingForNextPeak = true;
+                lowest = v;
+            }
+            if (lookingForNextPeak && !multiPeak) {
+                if (v < lowest) lowest = v;
+                else if (v > lowest + bump) multiPeak = true;
+            }
+        }
+        b.flags[GiMultiPeak] = multiPeak;
+
+        if (k > 0) {
+            // the previous breath's expiration: its peak, and whether there was a real one
+            const Samples &e = exp[k - 1];
+            int minAt = -1;
+            for (int i = e.from; e.chunk && i < e.to; ++i) {
+                if (minAt < 0 || e.at(i) < e.at(minAt)) minAt = i;
+            }
+            QVector<double> pefs;
+            for (int j = std::max(0, k - 5); j < k; ++j) pefs << std::fabs(breaths[j].pef);
+            const double typicalPef = median(pefs);
+            const double m = minAt >= 0 ? e.at(minAt) : 0;
+            b.flags[GiMultiBreath] = m > -0.10 * typicalPef;
+            if (!b.flags[GiMultiBreath] && minAt >= 0) {
+                // No Pause: extrapolate the expiration from its peak over one second to zero
+                const qint64 tm = e.chunk->start + qint64(std::llround(minAt * e.chunk->rateMs));
+                const int later = minAt + int(std::lround(1000 / e.chunk->rateMs));
+                const double y1 = later < e.chunk->samples.size() ? e.chunk->samples[later] : 0;
+                if (y1 < 0) {
+                    const double intersection = tm + 1000.0 * m / (m - y1);
+                    b.flags[GiNoPause] = br.start - intersection < 400;
+                } else {
+                    b.flags[GiNoPause] = true;   // still breathing out a second after the peak: no rest
+                }
+            }
+        }
+        if (k >= 5) b.flags[GiInspirRate] = 5 * 60000.0 / (br.start - breaths[k - 5].start) > 20;
+        if (k >= 4) {
+            double mean = 0, var = 0;
+            for (int j = k - 4; j <= k; ++j) mean += peak[j];
+            mean /= 5;
+            for (int j = k - 4; j <= k; ++j) var += (peak[j] - mean) * (peak[j] - mean);
+            b.flags[GiAmpVar] = mean > 0 && var / 5 / (mean * mean) > 4.0 / 900;
+        }
+
+        ++result.counts.breaths;
+        for (int c = 0; c < GiComponentCount; ++c) result.counts.flagged[c] += b.flags[c];
+        result.breaths << b;
+    }
+    return result;
+}
+
+QVector<TimedValue> glasgowSeries(const QVector<GlasgowBreath> &breaths)
+{
+    QVector<TimedValue> out;
+    QVector<const GlasgowBreath *> counted;
+    for (const GlasgowBreath &b : breaths) {
+        if (b.counted) counted << &b;
+    }
+    GlasgowCounts window;
+    int first = 0;
+    for (int i = 0; i < counted.size(); ++i) {
+        const GlasgowBreath &b = *counted[i];
+        ++window.breaths;
+        for (int c = 0; c < GiComponentCount; ++c) window.flagged[c] += b.flags[c];
+        while (counted[first]->start <= b.start - 300000) {   // keep (t - 300 s, t]
+            --window.breaths;
+            for (int c = 0; c < GiComponentCount; ++c) window.flagged[c] -= counted[first]->flags[c];
+            ++first;
+        }
+        out << TimedValue { b.start, float(window.index()) };
+    }
+    return out;
 }
 
 } // namespace analysis
