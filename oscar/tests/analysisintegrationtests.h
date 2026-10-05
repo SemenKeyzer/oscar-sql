@@ -34,6 +34,8 @@ private slots:
     void testMigrationAddsAnalysisDaily();
     void testMigrationV21KeepsRows();
     void testToDailyRowCarriesGlasgow();
+    void testGlasgowFigures();
+    void testGlasgowPeriodSkipsEmptyNights();
     void testDayAnalysisScoresAndStores();
     void testDayAnalysisLoadsOnlyWhatItNeeds();
     void testAnalysisSettingsRoundTrip();

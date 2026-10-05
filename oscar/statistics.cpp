@@ -92,7 +92,11 @@ QList<AnalysisDailyData> analysisRows(const QDate &start, const QDate &end)
 QString analysisGroup(const QString &key)
 {
     if (key == QLatin1String("agreement")) return QStringLiteral("comparison");
-    if (key == QLatin1String("fl")) return QStringLiteral("fl");
+    if (key == QLatin1String("fl") || key == QLatin1String("flmin") || key == QLatin1String("fllong")
+        || key == QLatin1String("flbr")) {
+        return QStringLiteral("fl");
+    }
+    if (key == QLatin1String("gi") || key == QLatin1String("gia")) return QStringLiteral("gi");
     if (key == QLatin1String("hb")) return QStringLiteral("hb");
     if (key == QLatin1String("dhr")) return QStringLiteral("dhr");
     if (key == QLatin1String("#pulse") || key == QLatin1String("pri")) return QStringLiteral("pulse");
@@ -111,6 +115,7 @@ int analysisGroups(const QDate &first, const QDate &last, QSet<QString> &has)
     for (const AnalysisDailyData &d : rows) {
         if (d.hasFlow) has.insert(QStringLiteral("flow"));
         if (d.hasFlow && d.flBreaths > 0) has.insert(QStringLiteral("fl"));
+        if (d.hasFlow && !d.glasgow.isEmpty()) has.insert(QStringLiteral("gi"));
         if (d.hasComparison) has.insert(QStringLiteral("comparison"));
         if (d.hasOximetry) has.insert(QStringLiteral("oxi"));
         if (d.hasFlow && d.hasOximetry && d.hasCpap) has.insert(QStringLiteral("hb"));
@@ -132,6 +137,11 @@ QString analysisName(const QString &key)
     if (key == QLatin1String("hi")) return Statistics::tr("Hypopnea Index");
     if (key == QLatin1String("rerai")) return Statistics::tr("RERA Index");
     if (key == QLatin1String("fl")) return Statistics::tr("% of time with flow limitation");
+    if (key == QLatin1String("flmin")) return Statistics::tr("Flow limitation, min per night");
+    if (key == QLatin1String("fllong")) return Statistics::tr("Longest flow limitation run, min");
+    if (key == QLatin1String("flbr")) return Statistics::tr("Breaths with flow limitation, %");
+    if (key == QLatin1String("gi")) return Statistics::tr("Glasgow Index");
+    if (key == QLatin1String("gia")) return Statistics::tr("Glasgow Index (adapted)");
     if (key == QLatin1String("pb")) return Statistics::tr("% of time in periodic breathing");
     if (key == QLatin1String("agreement")) return Statistics::tr("Agreement with the device, %");
     if (key == QLatin1String("odi3")) return Statistics::tr("ODI 3%");
@@ -156,6 +166,8 @@ double analysisFigureValue(const QString &key, const QList<AnalysisDailyData> &r
 {
     double num = 0, den = 0;
     double nadir = 101;
+    double longest = 0;
+    analysis::GlasgowCounts glasgow;
     for (const AnalysisDailyData &d : rows) {
         if (d.hasFlow) {
             const double h = d.flowSeconds / 3600.0;
@@ -169,6 +181,11 @@ double analysisFigureValue(const QString &key, const QList<AnalysisDailyData> &r
             else if (key == QLatin1String("rerai")) { num += d.nRera; den += h; }
             else if (key == QLatin1String("pb")) { num += 100.0 * d.pbSeconds; den += d.flowSeconds; }
             else if (key == QLatin1String("fl") && d.flBreaths > 0) { num += 100.0 * d.flSeconds; den += d.flowSeconds; }
+            else if (key == QLatin1String("flmin") && d.flBreaths > 0) { num += d.flSeconds / 60.0; den += 1; }
+            else if (key == QLatin1String("fllong") && d.flBreaths > 0) { longest = qMax(longest, d.flLongestSeconds / 60.0); den += 1; }
+            else if (key == QLatin1String("flbr") && d.flBreaths > 0) { num += 100.0 * d.flLimitedBreaths; den += d.flBreaths; }
+            else if (key == QLatin1String("gi")) glasgow += d.glasgow;
+            else if (key == QLatin1String("gia")) glasgow += d.glasgowAdapted;
             else if (key == QLatin1String("hb") && d.hasOximetry && d.hasCpap) { num += d.linkedDesatArea / 60.0; den += h; }
         }
         if (d.hasComparison && key == QLatin1String("agreement")) {
@@ -194,8 +211,10 @@ double analysisFigureValue(const QString &key, const QList<AnalysisDailyData> &r
             else if (key == QLatin1String("dhr")) { num += d.dhrSum; den += d.nDhr; }
         }
     }
+    if (key == QLatin1String("gi") || key == QLatin1String("gia")) return glasgow.index();   // NaN when empty
     if (den <= 0) return std::numeric_limits<double>::quiet_NaN();
     if (key == QLatin1String("nadir")) return nadir;
+    if (key == QLatin1String("fllong")) return longest;
     return num / den;
 }
 
@@ -203,7 +222,10 @@ QString analysisFigure(const QString &key, const QList<AnalysisDailyData> &rows)
 {
     const double value = analysisFigureValue(key, rows);
     if (std::isnan(value)) return QStringLiteral("-");
-    if (key == QLatin1String("nadir")) return QString::number(value, 'f', 0);
+    if (key == QLatin1String("nadir") || key == QLatin1String("flmin") || key == QLatin1String("fllong")) {
+        return QString::number(value, 'f', 0);
+    }
+    if (key == QLatin1String("flbr")) return QString::number(value, 'f', 1);
     return QString::number(value, 'f', 2);
 }
 
@@ -1065,7 +1087,8 @@ Statistics::Statistics(QObject *parent) :
     rows.push_back(StatisticsRow("", SC_SPACE, MT_UNKNOWN));
     rows.push_back(StatisticsRow(tr("Analysis (second opinion)"), SC_ANALYSIS_HEADING, MT_UNKNOWN));
     rows.push_back(StatisticsRow("", SC_COLUMNHEADERS, MT_UNKNOWN));
-    for (const char *key : { "#breathing", "ahi", "oai", "cai", "uai", "hi", "rerai", "fl", "pb", "agreement",
+    for (const char *key : { "#breathing", "ahi", "oai", "cai", "uai", "hi", "rerai", "fl", "flmin", "fllong", "flbr",
+                             "gi", "gia", "pb", "agreement",
                              "#oximetry", "odi3", "odi4" }) {
         rows.push_back(StatisticsRow(QString::fromLatin1(key), SC_ANALYSIS, MT_UNKNOWN));
     }
@@ -1702,6 +1725,7 @@ QList<SettingsComparison::Row> Statistics::settingsComparisonRows(const QDate &f
         }
         row.values[SettingsComparison::AnalysisAhi] = analysisFigureValue(QStringLiteral("ahi"), own);
         row.values[SettingsComparison::FlowLimitation] = analysisFigureValue(QStringLiteral("fl"), own);
+        row.values[SettingsComparison::Glasgow] = analysisFigureValue(QStringLiteral("gi"), own);
         row.values[SettingsComparison::Odi3] = analysisFigureValue(QStringLiteral("odi3"), own);
         row.values[SettingsComparison::Below90] = analysisFigureValue(QStringLiteral("below:90"), own);
 
@@ -1818,6 +1842,14 @@ DoctorReport Statistics::doctorReport(const QDate &from, const QDate &to, const 
     if (r.analysisMissing == 0) {
         r.analysisAhi = analysisFigureValue(QStringLiteral("ahi"), own);
         r.flowLimitation = analysisFigureValue(QStringLiteral("fl"), own);
+        auto value = [&own](const char *key) {
+            const double v = analysisFigureValue(QLatin1String(key), own);
+            return std::isnan(v) ? DoctorReport::kNoValue : v;
+        };
+        r.flowLimitationMinutes = value("flmin");
+        r.flowLimitedBreaths = value("flbr");
+        r.glasgow = value("gi");
+        r.glasgowAdapted = value("gia");
         r.odi3 = analysisFigureValue(QStringLiteral("odi3"), own);
         r.below90 = analysisFigureValue(QStringLiteral("below:90"), own);
     }

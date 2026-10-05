@@ -50,7 +50,7 @@ struct Group {
 //! Merges \a periods with equal settings and device; the group used last comes first.
 QList<Group> group(const QList<Period> &periods);
 
-enum Column { Nights, Usage, DeviceAhi, AnalysisAhi, Leak, Pressure, FlowLimitation, Odi3, Below90, ColumnCount };
+enum Column { Nights, Usage, DeviceAhi, AnalysisAhi, Leak, Pressure, FlowLimitation, Glasgow, Odi3, Below90, ColumnCount };
 
 //! A table row: its group and one value per column, NaN where there is no data.
 struct Row {

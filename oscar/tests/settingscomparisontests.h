@@ -27,6 +27,7 @@ private slots:
     void testHtmlDeviceColumn();
     void testHtmlEscapesSettings();
     void testHtmlSettingsWidth();
+    void testGlasgowColumn();
 };
 DECLARE_TEST(SettingsComparisonTests)
 

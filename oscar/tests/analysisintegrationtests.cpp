@@ -1384,3 +1384,47 @@ void AnalysisIntegrationTests::testToDailyRowCarriesGlasgow()
     QVERIFY(d.glasgow == r.glasgow);
     QVERIFY(d.glasgowAdapted == r.glasgowAdapted);
 }
+
+namespace {
+
+AnalysisDailyData flNight(int flSeconds, int limited, int longest, int flagged)
+{
+    AnalysisDailyData d;
+    d.hasFlow = true;
+    d.flowSeconds = 25000;
+    d.flSeconds = flSeconds;
+    d.flBreaths = 1000;
+    d.flLimitedBreaths = limited;
+    d.flLongestSeconds = longest;
+    d.glasgow.breaths = 1000;
+    d.glasgow.flagged[GiSkew] = flagged;
+    d.glasgowAdapted.breaths = 1000;
+    d.glasgowAdapted.flagged[GiSkew] = flagged / 2;
+    return d;
+}
+
+} // namespace
+
+void AnalysisIntegrationTests::testGlasgowFigures()
+{
+    const QList<AnalysisDailyData> rows { flNight(600, 200, 120, 100), flNight(1200, 400, 300, 300) };
+    QCOMPARE(analysisFigureValue(QStringLiteral("flmin"), rows), 15.0);
+    QCOMPARE(analysisFigureValue(QStringLiteral("fllong"), rows), 5.0);
+    QCOMPARE(analysisFigureValue(QStringLiteral("flbr"), rows), 30.0);
+    QCOMPARE(analysisFigureValue(QStringLiteral("gi"), rows), 0.2);
+    QCOMPARE(analysisFigureValue(QStringLiteral("gia"), rows), 0.1);
+}
+
+// A night without flow limitation scoring (below 10 Hz) does not pull the averages down.
+void AnalysisIntegrationTests::testGlasgowPeriodSkipsEmptyNights()
+{
+    AnalysisDailyData slow;
+    slow.hasFlow = true;
+    slow.flowSeconds = 25000;
+    const QList<AnalysisDailyData> rows { flNight(600, 200, 120, 100), flNight(1200, 400, 300, 300), slow };
+    QCOMPARE(analysisFigureValue(QStringLiteral("flmin"), rows), 15.0);
+    QCOMPARE(analysisFigureValue(QStringLiteral("fllong"), rows), 5.0);
+    QCOMPARE(analysisFigureValue(QStringLiteral("flbr"), rows), 30.0);
+    QCOMPARE(analysisFigureValue(QStringLiteral("gi"), rows), 0.2);
+    QVERIFY(std::isnan(analysisFigureValue(QStringLiteral("gi"), { slow })));
+}

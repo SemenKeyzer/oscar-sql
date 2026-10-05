@@ -233,3 +233,12 @@ void SettingsComparisonTests::testHtmlSettingsWidth()
     options.settingsWidth = QStringLiteral("34%");
     QVERIFY(SettingsComparison::html(rows, options).contains(QStringLiteral("<th align=left width='34%'>%1</th>").arg(settings)));
 }
+
+// Lower is better, as for the other indices; two decimals like the AHI.
+void SettingsComparisonTests::testGlasgowColumn()
+{
+    QCOMPARE(decimals(Glasgow), 2);
+    QList<Row> rows { rowWith(4, Glasgow, 1.2), rowWith(5, Glasgow, 0.4) };
+    QCOMPARE(best(rows, Glasgow), QSet<int>({ 1 }));
+    QVERIFY(html(rows, Options()).contains(QCoreApplication::translate("SettingsComparison", "Glasgow Index")));
+}

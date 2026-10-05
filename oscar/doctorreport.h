@@ -59,6 +59,10 @@ struct DoctorReport {
     double deviceAhi = kNoValue;
     double analysisAhi = kNoValue;
     double flowLimitation = kNoValue;
+    double flowLimitationMinutes = kNoValue;   //!< per night with flow limitation scored
+    double flowLimitedBreaths = kNoValue;      //!< % of scored breaths
+    double glasgow = kNoValue;                 //!< Glasgow Index, original and adapted
+    double glasgowAdapted = kNoValue;
     double leak = kNoValue;
     QString leakUnits;
     double leakRedline = 0;         //!< 0: none set

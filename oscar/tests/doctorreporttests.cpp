@@ -63,6 +63,10 @@ DoctorReport fullReport()
     r.deviceAhi = 4.3;
     r.analysisAhi = 5.2;
     r.flowLimitation = 11;
+    r.flowLimitationMinutes = 42;
+    r.flowLimitedBreaths = 18;
+    r.glasgow = 1.4;
+    r.glasgowAdapted = 0.9;
     r.leak = 3.1;
     r.leakUnits = QStringLiteral("L/min");
     r.leakRedline = 24;
@@ -257,9 +261,11 @@ void DoctorReportTests::testHtmlWithoutAnalysis()
     r.flowLimitation = DoctorReport::kNoValue;
     r.odi3 = DoctorReport::kNoValue;
     r.below90 = DoctorReport::kNoValue;
+    r.flowLimitationMinutes = r.flowLimitedBreaths = r.glasgow = r.glasgowAdapted = DoctorReport::kNoValue;
     const QString html = DoctorReportPage::html(r, QStringLiteral("chart.png"), kChart);
-    QVERIFY(html.contains(reportText("OSCAR's analysis: %1 · flow limitation %2%")
-                              .arg(SettingsComparison::kNoData, SettingsComparison::kNoData).toHtmlEscaped()));
+    const QString none = SettingsComparison::kNoData;
+    QVERIFY(html.contains(reportText("OSCAR's analysis: %1 · flow limitation %2% (%3 min per night, %4% of breaths) · Glasgow Index %5 / %6 (adapted)")
+                              .arg(none, none, none, none, none, none).toHtmlEscaped()));
     QVERIFY(!html.contains(QStringLiteral("nan"), Qt::CaseInsensitive));
 }
 
@@ -400,4 +406,17 @@ void DoctorReportTests::testWritePdfRussian()
     QVERIFY(file.open(QIODevice::ReadOnly));
     const int pages = int(QString::fromLatin1(file.readAll()).count(QRegularExpression(QStringLiteral("/Type\\s*/Page[^s]"))));
     QCOMPARE(pages, 1);
+}
+
+void DoctorReportTests::testHtmlFlowLimitation()
+{
+    DoctorReport r = fullReport();
+    const QString html = DoctorReportPage::html(r, QStringLiteral("chart.png"), kChart);
+    QVERIFY(html.contains(reportText("OSCAR's analysis: %1 · flow limitation %2% (%3 min per night, %4% of breaths) · Glasgow Index %5 / %6 (adapted)")
+                              .arg(QLocale().toString(5.2, 'f', 1), QStringLiteral("11"), QStringLiteral("42"), QStringLiteral("18"),
+                                   QLocale().toString(1.4, 'f', 1), QLocale().toString(0.9, 'f', 1))));
+    r.glasgow = r.glasgowAdapted = r.flowLimitationMinutes = r.flowLimitedBreaths = DoctorReport::kNoValue;
+    const QString dashes = DoctorReportPage::html(r, QStringLiteral("chart.png"), kChart);
+    QVERIFY(dashes.contains(QStringLiteral("Glasgow Index")));
+    QVERIFY(!dashes.contains(QStringLiteral("nan")));
 }

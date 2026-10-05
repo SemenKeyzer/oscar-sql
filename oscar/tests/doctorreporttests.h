@@ -33,6 +33,7 @@ private slots:
     void testWritePdfFailsOnBadPath();
     void testHtmlAnalysisMissing();
     void testWritePdfRussian();
+    void testHtmlFlowLimitation();
 
 private:
     class QApplication *m_app = nullptr;

@@ -128,6 +128,7 @@ int decimals(Column column)
     case Usage:
     case DeviceAhi:
     case AnalysisAhi:
+    case Glasgow:
     case Odi3:
         return 2;
     case Leak:
@@ -142,7 +143,7 @@ int decimals(Column column)
 
 namespace {
 
-const QList<Column> kTableColumns { Nights, Usage, DeviceAhi, AnalysisAhi, Leak, Pressure, FlowLimitation, Odi3, Below90 };
+const QList<Column> kTableColumns { Nights, Usage, DeviceAhi, AnalysisAhi, Leak, Pressure, FlowLimitation, Glasgow, Odi3, Below90 };
 
 QString columnTitle(Column column, const Options &options)
 {
@@ -156,6 +157,7 @@ QString columnTitle(Column column, const Options &options)
     case Pressure:
         return QCoreApplication::translate("SettingsComparison", "Pressure %1%").arg(locale.toString(options.percentile));
     case FlowLimitation: return QCoreApplication::translate("SettingsComparison", "Flow limitation, %");
+    case Glasgow: return QCoreApplication::translate("SettingsComparison", "Glasgow Index");
     case Odi3: return QCoreApplication::translate("SettingsComparison", "ODI 3%");
     case Below90: return QCoreApplication::translate("SettingsComparison", "SpO2 < 90%");
     case ColumnCount: break;
