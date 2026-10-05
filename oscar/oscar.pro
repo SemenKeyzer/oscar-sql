@@ -460,6 +460,7 @@ SOURCES += \
     SleepLib/analysis/analysis_channels.cpp \
     SleepLib/analysis/apnea_classifier.cpp \
     SleepLib/analysis/flow_analyzer.cpp \
+    SleepLib/analysis/glasgow_index.cpp \
     SleepLib/analysis/oxi_analyzer.cpp \
     SleepLib/analysis/analysis_params.cpp \
     SleepLib/analysis/signal_utils.cpp \
@@ -660,6 +661,8 @@ HEADERS  += \
     SleepLib/analysis/analysis_channels.h \
     SleepLib/analysis/apnea_classifier.h \
     SleepLib/analysis/flow_analyzer.h \
+    SleepLib/analysis/glasgow_counts.h \
+    SleepLib/analysis/glasgow_index.h \
     SleepLib/analysis/oxi_analyzer.h \
     SleepLib/analysis/analysis_params.h \
     SleepLib/analysis/signal_utils.h \
@@ -896,6 +899,7 @@ test {
         tests/doctorreporttests.cpp \
         tests/preferencessearchtests.cpp \
         tests/pdfreportoptionstests.cpp \
+        tests/glasgowindextests.cpp \
         tests/htmlpagestests.cpp \
         tests/channelstoretests.cpp \
         tests/machinetests.cpp \
@@ -940,6 +944,7 @@ test {
         tests/doctorreporttests.h \
         tests/preferencessearchtests.h \
         tests/pdfreportoptionstests.h \
+        tests/glasgowindextests.h \
         tests/htmlpagestests.h \
         tests/channelstoretests.h \
         tests/machinetests.h \
