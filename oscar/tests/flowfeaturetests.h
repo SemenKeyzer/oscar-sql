@@ -26,6 +26,7 @@ private slots:
     void testSteadyBreathingIsNotPeriodic();
     void testLimitedBreathCount();
     void testGlasgowNeedsTenHz();
+    void testGlasgowCoarseRecording();
 };
 DECLARE_TEST(FlowFeatureTests)
 

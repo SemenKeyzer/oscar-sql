@@ -585,7 +585,7 @@ FlowResult analyzeFlow(const QVector<FlowChunk> &chunkIn, const QVector<Span> &e
         std::sort(recorded.begin(), recorded.end(), [](const FlowChunk &a, const FlowChunk &b) { return a.start < b.start; });
         for (const Proc &c : chunks) prepared.append(FlowChunk { c.start, 1000.0 / c.fs, c.x });
         result.glasgow = glasgowOriginal(recorded);
-        result.glasgowAdapted = glasgowAdapted(prepared, result.breaths, blocked);
+        result.glasgowAdapted = glasgowAdapted(prepared, result.breaths, blocked, glasgowRecordingStep(recorded));
     }
     result.reras = flowReras(result.breaths, blocked, params.flThreshold);
     result.periodic = periodicBreathing(E);

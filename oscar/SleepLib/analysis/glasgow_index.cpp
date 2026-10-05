@@ -69,8 +69,9 @@ double jsRound(double v) { return std::floor(v + 0.5); }
 // (Catmull-Rom) interpolation: a breath's peak usually falls between such samples, and where
 // it does decides the spike, double peak, skew and amplitude signs. Faster recordings are left
 // as they are.
-// The recording's step when it is in whole L/min (Prisma), else 0.
-double coarseStep(const QVector<FlowChunk> &chunks)
+} // namespace
+
+double glasgowRecordingStep(const QVector<FlowChunk> &chunks)
 {
     qint64 n = 0, whole = 0;
     for (const FlowChunk &c : chunks) {
@@ -81,6 +82,8 @@ double coarseStep(const QVector<FlowChunk> &chunks)
     }
     return n > 0 && whole >= 0.99 * n ? 1.0 : 0.0;
 }
+
+namespace {
 
 // A recording in whole steps wobbles by a step from sample to sample: a centred moving average
 // over about 0.3 s takes the wobble out and keeps the shape of the breath.
@@ -98,9 +101,8 @@ FlowChunk smoothed(const FlowChunk &c)
     return r;
 }
 
-QVector<FlowChunk> onAuthorGrid(const QVector<FlowChunk> &recorded)
+QVector<FlowChunk> onAuthorGrid(const QVector<FlowChunk> &recorded, bool coarse)
 {
-    const bool coarse = coarseStep(recorded) > 0;
     QVector<FlowChunk> out;
     for (const FlowChunk &rc : recorded) {
         const FlowChunk c = coarse && rc.samples.size() >= 3 ? smoothed(rc) : rc;
@@ -149,7 +151,7 @@ struct Inspiration {
 GlasgowResult glasgowOriginal(const QVector<FlowChunk> &recorded)
 {
     GlasgowResult result;
-    const QVector<FlowChunk> chunks = onAuthorGrid(recorded);
+    const QVector<FlowChunk> chunks = onAuthorGrid(recorded, glasgowRecordingStep(recorded) > 0);
     QVector<double> y;
     QVector<qint64> t;
     double rateMs = 0;
@@ -358,10 +360,11 @@ double median(QVector<double> v)
 // author's rule in seconds; the L/min thresholds are taken relative to the peak P, chosen to
 // give the original's answer at P = 30 L/min.
 GlasgowResult glasgowAdapted(const QVector<FlowChunk> &recorded, const QVector<Breath> &breaths,
-                             const QVector<Span> &blocked)
+                             const QVector<Span> &blocked, double recordingStep)
 {
-    const QVector<FlowChunk> chunks = onAuthorGrid(recorded);
-    const double step = coarseStep(recorded);   // differences below two steps of the recording are rounding
+    // differences below two steps of the recording are rounding
+    const double step = recordingStep >= 0 ? recordingStep : glasgowRecordingStep(recorded);
+    const QVector<FlowChunk> chunks = onAuthorGrid(recorded, step > 0);
     GlasgowResult result;
     const int n = breaths.size();
     QVector<double> peak(n, 0);

@@ -25,7 +25,12 @@ GlasgowResult glasgowOriginal(const QVector<FlowChunk> &chunks);
 //! thresholds the author sets in L/min taken relative to the breath's peak. Breaths overlapping
 //! \a blocked (events, unscoreable time) are not counted.
 GlasgowResult glasgowAdapted(const QVector<FlowChunk> &chunks, const QVector<Breath> &breaths,
-                             const QVector<Span> &blocked);
+                             const QVector<Span> &blocked, double recordingStep = -1);
+
+//! The step of a recording made in whole L/min (Prisma), else 0. Such a flow is smoothed over
+//! about 0.3 s before the index, and the adapted variant ignores differences within two steps.
+//! glasgowAdapted() takes it from the recorded flow when its own (offset-free) flow hides it.
+double glasgowRecordingStep(const QVector<FlowChunk> &chunks);
 
 //! At every counted breath, the index over the counted breaths that started in the 5 minutes
 //! up to it.

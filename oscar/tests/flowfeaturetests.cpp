@@ -143,3 +143,19 @@ void FlowFeatureTests::testGlasgowNeedsTenHz()
     QVERIFY(r.glasgow.counts.breaths > 80);
     QVERIFY(r.glasgowAdapted.counts.breaths > 80);
 }
+
+// A Prisma records whole L/min at 10 Hz. Through the whole flow analysis (offset removal and
+// all) the adapted variant must still see the recording as coarse and not count its wobble.
+void FlowFeatureTests::testGlasgowCoarseRecording()
+{
+    FlowChunk c = synth::breathSequence(10, synth::repeat(150, SynthBreath { 4, 20, synth::sineShape }));
+    unsigned noise = 777;
+    for (float &v : c.samples) {
+        noise = noise * 1103515245u + 12345u;
+        v = std::round(v + 0.4f + float((noise >> 16) % 3) - 1.0f);   // whole L/min, a small offset, one-step wobble
+    }
+    const FlowResult r = analyze(c);
+    QVERIFY(r.glasgowAdapted.counts.breaths > 100);
+    QVERIFY2(r.glasgowAdapted.counts.fraction(GiMultiPeak) < 0.15, qPrintable(QString::number(r.glasgowAdapted.counts.fraction(GiMultiPeak))));
+    QVERIFY2(r.glasgowAdapted.counts.fraction(GiAmpVar) < 0.15, qPrintable(QString::number(r.glasgowAdapted.counts.fraction(GiAmpVar))));
+}
