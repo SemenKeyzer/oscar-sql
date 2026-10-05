@@ -365,6 +365,7 @@ SOURCES += \
     doctorreportdialog.cpp \
     preferencessearch.cpp \
     pdfreportoptions.cpp \
+    htmlpages.cpp \
     zip.cpp \
     Graphs/gAHIChart.cpp \
     Graphs/gdailysummary.cpp \
@@ -685,6 +686,7 @@ HEADERS  += \
     doctorreportdialog.h \
     preferencessearch.h \
     pdfreportoptions.h \
+    htmlpages.h \
     mytextbrowser.h \
     staticQMessageBox.h \
     git_info.h \
@@ -892,6 +894,7 @@ test {
         tests/doctorreporttests.cpp \
         tests/preferencessearchtests.cpp \
         tests/pdfreportoptionstests.cpp \
+        tests/htmlpagestests.cpp \
         tests/channelstoretests.cpp \
         tests/machinetests.cpp \
         tests/timealignsessiontests.cpp \
@@ -935,6 +938,7 @@ test {
         tests/doctorreporttests.h \
         tests/preferencessearchtests.h \
         tests/pdfreportoptionstests.h \
+        tests/htmlpagestests.h \
         tests/channelstoretests.h \
         tests/machinetests.h \
         tests/backuprestoretests.h \

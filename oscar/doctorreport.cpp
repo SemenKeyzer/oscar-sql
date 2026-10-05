@@ -22,10 +22,9 @@
 #include <QUrl>
 
 #include "analysispanel.h"
+#include "htmlpages.h"
 #include "version.h"
 
-// The DPI QTextDocument lays text out at (QtGui, private header qfont_p.h).
-Q_GUI_EXPORT int qt_defaultDpiY();
 
 namespace {
 
@@ -292,22 +291,13 @@ bool writePdf(const DoctorReport &report, const QString &path, QString *error)
     printer.setPageOrientation(QPageLayout::Portrait);
     printer.setPageMargins(QMarginsF(12, 12, 12, 12), QPageLayout::Millimeter);
 
-    // QTextDocument turns point sizes into layout units at the screen's DPI (72 on macOS, 96
-    // on Windows and Linux); sizing the page the same way keeps the text's size on paper
-    QTextDocument doc;
-    const QSizeF page = printer.pageRect(QPrinter::Point).size() * (qt_defaultDpiY() / 72.0);
-    doc.setPageSize(page);
-    doc.setDocumentMargin(0);
-    QFont font(QStringLiteral("Helvetica"));
-    font.setPointSizeF(8.5);
-    doc.setDefaultFont(font);
-
-    const QSize chartPixels(2400, 720);
-    const QString url = QStringLiteral("doctorreport-chart.png");
-    doc.addResource(QTextDocument::ImageResource, QUrl(url), chart(report, chartPixels));
-    const QSizeF chartSize(page.width(), page.width() * chartPixels.height() / chartPixels.width());
-    doc.setHtml(html(report, url, chartSize));
-    doc.print(&printer);
+    QPainter painter;
+    if (!painter.begin(&printer)) {
+        if (error) *error = DoctorReport::tr("Could not write %1.").arg(path);
+        return false;
+    }
+    paintPage(painter, printer, report, false);
+    painter.end();
 
     const QFileInfo written(path);
     if (printer.printerState() == QPrinter::Error || !written.exists() || written.size() == 0) {
@@ -315,6 +305,18 @@ bool writePdf(const DoctorReport &report, const QString &path, QString *error)
         return false;
     }
     return true;
+}
+
+int paintPage(QPainter &painter, QPrinter &printer, const DoctorReport &report, bool startOnNewPage)
+{
+    QFont font(QStringLiteral("Helvetica"));
+    font.setPointSizeF(8.5);
+    const QSizeF page = htmlPageSize(printer);
+    const QSize chartPixels(2400, 720);
+    const QString url = QStringLiteral("doctorreport-chart.png");
+    const QSizeF chartSize(page.width(), page.width() * chartPixels.height() / chartPixels.width());
+    return paintHtmlPages(painter, printer, html(report, url, chartSize), font,
+                          { { url, chart(report, chartPixels) } }, startOnNewPage);
 }
 
 } // namespace DoctorReportPage

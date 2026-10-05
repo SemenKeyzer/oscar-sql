@@ -10,6 +10,9 @@
 #define DOCTORREPORT_H
 
 #include <QColor>
+
+class QPainter;
+class QPrinter;
 #include <QCoreApplication>
 #include <QDate>
 #include <QImage>
@@ -106,6 +109,9 @@ QImage chart(const DoctorReport &report, const QSize &size);
 QString html(const DoctorReport &report, const QString &chartUrl, const QSizeF &chartSize);
 //! Writes the page as an A4 PDF at \a path; false, with \a error set, when that failed.
 bool writePdf(const DoctorReport &report, const QString &path, QString *error = nullptr);
+//! Draws the page on \a printer with \a painter (already begun), from its current page or from
+//! a new one; returns the number of pages drawn.
+int paintPage(QPainter &painter, QPrinter &printer, const DoctorReport &report, bool startOnNewPage);
 
 } // namespace DoctorReportPage
 
