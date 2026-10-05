@@ -264,6 +264,9 @@ DayInput buildDayInput(const QList<Session *> &sessions, QString *oxiSource)
         cs.unscoreableSeconds = st.unscoreableSeconds;
         cs.flSum = st.flSum;
         cs.flBreaths = st.flBreaths;
+        cs.flLimitedBreaths = st.flLimitedBreaths;
+        cs.glasgow = st.glasgow;
+        cs.glasgowAdapted = st.glasgowAdapted;
         in.cpap.append(cs);
 
         in.apneas += events(s, AN_ObstructiveApnea, RespEvent::ObstructiveApnea, k, shift);

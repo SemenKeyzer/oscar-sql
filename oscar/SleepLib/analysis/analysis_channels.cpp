@@ -15,7 +15,7 @@
 #include "SleepLib/schema.h"
 
 ChannelID AN_ObstructiveApnea, AN_CentralApnea, AN_Apnea, AN_FlowReduction, AN_RERA,
-          AN_FlowLimitation, AN_PeriodicBreathing, AN_Unscoreable, AN_FLScore,
+          AN_FlowLimitation, AN_PeriodicBreathing, AN_Unscoreable, AN_FLScore, AN_GlasgowIndex, AN_GlasgowAdapted,
           AN_ObstructiveHypopnea, AN_CentralHypopnea, AN_Hypopnea,
           AN_Desaturation, AN_CyclicDesaturation, AN_PulseRise, AN_Bradycardia, AN_Tachycardia,
           AN_OxiProblemZone, AN_Stamp;
@@ -75,6 +75,14 @@ void registerChannels()
     add(AN_FLScore, 0x1A08, WAVEFORM, MT_CPAP, "AnFLScore",
         QObject::tr("Flow Limitation (analysis)"), QObject::tr("How limited each inspiration looks, 0 (normal) to 1 (clearly limited)"),
         QObject::tr("FL score"), QString(), QColor(0x50, 0x50, 0x50));
+    add(AN_GlasgowIndex, 0x1A09, WAVEFORM, MT_CPAP, "AnGlasgowIndex",
+        QObject::tr("Glasgow Index (analysis)"),
+        QObject::tr("Glasgow Index over the last 5 minutes: the share of breaths with each of 8 shape signs, summed (DaveSkvn's method)"),
+        QObject::tr("GI"), QString(), QColor(0xb0, 0x30, 0x60));
+    add(AN_GlasgowAdapted, 0x1A0A, WAVEFORM, MT_CPAP, "AnGlasgowAdapted",
+        QObject::tr("Glasgow Index, adapted (analysis)"),
+        QObject::tr("Glasgow Index over the last 5 minutes, with thresholds relative to the breath's size"),
+        QObject::tr("GIa"), QString(), QColor(0x30, 0x60, 0xb0));
 
     // stage 2: hypopneas
     add(AN_ObstructiveHypopnea, 0x1A10, FLAG, MT_CPAP, "AnObstructiveHypopnea",
@@ -116,7 +124,8 @@ void registerChannels()
 QList<ChannelID> flowChannels()
 {
     return { AN_ObstructiveApnea, AN_CentralApnea, AN_Apnea, AN_FlowReduction, AN_RERA,
-             AN_FlowLimitation, AN_PeriodicBreathing, AN_Unscoreable, AN_FLScore };
+             AN_FlowLimitation, AN_PeriodicBreathing, AN_Unscoreable, AN_FLScore,
+             AN_GlasgowIndex, AN_GlasgowAdapted };
 }
 
 QList<ChannelID> hypopneaChannels()

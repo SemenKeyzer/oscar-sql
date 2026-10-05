@@ -24,6 +24,8 @@ private slots:
     void testNoReraWithoutRecoveryBreath();
     void testPeriodicBreathingDetected();
     void testSteadyBreathingIsNotPeriodic();
+    void testLimitedBreathCount();
+    void testGlasgowNeedsTenHz();
 };
 DECLARE_TEST(FlowFeatureTests)
 

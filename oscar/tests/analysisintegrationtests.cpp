@@ -160,7 +160,7 @@ void AnalysisIntegrationTests::testAnalysisChannelsAreComputed()
 {
     QList<ChannelID> all = flowChannels() + hypopneaChannels() + oximetryChannels();
     all << AN_Stamp;
-    QCOMPARE(all.size(), 19);
+    QCOMPARE(all.size(), 21);
     for (ChannelID code : all) {
         const schema::Channel &ch = schema::channel[code];
         QVERIFY2(!schema::channel[code].isNull() && ch.id() == code, qPrintable(QString::number(code, 16)));
@@ -232,6 +232,10 @@ void AnalysisIntegrationTests::testStageOneWritesFlowChannelsAndStamp()
     }();
     QCOMPARE(back.flowSeconds, st.flowSeconds);
     QCOMPARE(back.flBreaths, st.flBreaths);
+    QVERIFY(st.glasgowAdapted.breaths > 100);   // the original needs L/min amplitudes; this flow is ±1
+    QVERIFY(back.glasgow == st.glasgow);
+    QVERIFY(back.glasgowAdapted == st.glasgowAdapted);
+    QCOMPARE(back.flLimitedBreaths, st.flLimitedBreaths);
     QCOMPARE(back.unscoreableSeconds, st.unscoreableSeconds);
     QVERIFY(back.flScored);
     QVERIFY(!stageOneNeeded(&sess, params).any());

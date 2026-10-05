@@ -9,6 +9,7 @@
 #include "session_analysis.h"
 
 #include <QDebug>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMutex>
@@ -18,6 +19,7 @@
 
 #include "analysis_channels.h"
 #include "flow_analyzer.h"
+#include "glasgow_index.h"
 #include "oxi_analyzer.h"
 #include "SleepLib/machine.h"
 #include "SleepLib/schema.h"
@@ -94,6 +96,9 @@ void runFlow(Session *s, const AnalysisParams &p, SessionStamp &stamp)
     stamp.unscoreableSeconds = r.unscoreableSeconds;
     stamp.flSum = r.flSum;
     stamp.flBreaths = r.flBreaths;
+    stamp.flLimitedBreaths = r.flLimitedBreaths;
+    stamp.glasgow = r.glasgow.counts;
+    stamp.glasgowAdapted = r.glasgowAdapted.counts;
 
     Lists lists(s);
     for (const FlowEvent &ev : r.events) {
@@ -111,6 +116,12 @@ void runFlow(Session *s, const AnalysisParams &p, SessionStamp &stamp)
     for (const Span &sp : r.unscoreable) addSpanEvent(lists.get(AN_Unscoreable), sp.start, sp.end);
     for (const Breath &b : r.breaths) {
         if (hasData(b.fl)) lists.get(AN_FLScore, false, 0.01f)->AddEvent(b.inspEnd, raw(b.fl * 100));
+    }
+    for (const TimedValue &v : glasgowSeries(r.glasgow.breaths)) {
+        lists.get(AN_GlasgowIndex, false, 0.01f)->AddEvent(v.t, raw(v.v * 100));
+    }
+    for (const TimedValue &v : glasgowSeries(r.glasgowAdapted.breaths)) {
+        lists.get(AN_GlasgowAdapted, false, 0.01f)->AddEvent(v.t, raw(v.v * 100));
     }
 }
 
@@ -149,8 +160,12 @@ void setActiveParams(const AnalysisParams &params)
 
 SessionStamp SessionStamp::read(Session *session)
 {
+    return fromJson(session->settings.value(AN_Stamp).toString());
+}
+
+SessionStamp SessionStamp::fromJson(const QString &json)
+{
     SessionStamp st;
-    const QString json = session->settings.value(AN_Stamp).toString();
     if (json.isEmpty()) return st;
     const QJsonObject o = QJsonDocument::fromJson(json.toUtf8()).object();
     const QJsonObject flow = o.value("flow").toObject();
@@ -166,6 +181,17 @@ SessionStamp SessionStamp::read(Session *session)
     st.unscoreableSeconds = flow.value("u").toInt();
     st.flSum = flow.value("fl").toDouble();
     st.flBreaths = flow.value("flb").toInt();
+    st.flLimitedBreaths = flow.value("flx").toInt();
+    auto counts = [&flow](const char *key) {
+        const QJsonArray a = flow.value(QLatin1String(key)).toArray();
+        GlasgowCounts c;
+        if (a.size() != GiComponentCount + 1) return c;
+        c.breaths = a[0].toInt();
+        for (int k = 0; k < GiComponentCount; ++k) c.flagged[k] = a[k + 1].toInt();
+        return c;
+    };
+    st.glasgow = counts("gi");
+    st.glasgowAdapted = counts("gia");
     return st;
 }
 
@@ -182,6 +208,14 @@ QString SessionStamp::toJson() const
             flow.insert("u", unscoreableSeconds);
             flow.insert("fl", std::round(flSum * 1000) / 1000);
             flow.insert("flb", flBreaths);
+            flow.insert("flx", flLimitedBreaths);
+            auto counts = [](const GlasgowCounts &c) {
+                QJsonArray a { c.breaths };
+                for (int n : c.flagged) a.append(n);
+                return a;
+            };
+            if (!glasgow.isEmpty()) flow.insert("gi", counts(glasgow));
+            if (!glasgowAdapted.isEmpty()) flow.insert("gia", counts(glasgowAdapted));
         }
         o.insert("flow", flow);
     }

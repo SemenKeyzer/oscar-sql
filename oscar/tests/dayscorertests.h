@@ -29,6 +29,8 @@ private slots:
     void testLimitOxiToCpap();
     void testComparisonWithDevice();
     void testTotalsFromSessions();
+    void testLongestFlRun();
+    void testMixedRateNight();
     void testOffsetHintFindsLag();
     void testNoOffsetHintWhenAligned();
 };

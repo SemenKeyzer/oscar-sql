@@ -17,7 +17,7 @@
 //! Channels written by OSCAR's own analysis (range 0x1A00-0x1A3F). They are computed,
 //! never reported by a device: see schema::Channel::isComputed().
 extern ChannelID AN_ObstructiveApnea, AN_CentralApnea, AN_Apnea, AN_FlowReduction, AN_RERA,
-       AN_FlowLimitation, AN_PeriodicBreathing, AN_Unscoreable, AN_FLScore,
+       AN_FlowLimitation, AN_PeriodicBreathing, AN_Unscoreable, AN_FLScore, AN_GlasgowIndex, AN_GlasgowAdapted,
        AN_ObstructiveHypopnea, AN_CentralHypopnea, AN_Hypopnea,
        AN_Desaturation, AN_CyclicDesaturation, AN_PulseRise, AN_Bradycardia, AN_Tachycardia,
        AN_OxiProblemZone, AN_Stamp;

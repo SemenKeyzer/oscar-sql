@@ -118,3 +118,28 @@ void FlowFeatureTests::testSteadyBreathingIsNotPeriodic()
     const FlowResult r = analyze(synth::breathSequence(25, synth::repeat(450, SynthBreath())));
     QVERIFY(r.periodic.isEmpty());
 }
+
+// Every limited breath counts toward the share of breaths; only a run of them makes a span.
+void FlowFeatureTests::testLimitedBreathCount()
+{
+    QVector<SynthBreath> seq = synth::repeat(30, SynthBreath());
+    seq += synth::repeat(3, SynthBreath { 4, 1, synth::flatShape });
+    seq += synth::repeat(30, SynthBreath());
+    seq += synth::repeat(1, SynthBreath { 4, 1, synth::flatShape });
+    seq += synth::repeat(30, SynthBreath());
+    const FlowResult r = analyze(synth::breathSequence(25, seq));
+    QCOMPARE(r.flLimitedBreaths, 4);
+    QCOMPARE(r.flowLimitation.size(), 1);
+}
+
+void FlowFeatureTests::testGlasgowNeedsTenHz()
+{
+    const SynthBreath litres { 4, 30, synth::sineShape };   // ±30 L/min: the original's thresholds are in L/min
+    const FlowResult slow = analyze(synth::breathSequence(8, synth::repeat(100, litres)));
+    QVERIFY(slow.analyzed);
+    QVERIFY(slow.glasgow.counts.isEmpty());
+    QVERIFY(slow.glasgowAdapted.counts.isEmpty());
+    const FlowResult r = analyze(synth::breathSequence(25, synth::repeat(100, litres)));
+    QVERIFY(r.glasgow.counts.breaths > 80);
+    QVERIFY(r.glasgowAdapted.counts.breaths > 80);
+}

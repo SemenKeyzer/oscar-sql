@@ -7,6 +7,7 @@
  * for more details. */
 
 #include "flow_analyzer.h"
+#include "glasgow_index.h"
 
 #include "apnea_classifier.h"
 
@@ -570,8 +571,22 @@ FlowResult analyzeFlow(const QVector<FlowChunk> &chunkIn, const QVector<Span> &e
         if (!hasData(b.fl) || overlapsAny(blocked, b.start, b.end)) continue;
         result.flSum += b.fl;
         ++result.flBreaths;
+        if (b.fl >= params.flThreshold) ++result.flLimitedBreaths;
     }
     result.flowLimitation = flowLimitationSpans(result.breaths, blocked, params.flThreshold);
+
+    // ---- the Glasgow Index (DaveSkvn): as its author computes it on the recorded flow, and on
+    // our breaths with relative thresholds; both need the rate flow limitation needs
+    if (result.flScored) {
+        QVector<FlowChunk> recorded, prepared;
+        for (const FlowChunk &c : chunkIn) {
+            if (c.rateMs > 0 && c.samples.size() >= 2 && 1000.0 / c.rateMs >= kMinHz) recorded.append(c);
+        }
+        std::sort(recorded.begin(), recorded.end(), [](const FlowChunk &a, const FlowChunk &b) { return a.start < b.start; });
+        for (const Proc &c : chunks) prepared.append(FlowChunk { c.start, 1000.0 / c.fs, c.x });
+        result.glasgow = glasgowOriginal(recorded);
+        result.glasgowAdapted = glasgowAdapted(prepared, result.breaths, blocked);
+    }
     result.reras = flowReras(result.breaths, blocked, params.flThreshold);
     result.periodic = periodicBreathing(E);
 

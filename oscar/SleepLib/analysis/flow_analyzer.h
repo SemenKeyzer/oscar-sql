@@ -12,6 +12,7 @@
 #include <QVector>
 
 #include "analysis_params.h"
+#include "glasgow_counts.h"
 #include "oxi_analyzer.h"      // Span
 #include "signal_utils.h"
 
@@ -70,6 +71,9 @@ struct FlowResult {
     int unscoreableSeconds = 0;
     double flSum = 0;              //!< sum of the flow limitation scores ...
     int flBreaths = 0;             //!< ... of this many scored breaths outside events
+    int flLimitedBreaths = 0;      //!< of those, the ones at or above the threshold
+    GlasgowResult glasgow;         //!< the Glasgow Index as its author computes it (>= 10 Hz)
+    GlasgowResult glasgowAdapted;  //!< ... and adapted to our breaths (>= 10 Hz)
 
     int count(bool apnea) const;
     int flowLimitationSeconds() const;

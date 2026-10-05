@@ -339,9 +339,15 @@ DayResult scoreDay(const DayInput &in, const AnalysisParams &p)
         r.unscoreableSeconds += s.unscoreableSeconds;
         r.flSum += s.flSum;
         r.flBreaths += s.flBreaths;
+        r.flLimitedBreaths += s.flLimitedBreaths;
+        r.glasgow += s.glasgow;
+        r.glasgowAdapted += s.glasgowAdapted;
     }
     r.hasCpap = !in.cpap.isEmpty();
     r.flSeconds = spanSeconds(in.flowLimitation);
+    for (const Span &sp : in.flowLimitation) {
+        r.flLongestSeconds = qMax(r.flLongestSeconds, int((sp.end - sp.start) / 1000));
+    }
     r.pbSeconds = spanSeconds(in.periodic);
 
     // Oximetry of the whole night, or of CPAP time only when so configured.

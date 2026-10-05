@@ -375,3 +375,33 @@ void DayScorerTests::testNoOffsetHintWhenAligned()
     in.apneas.resize(5);
     QVERIFY(!scoreDay(in, AnalysisParams()).hasOffsetHint);
 }
+
+void DayScorerTests::testLongestFlRun()
+{
+    DayInput in = night(false);
+    in.flowLimitation = { Span { at(100), at(130), 0 }, Span { at(400), at(490), 0 } };
+    const DayResult r = scoreDay(in, AnalysisParams());
+    QCOMPARE(r.flSeconds, 120);
+    QCOMPARE(r.flLongestSeconds, 90);
+}
+
+// A session recorded below 10 Hz has no Glasgow counts; the night's come from the other one.
+void DayScorerTests::testMixedRateNight()
+{
+    DayInput in = night(false);
+    in.cpap[0].flLimitedBreaths = 20;
+    in.cpap[0].glasgow.breaths = 100;
+    in.cpap[0].glasgow.flagged[GiFlatTop] = 10;
+    in.cpap[0].glasgowAdapted.breaths = 90;
+    CpapSession slow;
+    slow.span = Span { at(kNight + 600), at(2 * kNight), 0 };
+    slow.analyzed = true;
+    slow.sampleRateHz = 5;
+    slow.flowSeconds = 2000;
+    in.cpap.append(slow);
+    const DayResult r = scoreDay(in, AnalysisParams());
+    QCOMPARE(r.glasgow.breaths, 100);
+    QCOMPARE(r.glasgow.flagged[GiFlatTop], 10);
+    QCOMPARE(r.glasgowAdapted.breaths, 90);
+    QCOMPARE(r.flLimitedBreaths, 20);
+}

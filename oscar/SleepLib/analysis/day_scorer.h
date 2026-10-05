@@ -13,6 +13,7 @@
 #include <QVector>
 
 #include "analysis_params.h"
+#include "glasgow_counts.h"
 #include "event_matcher.h"
 #include "oxi_analyzer.h"
 
@@ -38,6 +39,8 @@ struct CpapSession {
     int unscoreableSeconds = 0;
     double flSum = 0;
     int flBreaths = 0;
+    int flLimitedBreaths = 0;
+    GlasgowCounts glasgow, glasgowAdapted;
 };
 
 //! A value at a moment (a breath's flow limitation score).
@@ -75,6 +78,10 @@ struct DayResult {
     double flSum = 0;
     int flBreaths = 0;
     int flSeconds = 0;                  //!< in flow limitation spans
+    int flLongestSeconds = 0;           //!< the longest of those spans
+    int flLimitedBreaths = 0;           //!< scored breaths at or above the threshold
+    GlasgowCounts glasgow;              //!< Glasgow Index counts of the night, original ...
+    GlasgowCounts glasgowAdapted;       //!< ... and adapted
     int pbSeconds = 0;                  //!< in periodic breathing spans
 
     HypopneaRule rule = HypopneaRule::Auto;

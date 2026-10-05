@@ -14,6 +14,7 @@
 #include <QVector>
 
 #include "analysis_params.h"
+#include "glasgow_counts.h"
 #include "oxi_analyzer.h"
 #include "signal_utils.h"
 #include "SleepLib/machine_common.h"
@@ -44,8 +45,12 @@ struct SessionStamp {
     int unscoreableSeconds = 0;
     double flSum = 0;               //!< sum of the scores of flBreaths breaths
     int flBreaths = 0;
+    int flLimitedBreaths = 0;       //!< scored breaths at or above the flow limitation threshold
+    GlasgowCounts glasgow;          //!< Glasgow Index counts, original and adapted
+    GlasgowCounts glasgowAdapted;
 
     static SessionStamp read(Session *session);
+    static SessionStamp fromJson(const QString &json);
     void write(Session *session) const;
     QString toJson() const;
 };
