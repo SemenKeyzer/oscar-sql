@@ -64,6 +64,12 @@ QVariantMap toColumns(const AnalysisDailyData &d)
     put(f, "fl_time_s", d.flSeconds);
     put(f, "fl_sum", d.flSum);
     put(f, "n_fl_breaths", d.flBreaths);
+    put(f, "fl_limited_breaths", d.flLimitedBreaths);
+    put(f, "fl_longest_s", d.flLongestSeconds);
+    put(f && !d.glasgow.isEmpty(), "gi_breaths", d.glasgow.breaths);
+    put(f && !d.glasgow.isEmpty(), "gi_counts", d.glasgow.toText());
+    put(f && !d.glasgowAdapted.isEmpty(), "gia_breaths", d.glasgowAdapted.breaths);
+    put(f && !d.glasgowAdapted.isEmpty(), "gia_counts", d.glasgowAdapted.toText());
     put(f, "pb_time_s", d.pbSeconds);
     put(f, "hypopnea_rule", d.hypopneaRule);
 
@@ -145,6 +151,10 @@ AnalysisDailyData fromRecord(const QSqlRecord &r)
     d.flSeconds = i("fl_time_s");
     d.flSum = f("fl_sum");
     d.flBreaths = i("n_fl_breaths");
+    d.flLimitedBreaths = i("fl_limited_breaths");
+    d.flLongestSeconds = i("fl_longest_s");
+    d.glasgow = analysis::GlasgowCounts::fromText(i("gi_breaths"), r.value("gi_counts").toString());
+    d.glasgowAdapted = analysis::GlasgowCounts::fromText(i("gia_breaths"), r.value("gia_counts").toString());
     d.pbSeconds = i("pb_time_s");
     d.hypopneaRule = i("hypopnea_rule");
 

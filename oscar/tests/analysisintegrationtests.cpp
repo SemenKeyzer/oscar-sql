@@ -375,6 +375,12 @@ AnalysisDailyData sampleDay(qint64 profileId, const QDate &date)
     d.nCentralApnea = 3;
     d.nHypopneaAasm3 = 11;
     d.flSum = 123.5;
+    d.flLimitedBreaths = 210;
+    d.flLongestSeconds = 840;
+    d.glasgow.breaths = 6000;
+    for (int k = 0; k < GiComponentCount; ++k) d.glasgow.flagged[k] = 100 + k;
+    d.glasgowAdapted.breaths = 5900;
+    d.glasgowAdapted.flagged[GiFlatTop] = 450;
     d.hypopneaRule = int(HypopneaRule::Aasm3);
     d.hasOximetry = true;
     d.oxiSeconds = 24000;
@@ -422,6 +428,10 @@ void AnalysisIntegrationTests::testDailyRowRoundTrip()
     QCOMPARE(d.spo2Hist.size(), 51);
     QCOMPARE(d.spo2Hist[46], 20000);
     QCOMPARE(d.linkedDesatArea, 310.5);
+    QCOMPARE(d.flLimitedBreaths, 210);
+    QCOMPARE(d.flLongestSeconds, 840);
+    QVERIFY(d.glasgow == sampleDay(m_profileId, date).glasgow);
+    QVERIFY(d.glasgowAdapted == sampleDay(m_profileId, date).glasgowAdapted);
 
     // groups that do not apply are NULL, not 0
     QVERIFY(!d.hasComparison);
@@ -492,7 +502,7 @@ void AnalysisIntegrationTests::testMigrationAddsAnalysisDaily()
     QVERIFY(!db.tables().contains(QStringLiteral("analysis_daily")));
 
     QVERIFY(DatabaseSchema::upgradeSchema(db, 19));
-    QCOMPARE(DatabaseSchema::getSchemaVersion(db), 20);
+    QCOMPARE(DatabaseSchema::getSchemaVersion(db), DatabaseSchema::CURRENT_SCHEMA_VERSION);
     QVERIFY(db.tables().contains(QStringLiteral("analysis_daily")));
     QVERIFY(AnalysisDailyRepository().upsert(sampleDay(m_profileId, QDate(2026, 5, 1))));
     QVERIFY(AnalysisDailyRepository().remove(m_profileId, QDate(2026, 5, 1)));
@@ -1327,4 +1337,50 @@ void AnalysisIntegrationTests::testOximetryRows()
         QVERIFY2(!Statistics::isOximetryRow(StatisticsRow(QString::fromLatin1(key), SC_ANALYSIS, MT_UNKNOWN)), key);
     }
     QVERIFY(!Statistics::isOximetryRow(StatisticsRow(QStringLiteral("AHI"), SC_CPH, MT_CPAP)));
+}
+
+// A v20 database: its analysis rows survive the upgrade, with the new figures empty.
+void AnalysisIntegrationTests::testMigrationV21KeepsRows()
+{
+    QSqlDatabase db = DatabaseManager::instance().database();
+    QSqlQuery q(db);
+    for (const char *column : { "fl_limited_breaths", "fl_longest_s", "gi_breaths", "gi_counts", "gia_breaths", "gia_counts" }) {
+        QVERIFY2(q.exec(QStringLiteral("ALTER TABLE analysis_daily DROP COLUMN %1").arg(QLatin1String(column))), column);
+    }
+    QVERIFY(q.exec(QStringLiteral("UPDATE schema_version SET version = 20")));
+    const QDate date(2026, 6, 1);
+    q.prepare(QStringLiteral("INSERT INTO analysis_daily (profile_id, date, algo_version, params_hash, inputs_hash, computed_at, flow_s, fl_time_s) "
+                             "VALUES (?, ?, 2, 'p', 'i', '2026-06-02T08:00:00', 25000, 900)"));
+    q.addBindValue(m_profileId);
+    q.addBindValue(date.toString(Qt::ISODate));
+    QVERIFY(q.exec());
+
+    QVERIFY(DatabaseSchema::upgradeSchema(db, 20));
+    QCOMPARE(DatabaseSchema::getSchemaVersion(db), 21);
+    const AnalysisDailyData d = AnalysisDailyRepository().find(m_profileId, date);
+    QVERIFY(d.id > 0);
+    QCOMPARE(d.flSeconds, 900);
+    QCOMPARE(d.flLimitedBreaths, 0);
+    QCOMPARE(d.flLongestSeconds, 0);
+    QVERIFY(d.glasgow.isEmpty());
+    QVERIFY(d.glasgowAdapted.isEmpty());
+    QVERIFY(AnalysisDailyRepository().remove(m_profileId, date));
+}
+
+void AnalysisIntegrationTests::testToDailyRowCarriesGlasgow()
+{
+    DayResult r;
+    r.hasFlow = true;
+    r.flowSeconds = 20000;
+    r.flLimitedBreaths = 77;
+    r.flLongestSeconds = 300;
+    r.glasgow.breaths = 1000;
+    r.glasgow.flagged[GiSkew] = 50;
+    r.glasgowAdapted.breaths = 990;
+    r.glasgowAdapted.flagged[GiNoPause] = 12;
+    const AnalysisDailyData d = toDailyRow(r, AnalysisParams(), QStringLiteral("x"), QString());
+    QCOMPARE(d.flLimitedBreaths, 77);
+    QCOMPARE(d.flLongestSeconds, 300);
+    QVERIFY(d.glasgow == r.glasgow);
+    QVERIFY(d.glasgowAdapted == r.glasgowAdapted);
 }

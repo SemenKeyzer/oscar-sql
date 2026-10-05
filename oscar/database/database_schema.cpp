@@ -13,6 +13,7 @@
 #include "session_summaries_repository.h"
 #include "database_manager.h"
 #include "reports_initializer.h"
+#include <QSet>
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QDebug>
@@ -244,6 +245,7 @@ bool DatabaseSchema::upgradeSchema(QSqlDatabase& db, int fromVersion,
         { 17, &migrateV17ToV18 },
         { 18, &migrateV18ToV19 },
         { 19, &migrateV19ToV20 },
+        { 20, &migrateV20ToV21 },
     };
     const int stepsAvailable = int(sizeof(steps) / sizeof(steps[0]));
 
@@ -2001,6 +2003,12 @@ bool DatabaseSchema::createAnalysisDailyTable(QSqlDatabase& db)
             fl_time_s           INTEGER,
             fl_sum              REAL,
             n_fl_breaths        INTEGER,
+            fl_limited_breaths  INTEGER,
+            fl_longest_s        REAL,
+            gi_breaths          INTEGER,
+            gi_counts           TEXT,
+            gia_breaths         INTEGER,
+            gia_counts          TEXT,
             pb_time_s           INTEGER,
             hypopnea_rule       INTEGER,
 
@@ -2089,5 +2097,59 @@ bool DatabaseSchema::migrateV19ToV20(QSqlDatabase& db)
     }
 
     qDebug() << "DatabaseSchema: Migration v19->v20 complete";
+    return true;
+}
+
+/*
+ * Migrate database from schema version 20 to 21
+ *
+ * analysis_daily keeps the flow limitation run figures and the Glasgow Index counts. Columns a
+ * freshly created table already has are left alone.
+ */
+bool DatabaseSchema::migrateV20ToV21(QSqlDatabase& db)
+{
+    qDebug() << "DatabaseSchema: Migrating v20 -> v21";
+
+    if (!db.transaction()) {
+        qCritical() << "DatabaseSchema: migrateV20ToV21: failed to start transaction";
+        return false;
+    }
+
+    QSet<QString> existing;
+    QSqlQuery info(db);
+    if (info.exec(QStringLiteral("PRAGMA table_info(analysis_daily)"))) {
+        while (info.next()) existing.insert(info.value(1).toString());
+    }
+    const QList<QPair<QString, QString>> columns {
+        { QStringLiteral("fl_limited_breaths"), QStringLiteral("INTEGER") },
+        { QStringLiteral("fl_longest_s"), QStringLiteral("REAL") },
+        { QStringLiteral("gi_breaths"), QStringLiteral("INTEGER") },
+        { QStringLiteral("gi_counts"), QStringLiteral("TEXT") },
+        { QStringLiteral("gia_breaths"), QStringLiteral("INTEGER") },
+        { QStringLiteral("gia_counts"), QStringLiteral("TEXT") },
+    };
+    for (const auto &c : columns) {
+        if (existing.contains(c.first)) continue;
+        QSqlQuery q(db);
+        if (!q.exec(QStringLiteral("ALTER TABLE analysis_daily ADD COLUMN %1 %2").arg(c.first, c.second))) {
+            qCritical() << "DatabaseSchema: migrateV20ToV21: adding" << c.first << "failed:" << q.lastError().text();
+            db.rollback();
+            return false;
+        }
+    }
+
+    if (!setSchemaVersion(db, 21)) {
+        qCritical() << "DatabaseSchema: migrateV20ToV21: setSchemaVersion failed";
+        db.rollback();
+        return false;
+    }
+
+    if (!db.commit()) {
+        qCritical() << "DatabaseSchema: migrateV20ToV21: commit failed";
+        db.rollback();
+        return false;
+    }
+
+    qDebug() << "DatabaseSchema: Migration v20->v21 complete";
     return true;
 }

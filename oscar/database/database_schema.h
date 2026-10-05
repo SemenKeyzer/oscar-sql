@@ -103,7 +103,7 @@ public:
      * - Added type field to channels
      * - Removed events_file and summary_file from sessions (no longer needed)
      */
-    static const int CURRENT_SCHEMA_VERSION = 20;
+    static const int CURRENT_SCHEMA_VERSION = 21;
 
     /*!
      * \brief Oldest schema version that can be restored into the current database.
@@ -245,6 +245,7 @@ private:
 
     // Migration from v19 to v20
     static bool migrateV19ToV20(QSqlDatabase& db);
+    static bool migrateV20ToV21(QSqlDatabase& db);
 
     static bool createIndexes(QSqlDatabase& db);
     static bool setSchemaVersion(QSqlDatabase& db, int version);

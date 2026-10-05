@@ -340,6 +340,10 @@ AnalysisDailyData toDailyRow(const DayResult &r, const AnalysisParams &params, c
     d.flSeconds = r.flSeconds;
     d.flSum = r.flSum;
     d.flBreaths = r.flBreaths;
+    d.flLimitedBreaths = r.flLimitedBreaths;
+    d.flLongestSeconds = r.flLongestSeconds;
+    d.glasgow = r.glasgow;
+    d.glasgowAdapted = r.glasgowAdapted;
     d.pbSeconds = r.pbSeconds;
     d.hypopneaRule = int(r.rule);
 

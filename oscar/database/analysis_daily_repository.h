@@ -15,6 +15,8 @@
 #include <QString>
 #include <QVector>
 
+#include "SleepLib/analysis/glasgow_counts.h"
+
 /*!
  * \struct AnalysisDailyData
  * \brief One day of OSCAR's own sleep analysis (table analysis_daily, schema v20).
@@ -46,6 +48,9 @@ struct AnalysisDailyData
     int flSeconds = 0;
     double flSum = 0;
     int flBreaths = 0;
+    int flLimitedBreaths = 0;  //!< scored breaths at or above the flow limitation threshold
+    int flLongestSeconds = 0;  //!< the longest flow limitation span
+    analysis::GlasgowCounts glasgow, glasgowAdapted;   //!< Glasgow Index counts (empty: none)
     int pbSeconds = 0;
     int hypopneaRule = 0;      //!< analysis::HypopneaRule actually applied
 
