@@ -583,6 +583,7 @@ void NightSummaryView::setSummary(const NightSummary &s)
             const QString fl = QString::number(s.flPercent, 'f', 0), minutes = QString::number(s.flMinutes, 'f', 0);
             ahiNote += QStringLiteral("<br/>") + (s.hasGlasgow
                 ? tr("flow limitation %1% (%2 min) · Glasgow %3 / %4").arg(fl, minutes, num(s.glasgow), num(s.glasgowAdapted))
+                      + (s.glasgowLessReliable ? QLatin1Char(' ') + tr("(less reliable on this device)") : QString())
                 : tr("flow limitation %1% (%2 min)").arg(fl, minutes));
         }
         addTile(col++, tr("AHI"), num(s.ahi), ahiNote, s.ahiLevel(),
@@ -658,5 +659,6 @@ void NightSummary::takeFlowLimitation(const AnalysisDailyData &row)
     if (hasGlasgow) {
         glasgow = row.glasgow.index();
         glasgowAdapted = row.glasgowAdapted.index();
+        glasgowLessReliable = row.flowRateHz > 0 && row.flowRateHz < 20;
     }
 }

@@ -55,6 +55,7 @@ struct NightSummary {
     bool hasGlasgow = false;
     double glasgow = 0;             //!< Glasgow Index, original and adapted
     double glasgowAdapted = 0;
+    bool glasgowLessReliable = false; //!< the flow is recorded below 20 Hz (Prisma: 10 Hz)
     //! Takes the flow limitation figures from the analysis' row for the night.
     void takeFlowLimitation(const AnalysisDailyData &row);
     bool hasLeak = false;

@@ -446,3 +446,15 @@ void AnalysisPanelTests::testFlowLimitationLineOldStamp()
                               .arg(AnalysisPanel::duration(6300000), AnalysisPanel::duration(720000))));
     QVERIFY(!html.contains(QStringLiteral("-0%")));
 }
+
+void AnalysisPanelTests::testGlasgowLessReliableBelowTwentyHz()
+{
+    DayResult r = cpapNight();
+    r.flScored = true;
+    r.glasgow.breaths = r.glasgowAdapted.breaths = 1000;
+    const QString note = AnalysisPanel::tr("Less reliable here: the flow is recorded at %1 Hz, the method was made for 25 Hz.");
+    r.flowRateHz = 25;
+    QVERIFY(!AnalysisPanel::sidebarHtml(nullptr, r, QString(), {}).contains(note.arg(25)));
+    r.flowRateHz = 10;
+    QVERIFY(AnalysisPanel::sidebarHtml(nullptr, r, QString(), {}).contains(note.arg(10)));
+}

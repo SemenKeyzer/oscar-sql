@@ -409,3 +409,60 @@ void GlasgowIndexTests::testSamplingPhaseAtTenHz()
     QVERIFY2(std::fabs(o10.index() - o25.index()) < 0.15, qPrintable(QStringLiteral("%1 vs %2").arg(o10.index()).arg(o25.index())));
     QVERIFY2(std::fabs(a10.index() - a25.index()) < 0.15, qPrintable(QStringLiteral("%1 vs %2").arg(a10.index()).arg(a25.index())));
 }
+
+namespace {
+
+// A plateau-shaped breath (rise, about 1.3 s at the top, fall) at peak \a P, sampled at \a fs;
+// \a coarse: in whole L/min with a ±1 L/min wobble, as a Prisma records it.
+FlowChunk plateauBreaths(double fs, bool coarse, QVector<Breath> &breaths)
+{
+    const double period = 4.93, insp = 1.8, exp = 2.4, P = 17;
+    FlowChunk c;
+    c.start = 1000000;
+    c.rateMs = 1000.0 / fs;
+    const int n = int(60 * period * fs);
+    unsigned noise = 12345;
+    for (int i = 0; i < n; ++i) {
+        const double t = i / fs, phase = std::fmod(t, period);
+        double v = 0;
+        if (phase < insp) v = P * std::min(1.0, 1.6 * 4 * (phase / insp) * (1 - phase / insp));
+        else if (phase < insp + exp) v = -1.3 * P * std::sin(M_PI * (phase - insp) / exp);
+        if (coarse) {
+            noise = noise * 1103515245u + 12345u;
+            v = std::round(v + ((noise >> 16) % 3) - 1.0);   // whole L/min, wobbling by one step
+        }
+        c.samples << float(v);
+    }
+    breaths.clear();
+    for (int b = 0; b < 60; ++b) {
+        Breath br;
+        br.start = c.start + qint64(std::llround(b * period * 1000));
+        br.inspEnd = br.start + qint64(insp * 1000);
+        br.end = c.start + qint64(std::llround((b + 1) * period * 1000));
+        br.pif = float(P);
+        br.pef = float(-1.3 * P);
+        breaths << br;
+    }
+    return c;
+}
+
+} // namespace
+
+// A recording in whole L/min wobbles by a step between samples: that is no double peak and no
+// variable amplitude. The coarse 10 Hz recording must read as the smooth 25 Hz one does.
+void GlasgowIndexTests::testStaircaseRecording()
+{
+    QVector<Breath> smoothBreaths, coarseBreaths;
+    const FlowChunk smooth = plateauBreaths(25, false, smoothBreaths);
+    const FlowChunk coarse = plateauBreaths(10, true, coarseBreaths);
+    const GlasgowCounts os = glasgowOriginal({ smooth }).counts, oc = glasgowOriginal({ coarse }).counts;
+    const GlasgowCounts as = glasgowAdapted({ smooth }, smoothBreaths, {}).counts;
+    const GlasgowCounts ac = glasgowAdapted({ coarse }, coarseBreaths, {}).counts;
+    for (GlasgowComponent k : { GiMultiPeak, GiAmpVar, GiSpike, GiSkew }) {
+        QVERIFY2(std::fabs(oc.fraction(k) - os.fraction(k)) < 0.15,
+                 qPrintable(QStringLiteral("original %1: coarse %2, smooth %3").arg(k).arg(oc.fraction(k)).arg(os.fraction(k))));
+        QVERIFY2(std::fabs(ac.fraction(k) - as.fraction(k)) < 0.15,
+                 qPrintable(QStringLiteral("adapted %1: coarse %2, smooth %3").arg(k).arg(ac.fraction(k)).arg(as.fraction(k))));
+    }
+    QVERIFY2(std::fabs(ac.index() - as.index()) < 0.3, qPrintable(QStringLiteral("%1 vs %2").arg(ac.index()).arg(as.index())));
+}

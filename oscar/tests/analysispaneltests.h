@@ -25,6 +25,7 @@ private slots:
     void testGlasgowRows();
     void testGlasgowDash();
     void testFlowLimitationLineOldStamp();
+    void testGlasgowLessReliableBelowTwentyHz();
     void testTabListsDifferences();
     void testTabStepsThroughDifferences();
     void testDifferenceSpans();

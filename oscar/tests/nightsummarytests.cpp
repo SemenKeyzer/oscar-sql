@@ -298,8 +298,14 @@ void NightSummaryTests::testFlowLimitationFromRow()
     QCOMPARE(s.flPercent, 6.0);
     QCOMPARE(s.flMinutes, 32.0);
     QVERIFY(s.hasGlasgow);
+    QVERIFY(!s.glasgowLessReliable);   // recorded at 0 Hz in this row: not known, not flagged
     QCOMPARE(s.glasgow, 0.33);
     QCOMPARE(s.glasgowAdapted, 0.29);
+
+    row.flowRateHz = 10;
+    NightSummary prisma;
+    prisma.takeFlowLimitation(row);
+    QVERIFY(prisma.glasgowLessReliable);
 
     row.flBreaths = 0;   // flow limitation not scored (below 10 Hz)
     row.glasgow = row.glasgowAdapted = analysis::GlasgowCounts();
@@ -326,4 +332,22 @@ void NightSummaryTests::testFlowLimitationInAhiTile()
     QVERIFY2(notes.join(QLatin1Char('\n')).contains(NightSummaryView::tr("flow limitation %1% (%2 min) · Glasgow %3 / %4")
                                                      .arg(QStringLiteral("6"), QStringLiteral("32"), QStringLiteral("3.3"), QStringLiteral("2.9"))),
              qPrintable(notes.join(QLatin1Char('|'))));
+}
+
+void NightSummaryTests::testGlasgowLessReliableInTile()
+{
+    NightSummaryView view;
+    view.resize(900, 400);
+    NightSummary s = goodNight();
+    s.hasFlowLimitation = true;
+    s.flPercent = 6;
+    s.flMinutes = 32;
+    s.hasGlasgow = true;
+    s.glasgow = 2.1;
+    s.glasgowAdapted = 1.9;
+    s.glasgowLessReliable = true;
+    view.setSummary(s);
+    QStringList notes;
+    for (QLabel *l : view.findChildren<QLabel *>(QStringLiteral("nsNote"))) notes << l->text();
+    QVERIFY2(notes.join(QLatin1Char('\n')).contains(NightSummaryView::tr("(less reliable on this device)")), qPrintable(notes.join(QLatin1Char('|'))));
 }

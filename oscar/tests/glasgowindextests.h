@@ -30,6 +30,7 @@ private slots:
     void testAdaptedIgnoresSlowOnset();
     void testAdaptedPauseWithOffset();
     void testSamplingPhaseAtTenHz();
+    void testStaircaseRecording();
 };
 DECLARE_TEST(GlasgowIndexTests)
 

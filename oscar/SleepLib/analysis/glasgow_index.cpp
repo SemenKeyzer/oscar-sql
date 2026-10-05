@@ -69,10 +69,41 @@ double jsRound(double v) { return std::floor(v + 0.5); }
 // (Catmull-Rom) interpolation: a breath's peak usually falls between such samples, and where
 // it does decides the spike, double peak, skew and amplitude signs. Faster recordings are left
 // as they are.
-QVector<FlowChunk> onAuthorGrid(const QVector<FlowChunk> &chunks)
+// The recording's step when it is in whole L/min (Prisma), else 0.
+double coarseStep(const QVector<FlowChunk> &chunks)
 {
-    QVector<FlowChunk> out;
+    qint64 n = 0, whole = 0;
     for (const FlowChunk &c : chunks) {
+        for (float v : c.samples) {
+            ++n;
+            if (std::fabs(v - std::round(v)) < 1e-3f) ++whole;
+        }
+    }
+    return n > 0 && whole >= 0.99 * n ? 1.0 : 0.0;
+}
+
+// A recording in whole steps wobbles by a step from sample to sample: a centred moving average
+// over about 0.3 s takes the wobble out and keeps the shape of the breath.
+FlowChunk smoothed(const FlowChunk &c)
+{
+    const int half = std::max(1, int(std::lround(150 / c.rateMs)));
+    FlowChunk r = c;
+    const int n = c.samples.size();
+    for (int i = 0; i < n; ++i) {
+        double sum = 0;
+        int k = 0;
+        for (int j = std::max(0, i - half); j <= std::min(n - 1, i + half); ++j, ++k) sum += c.samples[j];
+        r.samples[i] = float(sum / k);
+    }
+    return r;
+}
+
+QVector<FlowChunk> onAuthorGrid(const QVector<FlowChunk> &recorded)
+{
+    const bool coarse = coarseStep(recorded) > 0;
+    QVector<FlowChunk> out;
+    for (const FlowChunk &rc : recorded) {
+        const FlowChunk c = coarse && rc.samples.size() >= 3 ? smoothed(rc) : rc;
         if (c.rateMs <= 50 || c.samples.size() < 2) {
             out << c;
             continue;
@@ -330,6 +361,7 @@ GlasgowResult glasgowAdapted(const QVector<FlowChunk> &recorded, const QVector<B
                              const QVector<Span> &blocked)
 {
     const QVector<FlowChunk> chunks = onAuthorGrid(recorded);
+    const double step = coarseStep(recorded);   // differences below two steps of the recording are rounding
     GlasgowResult result;
     const int n = breaths.size();
     QVector<double> peak(n, 0);
@@ -396,7 +428,7 @@ GlasgowResult glasgowAdapted(const QVector<FlowChunk> &recorded, const QVector<B
         b.flags[GiFlatTop] = midVar / half / (P * P) < 0.75 / 900;
 
         // Multi-Peak: the original's state machine, the step 3.3 % of P
-        const double bump = 0.033 * P;
+        const double bump = std::max(0.033 * P, 2 * step);
         bool firstPeakFound = false, lookingForNextPeak = false, multiPeak = false;
         double lastMax = 0, lowest = 0;
         for (int i = s.from; i < s.to; ++i) {
@@ -454,7 +486,7 @@ GlasgowResult glasgowAdapted(const QVector<FlowChunk> &recorded, const QVector<B
             for (int j = k - 4; j <= k; ++j) mean += peak[j];
             mean /= 5;
             for (int j = k - 4; j <= k; ++j) var += (peak[j] - mean) * (peak[j] - mean);
-            b.flags[GiAmpVar] = mean > 0 && var / 5 / (mean * mean) > 4.0 / 900;
+            b.flags[GiAmpVar] = mean > 0 && var / 5 / (mean * mean) > 4.0 / 900 && std::sqrt(var / 5) > step;
         }
 
         ++result.counts.breaths;

@@ -102,6 +102,10 @@ QString glasgowHtml(const DayResult &r)
         }
     }
     html += QStringLiteral("</table>");
+    if (r.flowRateHz > 0 && r.flowRateHz < 20) {
+        html += QStringLiteral("<p><font size=-1><b>%1</b></font></p>").arg(
+            AnalysisPanel::tr("Less reliable here: the flow is recorded at %1 Hz, the method was made for 25 Hz.").arg(r.flowRateHz));
+    }
     html += QStringLiteral("<p><font size=-1>%1</font></p>").arg(
         AnalysisPanel::tr("Author's scale: 0–0.2 clean breathing, about 3 serious problems. Experimental, not reviewed by physicians."));
     return html;
