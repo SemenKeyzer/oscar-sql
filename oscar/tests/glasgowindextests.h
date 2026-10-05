@@ -26,6 +26,8 @@ private slots:
     void testAdaptedIgnoresWeakAmplitude();
     void testAdaptedSkipsBlocked();
     void testSeries();
+    void testAdaptedSampleRateIndependent();
+    void testAdaptedIgnoresSlowOnset();
 };
 DECLARE_TEST(GlasgowIndexTests)
 

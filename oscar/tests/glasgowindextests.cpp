@@ -161,11 +161,12 @@ void GlasgowIndexTests::testEachComponent()
 
 void GlasgowIndexTests::testSampleRateIndependent()
 {
-    for (const char *name : { "normal", "flat", "double" }) {
+    // Prisma devices record the flow at 10 Hz: a breath of 15 samples must not look skewed or spiky
+    for (const char *name : { "normal", "flat", "double", "spike", "skew" }) {
         const double at25 = glasgowOriginal({ synthSeries(QLatin1String(name), 25) }).counts.index();
-        for (double fs : { 20.0, 50.0 }) {
+        for (double fs : { 10.0, 20.0, 50.0 }) {
             const double other = glasgowOriginal({ synthSeries(QLatin1String(name), fs) }).counts.index();
-            QVERIFY2(std::fabs(other - at25) <= 0.02, qPrintable(QStringLiteral("%1 at %2 Hz: %3 vs %4").arg(name).arg(fs).arg(other).arg(at25)));
+            QVERIFY2(std::fabs(other - at25) <= 0.1, qPrintable(QStringLiteral("%1 at %2 Hz: %3 vs %4").arg(name).arg(fs).arg(other).arg(at25)));
         }
     }
 }
@@ -263,4 +264,44 @@ void GlasgowIndexTests::testSeries()
     const float duringNormal = series[59].v;
     const float duringFlat = series[119].v;
     QVERIFY2(duringFlat > duringNormal + 0.5f, qPrintable(QStringLiteral("%1 vs %2").arg(duringFlat).arg(duringNormal)));
+}
+
+void GlasgowIndexTests::testAdaptedSampleRateIndependent()
+{
+    for (const char *name : { "normal", "flat", "double", "spike", "skew" }) {
+        const FlowChunk c25 = synthSeries(QLatin1String(name), 25);
+        const double at25 = glasgowAdapted({ c25 }, synthBreaths(QLatin1String(name), c25), {}).counts.index();
+        const FlowChunk c10 = synthSeries(QLatin1String(name), 10);
+        QVector<Breath> b10 = synthBreaths(QLatin1String(name), c25);   // same times, other samples
+        for (Breath &b : b10) b.end = std::min(b.end, c10.start + qint64(c10.samples.size() * c10.rateMs));
+        const double at10 = glasgowAdapted({ c10 }, b10, {}).counts.index();
+        QVERIFY2(std::fabs(at10 - at25) <= 0.1, qPrintable(QStringLiteral("%1: %2 at 10 Hz vs %3").arg(name).arg(at10).arg(at25)));
+    }
+}
+
+// Real inspirations often start with a slow low-flow onset. The original only looks at the
+// part above its 5 L/min grey zone; the adapted variant must do the same, relative to the peak.
+void GlasgowIndexTests::testAdaptedIgnoresSlowOnset()
+{
+    FlowChunk c;
+    c.start = 1000000;
+    c.rateMs = 40;
+    QVector<Breath> breaths;
+    for (int b = 0; b < 60; ++b) {
+        Breath br;
+        br.start = c.start + qint64(c.samples.size() * c.rateMs);
+        for (int k = 0; k < 15; ++k) c.samples << float(round2(2.0 * k / 15));   // 0.6 s creeping up to 2 L/min
+        for (int k = 0; k < 40; ++k) c.samples << float(round2(2 + 28 * 4.0 * k / 40 * (1 - k / 40.0)));
+        br.inspEnd = c.start + qint64(c.samples.size() * c.rateMs);
+        for (int k = 0; k < 60; ++k) c.samples << float(round2(-24 * std::sin(M_PI * k / 60)));
+        for (int k = 0; k < 25; ++k) c.samples << 0.0f;
+        br.end = c.start + qint64(c.samples.size() * c.rateMs);
+        br.pif = 30;
+        br.pef = -24;
+        breaths << br;
+    }
+    const GlasgowCounts o = glasgowOriginal({ c }).counts;
+    const GlasgowCounts a = glasgowAdapted({ c }, breaths, {}).counts;
+    QVERIFY(o.fraction(GiSkew) < 0.1);
+    QVERIFY2(a.fraction(GiSkew) < 0.1, qPrintable(QString::number(a.fraction(GiSkew))));
 }

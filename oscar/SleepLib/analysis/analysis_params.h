@@ -17,7 +17,7 @@ namespace analysis {
 
 //! Bump whenever an algorithm changes in a way that changes its results: every stored
 //! analysis then counts as outdated and is recalculated.
-constexpr int kAnalysisAlgoVersion = 3;   // 2: the stage 1 stamp carries the flow totals; 3: Glasgow Index, limited breaths
+constexpr int kAnalysisAlgoVersion = 4;   // 2: the stage 1 stamp carries the flow totals; 3: Glasgow Index, limited breaths; 4: its adapted grey zone
 
 //! How a flow reduction candidate becomes a hypopnea (stage 2).
 enum class HypopneaRule {

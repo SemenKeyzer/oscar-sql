@@ -309,8 +309,22 @@ GlasgowResult glasgowAdapted(const QVector<FlowChunk> &chunks, const QVector<Bre
         const Breath &br = breaths[k];
         GlasgowBreath b;
         b.start = br.start;
-        const Samples &s = insp[k];
+        Samples s = insp[k];
         const double P = peak[k];
+        if (s.chunk && P > 0) {
+            // the part of the inspiration above the grey zone (the original's 5 L/min, as 5/30 of
+            // the peak), as findInspirations takes it: from the last sample at or below it before
+            // the peak to the first one after
+            int pk = s.from;
+            for (int i = s.from; i < s.to; ++i) pk = s.at(i) > s.at(pk) ? i : pk;
+            const double grey = 5.0 / 30 * P;
+            int from = pk, to = pk;
+            while (from > s.from && s.at(from) > grey) --from;
+            const int last = std::min<int>(s.to, s.chunk->samples.size() - 1);   // may reach the first expiratory sample
+            while (to < last && s.at(to) > grey) ++to;
+            s.from = from;
+            s.to = to;
+        }
         b.counted = s.chunk && s.size() >= 2 && P > 0 && !overlaps(blocked, br.start, br.end);
         if (!b.counted) {
             result.breaths << b;
