@@ -265,8 +265,14 @@ void PdfReportDialog::update()
     m_create->setEnabled(o.anySection() && !(custom && o.from > o.to));
 }
 
+void PdfReportDialog::reject()
+{
+    if (!m_writing) QDialog::reject();
+}
+
 void PdfReportDialog::create()
 {
+    if (m_writing) return;
     const PdfReportOptions o = options();
     const QPair<QDate, QDate> range = o.range(m_lastNight);
     // no name in the file name when the report leaves it out
@@ -284,9 +290,17 @@ void PdfReportDialog::create()
     progress.setMessage(tr("Creating the report..."));
     progress.addAbortButton();
     connect(&progress, &ProgressDialog::abortClicked, this, [&writer]() { writer.cancel(); });
+    connect(&progress, &QDialog::rejected, this, [&writer]() { writer.cancel(); });   // Esc
     progress.open();
+    // the writer processes events: no second report, no closing, no changes meanwhile
+    m_writing = true;
+    const QList<QWidget *> controls = findChildren<QWidget *>(Qt::FindDirectChildrenOnly);
+    for (QWidget *w : controls) if (!w->isWindow()) w->setEnabled(false);
     QString error;
     const bool written = writer.write(o, m_lastNight, path, &progress, &error);
+    for (QWidget *w : controls) if (!w->isWindow()) w->setEnabled(true);
+    m_writing = false;
+    progress.allowClose();
     progress.close();
     if (!written) {
         if (!writer.cancelled()) QMessageBox::warning(this, windowTitle(), error);

@@ -82,6 +82,14 @@ QVariantMap PdfReportOptions::toMap() const
     };
 }
 
+QPair<QDate, QDate> PdfReportOptions::clamped(const QPair<QDate, QDate> &range, const QDate &first, const QDate &last)
+{
+    QPair<QDate, QDate> r = range;
+    if (first.isValid() && r.first < first) r.first = first;
+    if (last.isValid() && r.second > last) r.second = last;
+    return r;
+}
+
 PdfReportOptions PdfReportOptions::fromMap(const QVariantMap &map)
 {
     PdfReportOptions o;

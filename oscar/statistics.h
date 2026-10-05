@@ -251,6 +251,9 @@ class Statistics : public QObject
                               const QList<QDate> &outdated);
 
     static void printReport(QWidget *parent = nullptr);
+    //! A row the report's «Oximetry» choice leaves out: the oximeter's, and the analysis'
+    //! oximetry and pulse figures.
+    static bool isOximetryRow(const StatisticsRow &row);
 
     static void updateReportDate();
     static void resetReportDate();

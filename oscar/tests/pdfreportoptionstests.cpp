@@ -101,3 +101,16 @@ void PdfReportOptionsTests::testMapRoundTrip()
     QCOMPARE(defaults.period, PdfReportOptions::Last30);
     QVERIFY(defaults.summary && !defaults.daily);
 }
+
+void PdfReportOptionsTests::testClampedToData()
+{
+    const QDate first(2026, 9, 15), last(2026, 10, 4);
+    const auto r = PdfReportOptions::clamped({ QDate(2026, 7, 7), QDate(2026, 10, 4) }, first, last);
+    QCOMPARE(r.first, first);
+    QCOMPARE(r.second, last);
+    const auto inside = PdfReportOptions::clamped({ QDate(2026, 9, 20), QDate(2026, 9, 30) }, first, last);
+    QCOMPARE(inside.first, QDate(2026, 9, 20));
+    QCOMPARE(inside.second, QDate(2026, 9, 30));
+    const auto noData = PdfReportOptions::clamped({ QDate(2026, 9, 20), QDate(2026, 9, 30) }, QDate(), QDate());
+    QCOMPARE(noData.first, QDate(2026, 9, 20));   // nothing to clamp to: the range as asked
+}

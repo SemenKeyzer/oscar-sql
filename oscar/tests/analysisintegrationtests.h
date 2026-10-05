@@ -51,6 +51,8 @@ private slots:
     void testWriterRefusesEmptyPeriod();
     void testWriterRestoresAndCleansUp();
     void testPdfReportOptionsSurviveProfileSave();
+    void testPeriodHtmlSerialNumbers();
+    void testOximetryRows();
 
 private:
     class QCoreApplication *m_app = nullptr;

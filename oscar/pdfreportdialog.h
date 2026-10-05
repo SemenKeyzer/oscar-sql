@@ -35,6 +35,10 @@ class PdfReportDialog : public QDialog
     //! What the window shows now.
     PdfReportOptions options() const;
 
+  public slots:
+    //! Esc and the close button do nothing while the report is being written.
+    void reject() override;
+
   private slots:
     void update();
     void create();
@@ -47,6 +51,7 @@ class PdfReportDialog : public QDialog
     Overview *m_overview;
     QDate m_lastNight;
     bool m_loading = false;
+    bool m_writing = false;
 
     QButtonGroup *m_period = nullptr;
     QDateEdit *m_from = nullptr;

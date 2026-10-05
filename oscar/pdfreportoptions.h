@@ -37,6 +37,8 @@ struct PdfReportOptions {
     void apply(Preset preset);
     //! The report's dates: the last 7, 30 or 90 nights up to \a lastNight, or from and to.
     QPair<QDate, QDate> range(const QDate &lastNight) const;
+    //! \a range cut to the days that have data, \a first to \a last (left as is when unknown).
+    static QPair<QDate, QDate> clamped(const QPair<QDate, QDate> &range, const QDate &first, const QDate &last);
     //! The nights the Daily section prints: of \a cpapNights, those in range(), the chosen
     //! number from its end, oldest first.
     QList<QDate> nightsToPrint(const QList<QDate> &cpapNights) const;

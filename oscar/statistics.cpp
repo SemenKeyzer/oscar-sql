@@ -1520,7 +1520,7 @@ QString Statistics::GenerateMachineList()
                     .arg(m->brand())
                     .arg(m->model() +
                          (mn.isEmpty() ? "" : QString(" (") + mn + QString(")")))
-                    .arg(m->serial())
+                    .arg(showSerial() ? m->serial() : QString())
                     .arg(QLocale().toString(d1, MedDateFormat))
                     .arg(QLocale().toString(d2, MedDateFormat));
 
@@ -1531,6 +1531,15 @@ QString Statistics::GenerateMachineList()
     }
     return html;
 }
+bool Statistics::isOximetryRow(const StatisticsRow &row)
+{
+    if (row.type == MT_OXIMETER) return true;
+    if (row.calc != SC_ANALYSIS) return false;
+    const QString group = analysisGroup(row.src);
+    return group == QLatin1String("oxi") || group == QLatin1String("pulse") || group == QLatin1String("hb")
+           || group == QLatin1String("dhr");
+}
+
 QString Statistics::GenerateRXChanges()
 {
     // Generate list only if there are CPAP devices
@@ -2001,7 +2010,7 @@ QString Statistics::GenerateCPAPUsage()
     for (QList<StatisticsRow>::iterator i = rows.begin(); i != rows.end(); ++i) {
         StatisticsRow &row = (*i);
         QString name;
-        if (s_override.active && !s_override.sections.oximetry && row.type == MT_OXIMETER) continue;
+        if (s_override.active && !s_override.sections.oximetry && isOximetryRow(row)) continue;
 
         if (row.calc == SC_HEADING || row.calc == SC_ANALYSIS_HEADING) {  // All sections begin with a heading
             first = summaryInfo.first();

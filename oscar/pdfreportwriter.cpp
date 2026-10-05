@@ -80,10 +80,14 @@ bool PdfReportWriter::write(const PdfReportOptions &o, const QDate &lastNight, c
     printer.setPageOrientation(QPageLayout::Portrait);
     printer.setPageMargins(QMarginsF(10, 10, 10, 10), QPageLayout::Millimeter);
     QPainter painter;
-    if (!painter.begin(&printer)) return fail(tr("Could not write %1.").arg(path));
+    if (!painter.begin(&printer)) {
+        QFile::remove(path);
+        return fail(tr("Could not write %1.").arg(path));
+    }
 
     bool anyPage = false;
     bool ok = true;
+    QString failure;   // set when a section cannot be printed as asked
     auto section = [&](const QString &message) {
         if (progress) {
             progress->setMessage(message);
@@ -106,8 +110,16 @@ bool PdfReportWriter::write(const PdfReportOptions &o, const QDate &lastNight, c
     if (o.daily && m_daily && !m_cancelled) {
         DailyRestore restore(m_daily);
         const QList<QDate> nights = o.nightsToPrint(cpapNights);
-        for (int i = 0; i < nights.size() && section(tr("Night %1 of %2...").arg(i + 1).arg(nights.size())); ++i) {
+        for (int i = 0; ok && i < nights.size() && section(tr("Night %1 of %2...").arg(i + 1).arg(nights.size())); ++i) {
             m_daily->LoadDateNow(nights[i]);
+            if (m_daily->getDate() != nights[i]) {
+                // the Daily tab kept another day (a time alignment was not closed): its figures
+                // must not be printed under this night's date
+                failure = tr("Could not show the night of %1 on the Daily tab.")
+                              .arg(QLocale().toString(nights[i], QLocale::ShortFormat));
+                ok = false;
+                break;
+            }
             nextPage();
             PrintTarget target;
             target.personalData = o.personalData;
@@ -116,9 +128,11 @@ bool PdfReportWriter::write(const PdfReportOptions &o, const QDate &lastNight, c
         }
     }
 
-    if (o.overview && m_overview && section(tr("Overview..."))) {
+    if (ok && o.overview && m_overview && section(tr("Overview..."))) {
         OverviewRestore restore(m_overview);
-        QDate from = range.first, to = range.second;
+        // from the period's first CPAP night to its last: no empty weeks of graphs
+        const QPair<QDate, QDate> shown = PdfReportOptions::clamped(range, cpapNights.first(), cpapNights.last());
+        QDate from = shown.first, to = shown.second;
         m_overview->showPreset(o.overviewPreset);
         m_overview->setRange(from, to);
         nextPage();
@@ -128,7 +142,7 @@ bool PdfReportWriter::write(const PdfReportOptions &o, const QDate &lastNight, c
         ok = Report::paint(painter, printer, m_overview->graphView(), STR_TR_Overview, to, target) && ok;
     }
 
-    if (o.statistics && section(tr("Statistics..."))) {
+    if (ok && o.statistics && section(tr("Statistics..."))) {
         StatisticsSections s;
         s.settingsChanges = o.statsSettings;
         s.oximetry = o.statsOximetry;
@@ -150,7 +164,7 @@ bool PdfReportWriter::write(const PdfReportOptions &o, const QDate &lastNight, c
     const QFileInfo written(path);
     if (!ok || printer.printerState() == QPrinter::Error || !written.exists() || written.size() == 0) {
         QFile::remove(path);
-        return fail(tr("Could not write %1.").arg(path));
+        return fail(failure.isEmpty() ? tr("Could not write %1.").arg(path) : failure);
     }
     return true;
 }

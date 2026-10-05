@@ -21,6 +21,7 @@ private slots:
     void testNightsToPrint();
     void testEstimatePages();
     void testMapRoundTrip();
+    void testClampedToData();
 };
 DECLARE_TEST(PdfReportOptionsTests)
 

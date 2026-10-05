@@ -1295,3 +1295,32 @@ void AnalysisIntegrationTests::testPdfReportOptionsSurviveProfileSave()
 
     QCOMPARE(back.toMap(), o.toMap());
 }
+
+// The device table shows serial numbers only when the report asks for them.
+void AnalysisIntegrationTests::testPeriodHtmlSerialNumbers()
+{
+    StatisticsNight night(m_machineRow, 103, kNightDate.addDays(103));
+    Statistics stats;
+    StatisticsSections s;
+    s.devices = true;
+    s.serialNumbers = false;
+    const QString hidden = stats.periodHtml(night.date, night.date, s);
+    s.serialNumbers = true;
+    const QString shown = stats.periodHtml(night.date, night.date, s);
+    QVERIFY(hidden.contains(QStringLiteral("TestModel")));
+    QVERIFY(!hidden.contains(QStringLiteral("SN12345")));
+    QVERIFY(shown.contains(QStringLiteral("SN12345")));
+}
+
+// Unticking oximetry drops the device's rows and the analysis' oximetry and pulse rows.
+void AnalysisIntegrationTests::testOximetryRows()
+{
+    QVERIFY(Statistics::isOximetryRow(StatisticsRow(QStringLiteral("SPO2"), SC_AVG, MT_OXIMETER)));
+    for (const char *key : { "#oximetry", "odi3", "odi4", "below:90", "zones", "nadir", "hb", "#pulse", "pri", "dhr" }) {
+        QVERIFY2(Statistics::isOximetryRow(StatisticsRow(QString::fromLatin1(key), SC_ANALYSIS, MT_UNKNOWN)), key);
+    }
+    for (const char *key : { "#breathing", "ahi", "fl", "agreement" }) {
+        QVERIFY2(!Statistics::isOximetryRow(StatisticsRow(QString::fromLatin1(key), SC_ANALYSIS, MT_UNKNOWN)), key);
+    }
+    QVERIFY(!Statistics::isOximetryRow(StatisticsRow(QStringLiteral("AHI"), SC_CPH, MT_CPAP)));
+}
