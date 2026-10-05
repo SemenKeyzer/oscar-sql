@@ -50,6 +50,7 @@ private slots:
     void testWriterSummaryAndStatistics();
     void testWriterRefusesEmptyPeriod();
     void testWriterRestoresAndCleansUp();
+    void testPdfReportOptionsSurviveProfileSave();
 
 private:
     class QCoreApplication *m_app = nullptr;

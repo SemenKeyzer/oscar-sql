@@ -502,7 +502,7 @@ bool PreferencesRepository::saveUserSettings(qint64 profileId, UserSettings* gen
         "LinkGroups", "CalculateRDI", "PrefCalcMiddle", "PrefCalcPercentile",
         "PrefCalcMax", "ShowUnknownFlags", "StatReportMode", "StatReportDate",
         "StatReportRangeStart", "StatReportRangeEnd", "LastOverviewRange",
-        "CustomOverviewRangeStart", "CustomOverviewRangeEnd"
+        "CustomOverviewRangeStart", "CustomOverviewRangeEnd", "PdfReportOptions"
     };
     
     for (const QString& key : generalKeys) {

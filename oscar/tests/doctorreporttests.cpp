@@ -18,7 +18,6 @@
 #include <cmath>
 
 #include "doctorreport.h"
-#include "doctorreportdialog.h"
 
 using namespace DoctorReportPage;
 
@@ -339,16 +338,6 @@ void DoctorReportTests::testWritePdfFailsOnBadPath()
     QString error;
     QVERIFY(!DoctorReportPage::writePdf(fullReport(), QStringLiteral("/nonexistent-folder-oscar/report.pdf"), &error));
     QVERIFY(!error.isEmpty());
-}
-
-void DoctorReportTests::testDefaultFrom()
-{
-    const QDate first(2026, 2, 10), last(2026, 10, 2);
-    QCOMPARE(DoctorReportDialog::defaultFrom(QDate(), first, last), QDate(2026, 9, 3));             // last 30 days
-    QCOMPARE(DoctorReportDialog::defaultFrom(QDate(2026, 8, 1), first, last), QDate(2026, 8, 1));   // remembered
-    QCOMPARE(DoctorReportDialog::defaultFrom(QDate(2026, 10, 5), first, last), QDate(2026, 9, 3));  // after the data
-    QCOMPARE(DoctorReportDialog::defaultFrom(QDate(2025, 1, 1), first, last), QDate(2026, 9, 3));   // before the data
-    QCOMPARE(DoctorReportDialog::defaultFrom(QDate(), last.addDays(-5), last), last.addDays(-5));   // shorter history
 }
 
 void DoctorReportTests::testHtmlAnalysisMissing()

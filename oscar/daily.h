@@ -109,6 +109,8 @@ public:
         \param QDate date
         */
     void LoadDate(QDate date);
+    //! As LoadDate(), but the day is loaded before this returns: for printing one day after another.
+    void LoadDateNow(QDate date);
 
     /*! \fn getDate()
         \brief Returns the most recently loaded Date
@@ -348,6 +350,8 @@ protected:
     virtual void showEvent(QShowEvent *);
 
 private:
+    //! Shows \a date in the calendar without its selection signal.
+    void selectCalendarDate(QDate date);
     //! Brings the day's analysis up to date (before the graphs are given the day) and
     //! fills the Analysis tab.
     void loadAnalysis(Day *day);

@@ -35,7 +35,7 @@ struct DailyRestore {
     Daily *daily;
     QDate date;
     explicit DailyRestore(Daily *d) : daily(d), date(d->getDate()) {}
-    ~DailyRestore() { if (date.isValid()) daily->LoadDate(date); }
+    ~DailyRestore() { if (date.isValid()) daily->LoadDateNow(date); }
 };
 
 // Puts the Overview back on its dates and set of graphs, however the report ends.
@@ -107,7 +107,7 @@ bool PdfReportWriter::write(const PdfReportOptions &o, const QDate &lastNight, c
         DailyRestore restore(m_daily);
         const QList<QDate> nights = o.nightsToPrint(cpapNights);
         for (int i = 0; i < nights.size() && section(tr("Night %1 of %2...").arg(i + 1).arg(nights.size())); ++i) {
-            m_daily->LoadDate(nights[i]);
+            m_daily->LoadDateNow(nights[i]);
             nextPage();
             PrintTarget target;
             target.personalData = o.personalData;

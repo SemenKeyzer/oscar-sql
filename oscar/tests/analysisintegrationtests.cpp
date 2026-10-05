@@ -34,12 +34,14 @@
 #include "database/analysis_daily_repository.h"
 #include "database/database_manager.h"
 #include "database/database_schema.h"
+#include "database/preferences_repository.h"
 #include "database/profile_repository.h"
 #include "database/session_channels_repository.h"
 #include "database/session_settings_repository.h"
 #include "statistics.h"
 #include "doctorreport.h"
 #include "nightsummary.h"
+#include "pdfreportoptions.h"
 #include "pdfreportwriter.h"
 #include "tests/analysis_synth.h"
 
@@ -1270,4 +1272,26 @@ void AnalysisIntegrationTests::testWriterRestoresAndCleansUp()
     QVERIFY(!writer.write(oneNight(night.date), night.date, path, nullptr, &error));
     QVERIFY(writer.cancelled());
     QVERIFY(!QFile::exists(path));
+}
+
+// The report window's choices are kept in the profile's database rows, and come back.
+void AnalysisIntegrationTests::testPdfReportOptionsSurviveProfileSave()
+{
+    PdfReportOptions o;
+    o.apply(PdfReportOptions::Detailed);
+    o.period = PdfReportOptions::Custom;
+    o.from = QDate(2026, 9, 5);
+    o.to = QDate(2026, 10, 4);
+    o.personalData = false;
+    const QVariantMap saved = p_profile->general->pdfReportOptions();
+    p_profile->general->setPdfReportOptions(o.toMap());
+
+    PreferencesRepository repo;
+    QVERIFY(repo.saveAllPreferences(m_profileId, nullptr, nullptr, nullptr, nullptr, p_profile->general));
+    p_profile->general->setPdfReportOptions(QVariantMap());
+    QVERIFY(repo.loadAllPreferences(m_profileId, nullptr, nullptr, nullptr, nullptr, p_profile->general));
+    const PdfReportOptions back = PdfReportOptions::fromMap(p_profile->general->pdfReportOptions());
+    p_profile->general->setPdfReportOptions(saved);
+
+    QCOMPARE(back.toMap(), o.toMap());
 }

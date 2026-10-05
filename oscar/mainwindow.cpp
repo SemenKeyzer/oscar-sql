@@ -118,7 +118,7 @@
 #include "SleepLib/performance_timer.h"
 #include "reports.h"
 #include "statistics.h"
-#include "doctorreportdialog.h"
+#include "pdfreportdialog.h"
 #include "zip.h"
 #include "speedcheck.h"
 
@@ -535,7 +535,7 @@ void MainWindow::updateProfileActions()
     ui->action_Import_Data->setEnabled(open);
     ui->action_Edit_Profile->setEnabled(open);
     ui->actionPrint_Report->setEnabled(open);
-    ui->actionDoctor_Report->setEnabled(open);
+    ui->actionPdf_Report->setEnabled(open);
     ui->menuExp_ort_CSV_Data->menuAction()->setEnabled(open);
     ui->menuJournals->menuAction()->setEnabled(open);
     ui->actionBackup_Profile->setEnabled(open);
@@ -2381,10 +2381,10 @@ void MainWindow::on_actionPrint_Report_triggered()
     }
 }
 
-void MainWindow::on_actionDoctor_Report_triggered()
+void MainWindow::on_actionPdf_Report_triggered()
 {
     if (!p_profile) return;
-    DoctorReportDialog dialog(this);
+    PdfReportDialog dialog(daily, overview, this);
     dialog.exec();
 }
 

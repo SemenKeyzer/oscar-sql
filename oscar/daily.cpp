@@ -1274,13 +1274,25 @@ void Daily::LoadDate(QDate date)
         qDebug() << "Daily::LoadDate(): LoadDate called with invalid date";
         return;
     }
+    selectCalendarDate(date);
+    on_calendar_selectionChanged();
+}
+
+void Daily::LoadDateNow(QDate date)
+{
+    if (!date.isValid()) return;
+    selectCalendarDate(date);
+    on_ReloadDay();
+}
+
+void Daily::selectCalendarDate(QDate date)
+{
     ui->calendar->blockSignals(true);
     if (date.month()!=previous_date.month()) {
         on_calendar_currentPageChanged(date.year(),date.month());
     }
     ui->calendar->setSelectedDate(date);
     ui->calendar->blockSignals(false);
-    on_calendar_selectionChanged();
 }
 
 void Daily::on_calendar_selectionChanged()

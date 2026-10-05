@@ -31,7 +31,6 @@ private slots:
     void testHtmlEscapes();
     void testWritePdf();
     void testWritePdfFailsOnBadPath();
-    void testDefaultFrom();
     void testHtmlAnalysisMissing();
     void testWritePdfRussian();
 

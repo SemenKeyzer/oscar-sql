@@ -362,7 +362,7 @@ SOURCES += \
     overviewpresets.cpp \
     settingscomparison.cpp \
     doctorreport.cpp \
-    doctorreportdialog.cpp \
+    pdfreportdialog.cpp \
     preferencessearch.cpp \
     pdfreportoptions.cpp \
     htmlpages.cpp \
@@ -684,7 +684,7 @@ HEADERS  += \
     overviewpresets.h \
     settingscomparison.h \
     doctorreport.h \
-    doctorreportdialog.h \
+    pdfreportdialog.h \
     preferencessearch.h \
     pdfreportoptions.h \
     htmlpages.h \
