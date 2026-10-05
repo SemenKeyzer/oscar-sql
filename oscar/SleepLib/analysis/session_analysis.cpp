@@ -181,7 +181,7 @@ SessionStamp SessionStamp::fromJson(const QString &json)
     st.unscoreableSeconds = flow.value("u").toInt();
     st.flSum = flow.value("fl").toDouble();
     st.flBreaths = flow.value("flb").toInt();
-    st.flLimitedBreaths = flow.value("flx").toInt();
+    st.flLimitedBreaths = flow.value("flx").toInt(-1);   // -1: stamped before it was counted
     auto counts = [&flow](const char *key) {
         const QJsonArray a = flow.value(QLatin1String(key)).toArray();
         GlasgowCounts c;

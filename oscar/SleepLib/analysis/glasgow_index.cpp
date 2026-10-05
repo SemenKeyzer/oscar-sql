@@ -201,7 +201,8 @@ GlasgowResult glasgowOriginal(const QVector<FlowChunk> &chunks)
                 const double oneSecondLater = indexOfMin + extrapolation < len ? y[indexOfMin + extrapolation] : 0;
                 in.hasPreRest = true;
                 if (oneSecondLater < 0) {
-                    const int intersection = indexOfMin + int(jsRound(extrapolation * minValue / (minValue - oneSecondLater)));
+                    // in double, as in JS: a flat expiration gives an infinite rest, never "no pause"
+                    const double intersection = indexOfMin + jsRound(extrapolation * minValue / (minValue - oneSecondLater));
                     in.preRest = in.start - intersection;
                 } else {
                     in.preRest = -10;
@@ -393,16 +394,24 @@ GlasgowResult glasgowAdapted(const QVector<FlowChunk> &chunks, const QVector<Bre
             const double m = minAt >= 0 ? e.at(minAt) : 0;
             b.flags[GiMultiBreath] = m > -0.10 * typicalPef;
             if (!b.flags[GiMultiBreath] && minAt >= 0) {
-                // No Pause: extrapolate the expiration from its peak over one second to zero
+                // No Pause: where the expiration comes back to zero, by extrapolating it from
+                // its peak over one second as the original does, or, when it is already back
+                // by then, the first sample at or above zero (a resting flow hovers around it,
+                // so its sign alone says nothing); to the start of the inspiration proper
                 const qint64 tm = e.chunk->start + qint64(std::llround(minAt * e.chunk->rateMs));
                 const int later = minAt + int(std::lround(1000 / e.chunk->rateMs));
                 const double y1 = later < e.chunk->samples.size() ? e.chunk->samples[later] : 0;
+                const double inspStart = s.chunk->start + s.from * s.chunk->rateMs;
+                double intersection = tm;
                 if (y1 < 0) {
-                    const double intersection = tm + 1000.0 * m / (m - y1);
-                    b.flags[GiNoPause] = br.start - intersection < 400;
+                    intersection = tm + 1000.0 * m / (m - y1);
                 } else {
-                    b.flags[GiNoPause] = true;   // still breathing out a second after the peak: no rest
+                    int i = minAt + 1;
+                    const int stop = std::min<int>(later, e.chunk->samples.size() - 1);
+                    while (i < stop && e.chunk->samples[i] < 0) ++i;
+                    intersection = e.chunk->start + i * e.chunk->rateMs;
                 }
+                b.flags[GiNoPause] = inspStart - intersection < 400;
             }
         }
         if (k >= 5) b.flags[GiInspirRate] = 5 * 60000.0 / (br.start - breaths[k - 5].start) > 20;
@@ -439,7 +448,8 @@ QVector<TimedValue> glasgowSeries(const QVector<GlasgowBreath> &breaths)
             for (int c = 0; c < GiComponentCount; ++c) window.flagged[c] -= counted[first]->flags[c];
             ++first;
         }
-        out << TimedValue { b.start, float(window.index()) };
+        // from a minute of breathing on: over the first few breaths the index jumps about
+        if (b.start - counted[first]->start >= 60000) out << TimedValue { b.start, float(window.index()) };
     }
     return out;
 }

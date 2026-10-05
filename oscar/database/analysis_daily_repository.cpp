@@ -64,8 +64,8 @@ QVariantMap toColumns(const AnalysisDailyData &d)
     put(f, "fl_time_s", d.flSeconds);
     put(f, "fl_sum", d.flSum);
     put(f, "n_fl_breaths", d.flBreaths);
-    put(f, "fl_limited_breaths", d.flLimitedBreaths);
-    put(f, "fl_longest_s", d.flLongestSeconds);
+    put(f && d.hasFlRuns, "fl_limited_breaths", d.flLimitedBreaths);
+    put(f && d.hasFlRuns, "fl_longest_s", d.flLongestSeconds);
     put(f && !d.glasgow.isEmpty(), "gi_breaths", d.glasgow.breaths);
     put(f && !d.glasgow.isEmpty(), "gi_counts", d.glasgow.toText());
     put(f && !d.glasgowAdapted.isEmpty(), "gia_breaths", d.glasgowAdapted.breaths);
@@ -151,6 +151,7 @@ AnalysisDailyData fromRecord(const QSqlRecord &r)
     d.flSeconds = i("fl_time_s");
     d.flSum = f("fl_sum");
     d.flBreaths = i("n_fl_breaths");
+    d.hasFlRuns = !r.isNull("fl_limited_breaths");
     d.flLimitedBreaths = i("fl_limited_breaths");
     d.flLongestSeconds = i("fl_longest_s");
     d.glasgow = analysis::GlasgowCounts::fromText(i("gi_breaths"), r.value("gi_counts").toString());

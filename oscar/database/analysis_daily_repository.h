@@ -48,6 +48,7 @@ struct AnalysisDailyData
     int flSeconds = 0;
     double flSum = 0;
     int flBreaths = 0;
+    bool hasFlRuns = false;    //!< the two below are known (analysed by a version that keeps them)
     int flLimitedBreaths = 0;  //!< scored breaths at or above the flow limitation threshold
     int flLongestSeconds = 0;  //!< the longest flow limitation span
     analysis::GlasgowCounts glasgow, glasgowAdapted;   //!< Glasgow Index counts (empty: none)

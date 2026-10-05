@@ -36,6 +36,8 @@ private slots:
     void testToDailyRowCarriesGlasgow();
     void testGlasgowFigures();
     void testGlasgowPeriodSkipsEmptyNights();
+    void testFlRunsSkipOldNights();
+    void testOldStampHasNoLimitedBreaths();
     void testDayAnalysisScoresAndStores();
     void testDayAnalysisLoadsOnlyWhatItNeeds();
     void testAnalysisSettingsRoundTrip();

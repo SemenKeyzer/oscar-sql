@@ -81,6 +81,10 @@ QString glasgowHtml(const DayResult &r)
 {
     const QString dash = QStringLiteral("&mdash;");
     auto value = [&dash](double v) { return std::isnan(v) ? dash : number(v, 2); };
+    if (!r.flScored) {
+        return QStringLiteral("<p><b>%1</b>: &mdash; <font size=-1>%2</font></p>")
+            .arg(AnalysisPanel::tr("Glasgow Index"), AnalysisPanel::tr("Not computed: the flow is recorded below 10 Hz."));
+    }
     QString html = kTable;
     html += QStringLiteral("<tr><td><b>%1</b></td><td align=right>%2</td><td align=right>%3</td></tr>")
                 .arg(AnalysisPanel::tr("Glasgow Index"), AnalysisPanel::tr("original"), AnalysisPanel::tr("adapted"));
@@ -166,9 +170,11 @@ QString AnalysisPanel::sidebarHtml(Day *day, const DayResult &r, const QString &
         html += QStringLiteral("</table>");
 
         if (r.flScored && r.flBreaths > 0) {
-            html += QStringLiteral("<p>%1</p>").arg(tr("Flow limitation: %1, longest run %2; %3% of breaths")
-                .arg(duration(1000LL * r.flSeconds), duration(1000LL * r.flLongestSeconds),
-                     number(100.0 * r.flLimitedBreaths / r.flBreaths, 0)));
+            html += QStringLiteral("<p>%1</p>").arg(r.flLimitedBreaths >= 0
+                ? tr("Flow limitation: %1, longest run %2; %3% of breaths")
+                      .arg(duration(1000LL * r.flSeconds), duration(1000LL * r.flLongestSeconds),
+                           number(100.0 * r.flLimitedBreaths / r.flBreaths, 0))
+                : tr("Flow limitation: %1, longest run %2").arg(duration(1000LL * r.flSeconds), duration(1000LL * r.flLongestSeconds)));
         }
         html += glasgowHtml(r);
 

@@ -428,4 +428,21 @@ void AnalysisPanelTests::testGlasgowDash()
     QVERIFY(html.contains(AnalysisPanel::tr("Glasgow Index")));
     QVERIFY(html.contains(AnalysisPanel::tr("Flow limitation and cardiogenic oscillations need 10 Hz: not scored.")));
     QVERIFY(!html.contains(AnalysisPanel::tr("Flat top")));
+    QVERIFY(html.contains(AnalysisPanel::tr("Not computed: the flow is recorded below 10 Hz.")));
+    QVERIFY(!html.contains(AnalysisPanel::tr("Author's scale: 0–0.2 clean breathing, about 3 serious problems. Experimental, not reviewed by physicians.")));
+}
+
+void AnalysisPanelTests::testFlowLimitationLineOldStamp()
+{
+    DayResult r = cpapNight();
+    r.flScored = true;
+    r.flowSeconds = 27000;
+    r.flSeconds = 6300;
+    r.flLongestSeconds = 720;
+    r.flBreaths = 1000;
+    r.flLimitedBreaths = -1;   // not known
+    const QString html = AnalysisPanel::sidebarHtml(nullptr, r, QString(), {});
+    QVERIFY(html.contains(AnalysisPanel::tr("Flow limitation: %1, longest run %2")
+                              .arg(AnalysisPanel::duration(6300000), AnalysisPanel::duration(720000))));
+    QVERIFY(!html.contains(QStringLiteral("-0%")));
 }

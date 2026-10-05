@@ -79,7 +79,7 @@ struct DayResult {
     int flBreaths = 0;
     int flSeconds = 0;                  //!< in flow limitation spans
     int flLongestSeconds = 0;           //!< the longest of those spans
-    int flLimitedBreaths = 0;           //!< scored breaths at or above the threshold
+    int flLimitedBreaths = 0;           //!< scored breaths at or above the threshold; -1 unknown
     GlasgowCounts glasgow;              //!< Glasgow Index counts of the night, original ...
     GlasgowCounts glasgowAdapted;       //!< ... and adapted
     int pbSeconds = 0;                  //!< in periodic breathing spans

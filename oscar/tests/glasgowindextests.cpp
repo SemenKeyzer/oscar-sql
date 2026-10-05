@@ -29,6 +29,7 @@ const SeriesSpec kSpecs[] = {
     { "varamp", "parabola", 0, 40, 60, 25 },
     { "weak", "flat", 15, 40, 60, 25 },
     { "skew", "skew", 30, 40, 60, 25 },
+    { "plateau", "plateau", 30, 40, 60, 25 },   // a flat expiration: the original divides by zero
 };
 
 double shape(const QString &s, double x)
@@ -37,6 +38,7 @@ double shape(const QString &s, double x)
     if (s == QLatin1String("flat")) return std::min(1.0, 1.6 * 4 * x * (1 - x));
     if (s == QLatin1String("double")) return std::sin(M_PI * x) * (1 - 0.4 * std::exp(-std::pow((x - 0.5) / 0.1, 2)));
     if (s == QLatin1String("spike")) return 1 - std::fabs(2 * x - 1);
+    if (s == QLatin1String("plateau")) return 4 * x * (1 - x);
     return std::sin(M_PI * std::pow(x, 0.6));   // skew
 }
 
@@ -50,7 +52,10 @@ void appendSeries(QVector<float> &out, const SeriesSpec &sp, double fs, double p
     for (int b = 0; b < 60; ++b) {
         const double P = (QLatin1String(sp.name) == QLatin1String("varamp") ? (b % 2 ? 36 : 24) : sp.peak) * peakScale;
         for (int k = 0; k < I; ++k) out << float(round2(shape(QLatin1String(sp.shape), double(k) / I) * P));
-        for (int k = 0; k < E; ++k) out << float(round2(-0.8 * P * std::sin(M_PI * k / E)));
+        for (int k = 0; k < E; ++k) {
+            const bool plateau = QLatin1String(sp.shape) == QLatin1String("plateau");
+            out << float(plateau ? (k < 2 || k >= E - 2 ? -10.0 * k / E : -20.0) : round2(-0.8 * P * std::sin(M_PI * k / E)));
+        }
         for (int k = 0; k < R; ++k) out << 0.0f;
     }
 }
@@ -115,7 +120,8 @@ const Golden kGolden[] = {
     { "varamp", 60, { 0, 0, 0, 0, 0, 0, 0, 0.02, 0.9, 0.92 } },
     { "weak", 60, { 0, 0, 1, 1, 0, 0, 0, 0.02, 0, 1.02 } },
     { "skew", 59, { 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 } },
-    { "mixed", 540, { 0.11, 0.11, 0.22, 0.22, 0.11, 0.22, 0.11, 0, 0.13, 1.01 } },
+    { "plateau", 60, { 0, 0, 0, 0, 0, 0.98, 0, 0.02, 0, 1 } },
+    { "mixed", 600, { 0.1, 0.1, 0.2, 0.2, 0.1, 0.3, 0.1, 0, 0.12, 1.02 } },
 };
 
 } // namespace
@@ -258,11 +264,19 @@ void GlasgowIndexTests::testSeries()
     const FlowChunk c = synthSeries(QStringLiteral("mixed"));
     const GlasgowResult r = glasgowAdapted({ c }, synthBreaths(QStringLiteral("mixed"), c), {});
     const QVector<TimedValue> series = glasgowSeries(r.breaths);
-    QCOMPARE(series.size(), r.counts.breaths);
-    QCOMPARE(series.first().t, r.breaths.first().start);
+    // a value once the window holds a minute of breathing, not over the first few breaths
+    QVERIFY(series.size() < r.counts.breaths);
+    QVERIFY(series.first().t >= r.breaths.first().start + 60000);
+    QVERIFY(series.first().t < r.breaths.first().start + 70000);
     // 60 normal breaths of 5 s fill the window; the flat block follows them
-    const float duringNormal = series[59].v;
-    const float duringFlat = series[119].v;
+    auto at = [&series](qint64 t) {   // the value at the last breath before t
+        float v = 0;
+        for (const TimedValue &tv : series) if (tv.t <= t) v = tv.v;
+        return v;
+    };
+    // 60 breaths of 5 s per block
+    const float duringNormal = at(r.breaths.first().start + 295000);
+    const float duringFlat = at(r.breaths.first().start + 595000);
     QVERIFY2(duringFlat > duringNormal + 0.5f, qPrintable(QStringLiteral("%1 vs %2").arg(duringFlat).arg(duringNormal)));
 }
 
@@ -304,4 +318,45 @@ void GlasgowIndexTests::testAdaptedIgnoresSlowOnset()
     const GlasgowCounts a = glasgowAdapted({ c }, breaths, {}).counts;
     QVERIFY(o.fraction(GiSkew) < 0.1);
     QVERIFY2(a.fraction(GiSkew) < 0.1, qPrintable(QString::number(a.fraction(GiSkew))));
+}
+
+namespace {
+
+// Breaths with a quick expiration (peak after tau samples) and a rest of \a restSamples at
+// \a restFlow L/min, as a CPAP flow with a small offset looks; 25 Hz.
+FlowChunk restingBreaths(int restSamples, float restFlow, QVector<Breath> &breaths, double tau = 3)
+{
+    FlowChunk c;
+    c.start = 1000000;
+    c.rateMs = 40;
+    breaths.clear();
+    for (int b = 0; b < 60; ++b) {
+        Breath br;
+        br.start = c.start + qint64(c.samples.size() * c.rateMs);
+        for (int k = 0; k < 40; ++k) c.samples << float(round2(30 * 4.0 * k / 40 * (1 - k / 40.0)));
+        br.inspEnd = c.start + qint64(c.samples.size() * c.rateMs);
+        for (int k = 0; k < 40; ++k) c.samples << float(round2(-24 * (k / tau) * std::exp(1 - k / tau) + restFlow * (1 - std::exp(-k / tau))));
+        for (int k = 0; k < restSamples; ++k) c.samples << restFlow;
+        br.end = c.start + qint64(c.samples.size() * c.rateMs);
+        br.pif = 30;
+        br.pef = -24;
+        breaths << br;
+    }
+    return c;
+}
+
+} // namespace
+
+// A real rest before the inspiration is not "no pause", whatever small offset the flow has
+// during it; breathing in straight after breathing out is.
+void GlasgowIndexTests::testAdaptedPauseWithOffset()
+{
+    QVector<Breath> breaths;
+    for (float offset : { 0.0f, 0.3f, -0.3f }) {
+        const FlowChunk rested = restingBreaths(25, offset, breaths);
+        const double np = glasgowAdapted({ rested }, breaths, {}).counts.fraction(GiNoPause);
+        QVERIFY2(np < 0.1, qPrintable(QStringLiteral("offset %1: %2").arg(offset).arg(np)));
+    }
+    const FlowChunk hurried = restingBreaths(0, 0, breaths, 5);   // still breathing out when the next breath starts
+    QVERIFY(glasgowAdapted({ hurried }, breaths, {}).counts.fraction(GiNoPause) > 0.9);
 }

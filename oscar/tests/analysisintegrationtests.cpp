@@ -375,6 +375,7 @@ AnalysisDailyData sampleDay(qint64 profileId, const QDate &date)
     d.nCentralApnea = 3;
     d.nHypopneaAasm3 = 11;
     d.flSum = 123.5;
+    d.hasFlRuns = true;
     d.flLimitedBreaths = 210;
     d.flLongestSeconds = 840;
     d.glasgow.breaths = 6000;
@@ -1360,6 +1361,7 @@ void AnalysisIntegrationTests::testMigrationV21KeepsRows()
     const AnalysisDailyData d = AnalysisDailyRepository().find(m_profileId, date);
     QVERIFY(d.id > 0);
     QCOMPARE(d.flSeconds, 900);
+    QVERIFY(!d.hasFlRuns);   // not known until the night is analysed again
     QCOMPARE(d.flLimitedBreaths, 0);
     QCOMPARE(d.flLongestSeconds, 0);
     QVERIFY(d.glasgow.isEmpty());
@@ -1383,6 +1385,9 @@ void AnalysisIntegrationTests::testToDailyRowCarriesGlasgow()
     QCOMPARE(d.flLongestSeconds, 300);
     QVERIFY(d.glasgow == r.glasgow);
     QVERIFY(d.glasgowAdapted == r.glasgowAdapted);
+    QVERIFY(d.hasFlRuns);
+    r.flLimitedBreaths = -1;   // a session stamped before the count existed
+    QVERIFY(!toDailyRow(r, AnalysisParams(), QStringLiteral("x"), QString()).hasFlRuns);
 }
 
 namespace {
@@ -1394,6 +1399,7 @@ AnalysisDailyData flNight(int flSeconds, int limited, int longest, int flagged)
     d.flowSeconds = 25000;
     d.flSeconds = flSeconds;
     d.flBreaths = 1000;
+    d.hasFlRuns = true;
     d.flLimitedBreaths = limited;
     d.flLongestSeconds = longest;
     d.glasgow.breaths = 1000;
@@ -1427,4 +1433,25 @@ void AnalysisIntegrationTests::testGlasgowPeriodSkipsEmptyNights()
     QCOMPARE(analysisFigureValue(QStringLiteral("flbr"), rows), 30.0);
     QCOMPARE(analysisFigureValue(QStringLiteral("gi"), rows), 0.2);
     QVERIFY(std::isnan(analysisFigureValue(QStringLiteral("gi"), { slow })));
+}
+
+// A night analysed before the limited breaths and the longest run were kept says nothing
+// about them: it is left out of those two figures, not counted as 0.
+void AnalysisIntegrationTests::testFlRunsSkipOldNights()
+{
+    AnalysisDailyData old = flNight(600, 0, 0, 100);
+    old.hasFlRuns = false;
+    const QList<AnalysisDailyData> rows { flNight(600, 200, 120, 100), flNight(1200, 400, 300, 300), old };
+    QCOMPARE(analysisFigureValue(QStringLiteral("flbr"), rows), 30.0);
+    QCOMPARE(analysisFigureValue(QStringLiteral("fllong"), rows), 5.0);
+    QVERIFY(std::isnan(analysisFigureValue(QStringLiteral("flbr"), { old })));
+    QVERIFY(std::isnan(analysisFigureValue(QStringLiteral("fllong"), { old })));
+}
+
+void AnalysisIntegrationTests::testOldStampHasNoLimitedBreaths()
+{
+    const SessionStamp st = SessionStamp::fromJson(QStringLiteral(
+        "{\"flow\":{\"v\":2,\"p\":\"x\",\"a\":true,\"fls\":true,\"s\":1000,\"u\":0,\"fl\":5,\"flb\":100}}"));
+    QCOMPARE(st.flBreaths, 100);
+    QCOMPARE(st.flLimitedBreaths, -1);
 }
