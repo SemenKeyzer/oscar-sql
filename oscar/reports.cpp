@@ -36,7 +36,6 @@ void Report::PrintReport(gGraphView *gv, QString name, QDate date)
     if (!gv) { return; }
 
 
-    Session *journal = nullptr;
     //QDate d=QDate::currentDate();
 
     int visgraphs = gv->visibleGraphs();
@@ -50,7 +49,7 @@ void Report::PrintReport(gGraphView *gv, QString name, QDate date)
 
     if (name == STR_TR_Daily) {
         QVariantList book_start;
-        journal = mainwin->getDaily()->GetJournalSession(mainwin->getDaily()->getDate());
+        Session *journal = mainwin->getDaily()->GetJournalSession(mainwin->getDaily()->getDate());
 
         if (journal && journal->settings.contains(Bookmark_Start)) {
             book_start = journal->settings[Bookmark_Start].toList();
@@ -68,9 +67,6 @@ void Report::PrintReport(gGraphView *gv, QString name, QDate date)
 
     QPrinter *printer;
 
-    bool aa_setting = AppSetting->antiAliasing();
-
-    bool force_antialiasing = aa_setting;
 
     printer = new QPrinter(QPrinter::HighResolution);
 
@@ -106,11 +102,33 @@ void Report::PrintReport(gGraphView *gv, QString name, QDate date)
     progress.setPixmap(icon);
     progress.open();
 
+    PrintTarget target;
+    target.personalData = AppSetting->showPersonalData();
+    target.bookmarks = print_bookmarks;
+    target.progress = &progress;
+    paint(painter, *printer, gv, name, date, target);
+    painter.end();
+    progress.close();
+    delete printer;
+}
+
+bool Report::paint(QPainter &painter, QPrinter &printer, gGraphView *gv, const QString &name, const QDate &date,
+                   const PrintTarget &target)
+{
+    Q_UNUSED(date)
+    Session *journal = (name == STR_TR_Daily)
+                     ? mainwin->getDaily()->GetJournalSession(mainwin->getDaily()->getDate()) : nullptr;
+    bool aa_setting = AppSetting->antiAliasing();
+    bool force_antialiasing = aa_setting;
+    bool written = true;
+    // the window and viewport set below are this report's own; a combined report goes on drawing
+    painter.save();
+
 
     GLint gw;
     gw = 2048; // Rough guess.. No GL_MAX_RENDERBUFFER_SIZE in mingw.. :(
-    //QSizeF pxres=printer->paperSize(QPrinter::DevicePixel);
-    QRect prect = printer->pageLayout().paintRectPixels( printer->resolution() ) ;
+    //QSizeF pxres=printer.paperSize(QPrinter::DevicePixel);
+    QRect prect = printer.pageLayout().paintRectPixels( printer.resolution() ) ;
     float ratio = float(prect.height()) / float(prect.width());
     float virt_width = gw;
     float virt_height = virt_width * ratio;
@@ -145,7 +163,7 @@ void Report::PrintReport(gGraphView *gv, QString name, QDate date)
 
     int maxy = 0;
 
-    if (AppSetting->showPersonalData() && !p_profile->user->firstName().isEmpty()) {
+    if (target.personalData && !p_profile->user->firstName().isEmpty()) {
         QString userinfo = STR_TR_Name + QString(":\t %1, %2\n").
                 arg(p_profile->user->lastName()).
                 arg(p_profile->user->firstName());
@@ -433,7 +451,7 @@ void Report::PrintReport(gGraphView *gv, QString name, QDate date)
     AppSetting->setLineCursorMode(false);
 
     if (name == STR_TR_Daily) {
-        if (!print_bookmarks) {
+        if (!target.bookmarks) {
             for (int i = 0; i < gv->size(); i++) {
                 g = (*gv)[i];
 
@@ -553,7 +571,7 @@ void Report::PrintReport(gGraphView *gv, QString name, QDate date)
 
     int pages = ceil(float(graphs.size() + graph_slots) / float(graphs_per_page));
 
-    progress.setProgressMax(graphs.size());
+    if (target.progress) target.progress->setProgressMax(graphs.size());
 
     int page = 1;
 
@@ -567,8 +585,9 @@ void Report::PrintReport(gGraphView *gv, QString name, QDate date)
                 break;
             }
 
-            if (!printer->newPage()) {
+            if (!printer.newPage()) {
                 qWarning("failed in flushing page to disk, disk full?");
+                written = false;
                 break;
             }
 
@@ -637,14 +656,13 @@ void Report::PrintReport(gGraphView *gv, QString name, QDate date)
 
         top += full_graph_height;
 
-        progress.setProgressValue(i);
+        if (target.progress) target.progress->setProgressValue(i);
         QApplication::processEvents();
     }
 
     gv->SetXBounds(savest, saveet);
-    painter.end();
-    progress.close();
-    delete printer;
     AppSetting->setLineCursorMode(lineCursorMode);
+    painter.restore();
+    return written;
 }
 
