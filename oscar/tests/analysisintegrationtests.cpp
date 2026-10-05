@@ -8,6 +8,7 @@
 
 #include "analysisintegrationtests.h"
 
+#include <QApplication>
 #include <QCoreApplication>
 #include <QFile>
 #include <QRegularExpression>
@@ -108,7 +109,7 @@ void AnalysisIntegrationTests::initTestCase()
         static int argc = 1;
         static char appName[] = "test";
         static char *argv[] = { appName, nullptr };
-        m_app = new QCoreApplication(argc, argv);
+        m_app = new QApplication(argc, argv);   // the Statistics draw pixmaps
     }
     if (DatabaseManager::instance().isOpen()) DatabaseManager::instance().close();
 
@@ -1125,4 +1126,89 @@ void AnalysisIntegrationTests::testNightSummaryTimeAtMaximum()
     QVERIFY2(s.pressureMaxNote().contains(QCoreApplication::translate("NightSummary", "%1 min").arg(10)),
              qPrintable(s.pressureMaxNote()));
     delete day;
+}
+
+namespace {
+
+// One CPAP night on a machine the profile knows, for the Statistics tests; undone in the destructor.
+struct StatisticsNight {
+    Machine cpap;
+    QDate date;
+    Day *day = nullptr;
+    StatisticsNight(qint64 machineRow, SessionID id, const QDate &d) : cpap(p_profile, 68 + id), date(d)
+    {
+        QFile::remove(p_profile->Get("{" + STR_GEN_DataFolder + "}/RXChanges.cache"));
+        cpap.info.type = MT_CPAP;
+        cpap.info.brand = QStringLiteral("TestBrand");
+        cpap.info.model = QStringLiteral("TestModel");
+        cpap.info.serial = QStringLiteral("SN12345");
+        cpap.setDatabaseId(machineRow);
+        p_profile->AddMachine(&cpap);
+        day = p_profile->addDay(date);   // keeps the profile's first and last day up to date
+        day->addSession(hypopneaSession(&cpap, id, machineRow));
+        cpap.day.insert(date, day);       // the machine's own list of days, as an import fills it
+    }
+    ~StatisticsNight()
+    {
+        cpap.day.remove(date);
+        p_profile->daylist.remove(date);
+        p_profile->DelMachine(&cpap);
+        delete day;
+    }
+};
+
+} // namespace
+
+void AnalysisIntegrationTests::testPeriodHtmlSections()
+{
+    StatisticsNight night(m_machineRow, 100, kNightDate.addDays(100));
+    Statistics stats;
+    StatisticsSections all;
+    all.settingsChanges = all.oximetry = all.devices = true;
+    const QString full = stats.periodHtml(night.date, night.date, all);
+    QVERIFY(full.contains(Statistics::tr("Changes to Device Settings")));
+    QVERIFY(full.contains(Statistics::tr("Device Information")));
+
+    StatisticsSections none = all;
+    none.settingsChanges = none.devices = false;
+    const QString bare = stats.periodHtml(night.date, night.date, none);
+    QVERIFY(!bare.contains(Statistics::tr("Changes to Device Settings")));
+    QVERIFY(!bare.contains(Statistics::tr("Device Information")));
+    QVERIFY(bare.contains(Statistics::tr("CPAP Statistics")));
+}
+
+void AnalysisIntegrationTests::testPeriodHtmlPersonalData()
+{
+    StatisticsNight night(m_machineRow, 101, kNightDate.addDays(101));
+    const QString first = p_profile->user->firstName();
+    p_profile->user->setFirstName(QStringLiteral("Иван"));
+    const bool shown = AppSetting->showPersonalData();
+    AppSetting->setShowPersonalData(true);
+
+    Statistics stats;
+    StatisticsSections s;
+    s.personalData = false;
+    s.serialNumbers = false;
+    const QString hidden = stats.periodHtml(night.date, night.date, s);
+    s.personalData = true;
+    const QString visible = stats.periodHtml(night.date, night.date, s);
+    const bool stillShown = AppSetting->showPersonalData();
+
+    p_profile->user->setFirstName(first);
+    AppSetting->setShowPersonalData(shown);
+    QVERIFY(!hidden.contains(QStringLiteral("Иван")));
+    QVERIFY(visible.contains(QStringLiteral("Иван")));
+    QVERIFY(stillShown);   // the report's choice never touches the user's setting
+}
+
+void AnalysisIntegrationTests::testPeriodHtmlClampsToData()
+{
+    StatisticsNight night(m_machineRow, 102, kNightDate.addDays(102));
+    const int mode = p_profile->general->statReportMode();
+    const QDate rangeStart = p_profile->general->statReportRangeStart();
+    Statistics stats;
+    const QString html = stats.periodHtml(night.date.addDays(-400), night.date.addDays(400), StatisticsSections());
+    QVERIFY(html.contains(Statistics::tr("CPAP Statistics")));
+    QCOMPARE(p_profile->general->statReportMode(), mode);
+    QCOMPARE(p_profile->general->statReportRangeStart(), rangeStart);
 }

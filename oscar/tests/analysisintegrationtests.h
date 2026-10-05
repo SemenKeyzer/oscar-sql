@@ -44,6 +44,9 @@ private slots:
     void testDoctorReportSettingsSince();
     void testDoctorReportAnalysisOnCpapNightsOnly();
     void testNightSummaryTimeAtMaximum();
+    void testPeriodHtmlSections();
+    void testPeriodHtmlPersonalData();
+    void testPeriodHtmlClampsToData();
 
 private:
     class QCoreApplication *m_app = nullptr;

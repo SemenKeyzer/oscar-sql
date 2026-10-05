@@ -48,6 +48,32 @@ server= red 30+
 
 extern MainWindow *mainwin;
 
+// What the Statistics are built for: the profile's report settings, or, while periodHtml() or a
+// doctor report runs, explicit dates and privacy choices that leave the profile alone.
+namespace {
+struct ReportOverride {
+    bool active = false;
+    QDate from, to;
+    StatisticsSections sections;
+};
+ReportOverride s_override;
+bool s_privacyOverride = false;
+bool s_personal = true, s_serial = false;
+
+int reportMode() { return s_override.active ? STAT_MODE_RANGE : p_profile->general->statReportMode(); }
+QDate rangeStart() { return s_override.active ? s_override.from : p_profile->general->statReportRangeStart(); }
+QDate rangeEnd() { return s_override.active ? s_override.to : p_profile->general->statReportRangeEnd(); }
+QDate reportDate() { return s_override.active ? s_override.to : p_profile->general->statReportDate(); }
+bool showPersonal() { return s_privacyOverride ? s_personal : AppSetting->showPersonalData(); }
+bool showSerial() { return s_privacyOverride ? s_serial : AppSetting->includeSerial(); }
+
+// Sets the privacy choices for as long as it lives.
+struct PrivacyScope {
+    PrivacyScope(bool personal, bool serial) { s_privacyOverride = true; s_personal = personal; s_serial = serial; }
+    ~PrivacyScope() { s_privacyOverride = false; }
+};
+} // namespace
+
 namespace {
 QString analysisValue(const QString &key, const QDate &start, const QDate &end);
 }
@@ -395,11 +421,11 @@ QDate lastGoodDay() {
 void Statistics::adjustRange(QDate& start , QDate& last) {
     PERF_TIMER_SCOPE("Statistics::adjustRange()");
     // this method reduces the size of the available to meet the statistics pages requirements.
-    if (p_profile->general->statReportMode() == STAT_MODE_RANGE) {
-        start = qMax(start,p_profile->general->statReportRangeStart());
-        last  = qMin(last ,p_profile->general->statReportRangeEnd()  );
+    if (reportMode() == STAT_MODE_RANGE) {
+        start = qMax(start,rangeStart());
+        last  = qMin(last ,rangeEnd()  );
     } else {
-        last  = qMin(last ,p_profile->general->statReportDate()  );
+        last  = qMin(last ,reportDate()  );
     }
     start = qMax(start,p_profile->FirstDay());  // need if less than a years samples
     start = qMin(start,last);   // insure start is always less than max. SHould be but???
@@ -1079,7 +1105,7 @@ Statistics::Statistics(QObject *parent) :
 
 // Get the user information block for displaying at top of page
 QString Statistics::getUserInfo () {
-    if (!AppSetting->showPersonalData())
+    if (!showPersonal())
         return "";
 
     QString address = p_profile->user->address();
@@ -1414,7 +1440,7 @@ struct Period {
             next = last.addDays(advance);
         };
         if (next<=first) {
-            if ( (next<first) && (p_profile->general->statReportMode() == STAT_MODE_RANGE) ){
+            if ( (next<first) && (reportMode() == STAT_MODE_RANGE) ){
                 name = QObject::tr("Everything");
             }
             finished = true;
@@ -1569,9 +1595,10 @@ QString Statistics::GenerateRXChanges()
     while (it.hasPrevious()) {
         it.previous();
         const RXItem & rx = it.value();
-        if (rx.start > p_profile->general->statReportDate() ) continue;
+        if (rx.start > reportDate() ) continue;
+        if (s_override.active && rx.end < s_override.from) continue;
         QDate rxend=rx.end;
-        if (rxend > p_profile->general->statReportDate() ) rxend = p_profile->general->statReportDate();
+        if (rxend > reportDate() ) rxend = reportDate();
 
         QString color = alternatingColor(alternatingColorCounter);
 
@@ -1590,7 +1617,7 @@ QString Statistics::GenerateRXChanges()
         if (AppSetting->combineSimilarMachines()) {
             // Merged rows may represent multiple physical machines; show brand only.
             machid = QString("<td>%1</td>").arg(rx.machine->brand());
-        } else if (AppSetting->includeSerial()) {
+        } else if (showSerial()) {
             machid = QString("<td>%1 (%2) [%3]</td>").arg(rx.machine->model())
                                                            .arg(rx.machine->modelnumber())
                                                            .arg(rx.machine->serial());
@@ -1712,14 +1739,14 @@ DoctorReport Statistics::doctorReport(const QDate &from, const QDate &to, const 
     r.leakUnits = schema::channel[CPAP_Leak].units();
     r.pressureUnits = schema::channel[CPAP_Pressure].units();
     r.percentile = p_profile->general->prefCalcPercentile();
-    if (AppSetting->showPersonalData()) {
+    if (showPersonal()) {
         r.patient = (p_profile->user->firstName() + QLatin1Char(' ') + p_profile->user->lastName()).trimmed();
         r.birthDate = p_profile->user->DOB();
     }
 
     auto label = [](Machine *m) {
         QString text = QStringList { m->brand(), m->model() }.join(QLatin1Char(' ')).trimmed();
-        if (AppSetting->includeSerial() && !m->serial().isEmpty()) text += QStringLiteral(" (%1)").arg(m->serial());
+        if (showSerial() && !m->serial().isEmpty()) text += QStringLiteral(" (%1)").arg(m->serial());
         return text;
     };
 
@@ -1797,6 +1824,35 @@ DoctorReport Statistics::doctorReport(const QDate &from, const QDate &to, const 
         }
     }
     return r;
+}
+
+QString Statistics::periodHtml(const QDate &from, const QDate &to, const StatisticsSections &sections)
+{
+    // the period within the data, so no column runs over days that hold nothing
+    QDate first = p_profile->FirstDay(), last = p_profile->LastDay();
+    if (!first.isValid() || !last.isValid()) return htmlNoData();
+    s_override.active = true;
+    s_override.from = qMax(from, first);
+    s_override.to = qMin(to, last);
+    if (s_override.from > s_override.to) s_override.from = s_override.to;
+    s_override.sections = sections;
+    PrivacyScope privacy(sections.personalData, sections.serialNumbers);
+    struct Done { ~Done() { s_override = ReportOverride(); } } done;
+
+    initAlternatingColor();
+    QString html = generateHeader(false);
+    const QString usage = GenerateCPAPUsage();
+    if (usage.isEmpty()) return html + htmlNoData() + generateFooter(true);
+    html += usage;
+    if (sections.settingsChanges) html += GenerateRXChanges();
+    if (sections.devices) html += GenerateMachineList();
+    return html + generateFooter(true);
+}
+
+DoctorReport Statistics::doctorReport(const QDate &from, const QDate &to, bool personalData, bool serialNumbers)
+{
+    PrivacyScope privacy(personalData, serialNumbers);
+    return doctorReport(from, to);
 }
 
 QString Statistics::GenerateSettingsComparison()
@@ -1895,7 +1951,7 @@ QString Statistics::GenerateCPAPUsage()
 
     // Compute number of monthly periods for a monthly rather than standard time distribution
     int number_periods = 0;
-    if (p_profile->general->statReportMode() == STAT_MODE_MONTHLY) {
+    if (reportMode() == STAT_MODE_MONTHLY) {
         QDate startMonth = lastcpap.addMonths(-12);
         // Go to the the start of the next months
         firstcpap = startMonth.addDays((  1 +  (startMonth.daysInMonth()-startMonth.day())   ));
@@ -1913,12 +1969,12 @@ QString Statistics::GenerateCPAPUsage()
             // should never get here.
             number_periods = 12;
         }
-    } else if (p_profile->general->statReportMode() == STAT_MODE_STANDARD) {
+    } else if (reportMode() == STAT_MODE_STANDARD) {
         firstcpap = lastcpap.addYears(-1).addDays(1);
         adjustRange(firstcpap,lastcpap);
-    } else if (p_profile->general->statReportMode() == STAT_MODE_RANGE) {
-        firstcpap = p_profile->general->statReportRangeStart();
-        lastcpap = p_profile->general->statReportRangeEnd();
+    } else if (reportMode() == STAT_MODE_RANGE) {
+        firstcpap = rangeStart();
+        lastcpap = rangeEnd();
         adjustRange(firstcpap,lastcpap);
     }
     last = lastcpap;
@@ -1945,6 +2001,7 @@ QString Statistics::GenerateCPAPUsage()
     for (QList<StatisticsRow>::iterator i = rows.begin(); i != rows.end(); ++i) {
         StatisticsRow &row = (*i);
         QString name;
+        if (s_override.active && !s_override.sections.oximetry && row.type == MT_OXIMETER) continue;
 
         if (row.calc == SC_HEADING || row.calc == SC_ANALYSIS_HEADING) {  // All sections begin with a heading
             first = summaryInfo.first();
@@ -1956,7 +2013,7 @@ QString Statistics::GenerateCPAPUsage()
 
             // Clear the periods (columns)
             periods.clear();
-            if (p_profile->general->statReportMode() == STAT_MODE_MONTHLY) {
+            if (reportMode() == STAT_MODE_MONTHLY) {
                 QDate l=last,s=last;
 
                 periods.push_back(Period(last,last,tr("Last Session")));
@@ -1987,7 +2044,7 @@ QString Statistics::GenerateCPAPUsage()
                 periods.push_back(Period(first,last,finished, -6, false ,tr("Last Week")));
                 periods.push_back(Period(first,last,finished, -29,false, tr("Last 30 Days")));
                 periods.push_back(Period(first,last,finished, -6,true, tr("Last 6 Months")));
-                if (p_profile->general->statReportMode() == STAT_MODE_STANDARD) {
+                if (reportMode() == STAT_MODE_STANDARD) {
                     periods.push_back(Period(first,last,finished, -12,true,tr("Last Year")));
                 } else {
                     periods.push_back(Period(first,last,finished, last.daysTo(first),false,tr("Everything")));
@@ -2128,7 +2185,7 @@ QString Statistics::GenerateCPAPUsage()
         // both create header column and 5 data columns for a total of 100
         int dataWidth = 14;
         int headerWidth = 30;
-        if (p_profile->general->statReportMode() == STAT_MODE_MONTHLY)
+        if (reportMode() == STAT_MODE_MONTHLY)
         {
             // both create header column and 13  data columns for a total of 100
             dataWidth = 6;
@@ -2170,7 +2227,7 @@ QString Statistics::GenerateHTML()
     htmlReportHeaderPrint = generateHeader(false);
     htmlReportFooter = generateFooter(true);
 
-    if (p_profile->general->statReportMode() == STAT_MODE_SETTINGS) {
+    if (reportMode() == STAT_MODE_SETTINGS) {
         // one table; the blocks of the other modes stay empty so printing shows just this
         htmlUsage = GenerateSettingsComparison();
         htmlMachineSettings.clear();

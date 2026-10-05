@@ -216,6 +216,15 @@ public:
 
 
 
+//! Which parts a Statistics report for a period holds, and what of the user it shows.
+struct StatisticsSections {
+    bool settingsChanges = true;
+    bool oximetry = true;
+    bool devices = true;
+    bool personalData = true;
+    bool serialNumbers = false;
+};
+
 class Statistics : public QObject
 {
     Q_OBJECT
@@ -231,6 +240,11 @@ class Statistics : public QObject
     QList<SettingsComparison::Row> settingsComparisonRows(const QDate &from, const QDate &to, bool *showDevice = nullptr);
     //! Everything the report for the doctor shows for the nights in [from, to].
     DoctorReport doctorReport(const QDate &from, const QDate &to);
+    //! The same with the privacy choices of the report, not the user's settings.
+    DoctorReport doctorReport(const QDate &from, const QDate &to, bool personalData, bool serialNumbers);
+    //! The Statistics for the dates [from, to] (kept within the data) with \a sections, as the
+    //! Date Range mode shows them; the profile's report settings stay as they are.
+    QString periodHtml(const QDate &from, const QDate &to, const StatisticsSections &sections);
     //! The same with OSCAR's analysis given: its rows over the period and the dates whose
     //! analysis is out of date.
     DoctorReport doctorReport(const QDate &from, const QDate &to, const QList<AnalysisDailyData> &analysis,
