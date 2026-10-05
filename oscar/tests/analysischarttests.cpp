@@ -78,3 +78,28 @@ void AnalysisChartTests::testOdiTargetLine()
     QCOMPARE(gAnalysisChart::target(gAnalysisChart::PulseRises), 0.0f);
 }
 
+
+void AnalysisChartTests::testGlasgowValue()
+{
+    AnalysisDailyData r;
+    r.hasFlow = true;
+    QVERIFY(std::isnan(gAnalysisChart::glasgowValue(r, false)));
+    r.glasgow.breaths = 1000;
+    r.glasgow.flagged[analysis::GiSkew] = 250;
+    r.glasgowAdapted.breaths = 1000;
+    r.glasgowAdapted.flagged[analysis::GiSkew] = 100;
+    QCOMPARE(gAnalysisChart::glasgowValue(r, false), 0.25);
+    QCOMPARE(gAnalysisChart::glasgowValue(r, true), 0.1);
+    QVERIFY(gAnalysisChart::kinds().contains(gAnalysisChart::Glasgow));
+}
+
+void AnalysisChartTests::testFlMinutesValue()
+{
+    AnalysisDailyData r;
+    r.hasFlow = true;
+    r.flSeconds = 1800;
+    QVERIFY(std::isnan(gAnalysisChart::flMinutesValue(r)));   // not scored below 10 Hz
+    r.flBreaths = 900;
+    QCOMPARE(gAnalysisChart::flMinutesValue(r), 30.0);
+    QVERIFY(gAnalysisChart::kinds().contains(gAnalysisChart::FlowLimitationMinutes));
+}

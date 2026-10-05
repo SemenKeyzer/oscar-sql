@@ -12,6 +12,7 @@
 #include <QHash>
 
 #include "Graphs/gSummaryChart.h"
+#include "database/analysis_daily_repository.h"
 
 /*! \class gAnalysisChart
     \brief Overview charts of OSCAR's own sleep analysis (spec §5.2), one bar per night
@@ -27,6 +28,8 @@ class gAnalysisChart : public gSummaryChart
         ProblemZones,   //!< share of the night in problem zones, marked ones apart
         HypoxicBurden,  //!< %·min/h of desaturations linked to breathing events
         FlowLimitation, //!< % of the analysed time with limited breaths
+        FlowLimitationMinutes, //!< minutes in flow limitation spans
+        Glasgow,        //!< Glasgow Index (DaveSkvn's), the adapted one in the tooltip
         PulseRises,     //!< pulse rises per hour
     };
 
@@ -53,6 +56,10 @@ class gAnalysisChart : public gSummaryChart
     static QColor rangeColor(int index, int count);
     //! Shares (%) of the recorded time in problem zones: all of them, and the marked ones.
     static QPair<double, double> problemZoneShares(int zoneSeconds, int markedSeconds, int oxiSeconds);
+    //! A night's Glasgow Index, original or \a adapted; NaN when it was not computed.
+    static double glasgowValue(const AnalysisDailyData &row, bool adapted);
+    //! A night's minutes in flow limitation; NaN when flow limitation was not scored.
+    static double flMinutesValue(const AnalysisDailyData &row);
     virtual ~gAnalysisChart() {}
 
     //! Graph code, title and y-axis units of a kind, for the Overview.

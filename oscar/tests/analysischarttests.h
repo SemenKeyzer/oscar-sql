@@ -22,6 +22,8 @@ private slots:
     void testSpo2RangeColorsDarkenWithDepth();
     void testProblemZoneShares();
     void testOdiTargetLine();
+    void testGlasgowValue();
+    void testFlMinutesValue();
 };
 
 DECLARE_TEST(AnalysisChartTests)

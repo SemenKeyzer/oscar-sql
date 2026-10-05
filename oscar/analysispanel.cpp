@@ -76,6 +76,33 @@ QString eventLabel(RespEvent type)
     return QStringLiteral("RERA");
 }
 
+// The Glasgow Index (DaveSkvn's), original and adapted, with its nine signs.
+QString glasgowHtml(const DayResult &r)
+{
+    const QString dash = QStringLiteral("&mdash;");
+    auto value = [&dash](double v) { return std::isnan(v) ? dash : number(v, 2); };
+    QString html = kTable;
+    html += QStringLiteral("<tr><td><b>%1</b></td><td align=right>%2</td><td align=right>%3</td></tr>")
+                .arg(AnalysisPanel::tr("Glasgow Index"), AnalysisPanel::tr("original"), AnalysisPanel::tr("adapted"));
+    html += row3(AnalysisPanel::tr("Index"), value(r.glasgow.index()), value(r.glasgowAdapted.index()));
+    if (!r.glasgow.isEmpty() || !r.glasgowAdapted.isEmpty()) {
+        const QString names[GiComponentCount] = {
+            AnalysisPanel::tr("Skew"), AnalysisPanel::tr("Spike"), AnalysisPanel::tr("Flat top"),
+            AnalysisPanel::tr("Top heavy (not in the sum)"), AnalysisPanel::tr("Double peak"), AnalysisPanel::tr("No pause"),
+            AnalysisPanel::tr("Inspiration rate"), AnalysisPanel::tr("Double inspiration"), AnalysisPanel::tr("Variable amplitude"),
+        };
+        for (int k = 0; k < GiComponentCount; ++k) {
+            html += row3(QStringLiteral("<font size=-1>&nbsp;&nbsp;%1</font>").arg(names[k]),
+                         QStringLiteral("<font size=-1>%1</font>").arg(value(r.glasgow.fraction(GlasgowComponent(k)))),
+                         QStringLiteral("<font size=-1>%1</font>").arg(value(r.glasgowAdapted.fraction(GlasgowComponent(k)))));
+        }
+    }
+    html += QStringLiteral("</table>");
+    html += QStringLiteral("<p><font size=-1>%1</font></p>").arg(
+        AnalysisPanel::tr("Author's scale: 0–0.2 clean breathing, about 3 serious problems. Experimental, not reviewed by physicians."));
+    return html;
+}
+
 } // namespace
 
 QString AnalysisPanel::disclaimer()
@@ -137,6 +164,13 @@ QString AnalysisPanel::sidebarHtml(Day *day, const DayResult &r, const QString &
                      r.flowSeconds > 0 ? number(100.0 * r.pbSeconds / r.flowSeconds) : QStringLiteral("&mdash;"));
         html += row3(tr("Hours"), number(deviceHours, 2), number(analysisHours, 2));
         html += QStringLiteral("</table>");
+
+        if (r.flScored && r.flBreaths > 0) {
+            html += QStringLiteral("<p>%1</p>").arg(tr("Flow limitation: %1, longest run %2; %3% of breaths")
+                .arg(duration(1000LL * r.flSeconds), duration(1000LL * r.flLongestSeconds),
+                     number(100.0 * r.flLimitedBreaths / r.flBreaths, 0)));
+        }
+        html += glasgowHtml(r);
 
         html += QStringLiteral("<p>%1: AASM 3 % %2 &middot; CMS 4 % %3 &middot; %4 %5</p>")
                     .arg(tr("Hypopnea index by rule"), perHour(r.hypopneasAasm3, analysisHours),

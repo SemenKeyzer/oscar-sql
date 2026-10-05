@@ -383,3 +383,49 @@ void AnalysisPanelTests::testTabTellsTheFlowGraphWhichDifference()
     QCOMPARE(toggled.last().at(0).toBool(), false);
 }
 
+
+void AnalysisPanelTests::testFlowLimitationLine()
+{
+    DayResult r = cpapNight();
+    r.flScored = true;
+    r.flowSeconds = 27000;
+    r.flSeconds = 6300;
+    r.flLongestSeconds = 720;
+    r.flBreaths = 1000;
+    r.flLimitedBreaths = 310;
+    const QString html = AnalysisPanel::sidebarHtml(nullptr, r, QString(), {});
+    QVERIFY(html.contains(AnalysisPanel::tr("Flow limitation: %1, longest run %2; %3% of breaths")
+                              .arg(AnalysisPanel::duration(6300000), AnalysisPanel::duration(720000), QStringLiteral("31"))));
+}
+
+void AnalysisPanelTests::testGlasgowRows()
+{
+    DayResult r = cpapNight();
+    r.flScored = true;
+    r.glasgow.breaths = 1000;
+    r.glasgow.flagged[GiFlatTop] = 400;
+    r.glasgow.flagged[GiTopHeavy] = 300;
+    r.glasgowAdapted.breaths = 1000;
+    r.glasgowAdapted.flagged[GiFlatTop] = 150;
+    const QString html = AnalysisPanel::sidebarHtml(nullptr, r, QString(), {});
+    QVERIFY(html.contains(AnalysisPanel::tr("Glasgow Index")));
+    QVERIFY(html.contains(QStringLiteral("0.40")));   // original: flat top only
+    QVERIFY(html.contains(QStringLiteral("0.15")));   // adapted
+    for (const QString &name : { AnalysisPanel::tr("Skew"), AnalysisPanel::tr("Spike"), AnalysisPanel::tr("Flat top"),
+                                 AnalysisPanel::tr("Top heavy (not in the sum)"), AnalysisPanel::tr("Double peak"),
+                                 AnalysisPanel::tr("No pause"), AnalysisPanel::tr("Inspiration rate"),
+                                 AnalysisPanel::tr("Double inspiration"), AnalysisPanel::tr("Variable amplitude") })
+        QVERIFY2(html.contains(name), qPrintable(name));
+    QVERIFY(html.contains(AnalysisPanel::tr("Author's scale: 0–0.2 clean breathing, about 3 serious problems. Experimental, not reviewed by physicians.")));
+}
+
+void AnalysisPanelTests::testGlasgowDash()
+{
+    DayResult r = cpapNight();
+    r.flScored = false;
+    r.glasgow = r.glasgowAdapted = GlasgowCounts();
+    const QString html = AnalysisPanel::sidebarHtml(nullptr, r, QString(), {});
+    QVERIFY(html.contains(AnalysisPanel::tr("Glasgow Index")));
+    QVERIFY(html.contains(AnalysisPanel::tr("Flow limitation and cardiogenic oscillations need 10 Hz: not scored.")));
+    QVERIFY(!html.contains(AnalysisPanel::tr("Flat top")));
+}

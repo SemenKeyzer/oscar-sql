@@ -50,7 +50,8 @@ QString num(double v, int decimals = 1)
 } // namespace
 
 gAnalysisChart::gAnalysisChart(Kind kind)
-    : gSummaryChart(code(kind), kind == Ahi || kind == HypoxicBurden || kind == FlowLimitation ? MT_CPAP : MT_UNKNOWN),
+    : gSummaryChart(code(kind), kind == Ahi || kind == HypoxicBurden || kind == FlowLimitation || kind == FlowLimitationMinutes
+                                    || kind == Glasgow ? MT_CPAP : MT_UNKNOWN),
       m_kind(kind),
       m_deviceCalc(NoChannel, ST_CNT, Qt::black)
 {
@@ -60,7 +61,7 @@ gAnalysisChart::gAnalysisChart(Kind kind)
 
 QList<gAnalysisChart::Kind> gAnalysisChart::kinds()
 {
-    return { Ahi, Odi, Spo2Ranges, ProblemZones, HypoxicBurden, FlowLimitation, PulseRises };
+    return { Ahi, Odi, Spo2Ranges, ProblemZones, HypoxicBurden, FlowLimitation, FlowLimitationMinutes, Glasgow, PulseRises };
 }
 
 QString gAnalysisChart::code(Kind kind)
@@ -72,6 +73,8 @@ QString gAnalysisChart::code(Kind kind)
     case ProblemZones: return QStringLiteral("AnalysisZones");
     case HypoxicBurden: return QStringLiteral("AnalysisHB");
     case FlowLimitation: return QStringLiteral("AnalysisFL");
+    case FlowLimitationMinutes: return QStringLiteral("AnalysisFLMinutes");
+    case Glasgow: return QStringLiteral("AnalysisGlasgow");
     case PulseRises: break;
     }
     return QStringLiteral("AnalysisPulseRises");
@@ -86,6 +89,8 @@ QString gAnalysisChart::title(Kind kind)
     case ProblemZones: return QObject::tr("Oximetry Problem Zones");
     case HypoxicBurden: return QObject::tr("Hypoxic Burden (approx.)");
     case FlowLimitation: return QObject::tr("Flow Limitation (analysis)");
+    case FlowLimitationMinutes: return QObject::tr("Flow Limitation, minutes (analysis)");
+    case Glasgow: return QObject::tr("Glasgow Index (analysis)");
     case PulseRises: break;
     }
     return QObject::tr("Pulse Rise Index");
@@ -103,6 +108,8 @@ QString gAnalysisChart::units(Kind kind)
     case ProblemZones: return QObject::tr("% of time");
     case HypoxicBurden: return QObject::tr("%·min/h");
     case FlowLimitation: return QObject::tr("% of time");
+    case FlowLimitationMinutes: return QObject::tr("Minutes");
+    case Glasgow: return QObject::tr("Index");
     case PulseRises: break;
     }
     return QObject::tr("Rises/hour");
@@ -210,6 +217,23 @@ void gAnalysisChart::populate(Day *day, int idx)
         const float pct = 100.0f * r.flSeconds / r.flowSeconds;
         slices.append(SummaryChartSlice(calc, pct, pct, title(FlowLimitation), QColor(0x70, 0x70, 0x70)));
         tip = QObject::tr("\nFlow limitation: %1% of the time").arg(num(pct));
+        break;
+    }
+    case FlowLimitationMinutes: {
+        const double minutes = flMinutesValue(r);
+        if (std::isnan(minutes) || r.flowSeconds <= 0) return;
+        weight = r.flowSeconds / 3600.0f;
+        slices.append(SummaryChartSlice(calc, minutes, minutes, title(FlowLimitationMinutes), QColor(0x70, 0x70, 0x70)));
+        tip = QObject::tr("\nFlow limitation: %1 min, longest run %2 min").arg(num(minutes, 0), num(r.flLongestSeconds / 60.0, 0));
+        break;
+    }
+    case Glasgow: {
+        const double gi = glasgowValue(r, false);
+        if (std::isnan(gi)) return;
+        weight = 1;
+        slices.append(SummaryChartSlice(calc, gi, gi, title(Glasgow), QColor(0xb0, 0x30, 0x60)));
+        const double adapted = glasgowValue(r, true);
+        tip = QObject::tr("\nGlasgow Index: %1\nadapted: %2").arg(num(gi, 2), std::isnan(adapted) ? QStringLiteral("-") : num(adapted, 2));
         break;
     }
     case PulseRises: {
@@ -350,3 +374,15 @@ float gAnalysisChart::target(Kind kind)
     }
 }
 
+
+double gAnalysisChart::glasgowValue(const AnalysisDailyData &row, bool adapted)
+{
+    if (!row.hasFlow) return std::numeric_limits<double>::quiet_NaN();
+    return (adapted ? row.glasgowAdapted : row.glasgow).index();   // NaN when empty
+}
+
+double gAnalysisChart::flMinutesValue(const AnalysisDailyData &row)
+{
+    if (!row.hasFlow || row.flBreaths <= 0) return std::numeric_limits<double>::quiet_NaN();
+    return row.flSeconds / 60.0;
+}
