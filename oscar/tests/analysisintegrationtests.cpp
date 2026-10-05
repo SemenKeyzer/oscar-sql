@@ -40,6 +40,7 @@
 #include "statistics.h"
 #include "doctorreport.h"
 #include "nightsummary.h"
+#include "pdfreportwriter.h"
 #include "tests/analysis_synth.h"
 
 using namespace analysis;
@@ -1211,4 +1212,62 @@ void AnalysisIntegrationTests::testPeriodHtmlClampsToData()
     QVERIFY(html.contains(Statistics::tr("CPAP Statistics")));
     QCOMPARE(p_profile->general->statReportMode(), mode);
     QCOMPARE(p_profile->general->statReportRangeStart(), rangeStart);
+}
+
+namespace {
+
+int pdfPageCount(const QString &path)
+{
+    QFile f(path);
+    if (!f.open(QIODevice::ReadOnly)) return -1;
+    return int(QString::fromLatin1(f.readAll()).count(QRegularExpression(QStringLiteral("/Type\\s*/Page[^s]"))));
+}
+
+PdfReportOptions oneNight(const QDate &date)
+{
+    PdfReportOptions o;
+    o.apply(PdfReportOptions::Brief);
+    o.statistics = true;
+    o.period = PdfReportOptions::Custom;
+    o.from = o.to = date;
+    return o;
+}
+
+} // namespace
+
+void AnalysisIntegrationTests::testWriterSummaryAndStatistics()
+{
+    StatisticsNight night(m_machineRow, 103, kNightDate.addDays(103));
+    QTemporaryDir dir;
+    const QString path = dir.filePath(QStringLiteral("report.pdf"));
+    PdfReportWriter writer(nullptr, nullptr);
+    QString error;
+    QVERIFY2(writer.write(oneNight(night.date), night.date, path, nullptr, &error), qPrintable(error));
+    QVERIFY(pdfPageCount(path) >= 2);   // the summary page, then the statistics
+}
+
+void AnalysisIntegrationTests::testWriterRefusesEmptyPeriod()
+{
+    StatisticsNight night(m_machineRow, 104, kNightDate.addDays(104));
+    QTemporaryDir dir;
+    const QString path = dir.filePath(QStringLiteral("empty.pdf"));
+    PdfReportOptions o = oneNight(night.date.addDays(-20));   // a day without nights
+    PdfReportWriter writer(nullptr, nullptr);
+    QString error;
+    QVERIFY(!writer.write(o, night.date, path, nullptr, &error));
+    QVERIFY(!error.isEmpty());
+    QVERIFY(!QFile::exists(path));
+}
+
+void AnalysisIntegrationTests::testWriterRestoresAndCleansUp()
+{
+    StatisticsNight night(m_machineRow, 105, kNightDate.addDays(105));
+    QTemporaryDir dir;
+    const QString path = dir.filePath(QStringLiteral("cancelled.pdf"));
+    PdfReportWriter writer(nullptr, nullptr);
+    writer.cancel();
+    QString error;
+    QVERIFY(!writer.write(oneNight(night.date), night.date, path, nullptr, &error));
+    QVERIFY(writer.cancelled());
+    QVERIFY(!QFile::exists(path));
 }

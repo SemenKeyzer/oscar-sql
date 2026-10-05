@@ -47,6 +47,9 @@ private slots:
     void testPeriodHtmlSections();
     void testPeriodHtmlPersonalData();
     void testPeriodHtmlClampsToData();
+    void testWriterSummaryAndStatistics();
+    void testWriterRefusesEmptyPeriod();
+    void testWriterRestoresAndCleansUp();
 
 private:
     class QCoreApplication *m_app = nullptr;

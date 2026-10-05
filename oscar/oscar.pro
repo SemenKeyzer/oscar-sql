@@ -366,6 +366,7 @@ SOURCES += \
     preferencessearch.cpp \
     pdfreportoptions.cpp \
     htmlpages.cpp \
+    pdfreportwriter.cpp \
     zip.cpp \
     Graphs/gAHIChart.cpp \
     Graphs/gdailysummary.cpp \
@@ -687,6 +688,7 @@ HEADERS  += \
     preferencessearch.h \
     pdfreportoptions.h \
     htmlpages.h \
+    pdfreportwriter.h \
     mytextbrowser.h \
     staticQMessageBox.h \
     git_info.h \

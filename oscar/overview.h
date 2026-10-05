@@ -121,6 +121,12 @@ class Overview : public QWidget
 
     //! Saves the graph layout with the user's own choice of graphs, not what a preset shows.
     void SaveGraphSettings();
+    //! Shows the graphs of \a preset and remembers it for the next start.
+    void showPreset(OverviewPresets::Preset preset);
+    OverviewPresets::Preset currentPreset() const { return m_presets.preset(); }
+    //! The dates the graphs show now.
+    QDate displayedStart() const { return displayStartDate; }
+    QDate displayedEnd() const { return displayEndDate; }
 
   public slots:
     void onRebuildGraphs() { RebuildGraphs(true); }
@@ -160,8 +166,6 @@ class Overview : public QWidget
     class QLabel *m_analysisNotice = nullptr;
     class QButtonGroup *m_presetButtons = nullptr;
     OverviewPresets::State m_presets;
-    //! Shows the graphs of \a preset and remembers it for the next start.
-    void showPreset(OverviewPresets::Preset preset);
     OverviewPresets::Visibility graphVisibility() const;
     void setGraphVisibility(const OverviewPresets::Visibility &visibility);
     void CreateAllGraphs();
