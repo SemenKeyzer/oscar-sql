@@ -360,3 +360,52 @@ void GlasgowIndexTests::testAdaptedPauseWithOffset()
     const FlowChunk hurried = restingBreaths(0, 0, breaths, 5);   // still breathing out when the next breath starts
     QVERIFY(glasgowAdapted({ hurried }, breaths, {}).counts.fraction(GiNoPause) > 0.9);
 }
+
+namespace {
+
+// Steady breathing sampled at \a fs, with a period that is no whole number of samples: each
+// breath falls on the sampling grid differently, as real breaths do (Prisma records 10 Hz).
+FlowChunk driftingBreaths(double fs, QVector<Breath> &breaths)
+{
+    const double period = 4.93, insp = 1.6, exp = 2.4, P = 30;
+    FlowChunk c;
+    c.start = 1000000;
+    c.rateMs = 1000.0 / fs;
+    const int n = int(60 * period * fs);
+    for (int i = 0; i < n; ++i) {
+        const double t = i / fs, phase = std::fmod(t, period);
+        double v = 0;
+        if (phase < insp) v = P * 4 * (phase / insp) * (1 - phase / insp);
+        else if (phase < insp + exp) v = -0.8 * P * std::sin(M_PI * (phase - insp) / exp);
+        c.samples << float(v);
+    }
+    breaths.clear();
+    for (int b = 0; b < 60; ++b) {
+        Breath br;
+        br.start = c.start + qint64(std::llround(b * period * 1000));
+        br.inspEnd = br.start + qint64(insp * 1000);
+        br.end = c.start + qint64(std::llround((b + 1) * period * 1000));
+        br.pif = float(P);
+        br.pef = float(-0.8 * P);
+        breaths << br;
+    }
+    return c;
+}
+
+} // namespace
+
+// Breathing that does not change from breath to breath has no variable amplitude, spikes or
+// double peaks, however the samples fall on it.
+void GlasgowIndexTests::testSamplingPhaseAtTenHz()
+{
+    QVector<Breath> b25, b10;
+    const FlowChunk c25 = driftingBreaths(25, b25), c10 = driftingBreaths(10, b10);
+    const GlasgowCounts o25 = glasgowOriginal({ c25 }).counts, o10 = glasgowOriginal({ c10 }).counts;
+    const GlasgowCounts a25 = glasgowAdapted({ c25 }, b25, {}).counts, a10 = glasgowAdapted({ c10 }, b10, {}).counts;
+    for (GlasgowComponent k : { GiAmpVar, GiSpike, GiMultiPeak, GiSkew }) {
+        QVERIFY2(o10.fraction(k) < 0.1, qPrintable(QStringLiteral("original component %1: %2 (25 Hz: %3)").arg(k).arg(o10.fraction(k)).arg(o25.fraction(k))));
+        QVERIFY2(a10.fraction(k) < 0.1, qPrintable(QStringLiteral("adapted component %1: %2 (25 Hz: %3)").arg(k).arg(a10.fraction(k)).arg(a25.fraction(k))));
+    }
+    QVERIFY2(std::fabs(o10.index() - o25.index()) < 0.15, qPrintable(QStringLiteral("%1 vs %2").arg(o10.index()).arg(o25.index())));
+    QVERIFY2(std::fabs(a10.index() - a25.index()) < 0.15, qPrintable(QStringLiteral("%1 vs %2").arg(a10.index()).arg(a25.index())));
+}

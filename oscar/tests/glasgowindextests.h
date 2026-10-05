@@ -29,6 +29,7 @@ private slots:
     void testAdaptedSampleRateIndependent();
     void testAdaptedIgnoresSlowOnset();
     void testAdaptedPauseWithOffset();
+    void testSamplingPhaseAtTenHz();
 };
 DECLARE_TEST(GlasgowIndexTests)
 

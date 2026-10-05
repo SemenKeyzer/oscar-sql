@@ -265,6 +265,7 @@ NightSummary buildNightSummaryFor(Profile *profile, analysis::AnalysisService *s
                              + row.nObstructiveHypopnea + row.nCentralHypopnea + row.nHypopnea;
             s.analysisAhi = events / (row.flowSeconds / 3600.0);
         }
+        s.takeFlowLimitation(row);
         if (day->channelHasData(CPAP_Leak)) {
             s.hasLeak = true;
             s.leak = day->wavg(CPAP_Leak);
@@ -578,6 +579,12 @@ void NightSummaryView::setSummary(const NightSummary &s)
                 tr("target %1 h or more").arg(s.complianceHours), s.usageLevel());
         QString ahiNote = tr("target under %1").arg(NightSummary::kAhiTarget);
         if (s.hasAnalysisAhi) ahiNote += QStringLiteral("<br/>") + tr("OSCAR's analysis: %1").arg(num(s.analysisAhi));
+        if (s.hasFlowLimitation) {
+            const QString fl = QString::number(s.flPercent, 'f', 0), minutes = QString::number(s.flMinutes, 'f', 0);
+            ahiNote += QStringLiteral("<br/>") + (s.hasGlasgow
+                ? tr("flow limitation %1% (%2 min) · Glasgow %3 / %4").arg(fl, minutes, num(s.glasgow), num(s.glasgowAdapted))
+                : tr("flow limitation %1% (%2 min)").arg(fl, minutes));
+        }
         addTile(col++, tr("AHI"), num(s.ahi), ahiNote, s.ahiLevel(),
                 tr("Apneas and hypopneas per hour, as the device counted them."));
         if (s.hasLeak) {
@@ -640,3 +647,16 @@ NightSummary::Level NightSummary::spo2Level() const
     return Good;
 }
 
+void NightSummary::takeFlowLimitation(const AnalysisDailyData &row)
+{
+    hasFlowLimitation = row.id && row.hasFlow && row.flowSeconds > 0 && row.flBreaths > 0;   // scored at 10 Hz or more
+    if (hasFlowLimitation) {
+        flPercent = 100.0 * row.flSeconds / row.flowSeconds;
+        flMinutes = row.flSeconds / 60.0;
+    }
+    hasGlasgow = row.id && row.hasFlow && !row.glasgow.isEmpty() && !row.glasgowAdapted.isEmpty();
+    if (hasGlasgow) {
+        glasgow = row.glasgow.index();
+        glasgowAdapted = row.glasgowAdapted.index();
+    }
+}

@@ -26,6 +26,8 @@ private slots:
     void testPressureAtMaximum();
     void testActions();
     void testViewShowsTheNight();
+    void testFlowLimitationFromRow();
+    void testFlowLimitationInAhiTile();
 
 private:
     class QApplication *m_app = nullptr;

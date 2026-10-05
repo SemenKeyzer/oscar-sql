@@ -16,8 +16,9 @@
 
 namespace analysis {
 
-//! The Glasgow Index as FlowLimits.js computes it, on the session's raw flow (L/min). Windows
-//! the author sets in samples at 25 Hz are scaled to the recording's rate.
+//! The Glasgow Index as FlowLimits.js computes it, on the session's raw flow (L/min). A flow
+//! recorded below 20 Hz is first interpolated onto the author's 25 Hz grid; windows the author
+//! sets in samples at 25 Hz are scaled to the rate of a faster one.
 GlasgowResult glasgowOriginal(const QVector<FlowChunk> &chunks);
 
 //! The Glasgow Index on our own breaths (\a breaths from segmentBreaths on \a chunks), with the

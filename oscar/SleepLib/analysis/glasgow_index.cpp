@@ -65,6 +65,38 @@ namespace {
 // JavaScript's Math.round: halves go up.
 double jsRound(double v) { return std::floor(v + 0.5); }
 
+// A flow recorded below 20 Hz (Prisma: 10 Hz) on the author's 25 Hz grid, by cubic
+// (Catmull-Rom) interpolation: a breath's peak usually falls between such samples, and where
+// it does decides the spike, double peak, skew and amplitude signs. Faster recordings are left
+// as they are.
+QVector<FlowChunk> onAuthorGrid(const QVector<FlowChunk> &chunks)
+{
+    QVector<FlowChunk> out;
+    for (const FlowChunk &c : chunks) {
+        if (c.rateMs <= 50 || c.samples.size() < 2) {
+            out << c;
+            continue;
+        }
+        FlowChunk r;
+        r.start = c.start;
+        r.rateMs = 40;
+        const int n = c.samples.size();
+        const int m = int(std::floor((n - 1) * c.rateMs / r.rateMs)) + 1;
+        r.samples.reserve(m);
+        auto at = [&c, n](int i) { return double(c.samples[std::clamp(i, 0, n - 1)]); };
+        for (int j = 0; j < m; ++j) {
+            const double x = j * r.rateMs / c.rateMs;
+            const int i = int(std::floor(x));
+            const double t = x - i;
+            const double p0 = at(i - 1), p1 = at(i), p2 = at(i + 1), p3 = at(i + 2);
+            r.samples << float(0.5 * (2 * p1 + (p2 - p0) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t * t
+                                      + (3 * p1 - p0 - 3 * p2 + p3) * t * t * t));
+        }
+        out << r;
+    }
+    return out;
+}
+
 // One inspiration as FlowLimits.js describes it (indices into the joined samples).
 struct Inspiration {
     int start = 0, end = 0, midPoint = 0;
@@ -83,9 +115,10 @@ struct Inspiration {
 
 // FlowLimits.js: findMins, findInspirations, calcCycleBasedIndicators, inspirationAmplitude,
 // prepIndices. Constants in samples are the author's at 25 Hz, scaled by n().
-GlasgowResult glasgowOriginal(const QVector<FlowChunk> &chunks)
+GlasgowResult glasgowOriginal(const QVector<FlowChunk> &recorded)
 {
     GlasgowResult result;
+    const QVector<FlowChunk> chunks = onAuthorGrid(recorded);
     QVector<double> y;
     QVector<qint64> t;
     double rateMs = 0;
@@ -293,9 +326,10 @@ double median(QVector<double> v)
 // The same signs on our breaths. Signs that do not depend on how strong the flow is keep the
 // author's rule in seconds; the L/min thresholds are taken relative to the peak P, chosen to
 // give the original's answer at P = 30 L/min.
-GlasgowResult glasgowAdapted(const QVector<FlowChunk> &chunks, const QVector<Breath> &breaths,
+GlasgowResult glasgowAdapted(const QVector<FlowChunk> &recorded, const QVector<Breath> &breaths,
                              const QVector<Span> &blocked)
 {
+    const QVector<FlowChunk> chunks = onAuthorGrid(recorded);
     GlasgowResult result;
     const int n = breaths.size();
     QVector<double> peak(n, 0);

@@ -279,3 +279,51 @@ void NightSummaryTests::testPressureAtMaximum()
     for (QLabel *l : view.findChildren<QLabel *>()) shown = shown || l->text().contains(note.toHtmlEscaped());
     QVERIFY(shown);
 }
+
+void NightSummaryTests::testFlowLimitationFromRow()
+{
+    AnalysisDailyData row;
+    row.id = 1;
+    row.hasFlow = true;
+    row.flowSeconds = 32000;
+    row.flSeconds = 1920;
+    row.flBreaths = 5000;
+    row.glasgow.breaths = 1000;
+    row.glasgow.flagged[analysis::GiSkew] = 330;
+    row.glasgowAdapted.breaths = 1000;
+    row.glasgowAdapted.flagged[analysis::GiSkew] = 290;
+    NightSummary s;
+    s.takeFlowLimitation(row);
+    QVERIFY(s.hasFlowLimitation);
+    QCOMPARE(s.flPercent, 6.0);
+    QCOMPARE(s.flMinutes, 32.0);
+    QVERIFY(s.hasGlasgow);
+    QCOMPARE(s.glasgow, 0.33);
+    QCOMPARE(s.glasgowAdapted, 0.29);
+
+    row.flBreaths = 0;   // flow limitation not scored (below 10 Hz)
+    row.glasgow = row.glasgowAdapted = analysis::GlasgowCounts();
+    NightSummary none;
+    none.takeFlowLimitation(row);
+    QVERIFY(!none.hasFlowLimitation);
+    QVERIFY(!none.hasGlasgow);
+}
+
+void NightSummaryTests::testFlowLimitationInAhiTile()
+{
+    NightSummaryView view;
+    view.resize(900, 400);
+    NightSummary s = goodNight();
+    s.hasFlowLimitation = true;
+    s.flPercent = 6;
+    s.flMinutes = 32;
+    s.hasGlasgow = true;
+    s.glasgow = 3.28;
+    s.glasgowAdapted = 2.9;
+    view.setSummary(s);
+    QStringList notes;
+    for (QLabel *l : view.findChildren<QLabel *>(QStringLiteral("nsNote"))) notes << l->text();
+    QVERIFY2(notes.join(QLatin1Char('\n')).contains(NightSummaryView::tr("flow limitation %1% (%2 min) · Glasgow %3 / %4")
+                                                     .arg(QStringLiteral("6"), QStringLiteral("32"), QStringLiteral("3.3"), QStringLiteral("2.9"))),
+             qPrintable(notes.join(QLatin1Char('|'))));
+}

@@ -15,6 +15,7 @@
 #include <QWidget>
 
 #include "SleepLib/oximetry_summary.h"
+#include "database/analysis_daily_repository.h"
 
 class Profile;
 class QFrame;
@@ -48,6 +49,14 @@ struct NightSummary {
     double ahi = 0;                 //!< the device's
     bool hasAnalysisAhi = false;
     double analysisAhi = 0;         //!< OSCAR's analysis of the flow
+    bool hasFlowLimitation = false; //!< scored by the analysis (flow at 10 Hz or more)
+    double flPercent = 0;           //!< % of the analysed time
+    double flMinutes = 0;
+    bool hasGlasgow = false;
+    double glasgow = 0;             //!< Glasgow Index, original and adapted
+    double glasgowAdapted = 0;
+    //! Takes the flow limitation figures from the analysis' row for the night.
+    void takeFlowLimitation(const AnalysisDailyData &row);
     bool hasLeak = false;
     double leak = 0;                //!< weighted average
     double leakRedline = 0;         //!< 0: none set
