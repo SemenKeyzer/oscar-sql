@@ -468,6 +468,8 @@ public slots:
     void reloadProfile();
 
 private:
+    class HelpPanel *m_helpPanel = nullptr;
+
     QString getMainWindowTitle();
     void importCPAPBackups();
 

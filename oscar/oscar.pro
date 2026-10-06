@@ -367,6 +367,7 @@ SOURCES += \
     pdfreportoptions.cpp \
     glossary.cpp \
     helptips.cpp \
+    helppanel.cpp \
     htmlpages.cpp \
     pdfreportwriter.cpp \
     zip.cpp \
@@ -694,6 +695,7 @@ HEADERS  += \
     pdfreportoptions.h \
     glossary.h \
     helptips.h \
+    helppanel.h \
     htmlpages.h \
     pdfreportwriter.h \
     mytextbrowser.h \
@@ -906,6 +908,7 @@ test {
         tests/glasgowindextests.cpp \
         tests/glossarytests.cpp \
         tests/helptipstests.cpp \
+        tests/helppaneltests.cpp \
         tests/htmlpagestests.cpp \
         tests/channelstoretests.cpp \
         tests/machinetests.cpp \
@@ -953,6 +956,7 @@ test {
         tests/glasgowindextests.h \
         tests/glossarytests.h \
         tests/helptipstests.h \
+        tests/helppaneltests.h \
         tests/htmlpagestests.h \
         tests/channelstoretests.h \
         tests/machinetests.h \

@@ -119,6 +119,7 @@
 #include "reports.h"
 #include "statistics.h"
 #include "pdfreportdialog.h"
+#include "helppanel.h"
 #include "helptips.h"
 #include "zip.h"
 #include "speedcheck.h"
@@ -184,8 +185,14 @@ MainWindow::MainWindow(QWidget *parent) :
     QSettings settings;
 
     // Load previous Window geometry (stored per database folder)
+    // the help panel, on the right and hidden until opened; its place is part of the window state
+    m_helpPanel = new HelpPanel(this);
+    addDockWidget(Qt::RightDockWidgetArea, m_helpPanel);
+    m_helpPanel->hide();
+
     settings.beginGroup(QFileInfo(GetAppData()).fileName());
     restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
+    restoreState(settings.value("MainWindow/state").toByteArray());
     settings.endGroup();
 
     // Nifty Notification popups in System Tray (uses Growl on Mac)
@@ -363,6 +370,8 @@ void MainWindow::SetupGUI()
     bool oldState = ui->actionShowPersonalData->blockSignals(true);
     ui->actionShowPersonalData->setChecked(AppSetting->showPersonalData());
     ui->actionShowPersonalData->blockSignals(oldState);
+    m_helpPanel->toggleViewAction()->setText(tr("Help Panel"));
+    ui->menu_View->insertAction(ui->actionHoverExplanations, m_helpPanel->toggleViewAction());
     oldState = ui->actionHoverExplanations->blockSignals(true);
     ui->actionHoverExplanations->setChecked(HelpTips::instance()->enabled());   // also installs the hover filter
     ui->actionHoverExplanations->blockSignals(oldState);
@@ -485,6 +494,7 @@ void MainWindow::closeEvent(QCloseEvent * event)
         QSettings settings;
         settings.beginGroup(QFileInfo(GetAppData()).fileName());
         settings.setValue("MainWindow/geometry", saveGeometry());
+        settings.setValue("MainWindow/state", saveState());
         if (!(windowState() & Qt::WindowMaximized))
             settings.setValue("MainWindow/frameTopLeft", frameGeometry().topLeft());
         settings.endGroup();
@@ -2551,6 +2561,7 @@ void MainWindow::RestartApplication(QString cmdline)
         QSettings settings;
         settings.beginGroup(QFileInfo(GetAppData()).fileName());
         settings.setValue("MainWindow/geometry", saveGeometry());
+        settings.setValue("MainWindow/state", saveState());
         if (!(windowState() & Qt::WindowMaximized))
             settings.setValue("MainWindow/frameTopLeft", frameGeometry().topLeft());
         settings.endGroup();
@@ -4572,6 +4583,7 @@ void MainWindow::on_actionCompress_Database_triggered()
         QSettings settings;
         settings.beginGroup(QFileInfo(GetAppData()).fileName());
         settings.setValue("MainWindow/geometry", saveGeometry());
+        settings.setValue("MainWindow/state", saveState());
         if (!(windowState() & Qt::WindowMaximized))
             settings.setValue("MainWindow/frameTopLeft", frameGeometry().topLeft());
         settings.endGroup();
