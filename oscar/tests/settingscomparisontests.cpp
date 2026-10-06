@@ -242,3 +242,16 @@ void SettingsComparisonTests::testGlasgowColumn()
     QCOMPARE(best(rows, Glasgow), QSet<int>({ 1 }));
     QVERIFY(html(rows, Options()).contains(QCoreApplication::translate("SettingsComparison", "Glasgow Index")));
 }
+
+// The Statistics tab explains the columns; the doctor's PDF gets plain headings.
+void SettingsComparisonTests::testHelpLinksOnlyWhenAsked()
+{
+    QList<Row> rows { rowWith(4, Glasgow, 1.2) };
+    Options plain;
+    QVERIFY(!html(rows, plain).contains(QStringLiteral("help:")));
+    Options linked;
+    linked.helpLinks = true;
+    const QString page = html(rows, linked);
+    QVERIFY(page.contains(QStringLiteral("help:glasgow")));
+    QVERIFY(page.contains(QStringLiteral("help:best_value")));
+}

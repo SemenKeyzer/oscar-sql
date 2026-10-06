@@ -1560,9 +1560,19 @@ QString Daily::getMachineSettings(Day * day) {
         QMap<int, QString> first;
 
         ChannelID cpapmode = loader->CPAPModeChannel();
+        // a setting's name explains itself: mode, pressure relief, APAP range, ramp, pressures
+        auto settingLabel = [&](ChannelID code) {
+            QString key;
+            if (code == cpapmode) key = QStringLiteral("mode");
+            else if (code == loader->PresReliefMode() || code == loader->PresReliefLevel()) key = QStringLiteral("relief");
+            else if (code == CPAP_PressureMin || code == CPAP_PressureMax) key = QStringLiteral("apap_range");
+            else if (code == CPAP_RampTime || code == CPAP_RampPressure) key = QStringLiteral("ramp");
+            else key = Glossary::keyForChannel(code);
+            return HelpTips::term(schema::channel[code].label(), key);
+        };
         schema::Channel & chan = schema::channel[cpapmode];
         first[cpapmode] = QString(fmt)
-                .arg(chan.label())
+                .arg(settingLabel(cpapmode))
                 .arg(chan.description())
                 .arg(day->getCPAPModeStr());
 
@@ -1617,7 +1627,7 @@ QString Daily::getMachineSettings(Day * day) {
                 data = formatRelief(data);
 
             QString tmp = QString(fmt)
-                    .arg(schema::channel[code].label())
+                    .arg(settingLabel(code))
                     .arg(schema::channel[code].description())
                     .arg(data);
             if (first_channels.contains(code)) {

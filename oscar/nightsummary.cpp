@@ -417,6 +417,8 @@ NightSummaryView::NightSummaryView(QWidget *parent)
     trends->setHorizontalSpacing(24);
     m_usageCaption = richLabel(QString(), QStringLiteral("nsCaption"));
     m_ahiCaption = richLabel(QString(), QStringLiteral("nsCaption"));
+    HelpTips::attach(m_usageCaption, QStringLiteral("compliance"));
+    HelpTips::attach(m_ahiCaption, QStringLiteral("median"));
     m_usageTrend = new NightTrend(m_trendsFrame);
     m_ahiTrend = new NightTrend(m_trendsFrame);
     trends->addWidget(m_usageCaption, 0, 0);
@@ -498,7 +500,12 @@ QLabel *NightSummaryView::richLabel(const QString &text, const QString &objectNa
         if (!key.isEmpty()) HelpTips::instance()->open(key);
         else emit linkActivated(link);
     });
-    connect(l, &QLabel::linkHovered, this, [](const QString &link) { HelpTips::instance()->hover(HelpTips::keyOf(QUrl(link))); });
+    connect(l, &QLabel::linkHovered, this, [l](const QString &link) {
+        // while a term is under the mouse, its own explanation wins over the tile's
+        const QString key = HelpTips::keyOf(QUrl(link));
+        l->setProperty("helpKey", key);
+        HelpTips::instance()->hover(key);
+    });
     return l;
 }
 

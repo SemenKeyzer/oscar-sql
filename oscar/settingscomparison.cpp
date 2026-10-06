@@ -7,6 +7,7 @@
  * for more details. */
 
 #include "settingscomparison.h"
+#include "helptips.h"
 
 #include <QCoreApplication>
 #include <QHash>
@@ -145,6 +146,24 @@ namespace {
 
 const QList<Column> kTableColumns { Nights, Usage, DeviceAhi, AnalysisAhi, Leak, Pressure, FlowLimitation, Glasgow, Odi3, Below90 };
 
+QString columnHelpKey(Column column)
+{
+    switch (column) {
+    case Nights: return QStringLiteral("nights_with_data");
+    case Usage: return QStringLiteral("usage");
+    case DeviceAhi: return QStringLiteral("ahi");
+    case AnalysisAhi: return QStringLiteral("an_ahi");
+    case Leak: return QStringLiteral("leak");
+    case Pressure: return QStringLiteral("p95");
+    case FlowLimitation: return QStringLiteral("fl_time");
+    case Glasgow: return QStringLiteral("glasgow");
+    case Odi3: return QStringLiteral("odi3");
+    case Below90: return QStringLiteral("t90");
+    case ColumnCount: break;
+    }
+    return QString();
+}
+
 QString columnTitle(Column column, const Options &options)
 {
     const QLocale locale;
@@ -201,6 +220,7 @@ QString html(const QList<Row> &rows, const Options &options)
     }
     for (Column c : kTableColumns) {
         QString head = columnTitle(c, options).toHtmlEscaped();
+        if (options.helpLinks) head = HelpTips::term(head, columnHelpKey(c));
         if (c == Pressure) {
             const QString tip = QCoreApplication::translate("SettingsComparison",
                                     "Average over the nights of each night's %1th percentile")
@@ -241,7 +261,8 @@ QString html(const QList<Row> &rows, const Options &options)
     const QString note = QCoreApplication::translate("SettingsComparison",
         "Green marks the best value among settings used for at least %1 nights. Grey rows have fewer "
         "nights, too few to judge. Pressure is the average over the nights.").arg(kMinNights);
-    html += QStringLiteral("<tr><td colspan=%1 align=center><i>%2</i></td></tr>").arg(span).arg(note.toHtmlEscaped());
+    const QString noteHtml = options.helpLinks ? HelpTips::term(note.toHtmlEscaped(), QStringLiteral("best_value")) : note.toHtmlEscaped();
+    html += QStringLiteral("<tr><td colspan=%1 align=center><i>%2</i></td></tr>").arg(QString::number(span), noteHtml);
     html += QStringLiteral("</table>");
     return html;
 }

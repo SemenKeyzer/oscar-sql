@@ -30,6 +30,9 @@ private slots:
     void testFlowLimitationInAhiTile();
     void testGlasgowLessReliableInTile();
     void testTilesHaveHelp();
+    void testTileLinkKeepsItsOwnTooltip();
+    void testTrendCaptionsHaveHelp();
+    void testTileTooltipFromInnerLabel();
 
 private:
     class QApplication *m_app = nullptr;

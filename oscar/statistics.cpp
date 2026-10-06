@@ -1591,7 +1591,8 @@ QString Statistics::helpKey(const StatisticsRow &row)
     case SC_HOURS:
     case SC_MEDIAN_HOURS:
         return QStringLiteral("usage");
-    case SC_AHI_RDI:
+    case SC_AHI_RDI:   // labelled RDI when the profile counts RERAs in
+        return p_profile && p_profile->general->calculateRDI() ? QStringLiteral("rdi") : QStringLiteral("ahi");
     case SC_AHI_ONLY:
     case SC_MEDIAN_AHI:
         return QStringLiteral("ahi");
@@ -1951,6 +1952,7 @@ QString Statistics::GenerateSettingsComparison()
     options.ahiName = rdi ? STR_TR_RDI : STR_TR_AHI;
     options.percentile = p_profile->general->prefCalcPercentile();
     options.headingColor = heading_color;
+    options.helpLinks = true;   // the Statistics tab; the doctor's PDF leaves them out
     int counter = 0;
     for (int i = 0; i < rows.size(); ++i) options.rowColors << alternatingColor(counter);
 
@@ -2275,7 +2277,7 @@ QString Statistics::GenerateCPAPUsage()
             headerWidth = 22;
         }
         QString bgColor = alternatingColor(alternatingColorCounter);
-        line += QString("<tr class=datarow bgcolor='%3'><td width='%1%'>%2</td>").arg(headerWidth).arg(HelpTips::term(name, helpKey(row))).arg(bgColor);
+        line += QString("<tr class=datarow bgcolor='%3'><td width='%1%'>%2</td>").arg(headerWidth).arg(s_override.active ? name : HelpTips::term(name, helpKey(row))).arg(bgColor);   // no links in the PDF
 
         for (int j=0; j < np; j++) {
             width = j < np-1 ? dataWidth : 100 - (headerWidth + dataWidth*(np-1));

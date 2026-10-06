@@ -14,6 +14,10 @@
 #include <cmath>
 
 #include "nightsummary.h"
+#include "helptips.h"
+#include "glossary.h"
+#include <QToolTip>
+#include <QHelpEvent>
 
 namespace {
 
@@ -375,4 +379,62 @@ void NightSummaryTests::testTilesHaveHelp()
     const QString all = notes.join(QLatin1Char('\n'));
     QVERIFY(all.contains(QStringLiteral("help:fl_time")));
     QVERIFY(all.contains(QStringLiteral("help:glasgow")));
+}
+
+// Hovering "Glasgow …" inside the AHI tile explains Glasgow, not AHI.
+void NightSummaryTests::testTileLinkKeepsItsOwnTooltip()
+{
+    NightSummaryView view;
+    view.resize(900, 400);
+    NightSummary s = goodNight();
+    s.hasFlowLimitation = true;
+    s.flPercent = 6;
+    s.flMinutes = 32;
+    s.hasGlasgow = true;
+    s.glasgow = 2.1;
+    s.glasgowAdapted = 1.9;
+    view.setSummary(s);
+    QLabel *note = nullptr;
+    for (QLabel *l : view.findChildren<QLabel *>(QStringLiteral("nsNote"))) {
+        if (l->text().contains(QStringLiteral("help:glasgow"))) note = l;
+    }
+    QVERIFY(note);
+    emit note->linkHovered(QStringLiteral("help:glasgow"));
+    QCOMPARE(note->property("helpKey").toString(), QStringLiteral("glasgow"));
+    emit note->linkHovered(QString());
+    QVERIFY(note->property("helpKey").toString().isEmpty());
+}
+
+// The bars of the nights before explain themselves too.
+void NightSummaryTests::testTrendCaptionsHaveHelp()
+{
+    NightSummaryView view;
+    view.resize(900, 400);
+    view.setSummary(goodNight());
+    QStringList keys;
+    for (QWidget *w : view.findChildren<QWidget *>()) {
+        const QString k = w->property("helpKey").toString();
+        if (!k.isEmpty()) keys << k;
+    }
+    QVERIFY2(keys.contains(QStringLiteral("compliance")) && keys.contains(QStringLiteral("median")), qPrintable(keys.join(QLatin1Char(','))));
+}
+
+// Hovering any part of a tile (its caption, figure or note) explains the tile's figure.
+void NightSummaryTests::testTileTooltipFromInnerLabel()
+{
+    NightSummaryView view;
+    view.resize(900, 400);
+    view.setSummary(goodNight());
+    view.show();
+    QFrame *leak = nullptr;
+    for (QFrame *tile : view.findChildren<QFrame *>(QStringLiteral("nsTile"))) {
+        if (tile->property("helpKey").toString() == QLatin1String("leak")) leak = tile;
+    }
+    QVERIFY(leak);
+    QLabel *caption = leak->findChild<QLabel *>(QStringLiteral("nsCaption"));
+    QVERIFY(caption);
+    QHelpEvent help(QEvent::ToolTip, QPoint(3, 3), caption->mapToGlobal(QPoint(3, 3)));
+    QApplication::sendEvent(caption, &help);
+    QVERIFY2(QToolTip::text().contains(Glossary::find(QStringLiteral("leak"))->term), qPrintable(QToolTip::text()));
+    QToolTip::hideText();
 }

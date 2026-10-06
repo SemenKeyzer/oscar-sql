@@ -41,6 +41,7 @@
 #include "statistics.h"
 #include "doctorreport.h"
 #include "glossary.h"
+#include "helptips.h"
 #include "nightsummary.h"
 #include "pdfreportoptions.h"
 #include "pdfreportwriter.h"
@@ -1476,4 +1477,27 @@ void AnalysisIntegrationTests::testStatisticsRowKeys()
         if (row.calc == SC_DAYS_GE_COMPLIANCE_HOURS) QCOMPARE(Statistics::helpKey(row), QStringLiteral("compliance_pct"));
         if (row.calc == SC_ANALYSIS && row.src == QLatin1String("gia")) QCOMPARE(Statistics::helpKey(row), QStringLiteral("glasgow_adapted"));
     }
+}
+
+// The doctor's PDF has no "help:" links, whatever the View menu says.
+void AnalysisIntegrationTests::testPdfStatisticsHaveNoHelpLinks()
+{
+    StatisticsNight night(m_machineRow, 105, kNightDate.addDays(105));
+    HelpTips::instance()->setEnabled(true);
+    Statistics stats;
+    const QString html = stats.periodHtml(night.date, night.date, StatisticsSections());
+    QVERIFY(html.contains(Statistics::tr("CPAP Statistics")));
+    QVERIFY(!html.contains(QStringLiteral("help:")));
+}
+
+void AnalysisIntegrationTests::testRdiRowExplainsRdi()
+{
+    const bool was = p_profile->general->calculateRDI();
+    p_profile->general->setCalculateRDI(true);
+    const QString rdi = Statistics::helpKey(StatisticsRow(QStringLiteral("AHI"), SC_AHI_RDI, MT_CPAP));
+    p_profile->general->setCalculateRDI(false);
+    const QString ahi = Statistics::helpKey(StatisticsRow(QStringLiteral("AHI"), SC_AHI_RDI, MT_CPAP));
+    p_profile->general->setCalculateRDI(was);
+    QCOMPARE(rdi, QStringLiteral("rdi"));
+    QCOMPARE(ahi, QStringLiteral("ahi"));
 }
