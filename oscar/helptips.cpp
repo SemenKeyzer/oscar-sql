@@ -133,8 +133,11 @@ void HelpTips::attachMenus(QWidget *owner)
         menu->setProperty("helpMenuWatched", true);
         connect(menu, &QMenu::hovered, instance(), [](QAction *action) {
             HelpTips *tips = instance();
-            if (!tips->enabled() || !action || action->objectName().isEmpty()) return;
-            const QString key = QStringLiteral("ui.menu.") + action->objectName();
+            if (!tips->enabled() || !action) return;
+            // a submenu is explained by its own name: its items may be made in code
+            const QString name = action->menu() ? action->menu()->objectName() : action->objectName();
+            if (name.isEmpty()) return;
+            const QString key = QStringLiteral("ui.menu.") + name;
             if (Glossary::find(key)) tips->hover(key);
         });
     }
@@ -174,11 +177,12 @@ bool HelpTips::eventFilter(QObject *o, QEvent *e)
 {
     if ((e->type() == QEvent::ToolTip || e->type() == QEvent::Enter) && o->isWidgetType() && enabled()) {
         QString key = keyFor(static_cast<QWidget *>(o));
-        if (auto *menu = qobject_cast<QMenu *>(o); menu && key.isEmpty() && menu->activeAction()
-            && !menu->activeAction()->objectName().isEmpty()) {
-            // a menu drawn by Qt (Windows, Linux): the highlighted item
-            const QString itemKey = QStringLiteral("ui.menu.") + menu->activeAction()->objectName();
-            if (Glossary::find(itemKey)) key = itemKey;
+        if (auto *menu = qobject_cast<QMenu *>(o); menu && key.isEmpty() && menu->activeAction()) {
+            // a menu drawn by Qt (Windows, Linux): the highlighted item or submenu
+            QAction *a = menu->activeAction();
+            const QString name = a->menu() ? a->menu()->objectName() : a->objectName();
+            const QString itemKey = QStringLiteral("ui.menu.") + name;
+            if (!name.isEmpty() && Glossary::find(itemKey)) key = itemKey;
         }
         if (!key.isEmpty()) {
             if (e->type() == QEvent::Enter) {

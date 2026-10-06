@@ -203,6 +203,20 @@ void HelpTipsTests::testMenuHoverSkipsDynamicItems()
     QCOMPARE(hovered.count(), 0);
 }
 
+void HelpTipsTests::testSubmenuHoverExplainsMenu()
+{
+    // a submenu whose items are made in code (one per device) is explained by its own name
+    QMainWindow win;
+    QMenu *data = win.menuBar()->addMenu(QStringLiteral("Data"));
+    QMenu *rebuild = data->addMenu(QStringLiteral("Rebuild CPAP Data"));
+    rebuild->setObjectName(QStringLiteral("menu_Rebuild_CPAP_Data"));
+    HelpTips::attachMenus(&win);
+    QSignalSpy hovered(HelpTips::instance(), &HelpTips::hovered);
+    emit data->hovered(rebuild->menuAction());
+    QCOMPARE(hovered.count(), 1);
+    QCOMPARE(hovered.first().first().toString(), QStringLiteral("ui.menu.menu_Rebuild_CPAP_Data"));
+}
+
 void HelpTipsTests::testMenuTooltipUsesActiveAction()
 {
     QMenu menu;

@@ -20,6 +20,7 @@
 #include <QGroupBox>
 #include <QLineEdit>
 #include <QMainWindow>
+#include <QMenu>
 #include <QSlider>
 #include <QTabBar>
 #include <QTemporaryDir>
@@ -140,6 +141,12 @@ void UiCoverageTests::testMenusCovered()
     for (QAction *a : host.findChildren<QAction *>()) {
         if (a->isSeparator() || a->objectName().isEmpty() || a->text().isEmpty() || exempt.contains(a->objectName())) continue;
         if (!Glossary::find(QStringLiteral("ui.menu.") + a->objectName())) missing << a->objectName();
+    }
+    // submenus: their items may be made in code, so the submenu itself explains them
+    for (QMenu *m : host.findChildren<QMenu *>()) {
+        if (qobject_cast<QMenu *>(m->parentWidget()) && !Glossary::find(QStringLiteral("ui.menu.") + m->objectName())) {
+            missing << m->objectName();
+        }
     }
     missing.removeDuplicates();
     QVERIFY2(missing.isEmpty(), qPrintable(QString::number(missing.size()) + QStringLiteral(": ") + missing.join(QStringLiteral(", "))));

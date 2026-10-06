@@ -29,6 +29,7 @@ private slots:
     void testLabelTakesNeighbourKey();
     void testMenuHoverFollowsAction();
     void testMenuHoverSkipsDynamicItems();
+    void testSubmenuHoverExplainsMenu();
     void testMenuTooltipUsesActiveAction();
 private:
     QApplication *m_app = nullptr;
