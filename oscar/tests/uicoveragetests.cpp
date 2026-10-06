@@ -33,7 +33,9 @@
 #include "analysisprefs.h"
 #include "database/database_manager.h"
 #include "glossary.h"
+#include "helppanel.h"
 #include "helptips.h"
+#include "timealignbar.h"
 #include "overviewpresets.h"
 #include "ui_daily.h"
 #include "ui_mainwindow.h"
@@ -70,7 +72,7 @@ QStringList uncovered(QWidget *root, const QString &window, const QStringList &e
         bool internal = false;   // parts of compound widgets and dialog button boxes
         for (QWidget *p = w->parentWidget(); p && p != root; p = p->parentWidget()) {
             if (qobject_cast<QDialogButtonBox *>(p) || qobject_cast<QCalendarWidget *>(p) || qobject_cast<QAbstractSpinBox *>(p)
-                || qobject_cast<QComboBox *>(p) || qobject_cast<QTabBar *>(p)) {
+                || qobject_cast<QComboBox *>(p) || qobject_cast<QTabBar *>(p) || qobject_cast<QLineEdit *>(p)) {
                 internal = true;
             }
         }
@@ -233,4 +235,21 @@ void UiCoverageTests::testCodeCreatedControlsCovered()
         if (!Glossary::find(k)) missing << k;
     }
     QVERIFY2(missing.isEmpty(), qPrintable(missing.join(QStringLiteral(", "))));
+}
+
+void UiCoverageTests::testAlignBarCovered()
+{
+    // the bar the Daily «Align» button opens is built in code
+    QWidget host;
+    new TimeAlignBar(&host);
+    const QStringList missing = uncovered(&host, QStringLiteral("daily"), {});
+    QVERIFY2(missing.isEmpty(), qPrintable(QString::number(missing.size()) + QStringLiteral(": ") + missing.join(QStringLiteral(", "))));
+}
+
+void UiCoverageTests::testHelpPanelCovered()
+{
+    QMainWindow host;
+    new HelpPanel(&host);
+    const QStringList missing = uncovered(&host, QStringLiteral("main"), {});
+    QVERIFY2(missing.isEmpty(), qPrintable(QString::number(missing.size()) + QStringLiteral(": ") + missing.join(QStringLiteral(", "))));
 }

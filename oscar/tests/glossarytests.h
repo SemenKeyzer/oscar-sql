@@ -26,6 +26,7 @@ private slots:
     void testCautionOnlyWhereListed();
     void testUiTooltipShowsAdviceAndCaution();
     void testSearchFindsUiEntries();
+    void testExplanationsMatchCode();
 };
 DECLARE_TEST(GlossaryTests)
 

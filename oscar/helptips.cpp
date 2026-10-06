@@ -52,10 +52,8 @@ QWidget *rowNeighbour(QLabel *label, QLayout *layout)
     }
     auto *box = qobject_cast<QBoxLayout *>(layout);
     if (!box || (box->direction() != QBoxLayout::LeftToRight && box->direction() != QBoxLayout::RightToLeft)) return nullptr;
-    for (int j = i + 1; j < box->count(); ++j) {
-        if (QWidget *w = box->itemAt(j)->widget()) return w;
-    }
-    return nullptr;
+    // only the item right after the label: a spacer or stretch ends the row's label
+    return i + 1 < box->count() ? box->itemAt(i + 1)->widget() : nullptr;
 }
 }
 

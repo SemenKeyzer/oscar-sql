@@ -29,6 +29,8 @@ private slots:
     void testPrefsCovered();
     void testOximportCovered();
     void testCodeCreatedControlsCovered();
+    void testAlignBarCovered();
+    void testHelpPanelCovered();
 private:
     QApplication *m_app = nullptr;
     QTemporaryDir *m_tempDir = nullptr;   // a profile for the Bluetooth page

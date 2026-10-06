@@ -23,6 +23,7 @@ HelpPanel::HelpPanel(QWidget *parent) : QDockWidget(tr("Help Panel"), parent)
     auto *layout = new QVBoxLayout(body);
     layout->setContentsMargins(4, 4, 4, 4);
     m_search = new QLineEdit(body);
+    m_search->setObjectName(QStringLiteral("helpSearch"));   // the key of its own explanation
     m_search->setPlaceholderText(tr("Search the explanations"));
     m_search->setClearButtonEnabled(true);
     m_results = new QListWidget(body);

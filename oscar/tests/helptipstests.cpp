@@ -173,6 +173,22 @@ void HelpTipsTests::testLabelTakesNeighbourKey()
     QVERIFY(other->property("helpKey").toString().isEmpty());
 }
 
+void HelpTipsTests::testLabelStopsAtSpacer()
+{
+    // a section header followed by a stretch does not explain the control after the gap
+    QWidget box;
+    auto *row = new QHBoxLayout(&box);
+    auto *header = new QLabel(QStringLiteral("Journal"), &box);
+    auto *field = new QTimeEdit(&box);
+    field->setObjectName(QStringLiteral("timeEdit"));
+    row->addWidget(header);
+    row->addStretch(1);
+    row->addWidget(field);
+    HelpTips::attachAll(&box, QStringLiteral("prefs"));
+    QVERIFY(header->property("helpKey").toString().isEmpty());
+    QCOMPARE(field->property("helpKey").toString(), kPrefsKey);
+}
+
 void HelpTipsTests::testMenuHoverFollowsAction()
 {
     QMainWindow win;

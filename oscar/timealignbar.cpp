@@ -31,6 +31,7 @@ TimeAlignBar::TimeAlignBar(QWidget *parent)
     top->addWidget(new QLabel(tr("Align device time:"), this));
 
     m_deviceCombo = new QComboBox(this);
+    m_deviceCombo->setObjectName(QStringLiteral("alignDevice"));   // names: the keys of the hover explanations
     m_deviceCombo->setToolTip(tr("Device whose time is being aligned to the CPAP data"));
     top->addWidget(m_deviceCombo);
 
@@ -53,6 +54,7 @@ TimeAlignBar::TimeAlignBar(QWidget *parent)
     };
     for (const Step &step : steps) {
         auto *button = new QPushButton(tr(step.text), this);
+        button->setObjectName(QStringLiteral("alignNudge_%1").arg(QString::fromLatin1(step.text).replace(QLatin1Char('-'), QLatin1Char('m')).replace(QLatin1Char('+'), QLatin1Char('p'))));
         button->setAutoDefault(false);
         const qint64 delta = step.ms;
         connect(button, &QPushButton::clicked, this, [this, delta]() { emit nudgeRequested(delta); });
@@ -62,11 +64,13 @@ TimeAlignBar::TimeAlignBar(QWidget *parent)
     top->addStretch(1);
 
     auto *cancel = new QPushButton(tr("Cancel"), this);
+    cancel->setObjectName(QStringLiteral("alignCancel"));
     cancel->setToolTip(tr("Discard the change (Esc)"));
     connect(cancel, &QPushButton::clicked, this, &TimeAlignBar::cancelRequested);
     top->addWidget(cancel);
 
     auto *save = new QPushButton(tr("Save"), this);
+    save->setObjectName(QStringLiteral("alignSave"));
     save->setToolTip(tr("Save the shift for this night (Enter)"));
     connect(save, &QPushButton::clicked, this, &TimeAlignBar::saveRequested);
     top->addWidget(save);
@@ -77,11 +81,13 @@ TimeAlignBar::TimeAlignBar(QWidget *parent)
     bottom->addWidget(m_statusLabel, 1);
 
     m_sameAsLastNight = new QPushButton(tr("Same as last night"), this);
+    m_sameAsLastNight->setObjectName(QStringLiteral("alignSameAsLastNight"));
     m_sameAsLastNight->setToolTip(tr("Use the shift saved for the nearest earlier night"));
     connect(m_sameAsLastNight, &QPushButton::clicked, this, &TimeAlignBar::sameAsLastNightRequested);
     bottom->addWidget(m_sameAsLastNight);
 
     auto *more = new QPushButton(tr("More options..."), this);
+    more->setObjectName(QStringLiteral("alignMoreOptions"));
     more->setToolTip(tr("Open Time Corrections for date ranges and other correction types"));
     connect(more, &QPushButton::clicked, this, &TimeAlignBar::moreOptionsRequested);
     bottom->addWidget(more);

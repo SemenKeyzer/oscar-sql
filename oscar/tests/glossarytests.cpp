@@ -146,3 +146,30 @@ void GlossaryTests::testSearchFindsUiEntries()
 {
     QVERIFY(Glossary::search(QStringLiteral("purge")).contains(kPurgeDay));
 }
+
+// texts the final review found contradicting what the code does
+void GlossaryTests::testExplanationsMatchCode()
+{
+    auto e = [](const char *key) {
+        const GlossaryEntry *entry = Glossary::find(QString::fromLatin1(key));
+        if (!entry) qFatal("no entry %s", key);
+        return *entry;
+    };
+    // MainWindow::on_action_Rebuild_Oximetry_Index_triggered drops short pieces and the drop/change flags
+    QVERIFY(e("ui.menu.action_Rebuild_Oximetry_Index").summary.contains(QStringLiteral("Discard short pieces")));
+    // OximeterImport::onBluetoothFinished accepts the dialog
+    QVERIFY(e("ui.oximport.bluetoothDoneButton").summary.contains(QStringLiteral("closes the wizard")));
+    // the reminder asks to put the card back into the device
+    QVERIFY(e("ui.prefs.removeCardNotificationCheckbox").summary.contains(QStringLiteral("back into")));
+    // AnalysisParams::limitOxiToCpap is false by default
+    QVERIFY(e("ui.prefs.limitOxi").advice.contains(QStringLiteral("Off by default")));
+    // devices without card backups (oximeters) are lost for good
+    QVERIFY(e("ui.menu.menuPurge_CPAP_Data").caution.contains(QStringLiteral("for good")));
+    QVERIFY(!e("ui.menu.menuPurge_CPAP_Data").advice.contains(QStringLiteral("backup")));
+    // the cable erase box is wired to nothing
+    QVERIFY(e("ui.oximport.cms50EraseAfterwards").summary.contains(QStringLiteral("no effect")));
+    QVERIFY(e("ui.oximport.cms50EraseAfterwards").caution.isEmpty());
+    // schema::resetChannels() applies at once, before OK or Cancel
+    QVERIFY(e("ui.prefs.resetChannelDefaults").caution.contains(QStringLiteral("Cancel")));
+    QVERIFY(e("ui.prefs.resetWaveformChannels").caution.contains(QStringLiteral("Cancel")));
+}
