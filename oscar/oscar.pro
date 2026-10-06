@@ -366,6 +366,7 @@ SOURCES += \
     preferencessearch.cpp \
     pdfreportoptions.cpp \
     glossary.cpp \
+    SleepLib/manual_scoring.cpp \
     helpstrip.cpp \
     uiglossary.cpp \
     helptips.cpp \
@@ -696,6 +697,7 @@ HEADERS  += \
     preferencessearch.h \
     pdfreportoptions.h \
     glossary.h \
+    SleepLib/manual_scoring.h \
     helpstrip.h \
     uiglossary.h \
     helptips.h \
@@ -915,6 +917,7 @@ test {
         tests/helppaneltests.cpp \
         tests/helpstriptests.cpp \
         tests/uicoveragetests.cpp \
+        tests/manualscoringtests.cpp \
         tests/helplinkstests.cpp \
         tests/htmlpagestests.cpp \
         tests/channelstoretests.cpp \
@@ -966,6 +969,7 @@ test {
         tests/helppaneltests.h \
         tests/helpstriptests.h \
         tests/uicoveragetests.h \
+        tests/manualscoringtests.h \
         tests/helplinkstests.h \
         tests/htmlpagestests.h \
         tests/channelstoretests.h \
