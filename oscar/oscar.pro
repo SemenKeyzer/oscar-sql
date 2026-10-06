@@ -367,6 +367,7 @@ SOURCES += \
     pdfreportoptions.cpp \
     glossary.cpp \
     SleepLib/manual_scoring.cpp \
+    database/manual_scoring_repository.cpp \
     helpstrip.cpp \
     uiglossary.cpp \
     helptips.cpp \
@@ -698,6 +699,7 @@ HEADERS  += \
     pdfreportoptions.h \
     glossary.h \
     SleepLib/manual_scoring.h \
+    database/manual_scoring_repository.h \
     helpstrip.h \
     uiglossary.h \
     helptips.h \

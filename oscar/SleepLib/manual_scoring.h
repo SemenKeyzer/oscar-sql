@@ -26,7 +26,7 @@ enum class Kind { Add, Remove, Retype, Exclude };
 //! One correction. Remove and Retype name the device event by its channel and end time.
 struct Edit {
     qint64 id = 0;
-    SessionID session = 0;
+    qint64 sessionRow = 0;      //!< the session's row in the database (Session::sessionRowId)
     Kind kind = Kind::Add;
     ChannelID channel = 0;      //!< the added type, or the device event's own type
     ChannelID newChannel = 0;   //!< Retype: the new type

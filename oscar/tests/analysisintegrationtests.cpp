@@ -1359,7 +1359,7 @@ void AnalysisIntegrationTests::testMigrationV21KeepsRows()
     QVERIFY(q.exec());
 
     QVERIFY(DatabaseSchema::upgradeSchema(db, 20));
-    QCOMPARE(DatabaseSchema::getSchemaVersion(db), 21);
+    QCOMPARE(DatabaseSchema::getSchemaVersion(db), DatabaseSchema::CURRENT_SCHEMA_VERSION);
     const AnalysisDailyData d = AnalysisDailyRepository().find(m_profileId, date);
     QVERIFY(d.id > 0);
     QCOMPARE(d.flSeconds, 900);

@@ -27,6 +27,18 @@ private slots:
     void testExcludeOverlapAndClip();
     void testExcludeWholeNight();
     void testAddedInsideExcludeNotCounted();
+    // storage
+    void testStoreAndLoadEdits();
+    void testRemoveEdit();
+    void testSummaryRoundTrip();
+    void testSessionDeleteCascades();
+    void testMigration21To22();
+    void cleanupTestCase();
+private:
+    qint64 sessionRow(qint64 deviceSessionId);
+    class QTemporaryDir *m_tempDir = nullptr;
+    class QCoreApplication *m_app = nullptr;
+    qint64 m_machineRow = 0;
 };
 DECLARE_TEST(ManualScoringTests)
 

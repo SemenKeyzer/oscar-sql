@@ -160,6 +160,12 @@ bool DatabaseSchema::createSchema(QSqlDatabase& db)
         return false;
     }
 
+    // The doctor's manual scoring (schema version 22)
+    if (!createManualScoringTables(db)) {
+        qCritical() << "DatabaseSchema: Failed to create manual scoring tables";
+        return false;
+    }
+
     // Create indexes
     if (!createIndexes(db)) {
         qCritical() << "DatabaseSchema: Failed to create indexes";
@@ -246,6 +252,7 @@ bool DatabaseSchema::upgradeSchema(QSqlDatabase& db, int fromVersion,
         { 18, &migrateV18ToV19 },
         { 19, &migrateV19ToV20 },
         { 20, &migrateV20ToV21 },
+        { 21, &migrateV21ToV22 },
     };
     const int stepsAvailable = int(sizeof(steps) / sizeof(steps[0]));
 
@@ -2151,5 +2158,61 @@ bool DatabaseSchema::migrateV20ToV21(QSqlDatabase& db)
     }
 
     qDebug() << "DatabaseSchema: Migration v20->v21 complete";
+    return true;
+}
+
+bool DatabaseSchema::createManualScoringTables(QSqlDatabase& db)
+{
+    QSqlQuery q(db);
+    const QStringList statements = {
+        QStringLiteral(
+            "CREATE TABLE IF NOT EXISTS manual_scoring ("
+            "    id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "    session_id INTEGER NOT NULL,"
+            "    kind TEXT NOT NULL,"
+            "    channel INTEGER NOT NULL DEFAULT 0,"
+            "    new_channel INTEGER NOT NULL DEFAULT 0,"
+            "    start_ms INTEGER NOT NULL,"
+            "    end_ms INTEGER NOT NULL,"
+            "    note TEXT,"
+            "    created_at TEXT NOT NULL,"
+            "    FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE"
+            ")"),
+        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_manual_scoring_session ON manual_scoring(session_id)"),
+        QStringLiteral(
+            "CREATE TABLE IF NOT EXISTS manual_scoring_summary ("
+            "    session_id INTEGER PRIMARY KEY,"
+            "    deltas TEXT NOT NULL DEFAULT '',"
+            "    excluded_ms INTEGER NOT NULL DEFAULT 0,"
+            "    not_found INTEGER NOT NULL DEFAULT 0,"
+            "    FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE"
+            ")"),
+    };
+    for (const QString &sql : statements) {
+        if (!q.exec(sql)) {
+            qCritical() << "DatabaseSchema: createManualScoringTables failed:" << q.lastError().text();
+            return false;
+        }
+    }
+    return true;
+}
+
+bool DatabaseSchema::migrateV21ToV22(QSqlDatabase& db)
+{
+    qDebug() << "DatabaseSchema: Migrating v21 -> v22";
+    if (!db.transaction()) {
+        qCritical() << "DatabaseSchema: migrateV21ToV22: failed to start transaction";
+        return false;
+    }
+    if (!createManualScoringTables(db) || !setSchemaVersion(db, 22)) {
+        db.rollback();
+        return false;
+    }
+    if (!db.commit()) {
+        qCritical() << "DatabaseSchema: migrateV21ToV22: commit failed";
+        db.rollback();
+        return false;
+    }
+    qDebug() << "DatabaseSchema: Migration v21->v22 complete";
     return true;
 }

@@ -8,7 +8,16 @@
 
 #include "manualscoringtests.h"
 
+#include <QCoreApplication>
+#include <QDir>
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QTemporaryDir>
+
 #include "SleepLib/manual_scoring.h"
+#include "database/database_manager.h"
+#include "database/database_schema.h"
+#include "database/manual_scoring_repository.h"
 #include "SleepLib/schema.h"
 
 using namespace ManualScoring;
@@ -49,7 +58,43 @@ int total(const QHash<ChannelID, int> &delta)
 
 void ManualScoringTests::initTestCase()
 {
+    if (QCoreApplication::instance() == nullptr) {
+        static int argc = 1;
+        static char appName[] = "test";
+        static char *argv[] = { appName, nullptr };
+        m_app = new QCoreApplication(argc, argv);
+    }
     if (CPAP_Obstructive == 0) schema::init();
+    if (DatabaseManager::instance().isOpen()) DatabaseManager::instance().close();
+    m_tempDir = new QTemporaryDir(QDir::tempPath() + QStringLiteral("/oscar-manualscoring-XXXXXX"));
+    QVERIFY(m_tempDir->isValid());
+    QVERIFY(DatabaseManager::instance().initialize(m_tempDir->path() + QStringLiteral("/oscar.db")));
+    QSqlQuery q(DatabaseManager::instance().database());
+    QVERIFY(q.exec(QStringLiteral("INSERT INTO profiles (username, data_folder) VALUES ('scoring', '/tmp/scoring')")));
+    const qint64 profile = q.lastInsertId().toLongLong();
+    q.prepare(QStringLiteral("INSERT INTO machines (profile_id, machine_id, loader_name, machine_type) VALUES (?, 1, 'test', 1)"));
+    q.addBindValue(profile);
+    QVERIFY(q.exec());
+    m_machineRow = q.lastInsertId().toLongLong();
+}
+
+void ManualScoringTests::cleanupTestCase()
+{
+    DatabaseManager::instance().close();
+    delete m_tempDir;
+    m_tempDir = nullptr;
+    delete m_app;
+    m_app = nullptr;
+}
+
+qint64 ManualScoringTests::sessionRow(qint64 deviceSessionId)
+{
+    QSqlQuery q(DatabaseManager::instance().database());
+    q.prepare(QStringLiteral("INSERT INTO sessions (session_id, machine_id, start_time, end_time, duration) VALUES (?, ?, 0, 3600000, 3600)"));
+    q.addBindValue(deviceSessionId);
+    q.addBindValue(m_machineRow);
+    if (!q.exec()) return 0;
+    return q.lastInsertId().toLongLong();
 }
 
 void ManualScoringTests::testNoEditsNoChange()
@@ -148,4 +193,104 @@ void ManualScoringTests::testAddedInsideExcludeNotCounted()
                            { edit(1, Kind::Add, CPAP_Hypopnea, 180 * kSec, 200 * kSec), edit(2, Kind::Exclude, 0, 150 * kSec, 350 * kSec) },
                            oneSession());
     QCOMPARE(r.delta.value(CPAP_Hypopnea), 0);
+}
+
+// ---- storage
+
+void ManualScoringTests::testStoreAndLoadEdits()
+{
+    const qint64 row = sessionRow(101);
+    QVERIFY(row > 0);
+    QList<Edit> stored = { edit(0, Kind::Add, CPAP_Hypopnea, 480 * kSec, 500 * kSec),
+                           edit(0, Kind::Remove, CPAP_Obstructive, 185 * kSec, 200 * kSec),
+                           edit(0, Kind::Retype, CPAP_ClearAirway, 289 * kSec, 300 * kSec, CPAP_Obstructive),
+                           edit(0, Kind::Exclude, 0, 150 * kSec, 350 * kSec) };
+    stored[3].note = QStringLiteral("awake");
+    for (Edit &e : stored) {
+        e.sessionRow = row;
+        e.id = ManualScoringRepository::add(e);
+        QVERIFY(e.id > 0);
+    }
+    const QList<Edit> loaded = ManualScoringRepository::editsForSession(row);
+    QCOMPARE(loaded.size(), 4);
+    for (int i = 0; i < 4; ++i) {
+        QCOMPARE(loaded[i].id, stored[i].id);
+        QCOMPARE(loaded[i].sessionRow, row);
+        QCOMPARE(int(loaded[i].kind), int(stored[i].kind));
+        QCOMPARE(loaded[i].channel, stored[i].channel);
+        QCOMPARE(loaded[i].newChannel, stored[i].newChannel);
+        QCOMPARE(loaded[i].startMs, stored[i].startMs);
+        QCOMPARE(loaded[i].endMs, stored[i].endMs);
+        QCOMPARE(loaded[i].note, stored[i].note);
+        QVERIFY(loaded[i].createdAt.isValid());
+    }
+    QCOMPARE(ManualScoringRepository::editsForSessions({ row }).size(), 4);
+}
+
+void ManualScoringTests::testRemoveEdit()
+{
+    const qint64 row = sessionRow(102);
+    Edit e = edit(0, Kind::Add, CPAP_Hypopnea, 1, 2);
+    e.sessionRow = row;
+    const qint64 a = ManualScoringRepository::add(e);
+    const qint64 b = ManualScoringRepository::add(e);
+    QVERIFY(ManualScoringRepository::remove(a));
+    const QList<Edit> left = ManualScoringRepository::editsForSession(row);
+    QCOMPARE(left.size(), 1);
+    QCOMPARE(left.first().id, b);
+    QVERIFY(ManualScoringRepository::removeAllForSessions({ row }));
+    QVERIFY(ManualScoringRepository::editsForSession(row).isEmpty());
+}
+
+void ManualScoringTests::testSummaryRoundTrip()
+{
+    const qint64 row = sessionRow(103);
+    Result r;
+    r.delta.insert(CPAP_Obstructive, -1);
+    r.delta.insert(CPAP_Hypopnea, 2);
+    r.excludedMs = 120000;
+    r.notFound = { 7, 9 };
+    QVERIFY(ManualScoringRepository::storeSummary(row, r));
+    QHash<ChannelID, int> delta;
+    qint64 excluded = 0;
+    int notFound = 0;
+    QVERIFY(ManualScoringRepository::loadSummary(row, delta, excluded, notFound));
+    QCOMPARE(delta, r.delta);
+    QCOMPARE(excluded, qint64(120000));
+    QCOMPARE(notFound, 2);
+    QVERIFY(ManualScoringRepository::removeSummary(row));
+    QVERIFY(!ManualScoringRepository::loadSummary(row, delta, excluded, notFound));
+}
+
+void ManualScoringTests::testSessionDeleteCascades()
+{
+    const qint64 row = sessionRow(104);
+    Edit e = edit(0, Kind::Exclude, 0, 1, 2);
+    e.sessionRow = row;
+    ManualScoringRepository::add(e);
+    Result r;
+    r.excludedMs = 1;
+    ManualScoringRepository::storeSummary(row, r);
+    QSqlQuery q(DatabaseManager::instance().database());
+    q.prepare(QStringLiteral("DELETE FROM sessions WHERE id = ?"));
+    q.addBindValue(row);
+    QVERIFY(q.exec());
+    QVERIFY(ManualScoringRepository::editsForSession(row).isEmpty());
+    QHash<ChannelID, int> delta;
+    qint64 excluded = 0;
+    int notFound = 0;
+    QVERIFY(!ManualScoringRepository::loadSummary(row, delta, excluded, notFound));
+}
+
+void ManualScoringTests::testMigration21To22()
+{
+    QSqlDatabase db = DatabaseManager::instance().database();
+    QSqlQuery q(db);
+    QVERIFY(q.exec(QStringLiteral("DROP TABLE manual_scoring")));
+    QVERIFY(q.exec(QStringLiteral("DROP TABLE manual_scoring_summary")));
+    QVERIFY(q.exec(QStringLiteral("UPDATE schema_version SET version = 21")));
+    QVERIFY(DatabaseSchema::upgradeSchema(db, 21));
+    QCOMPARE(DatabaseSchema::getSchemaVersion(db), 22);
+    QVERIFY(db.tables().contains(QStringLiteral("manual_scoring")));
+    QVERIFY(db.tables().contains(QStringLiteral("manual_scoring_summary")));
 }
