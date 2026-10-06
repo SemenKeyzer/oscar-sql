@@ -53,6 +53,7 @@
 #include "SleepLib/analysis/analysis_service.h"
 #include "analysispanel.h"
 #include "scoringmenus.h"
+#include "Graphs/gManualScoringLayer.h"
 #include "SleepLib/manual_scoring.h"
 #include "database/manual_scoring_repository.h"
 #include "nightsummary.h"
@@ -697,6 +698,14 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
 
     ui->calButton->setChecked(AppSetting->calendarVisible() ? true : false);
     on_calButton_toggled(AppSetting->calendarVisible());
+
+    // manual scoring: the hatch of excluded stretches on every graph, the edited events on flow and flags
+    m_scoringDrawn = QSharedPointer<ManualScoring::Result>::create();
+    for (auto it = graphlist.cbegin(); it != graphlist.cend(); ++it) {
+        if (it.key() == STR_GRAPH_EventBreakdown) continue;   // not a time graph
+        const bool markers = it.key() == STR_GRAPH_FlowRate || it.key() == STR_GRAPH_SleepFlags;
+        it.value()->AddLayer(new gManualScoringLayer(m_scoringDrawn, markers));
+    }
 
     GraphView->resetLayout();
     GraphView->SaveDefaultSettings();
@@ -2429,6 +2438,7 @@ QVariant MyTextBrowser::loadResource(int type, const QUrl &url)
 
 void Daily::Load(QDate date)
 {
+    updateScoringLayer(nullptr);   // a night without CPAP hours draws no scoring
     PERF_TIMER_SCOPE("Daily::Load()");
 
     qDebug() << "Daily::Load(): Called for" << date.toString() << "using" << QApplication::font().toString();
@@ -2561,6 +2571,7 @@ void Daily::Load(QDate date)
         modestr=schema::channel[CPAP_Mode].m_options[mode];
         if (hours>0) {
             htmlLeftAHI= getAHI(day,isBrick, figures.hasAnalysisAhi ? figures.analysisAhi : -1) + getManualScoring(day);
+            updateScoringLayer(day);
 
             htmlLeftMachineInfo = getCPAPInformation(day);
 
@@ -4384,4 +4395,17 @@ QString Daily::getManualScoring(Day *day)
     html += QStringLiteral("<tr><td colspan=5 align=center><a href='scoring=clear'>%1</a></td></tr>\n").arg(tr("Undo all scoring of this night").toHtmlEscaped());
     html += QStringLiteral("</table>\n");
     return html;
+}
+
+void Daily::updateScoringLayer(Day *day)
+{
+    if (!m_scoringDrawn) return;
+    *m_scoringDrawn = ManualScoring::Result();
+    if (!day || !day->hasManualScoring()) return;
+    for (Session *s : day->sessions) {
+        if (s->type() != MT_CPAP || !s->enabled() || !s->hasManualScoring()) continue;
+        const ManualScoring::Result r = ManualScoring::resultFor(s);
+        m_scoringDrawn->events += r.events;
+        m_scoringDrawn->excludedSpans += r.excludedSpans;
+    }
 }

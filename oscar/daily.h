@@ -13,6 +13,7 @@
 #include <QMenu>
 #include <QAction>
 #include <QWidget>
+#include <QSharedPointer>
 #include <QTreeWidget>
 #include <QHBoxLayout>
 #include <QPushButton>
@@ -28,6 +29,7 @@
 #include <QTextBrowser>
 #include <QBitArray>
 
+#include "SleepLib/manual_scoring.h"
 #include "SleepLib/profiles.h"
 #include "mainwindow.h"
 #include "Graphs/gGraphView.h"
@@ -456,6 +458,8 @@ private:
     // Manual scoring (SleepLib/manual_scoring)
     QPushButton *scoringButton = nullptr;
     QLabel *m_scoringBanner = nullptr;
+    QSharedPointer<ManualScoring::Result> m_scoringDrawn;   //!< what the graphs draw (gManualScoringLayer)
+    void updateScoringLayer(Day *day);
     //! Applies a choice from a scoring menu to the day shown; the stretch is for "add"/"exclude".
     void applyScoring(const QVariantMap &choice, qint64 startMs, qint64 endMs);
     void scoringChanged();

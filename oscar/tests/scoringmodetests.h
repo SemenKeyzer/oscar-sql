@@ -21,6 +21,8 @@ private slots:
     void testRightClickRequestsMenu();
     void testOtherGraphsUnaffected();
     void testRangeFromPixels();
+    void testLayerItems();
+    void initTestCase();
 };
 DECLARE_TEST(ScoringModeTests)
 

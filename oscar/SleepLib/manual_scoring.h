@@ -69,6 +69,7 @@ struct EffectiveEvent {
 struct Result {
     QHash<ChannelID, int> delta;   //!< counted minus device count, per scored channel
     qint64 excludedMs = 0;         //!< excluded time inside the sessions, overlaps counted once
+    QList<QPair<qint64, qint64>> excludedSpans;   //!< the excluded stretches, merged and clipped to the sessions
     QList<qint64> notFound;        //!< Remove/Retype edits whose device event is not there
     QList<EffectiveEvent> events;  //!< every device and added event of the scored channels
 };

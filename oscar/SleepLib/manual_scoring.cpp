@@ -103,6 +103,7 @@ Result apply(const QList<DeviceEvent> &device, const QList<Edit> &edits, const Q
     }
 
     const QList<QPair<qint64, qint64>> excluded = clippedUnion(excludes, sessionSpans);
+    r.excludedSpans = excluded;
     for (const auto &span : excluded) r.excludedMs += span.second - span.first;
     QHash<ChannelID, int> counted;
     for (EffectiveEvent &ev : r.events) {
