@@ -234,8 +234,8 @@ bool Report::paint(QPainter &painter, QPrinter &printer, gGraphView *gv, const Q
 
             if (p_profile->general->calculateRDI()) { ahi += day->count(CPAP_RERA); }
 
-            float hours = day->hours(MT_CPAP);
-            ahi /= hours;
+            float hours = day->ahiHours();   // less the stretches excluded by manual scoring
+            ahi = hours > 0 ? ahi / hours : 0;
             float csr = (100.0 / hours) * (day->sum(CPAP_CSR) / 3600.0);
             //float pb = (100.0 / hours) * (day->sum(CPAP_PB) / 3600.0);
             float uai = day->count(CPAP_Apnea) / hours;

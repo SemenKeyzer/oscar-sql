@@ -24,6 +24,7 @@ private slots:
     void testNotFoundAfterRebuild();
     void testClearDayRestoresDevice();
     void testEditsSurviveReopen();
+    void testAhiSameEverywhere();
     void initTestCase();
     void cleanupTestCase();
     void testAnalysisChannelsAreComputed();

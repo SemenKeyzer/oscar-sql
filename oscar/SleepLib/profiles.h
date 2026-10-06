@@ -174,6 +174,8 @@ class Profile : public Preferences
 
     //! \brief Returns a sum of all session durations for device type, between start and end dates
     EventDataType calcHours(MachineType mt = MT_CPAP, QDate start = QDate(), QDate end = QDate());
+    //! \brief CPAP hours the AHI counts over: less the stretches excluded by manual scoring.
+    EventDataType calcAhiHours(QDate start = QDate(), QDate end = QDate());
 
     //! \brief Calculates Channel Average (Sums and counts all events, returning the sum divided by the count.)
     EventDataType calcAvg(ChannelID code, MachineType mt = MT_CPAP, QDate start = QDate(),

@@ -262,7 +262,7 @@ QString Welcome::GenerateCPAPHTML()
 
 //            EventDataType ahi = (day->count(CPAP_AllApnea) + day->count(CPAP_Obstructive) + day->count(CPAP_Hypopnea) + day->count(CPAP_ClearAirway) + day->count(CPAP_Apnea)) / hours;
             // A night with no mask-on time (every slice off) has no hours: 0, not "nan".
-            EventDataType ahi = (hours > 0) ? day->count(AllAhiChannels) / hours : 0;
+            EventDataType ahi = (day->ahiHours() > 0) ? day->count(AllAhiChannels) / day->ahiHours() : 0;   // less what was excluded by hand
             EventDataType ahidays = calcAHI(starttime, endtime);
 
             const QString under = tr("under");

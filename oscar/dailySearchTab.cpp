@@ -1881,7 +1881,7 @@ QString DailySearchTab::opCodeStr(OpCode opCode) {
 EventDataType  DailySearchTab::calculateAhi(Day* day) {
         if (!day) return 0.0;
         // copied from daily.cpp
-        double  hours=day->hours(MT_CPAP);
+        double  hours=day->ahiHours();   // less the stretches excluded by manual scoring
         if (hours<=0) return 0;
         EventDataType  ahi=day->count(AllAhiChannels);
         if (p_profile->general->calculateRDI()) ahi+=day->count(CPAP_RERA);

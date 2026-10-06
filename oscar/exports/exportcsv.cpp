@@ -292,7 +292,12 @@ void ExportCSV::on_exportButton_clicked()
                     data += sep + QString::asprintf("%02i:%02i:%02i", h, m, s);
 
                     float ahi = sess->count(AllAhiChannels);
-                    ahi /= sess->hours();
+                    double ahiHours = sess->hours();
+                    if (sess->hasManualScoring()) {   // the doctor's corrections of this session
+                        for (int d : sess->manualDelta()) ahi += d;
+                        ahiHours -= sess->manualExcludedMs() / 3600000.0;
+                    }
+                    ahi = ahiHours > 0 ? ahi / ahiHours : 0;
                     data += sep + QString::number(ahi, 'f', 3);
 
                     for (int j = 0; j < countlist.size(); j++) {

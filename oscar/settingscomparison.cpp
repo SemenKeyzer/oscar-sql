@@ -46,6 +46,8 @@ QList<Group> group(const QList<Period> &periods)
         Group &g = groups[it.value()];
         g.dates << p.dates;
         g.hours += p.hours;
+        if (g.ahiHours < 0) g.ahiHours = 0;
+        g.ahiHours += p.ahiHours < 0 ? p.hours : p.ahiHours;
         g.events += p.events;
     }
     for (Group &g : groups) {
@@ -64,7 +66,8 @@ Row row(const Group &group)
     const int nights = group.dates.size();
     r.values[Nights] = nights;
     if (nights > 0 && group.hours > 0) r.values[Usage] = group.hours / nights;
-    if (group.hours > 0) r.values[DeviceAhi] = group.events / group.hours;
+    const double ahiHours = group.ahiHours < 0 ? group.hours : group.ahiHours;
+    if (group.hours > 0 && ahiHours > 0) r.values[DeviceAhi] = group.events / ahiHours;
     return r;
 }
 

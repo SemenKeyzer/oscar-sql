@@ -3518,3 +3518,15 @@ void AnalysisSettings::setSpo2Thresholds(const QList<double> &thresholds)
 {
     setPref(STR_AN_Spo2Thresholds, thresholdsText(thresholds));
 }
+
+EventDataType Profile::calcAhiHours(QDate start, QDate end)
+{
+    if (!start.isValid()) start = LastGoodDay(MT_CPAP);
+    if (!end.isValid()) end = LastGoodDay(MT_CPAP);
+    if (start.isNull()) return 0;
+    double val = 0;
+    for (QDate date = start; date <= end; date = date.addDays(1)) {
+        if (Day *day = GetGoodDay(date, MT_CPAP)) val += day->ahiHours();
+    }
+    return val;
+}

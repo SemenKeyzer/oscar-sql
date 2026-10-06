@@ -1522,6 +1522,7 @@ Session *scoredSession(Machine *mach, SessionID id, qint64 machineRow)
     sess->setCount(CPAP_Obstructive, 2);
     sess->setCount(CPAP_ClearAirway, 1);
     sess->setCount(CPAP_Hypopnea, 1);
+    sess->setOpened(true);   // in memory: nothing to load from the database
     sess->setSessionRowId(insertRow(QStringLiteral("INSERT INTO sessions (session_id, machine_id, start_time, end_time, duration) "
                                                    "VALUES (?, ?, ?, ?, 3600)"), { id, machineRow, sess->first(), sess->last() }));
     return sess;
@@ -1684,4 +1685,41 @@ void AnalysisIntegrationTests::testEditsSurviveReopen()
     ManualScoringRepository::removeAllForSession(ManualScoring::keyOf(&again));
     ManualScoringRepository::removeSummary(ManualScoring::keyOf(&again));
     delete s;
+}
+
+extern EventDataType calcAHI(QDate start, QDate end);
+
+void AnalysisIntegrationTests::testAhiSameEverywhere()
+{
+    QFile::remove(p_profile->Get("{" + STR_GEN_DataFolder + "}/RXChanges.cache"));
+    Machine cpap(p_profile, 77);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    const QDate date = kNightDate.addDays(80);
+    Day *day = new Day();
+    day->setDate(date);
+    Session *s = scoredSession(&cpap, 771, m_machineRow);
+    day->addSession(s);
+    // two hypopneas added, half an hour (holding OA@200, CA@300, H@400) excluded
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Add, CPAP_Hypopnea, 2480, 2500)));
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Add, CPAP_Hypopnea, 2600, 2620)));
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Exclude, 0, 150, 1950)));
+    const EventDataType expected = day->calcAHI();
+    QCOMPARE(expected, EventDataType(6.0));   // OA@100 + 2 added in half an hour
+    p_profile->daylist.insert(date, day);
+
+    QCOMPARE(calcAHI(date, date), expected);
+    const NightSummary n = buildNightSummaryFor(p_profile, nullptr, date, date, false);
+    QCOMPARE(EventDataType(n.ahi), expected);
+    Statistics stats;
+    const DoctorReport r = stats.doctorReport(date, date);
+    QCOMPARE(EventDataType(r.deviceAhi), expected);
+    QCOMPARE(EventDataType(r.nightList.last().ahi), expected);
+    const QList<SettingsComparison::Row> rows = stats.settingsComparisonRows(date, date);
+    QVERIFY(!rows.isEmpty());
+    QCOMPARE(EventDataType(rows.first().values.value(SettingsComparison::DeviceAhi)), expected);
+
+    p_profile->daylist.remove(date);
+    ManualScoring::clearDay(day);
+    delete day;
 }

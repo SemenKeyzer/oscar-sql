@@ -172,6 +172,7 @@ public:
         machine = nullptr;
         ahi = rdi = 0;
         hours = 0;
+        ahiHours = 0;
     }
     RXItem(const RXItem & copy) {
         start = copy.start;
@@ -182,6 +183,7 @@ public:
         ahi = copy.ahi;
         rdi = copy.rdi;
         hours = copy.hours;
+        ahiHours = copy.ahiHours;
         machine = copy.machine;
         relief = copy.relief;
         mode = copy.mode;
@@ -207,6 +209,7 @@ public:
     quint64 ahi;
     quint64 rdi;
     double hours;
+    double ahiHours;   //!< hours the AHI counts over: less the stretches excluded by manual scoring
     Machine * machine;
     QString relief;
     QString mode;

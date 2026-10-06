@@ -46,7 +46,9 @@ void gAHIChart::customCalc(Day *day, QVector<SummaryChartSlice> &list)
 {
     int size = list.size();
     if (size == 0) return;
-    EventDataType hours = day->hours(m_machtype);
+    // the AHI counts over the CPAP hours less the stretches excluded by manual scoring
+    EventDataType hours = m_machtype == MT_CPAP ? day->ahiHours() : day->hours(m_machtype);
+    if (hours <= 0) return;
     EventDataType ahi_cnt = 0;
 
     for (auto & slice : list) {
@@ -157,7 +159,8 @@ void gAHIChart::populate(Day *day, int idx)
 {
     QVector<SummaryChartSlice> & slices = cache[idx];
 
-    float hours = day->hours(m_machtype);
+    float hours = m_machtype == MT_CPAP ? day->ahiHours() : day->hours(m_machtype);
+    if (hours <= 0) return;
 
     for (auto & calc : calcitems) {
         ChannelID code = calc.code;

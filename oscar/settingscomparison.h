@@ -32,6 +32,7 @@ struct Period {
     QString deviceLabel;
     QList<QDate> dates;
     double hours = 0;
+    double ahiHours = -1;   //!< hours the AHI counts over (less manually excluded stretches); <0: the same as hours
     double events = 0;      //!< the device's AHI (or RDI) events
 };
 
@@ -44,6 +45,7 @@ struct Group {
     QString deviceLabel;
     QList<QDate> dates;     //!< ascending, no duplicates
     double hours = 0;
+    double ahiHours = -1;   //!< hours the AHI counts over; <0: the same as hours
     double events = 0;
 };
 

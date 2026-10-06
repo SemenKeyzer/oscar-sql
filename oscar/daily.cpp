@@ -1967,10 +1967,10 @@ QString Daily::getSleepTime(Day * day)
 QString Daily::getAHI(Day * day, bool isBrick, double analysisAhi) {
     QString html;
 
-    float hours=day->hours(MT_CPAP);
+    float hours=day->ahiHours();   // less the stretches excluded by manual scoring
     EventDataType ahi=day->count(AllAhiChannels);
     if (p_profile->general->calculateRDI()) ahi+=day->count(CPAP_RERA);
-    ahi/=hours;
+    ahi = hours > 0 ? ahi / hours : 0;
 
     html ="<table cellspacing=0 cellpadding=0 border=0 width='100%'>\n";
 

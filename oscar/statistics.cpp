@@ -33,6 +33,7 @@ server= red 30+
 
 #include "mainwindow.h"
 #include "statistics.h"
+#include "SleepLib/manual_scoring.h"
 #include "glossary.h"
 #include "helptips.h"
 #include "translation.h"
@@ -290,6 +291,7 @@ QDataStream & operator>>(QDataStream & in, RXItem & rx)
     in >> rx.ahi;
     in >> rx.rdi;
     in >> rx.hours;
+    rx.ahiHours = rx.hours;   // not in the cache file; recounted when the rows are rebuilt
 
     QString loadername;
     in >> loadername;
@@ -634,6 +636,8 @@ void Statistics::updateRXChanges()
                     rx.ahi += tmp;
                     rx.rdi += tmp + day->count(CPAP_RERA);
                     rx.hours += day->hours(MT_CPAP);
+                rx.ahiHours += day->ahiHours();
+                    rx.ahiHours += day->ahiHours();
 
                     // Add this date to RX cache
                     rx.dates[date] = day;
@@ -667,6 +671,7 @@ void Statistics::updateRXChanges()
 
                     //The rest of this cache record for this day
                     rx1.hours = day->hours(MT_CPAP);
+                    rx1.ahiHours = day->ahiHours();
                     rx1.relief = relief;
                     rx1.mode = mode;
                     rx1.pressure = pressure;
@@ -695,9 +700,11 @@ void Statistics::updateRXChanges()
                     rx2.ahi = 0;
                     rx2.rdi = 0;
                     rx2.hours = 0;
+                    rx2.ahiHours = 0;
                     rx.ahi = 0;
                     rx.rdi = 0;
                     rx.hours = 0;
+                    rx.ahiHours = 0;
                     rx.s_count.clear();
                     rx2.s_count.clear();
                     rx.s_sum.clear();
@@ -728,6 +735,7 @@ void Statistics::updateRXChanges()
 
                             // Update time sum
                             rx.hours += dy->hours(MT_CPAP);
+                            rx.ahiHours += dy->ahiHours();
 
                             // Update the last date of this cache entry
                             // (Max here should be unnessary, this should be sequential because we are processing a QMap.)
@@ -756,6 +764,7 @@ void Statistics::updateRXChanges()
 
                             // Update time sum
                             rx2.hours += dy->hours(MT_CPAP);
+                            rx2.ahiHours += dy->ahiHours();
 
                             // Update start and end
                             //rx2.end = qMax(di.key(), rx2.end); // don't need to do this, the end won't change from what the old one was.
@@ -836,6 +845,7 @@ void Statistics::updateRXChanges()
 
                 // Update hours
                 rx.hours += day->hours(MT_CPAP);
+                rx.ahiHours += day->ahiHours();
 
                 // Add day to this RX Cache
                 rx.dates[date] = day;
@@ -867,6 +877,7 @@ void Statistics::updateRXChanges()
             }
 
             rx.hours = day->hours(MT_CPAP);
+            rx.ahiHours = day->ahiHours();
 
             // Store settings, etc..
             rx.relief = relief;
@@ -1276,7 +1287,7 @@ EventDataType calcAHIorRDI(QDate start, QDate end , RDI_MODE mode)
         cnt += p_profile->calcCount(CPAP_RERA, MT_CPAP, start, end);
     }
 
-    EventDataType hours = p_profile->calcHours(MT_CPAP, start, end);
+    EventDataType hours = p_profile->calcAhiHours(start, end);   // less the stretches excluded by hand
 
     if (hours > 0) {
         ahi = cnt / hours;
@@ -1304,7 +1315,7 @@ static EventDataType calcAhiBucket(const QVector<ChannelID> & channels, QDate st
         cnt += p_profile->calcCount(channels.at(i), MT_CPAP, start, end);
     }
 
-    EventDataType hours = p_profile->calcHours(MT_CPAP, start, end);
+    EventDataType hours = p_profile->calcAhiHours(start, end);
 
     return (hours > 0) ? (cnt / hours) : 0;
 }
@@ -1685,7 +1696,7 @@ QString Statistics::GenerateRXChanges()
                 .arg(rxend.toString(Qt::ISODate))
                 .arg(datarowclass);
 
-        double ahi = rdi ? (double(rx.rdi) / rx.hours) : (double(rx.ahi) /rx.hours);
+        double ahi = rdi ? (double(rx.rdi) / rx.ahiHours) : (double(rx.ahi) /rx.ahiHours);
         double fli = double(rx.count(CPAP_FlowLimit)) / rx. hours;
 
         QString machid;
@@ -1737,6 +1748,7 @@ QList<SettingsComparison::Row> Statistics::settingsComparisonRows(const QDate &f
         p.pressure = rx.pressure;
         p.relief = formatRelief(rx.relief);
         p.deviceKey = byBrand ? rx.machine->brand() : rx.machine->model() + QLatin1Char(' ') + rx.machine->serial();
+        p.ahiHours = 0;
         p.deviceLabel = byBrand ? rx.machine->brand()
                                 : QString("%1 (%2)").arg(rx.machine->model(), rx.machine->modelnumber());
         for (auto it = rx.dates.cbegin(); it != rx.dates.cend(); ++it) {
@@ -1748,6 +1760,7 @@ QList<SettingsComparison::Row> Statistics::settingsComparisonRows(const QDate &f
             if (h <= 0) continue;
             p.dates << date;
             p.hours += h;
+            p.ahiHours += day->ahiHours();
             p.events += day->count(AllAhiChannels) + (rdi ? day->count(CPAP_RERA) : 0);
         }
         if (p.dates.isEmpty()) continue;
@@ -1827,7 +1840,7 @@ DoctorReport Statistics::doctorReport(const QDate &from, const QDate &to, const 
     };
 
     // night by night: CPAP hours only, events per the AHI or RDI setting
-    double hours = 0, events = 0, leak = 0, leakHours = 0, pressure = 0, pressureHours = 0;
+    double hours = 0, ahiHours = 0, events = 0, leak = 0, leakHours = 0, pressure = 0, pressureHours = 0;
     QDate firstNight, lastNight;
     for (QDate date = from; date.isValid() && date <= to; date = date.addDays(1)) {
         DoctorReport::Night night;
@@ -1842,8 +1855,10 @@ DoctorReport Statistics::doctorReport(const QDate &from, const QDate &to, const 
             const QString device = label(cpap);
             if (!device.isEmpty() && !r.cpapDevices.contains(device)) r.cpapDevices << device;
             const double e = day->count(AllAhiChannels) + (rdi ? day->count(CPAP_RERA) : 0);
+            const double ah = day->ahiHours();   // less the stretches excluded by hand
             night.hours = h;
-            night.ahi = e / h;
+            night.ahi = ah > 0 ? e / ah : 0;
+            ahiHours += ah;
             ++r.nights;
             hours += h;
             events += e;
@@ -1862,7 +1877,7 @@ DoctorReport Statistics::doctorReport(const QDate &from, const QDate &to, const 
         r.nightList << night;
     }
     if (r.nights > 0) r.meanHours = hours / r.nights;
-    if (hours > 0) r.deviceAhi = events / hours;
+    if (ahiHours > 0) r.deviceAhi = events / ahiHours;
     if (leakHours > 0) r.leak = leak / leakHours;
     if (pressureHours > 0) r.pressure = pressure / pressureHours;
 
@@ -2677,7 +2692,7 @@ QString Statistics::UpdateRecordsBox()
                 tr("Date: %1 - %2").arg(rxbest.start.toString(QLocale::system().dateFormat(QLocale::ShortFormat))).arg(rxbest.end.toString(QLocale::system().dateFormat(QLocale::ShortFormat))) + "</a><br>";
             html += QString("%1").arg(rxbest.machine->model()) + "<br>";
             html += tr("Serial: %1").arg(rxbest.machine->serial()) + "<br>";
-            html += QString("%1: %2").arg(ahitxt).arg(rdi ? double(rxbest.rdi) / rxbest.hours : double(rxbest.ahi) / rxbest.hours, 0, 'f', 2) + "<br>";
+            html += QString("%1: %2").arg(ahitxt).arg(rdi ? double(rxbest.rdi) / rxbest.ahiHours : double(rxbest.ahi) / rxbest.ahiHours, 0, 'f', 2) + "<br>";
             html += tr("Total Hours: %1").arg(rxbest.hours, 0, 'f', 2) + "<br>";
             html += QString("%1").arg(rxbest.pressure) + "<br>";
             html += QString("%1").arg(formatRelief(rxbest.relief)) + "<br>";
@@ -2810,8 +2825,12 @@ QString StatisticsRow::value(QDate start, QDate end, MachineType typeOverride)
             case SC_MAX:
                 val = p_profile->calcMax(code, effectiveType, start, end);
                 break;
-            case SC_CPH:
-                val = p_profile->calcCount(code, effectiveType, start, end) / p_profile->calcHours(effectiveType, start, end);
+            case SC_CPH: {
+                // the scored channels (OA, CA, A, H) per hour over the hours the AHI counts
+                const bool scored = effectiveType == MT_CPAP && ManualScoring::scoredChannels().contains(code);
+                val = p_profile->calcCount(code, effectiveType, start, end)
+                      / (scored ? p_profile->calcAhiHours(start, end) : p_profile->calcHours(effectiveType, start, end));
+            }
                 break;
             case SC_SPH:
                 fmt += "%";
