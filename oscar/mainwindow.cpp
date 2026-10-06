@@ -139,6 +139,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_analysis = new analysis::AnalysisService(this);
     {
         QAction *recalc = new QAction(tr("Recalculate Analysis..."), this);
+        recalc->setObjectName(QStringLiteral("actionRecalculateAnalysis"));
         recalc->setToolTip(tr("Recalculate OSCAR's own analysis of your nights"));
         ui->menu_Data->insertAction(ui->menu_Advanced->menuAction(), recalc);
         connect(recalc, &QAction::triggered, this, &MainWindow::recalculateAnalysis);
@@ -375,6 +376,10 @@ void MainWindow::SetupGUI()
     oldState = ui->actionHoverExplanations->blockSignals(true);
     ui->actionHoverExplanations->setChecked(HelpTips::instance()->enabled());   // also installs the hover filter
     ui->actionHoverExplanations->blockSignals(oldState);
+    m_helpPanel->toggleViewAction()->setObjectName(QStringLiteral("actionHelpPanel"));
+    // hover explanations of the menus and the left toolbar
+    HelpTips::attachMenus(this);
+    HelpTips::attachAll(this, QStringLiteral("main"));
 
     oldState = ui->actionPie_Chart->blockSignals(true);
     ui->actionPie_Chart->setChecked(AppSetting->showPieChart());

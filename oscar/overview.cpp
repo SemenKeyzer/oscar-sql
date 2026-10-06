@@ -27,6 +27,7 @@
 
 #include "SleepLib/profiles.h"
 #include "overview.h"
+#include "helptips.h"
 #include "glossary.h"
 #include "ui_overview.h"
 #include "combocheckdelegate.h"
@@ -94,6 +95,7 @@ Overview::Overview(QWidget *parent, gGraphView *shared) :
     int presetIndex = ui->horizontalLayout->indexOf(m_analysisNotice);
     for (OverviewPresets::Preset preset : OverviewPresets::presets()) {
         QToolButton *button = new QToolButton(this);
+        button->setObjectName(QStringLiteral("presetButton_%1").arg(int(preset)));
         button->setText(OverviewPresets::title(preset));
         button->setCheckable(true);
         button->setStyleSheet(QStringLiteral(
@@ -229,6 +231,7 @@ Overview::Overview(QWidget *parent, gGraphView *shared) :
     connect(GraphView, SIGNAL(GraphsChanged()), this, SLOT(updateGraphCombo()));
     connect(GraphView, SIGNAL(XBoundsChanged(qint64 ,qint64)), this, SLOT(on_XBoundsChanged(qint64 ,qint64)));
     saveGraphLayoutSettings=nullptr;
+    HelpTips::attachAll(this, QStringLiteral("overview"));
 }
 
 Overview::~Overview()

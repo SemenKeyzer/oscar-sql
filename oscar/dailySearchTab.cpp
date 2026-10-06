@@ -188,6 +188,21 @@ void    DailySearchTab::createUi() {
         summaryFound     = new QPushButton(summaryWidget);
         summaryMinMax    = new QPushButton(summaryWidget);
         progressBar      = new QProgressBar(searchTabWidget);
+        // names: the keys of their hover explanations
+        helpButton->setObjectName(QStringLiteral("searchHelpButton"));
+        matchButton->setObjectName(QStringLiteral("searchMatchButton"));
+        addMatchButton->setObjectName(QStringLiteral("searchAddMatchButton"));
+        clearButton->setObjectName(QStringLiteral("searchClearButton"));
+        startButton->setObjectName(QStringLiteral("searchStartButton"));
+        commandButton->setObjectName(QStringLiteral("searchCommandButton"));
+        operationCombo->setObjectName(QStringLiteral("searchOperationCombo"));
+        operationButton->setObjectName(QStringLiteral("searchOperationButton"));
+        selectDouble->setObjectName(QStringLiteral("searchValueDouble"));
+        selectInteger->setObjectName(QStringLiteral("searchValueInteger"));
+        selectString->setObjectName(QStringLiteral("searchValueText"));
+        summaryProgress->setObjectName(QStringLiteral("searchProgress"));
+        summaryFound->setObjectName(QStringLiteral("searchFound"));
+        summaryMinMax->setObjectName(QStringLiteral("searchMinMax"));
 
         populateControl();
 

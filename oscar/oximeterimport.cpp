@@ -22,6 +22,8 @@
 #include "Graphs/gXAxis.h"
 
 #include "oximeterimport.h"
+#include "helpstrip.h"
+#include "helptips.h"
 #include "translation.h"
 #include "ui_oximeterimport.h"
 #include "SleepLib/calcs.h"
@@ -193,7 +195,9 @@ OximeterImport::OximeterImport(QWidget *parent) :
     connect(m_btPage, &BluetoothOximeterPage::ended, this, &OximeterImport::onBluetoothEnded);
     // Retry and Done live in the wizard's own button row, sized like its other buttons.
     m_btRetryButton = new QPushButton(tr("Retry"), ui->frame_2);
+    m_btRetryButton->setObjectName(QStringLiteral("bluetoothRetryButton"));
     m_btDoneButton = new QPushButton(tr("Done"), ui->frame_2);
+    m_btDoneButton->setObjectName(QStringLiteral("bluetoothDoneButton"));
     for (QPushButton *b : { m_btRetryButton, m_btDoneButton }) {
         b->setMinimumWidth(ui->cancelButton->minimumWidth());
         b->setSizePolicy(ui->cancelButton->sizePolicy());
@@ -204,6 +208,7 @@ OximeterImport::OximeterImport(QWidget *parent) :
     connect(m_btDoneButton, &QPushButton::clicked, this, [this]() { onBluetoothFinished(m_btPage->importedAny()); });
     auto *btButton = new QPushButton(tr("Import over Bluetooth from a Contec oximeter (CMS50FW, CMS50D-BT, ...)"),
                                      ui->importSelectionPage);
+    btButton->setObjectName(QStringLiteral("bluetoothImportButton"));
     // Dressed like the other import buttons: the oximeter picture, here with a Bluetooth badge.
     btButton->setIcon(QIcon(QPixmap::fromImage(
         BluetoothOximeterPage::badgedIcon(QImage(QStringLiteral(":/icons/oximeter.png")), 128))));
@@ -216,7 +221,9 @@ OximeterImport::OximeterImport(QWidget *parent) :
     connect(btButton, &QPushButton::clicked, this, &OximeterImport::onBluetoothImportClicked);
 #endif
 
-
+    // hover explanations: the strip at the bottom shows what the control under the mouse does
+    ui->verticalLayout_5->addWidget(new HelpStrip({ QStringLiteral("ui.oximport."), QStringLiteral("ui.ble.") }, this));
+    HelpTips::attachAll(this, QStringLiteral("oximport"));
 }
 
 OximeterImport::~OximeterImport()

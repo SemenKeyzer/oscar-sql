@@ -16,6 +16,7 @@
 #include <QTextBrowser>
 
 #include "welcome.h"
+#include "helptips.h"
 #include "SleepLib/oximetry_summary.h"
 #include "nightsummary.h"
 #include "SleepLib/analysis/analysis_service.h"
@@ -38,6 +39,7 @@ Welcome::Welcome(QWidget *parent) :
     });
 
     refreshPage();
+    HelpTips::attachAll(this, QStringLiteral("welcome"));
 }
 
 Welcome::~Welcome()

@@ -7,6 +7,7 @@
  * for more details. */
 
 #include "bluetoothoximeterpage.h"
+#include "helptips.h"
 
 #include "SleepLib/loader_plugins/contec_ble_loader.h"
 #include "SleepLib/machine.h"
@@ -74,7 +75,9 @@ BluetoothOximeterPage::BluetoothOximeterPage(QWidget *parent)
     }
 
     m_deviceList = new QListWidget(this);
+    m_deviceList->setObjectName(QStringLiteral("deviceList"));
     m_connectButton = new QPushButton(tr("Connect"), this);
+    m_connectButton->setObjectName(QStringLiteral("connectButton"));
     layout->addWidget(m_deviceList);
     layout->addWidget(m_connectButton, 0, Qt::AlignLeft);
 
@@ -89,11 +92,13 @@ BluetoothOximeterPage::BluetoothOximeterPage(QWidget *parent)
     layout->addWidget(m_signalLabel);
 
     m_syncClock = new QCheckBox(tr("Set the oximeter clock to this computer's time"), this);
+    m_syncClock->setObjectName(QStringLiteral("syncClock"));
     m_syncClock->setChecked(p_profile->oxi->syncOximeterClock());
     connect(m_syncClock, &QCheckBox::toggled, this, [](bool on) { p_profile->oxi->setSyncOximeterClock(on); });
     layout->addWidget(m_syncClock);
 
     m_eraseAfter = new QCheckBox(tr("Automatically erase the records on the oximeter after a successful import"), this);
+    m_eraseAfter->setObjectName(QStringLiteral("eraseAfter"));
     m_eraseAfter->setToolTip(tr("The oximeter can only erase all of its records at once. OSCAR erases only when "
                                 "every record on it is safely in OSCAR and it isn't still recording."));
     m_eraseAfter->setChecked(p_profile->oxi->bleEraseAfterImport());
@@ -121,6 +126,7 @@ BluetoothOximeterPage::BluetoothOximeterPage(QWidget *parent)
         const int row = m_deviceList->currentRow();
         if (row >= 0 && row < m_found.size()) connectTo(m_found.at(row));
     });
+    HelpTips::attachAll(this, QStringLiteral("ble"));
 }
 
 BluetoothOximeterPage::~BluetoothOximeterPage()

@@ -914,6 +914,7 @@ test {
         tests/helptipstests.cpp \
         tests/helppaneltests.cpp \
         tests/helpstriptests.cpp \
+        tests/uicoveragetests.cpp \
         tests/helplinkstests.cpp \
         tests/htmlpagestests.cpp \
         tests/channelstoretests.cpp \
@@ -964,6 +965,7 @@ test {
         tests/helptipstests.h \
         tests/helppaneltests.h \
         tests/helpstriptests.h \
+        tests/uicoveragetests.h \
         tests/helplinkstests.h \
         tests/htmlpagestests.h \
         tests/channelstoretests.h \

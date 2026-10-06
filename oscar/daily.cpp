@@ -712,6 +712,7 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     ui->verticalLayout_3->insertWidget(ui->verticalLayout_3->indexOf(ui->graphMainArea), m_alignBar);
 
     alignButton = new QPushButton(tr("Align"), this);
+    alignButton->setObjectName(QStringLiteral("alignButton"));
     alignButton->setCheckable(true);
     alignButton->setToolTip(tr("Line up an oximeter or other device with the CPAP data for this night"));
     alignButton->hide();
@@ -748,6 +749,7 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
 #ifndef REMOVE_FITNESS
     set_ZombieUI(0,true);
 #endif
+    HelpTips::attachAll(this, QStringLiteral("daily"));
 }
 
 Daily::~Daily()

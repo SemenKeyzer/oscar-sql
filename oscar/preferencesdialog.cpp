@@ -30,6 +30,8 @@
 #include <cmath>
 
 #include "preferencesdialog.h"
+#include "helpstrip.h"
+#include "helptips.h"
 #include <QScrollArea>
 #include "analysisprefs.h"
 #include "SleepLib/analysis/analysis_service.h"
@@ -165,6 +167,7 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
 
     // search across every tab: type a word, pick the setting from the list
     m_search = new QLineEdit(this);
+    m_search->setObjectName(QStringLiteral("searchSettings"));
     m_search->setPlaceholderText(tr("Search settings..."));
     m_search->setClearButtonEnabled(true);
     m_searchResults = new QListWidget(this);
@@ -466,9 +469,9 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
     else
         ui->baseSpO2Option->setCurrentIndex(100-baseoption_data);
 
-
-
-
+    // hover explanations: the strip at the bottom shows what the setting under the mouse does
+    ui->mainlayout->addWidget(new HelpStrip({ QStringLiteral("ui.prefs.") }, this));
+    HelpTips::attachAll(this, QStringLiteral("prefs"));
 }
 
 #include <QItemDelegate>

@@ -37,12 +37,14 @@ AnalysisPreferencesPage::AnalysisPreferencesPage(QWidget *parent)
     intro->setWordWrap(true);
     layout->addWidget(intro);
     m_enabled = new QCheckBox(tr("Analyse nights with OSCAR's own analysis (experimental)"), this);
+    m_enabled->setObjectName(QStringLiteral("analysisEnabled"));
     layout->addWidget(m_enabled);
 
     // hypopnea rule: a selector with what each rule means under it
     auto *ruleBox = new QGroupBox(tr("Hypopnea rule"), this);
     auto *ruleLayout = new QVBoxLayout(ruleBox);
     m_rule = new QComboBox(ruleBox);
+    m_rule->setObjectName(QStringLiteral("hypopneaRule"));
     m_rule->addItem(tr("Auto (recommended)"), int(HypopneaRule::Auto));
     m_rule->addItem(tr("AASM 3 %"), int(HypopneaRule::Aasm3));
     m_rule->addItem(tr("CMS 4 %"), int(HypopneaRule::Cms4));
@@ -64,12 +66,16 @@ AnalysisPreferencesPage::AnalysisPreferencesPage(QWidget *parent)
     auto *options = new QGroupBox(tr("Options"), this);
     auto *optionLayout = new QFormLayout(options);
     m_limitOxi = new QCheckBox(tr("Limit oximetry metrics to CPAP usage time"), options);
+    m_limitOxi->setObjectName(QStringLiteral("limitOxi"));
     m_limitOxi->setToolTip(tr("Off: the whole oximeter recording counts. Desaturations are linked to breathing "
                               "events only where the CPAP ran, either way."));
     m_pulseArousal = new QCheckBox(tr("Count a pulse-rate rise as an arousal (not AASM)"), options);
+    m_pulseArousal->setObjectName(QStringLiteral("pulseArousal"));
     m_pulseArousal->setToolTip(tr("A pulse rise at the end of a flow reduction also confirms it as a hypopnea."));
     m_classify = new QCheckBox(tr("Classify apneas as obstructive or central (experimental)"), options);
+    m_classify->setObjectName(QStringLiteral("classifyApneas"));
     m_thresholds = new QLineEdit(options);
+    m_thresholds->setObjectName(QStringLiteral("spo2Thresholds"));
     m_thresholds->setToolTip(tr("Up to six SpO2 values, separated by commas. Changing them needs no recalculation."));
     optionLayout->addRow(m_limitOxi);
     optionLayout->addRow(m_pulseArousal);
@@ -79,6 +85,7 @@ AnalysisPreferencesPage::AnalysisPreferencesPage(QWidget *parent)
 
     // every other parameter, as a percentage where it is a fraction
     m_advanced = new QGroupBox(tr("Advanced"), this);
+    m_advanced->setObjectName(QStringLiteral("advancedGroup"));
     m_advanced->setCheckable(true);
     m_advanced->setChecked(false);
     auto *advanced = new QFormLayout(m_advanced);
@@ -90,41 +97,44 @@ AnalysisPreferencesPage::AnalysisPreferencesPage(QWidget *parent)
     connect(m_advanced, &QGroupBox::toggled, advancedContent, &QWidget::setVisible);
 
     const QString s = tr(" s"), pct = tr(" %"), bpm = tr(" bpm");
-    auto add = [this, form](const QString &label, QDoubleSpinBox *box, double *(*field)(AnalysisParams &), double scale) {
+    auto add = [this, form](const char *name, const QString &label, QDoubleSpinBox *box, double *(*field)(AnalysisParams &), double scale) {
+        box->setObjectName(QString::fromLatin1(name));   // the key of its explanation
         form->addRow(label, box);
         m_fields.append(Field { box, field, scale });
     };
     using P = AnalysisParams;
-    add(tr("Apnea: flow reduction at least"), number(50, 100, 1, 0, pct), [](P &p) { return &p.flow.apneaReduction; }, 100);
-    add(tr("Hypopnea candidate: flow reduction at least"), number(10, 90, 1, 0, pct), [](P &p) { return &p.flow.hypopneaReduction; }, 100);
-    add(tr("Flow only hypopnea: flow reduction at least"), number(10, 90, 1, 0, pct), [](P &p) { return &p.day.flowOnlyReduction; }, 100);
-    add(tr("Shortest event"), number(5, 60, 1, 0, s), [](P &p) { return &p.flow.minEventSec; }, 1);
-    add(tr("Longest event (longer is unscoreable)"), number(30, 300, 5, 0, s), [](P &p) { return &p.flow.maxEventSec; }, 1);
-    add(tr("Baseline window"), number(30, 600, 10, 0, s), [](P &p) { return &p.flow.baselineWindowSec; }, 1);
-    add(tr("Baseline percentile"), number(50, 95, 1, 0, QString()), [](P &p) { return &p.flow.baselinePercentile; }, 1);
-    add(tr("Flow limitation score of a limited breath"), number(0.1, 0.9, 0.05, 2, QString()), [](P &p) { return &p.flow.flThreshold; }, 1);
-    add(tr("Desaturation linked to an event ending up to"), number(10, 90, 5, 0, s), [](P &p) { return &p.day.linkWindowSec; }, 1);
-    add(tr("Desaturation: SpO2 drop at least"), number(2, 10, 1, 0, pct), [](P &p) { return &p.oxi.desatMinDrop; }, 1);
-    add(tr("Desaturation: at least"), number(5, 60, 1, 0, s), [](P &p) { return &p.oxi.desatMinSec; }, 1);
-    add(tr("Desaturation: slowest fall"), number(30, 300, 10, 0, s), [](P &p) { return &p.oxi.desatMaxFallSec; }, 1);
-    add(tr("Desaturation: longest"), number(60, 600, 10, 0, s), [](P &p) { return &p.oxi.desatMaxSec; }, 1);
-    add(tr("Pulse rise at least"), number(3, 30, 1, 0, bpm), [](P &p) { return &p.oxi.pulseRise; }, 1);
-    add(tr("Low pulse below"), number(30, 60, 1, 0, bpm), [](P &p) { return &p.oxi.bradyBpm; }, 1);
-    add(tr("High pulse above"), number(90, 180, 1, 0, bpm), [](P &p) { return &p.oxi.tachyBpm; }, 1);
-    add(tr("Low or high pulse for at least"), number(10, 300, 5, 0, s), [](P &p) { return &p.oxi.bradyTachyMinSec; }, 1);
-    add(tr("Problem zones: low SpO2 below"), number(80, 95, 1, 0, pct), [](P &p) { return &p.oxi.zoneLowPct; }, 1);
-    add(tr("Problem zones: critical SpO2 below"), number(70, 92, 1, 0, pct), [](P &p) { return &p.oxi.zoneCriticalPct; }, 1);
-    add(tr("Problem zones: window"), number(60, 1200, 30, 0, s), [](P &p) { return &p.oxi.zoneWindowSec; }, 1);
-    add(tr("Problem zones: window step"), number(10, 300, 10, 0, s), [](P &p) { return &p.oxi.zoneStepSec; }, 1);
-    add(tr("Problem zones: seconds below the low SpO2"), number(10, 300, 10, 0, s), [](P &p) { return &p.oxi.zoneLowSec; }, 1);
-    add(tr("Problem zones: seconds below the critical SpO2"), number(5, 300, 5, 0, s), [](P &p) { return &p.oxi.zoneCriticalSec; }, 1);
-    add(tr("Problem zones: shortest zone"), number(30, 1200, 30, 0, s), [](P &p) { return &p.oxi.zoneMinSec; }, 1);
-    add(tr("Problem zones: merge zones closer than"), number(0, 1200, 30, 0, s), [](P &p) { return &p.oxi.zoneMergeGapSec; }, 1);
+    add("apneaReduction", tr("Apnea: flow reduction at least"), number(50, 100, 1, 0, pct), [](P &p) { return &p.flow.apneaReduction; }, 100);
+    add("hypopneaReduction", tr("Hypopnea candidate: flow reduction at least"), number(10, 90, 1, 0, pct), [](P &p) { return &p.flow.hypopneaReduction; }, 100);
+    add("flowOnlyReduction", tr("Flow only hypopnea: flow reduction at least"), number(10, 90, 1, 0, pct), [](P &p) { return &p.day.flowOnlyReduction; }, 100);
+    add("minEventSec", tr("Shortest event"), number(5, 60, 1, 0, s), [](P &p) { return &p.flow.minEventSec; }, 1);
+    add("maxEventSec", tr("Longest event (longer is unscoreable)"), number(30, 300, 5, 0, s), [](P &p) { return &p.flow.maxEventSec; }, 1);
+    add("baselineWindowSec", tr("Baseline window"), number(30, 600, 10, 0, s), [](P &p) { return &p.flow.baselineWindowSec; }, 1);
+    add("baselinePercentile", tr("Baseline percentile"), number(50, 95, 1, 0, QString()), [](P &p) { return &p.flow.baselinePercentile; }, 1);
+    add("flThreshold", tr("Flow limitation score of a limited breath"), number(0.1, 0.9, 0.05, 2, QString()), [](P &p) { return &p.flow.flThreshold; }, 1);
+    add("linkWindowSec", tr("Desaturation linked to an event ending up to"), number(10, 90, 5, 0, s), [](P &p) { return &p.day.linkWindowSec; }, 1);
+    add("desatMinDrop", tr("Desaturation: SpO2 drop at least"), number(2, 10, 1, 0, pct), [](P &p) { return &p.oxi.desatMinDrop; }, 1);
+    add("desatMinSec", tr("Desaturation: at least"), number(5, 60, 1, 0, s), [](P &p) { return &p.oxi.desatMinSec; }, 1);
+    add("desatMaxFallSec", tr("Desaturation: slowest fall"), number(30, 300, 10, 0, s), [](P &p) { return &p.oxi.desatMaxFallSec; }, 1);
+    add("desatMaxSec", tr("Desaturation: longest"), number(60, 600, 10, 0, s), [](P &p) { return &p.oxi.desatMaxSec; }, 1);
+    add("pulseRise", tr("Pulse rise at least"), number(3, 30, 1, 0, bpm), [](P &p) { return &p.oxi.pulseRise; }, 1);
+    add("bradyBpm", tr("Low pulse below"), number(30, 60, 1, 0, bpm), [](P &p) { return &p.oxi.bradyBpm; }, 1);
+    add("tachyBpm", tr("High pulse above"), number(90, 180, 1, 0, bpm), [](P &p) { return &p.oxi.tachyBpm; }, 1);
+    add("bradyTachyMinSec", tr("Low or high pulse for at least"), number(10, 300, 5, 0, s), [](P &p) { return &p.oxi.bradyTachyMinSec; }, 1);
+    add("zoneLowPct", tr("Problem zones: low SpO2 below"), number(80, 95, 1, 0, pct), [](P &p) { return &p.oxi.zoneLowPct; }, 1);
+    add("zoneCriticalPct", tr("Problem zones: critical SpO2 below"), number(70, 92, 1, 0, pct), [](P &p) { return &p.oxi.zoneCriticalPct; }, 1);
+    add("zoneWindowSec", tr("Problem zones: window"), number(60, 1200, 30, 0, s), [](P &p) { return &p.oxi.zoneWindowSec; }, 1);
+    add("zoneStepSec", tr("Problem zones: window step"), number(10, 300, 10, 0, s), [](P &p) { return &p.oxi.zoneStepSec; }, 1);
+    add("zoneLowSec", tr("Problem zones: seconds below the low SpO2"), number(10, 300, 10, 0, s), [](P &p) { return &p.oxi.zoneLowSec; }, 1);
+    add("zoneCriticalSec", tr("Problem zones: seconds below the critical SpO2"), number(5, 300, 5, 0, s), [](P &p) { return &p.oxi.zoneCriticalSec; }, 1);
+    add("zoneMinSec", tr("Problem zones: shortest zone"), number(30, 1200, 30, 0, s), [](P &p) { return &p.oxi.zoneMinSec; }, 1);
+    add("zoneMergeGapSec", tr("Problem zones: merge zones closer than"), number(0, 1200, 30, 0, s), [](P &p) { return &p.oxi.zoneMergeGapSec; }, 1);
     m_zoneMinDesats = number(1, 20, 1, 0, QString());
+    m_zoneMinDesats->setObjectName(QStringLiteral("zoneMinDesats"));
     form->addRow(tr("Problem zones: desaturations in a window"), m_zoneMinDesats);
     layout->addWidget(m_advanced);
 
     auto *reset = new QPushButton(tr("Reset to Defaults"), this);
+    reset->setObjectName(QStringLiteral("resetAnalysisDefaults"));
     connect(reset, &QPushButton::clicked, this, [this]() { resetToDefaults(); });
     auto *bottom = new QHBoxLayout();
     bottom->addStretch(1);
