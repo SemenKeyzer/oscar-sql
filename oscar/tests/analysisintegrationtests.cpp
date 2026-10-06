@@ -40,6 +40,7 @@
 #include "database/session_settings_repository.h"
 #include "statistics.h"
 #include "doctorreport.h"
+#include "glossary.h"
 #include "nightsummary.h"
 #include "pdfreportoptions.h"
 #include "pdfreportwriter.h"
@@ -1454,4 +1455,25 @@ void AnalysisIntegrationTests::testOldStampHasNoLimitedBreaths()
         "{\"flow\":{\"v\":2,\"p\":\"x\",\"a\":true,\"fls\":true,\"s\":1000,\"u\":0,\"fl\":5,\"flb\":100}}"));
     QCOMPARE(st.flBreaths, 100);
     QCOMPARE(st.flLimitedBreaths, -1);
+}
+
+// Every figure of Statistics has an explanation: its own entry, or its channel's description.
+void AnalysisIntegrationTests::testStatisticsRowKeys()
+{
+    Statistics stats;
+    const QSet<StatCalcType> layout { SC_UNDEFINED, SC_COLUMNHEADERS, SC_HEADING, SC_SUBHEADING, SC_DAYS_HEADER,
+                                      SC_WARNING, SC_MESSAGE, SC_SPACE, SC_ANALYSIS_HEADING };
+    int checked = 0;
+    for (const StatisticsRow &row : stats.rowList()) {
+        if (layout.contains(row.calc) || row.src.startsWith(QLatin1Char('#'))) continue;
+        const QString key = Statistics::helpKey(row);
+        const bool channelText = !Glossary::channelTooltip(schema::channel[row.src].id()).isEmpty();
+        QVERIFY2((!key.isEmpty() && Glossary::find(key)) || channelText, qPrintable(row.src));
+        ++checked;
+    }
+    QVERIFY(checked > 30);
+    for (const StatisticsRow &row : stats.rowList()) {
+        if (row.calc == SC_DAYS_GE_COMPLIANCE_HOURS) QCOMPARE(Statistics::helpKey(row), QStringLiteral("compliance_pct"));
+        if (row.calc == SC_ANALYSIS && row.src == QLatin1String("gia")) QCOMPARE(Statistics::helpKey(row), QStringLiteral("glasgow_adapted"));
+    }
 }

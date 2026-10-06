@@ -254,6 +254,10 @@ class Statistics : public QObject
     //! A row the report's «Oximetry» choice leaves out: the oximeter's, and the analysis'
     //! oximetry and pulse figures.
     static bool isOximetryRow(const StatisticsRow &row);
+    //! The glossary entry explaining \a row; empty when only its channel's description does.
+    static QString helpKey(const StatisticsRow &row);
+    //! The rows of the report, in order.
+    const QList<StatisticsRow> &rowList() const { return rows; }
 
     static void updateReportDate();
     static void resetReportDate();

@@ -33,6 +33,8 @@ server= red 30+
 
 #include "mainwindow.h"
 #include "statistics.h"
+#include "glossary.h"
+#include "helptips.h"
 #include "translation.h"
 #include "cprogressbar.h"
 #include "SleepLib/common.h"
@@ -1563,6 +1565,46 @@ bool Statistics::isOximetryRow(const StatisticsRow &row)
            || group == QLatin1String("dhr");
 }
 
+QString Statistics::helpKey(const StatisticsRow &row)
+{
+    if (row.calc == SC_ANALYSIS) {
+        static const QHash<QString, QString> analysis {
+            { "ahi", "an_ahi" }, { "oai", "oai" }, { "cai", "cai" }, { "uai", "uai" }, { "hi", "hi" }, { "rerai", "rera" },
+            { "fl", "fl_time" }, { "flmin", "fl_time" }, { "fllong", "fl_longest" }, { "flbr", "fl_breaths" },
+            { "gi", "glasgow" }, { "gia", "glasgow_adapted" }, { "pb", "csr" }, { "agreement", "agreement" },
+            { "odi3", "odi3" }, { "odi4", "odi4" }, { "zones", "oxi_zones" }, { "nadir", "spo2_nadir" },
+            { "hb", "hypoxic_burden" }, { "pri", "pulse_change" }, { "dhr", "pulse_response" },
+        };
+        if (row.src.startsWith(QLatin1String("below:"))) return QStringLiteral("t90");
+        return analysis.value(row.src);
+    }
+    switch (row.calc) {
+    case SC_TOTAL_DAYS:
+    case SC_DAYS_W_DATA:
+    case SC_DAYS_WO_DATA:
+        return QStringLiteral("nights_with_data");
+    case SC_DAYS_GE_COMPLIANCE_HOURS:
+    case SC_DAYS_LT_COMPLAINCE_HOURS:
+    case SC_TOTAL_DAYS_PERCENT:
+    case SC_USED_DAY_PERCENT:
+        return QStringLiteral("compliance_pct");
+    case SC_HOURS:
+    case SC_MEDIAN_HOURS:
+        return QStringLiteral("usage");
+    case SC_AHI_RDI:
+    case SC_AHI_ONLY:
+    case SC_MEDIAN_AHI:
+        return QStringLiteral("ahi");
+    case SC_OAHI:
+        return QStringLiteral("oai");
+    case SC_CAHI:
+        return QStringLiteral("cai");
+    default:
+        break;
+    }
+    return Glossary::keyForChannel(schema::channel[row.src].id());
+}
+
 QString Statistics::GenerateRXChanges()
 {
     // Generate list only if there are CPAP devices
@@ -2233,7 +2275,7 @@ QString Statistics::GenerateCPAPUsage()
             headerWidth = 22;
         }
         QString bgColor = alternatingColor(alternatingColorCounter);
-        line += QString("<tr class=datarow bgcolor='%3'><td width='%1%'>%2</td>").arg(headerWidth).arg(name).arg(bgColor);
+        line += QString("<tr class=datarow bgcolor='%3'><td width='%1%'>%2</td>").arg(headerWidth).arg(HelpTips::term(name, helpKey(row))).arg(bgColor);
 
         for (int j=0; j < np; j++) {
             width = j < np-1 ? dataWidth : 100 - (headerWidth + dataWidth*(np-1));

@@ -909,6 +909,7 @@ test {
         tests/glossarytests.cpp \
         tests/helptipstests.cpp \
         tests/helppaneltests.cpp \
+        tests/helplinkstests.cpp \
         tests/htmlpagestests.cpp \
         tests/channelstoretests.cpp \
         tests/machinetests.cpp \
@@ -957,6 +958,7 @@ test {
         tests/glossarytests.h \
         tests/helptipstests.h \
         tests/helppaneltests.h \
+        tests/helplinkstests.h \
         tests/htmlpagestests.h \
         tests/channelstoretests.h \
         tests/machinetests.h \

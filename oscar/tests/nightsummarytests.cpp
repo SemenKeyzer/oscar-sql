@@ -329,9 +329,9 @@ void NightSummaryTests::testFlowLimitationInAhiTile()
     view.setSummary(s);
     QStringList notes;
     for (QLabel *l : view.findChildren<QLabel *>(QStringLiteral("nsNote"))) notes << l->text();
-    QVERIFY2(notes.join(QLatin1Char('\n')).contains(NightSummaryView::tr("flow limitation %1% (%2 min) · Glasgow %3 / %4")
-                                                     .arg(QStringLiteral("6"), QStringLiteral("32"), QStringLiteral("3.3"), QStringLiteral("2.9"))),
-             qPrintable(notes.join(QLatin1Char('|'))));
+    const QString all = notes.join(QLatin1Char('\n'));
+    QVERIFY2(all.contains(NightSummaryView::tr("flow limitation %1% (%2 min)").arg(QStringLiteral("6"), QStringLiteral("32"))), qPrintable(all));
+    QVERIFY2(all.contains(NightSummaryView::tr("Glasgow %1 / %2").arg(QStringLiteral("3.3"), QStringLiteral("2.9"))), qPrintable(all));
 }
 
 void NightSummaryTests::testGlasgowLessReliableInTile()
@@ -350,4 +350,29 @@ void NightSummaryTests::testGlasgowLessReliableInTile()
     QStringList notes;
     for (QLabel *l : view.findChildren<QLabel *>(QStringLiteral("nsNote"))) notes << l->text();
     QVERIFY2(notes.join(QLatin1Char('\n')).contains(NightSummaryView::tr("(less reliable on this device)")), qPrintable(notes.join(QLatin1Char('|'))));
+}
+
+// Each tile explains its figure on hover; the AHI tile's flow limitation and Glasgow parts link
+// their own explanations.
+void NightSummaryTests::testTilesHaveHelp()
+{
+    NightSummaryView view;
+    view.resize(900, 400);
+    NightSummary s = goodNight();
+    s.hasFlowLimitation = true;
+    s.flPercent = 6;
+    s.flMinutes = 32;
+    s.hasGlasgow = true;
+    s.glasgow = 2.1;
+    s.glasgowAdapted = 1.9;
+    view.setSummary(s);
+    QStringList keys;
+    for (QFrame *tile : view.findChildren<QFrame *>(QStringLiteral("nsTile"))) keys << tile->property("helpKey").toString();
+    QVERIFY2(keys.contains(QStringLiteral("usage")) && keys.contains(QStringLiteral("ahi")) && keys.contains(QStringLiteral("leak"))
+             && keys.contains(QStringLiteral("p95")), qPrintable(keys.join(QLatin1Char(','))));
+    QStringList notes;
+    for (QLabel *l : view.findChildren<QLabel *>(QStringLiteral("nsNote"))) notes << l->text();
+    const QString all = notes.join(QLatin1Char('\n'));
+    QVERIFY(all.contains(QStringLiteral("help:fl_time")));
+    QVERIFY(all.contains(QStringLiteral("help:glasgow")));
 }

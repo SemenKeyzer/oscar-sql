@@ -20,14 +20,16 @@ namespace {
 const char *kKeyProperty = "helpKey";
 }
 
-HelpTips::HelpTips()
-{
-    if (qApp) qApp->installEventFilter(this);
-}
+HelpTips::HelpTips() {}
 
 HelpTips *HelpTips::instance()
 {
     static HelpTips *tips = new HelpTips;
+    // on the application in use (tests make a new one per test class)
+    if (qApp && tips->m_filtered != qApp) {
+        qApp->installEventFilter(tips);
+        tips->m_filtered = qApp;
+    }
     return tips;
 }
 
@@ -73,7 +75,10 @@ void HelpTips::open(const QString &key)
 bool HelpTips::eventFilter(QObject *o, QEvent *e)
 {
     if ((e->type() == QEvent::ToolTip || e->type() == QEvent::Enter) && o->isWidgetType() && enabled()) {
-        const QString key = o->property(kKeyProperty).toString();
+        // the key of the widget or of the tile/frame it sits in
+        QString key;
+        for (QWidget *w = static_cast<QWidget *>(o); w && key.isEmpty(); w = w->isWindow() ? nullptr : w->parentWidget())
+            key = w->property(kKeyProperty).toString();
         if (!key.isEmpty()) {
             if (e->type() == QEvent::Enter) {
                 hover(key);

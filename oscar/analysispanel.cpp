@@ -7,6 +7,7 @@
  * for more details. */
 
 #include "analysispanel.h"
+#include "helptips.h"
 #include "SleepLib/profiles.h"
 
 #include <QCheckBox>
@@ -87,16 +88,19 @@ QString glasgowHtml(const DayResult &r)
     }
     QString html = kTable;
     html += QStringLiteral("<tr><td><b>%1</b></td><td align=right>%2</td><td align=right>%3</td></tr>")
-                .arg(AnalysisPanel::tr("Glasgow Index"), AnalysisPanel::tr("original"), AnalysisPanel::tr("adapted"));
+                .arg(HelpTips::term(AnalysisPanel::tr("Glasgow Index"), QStringLiteral("glasgow")), AnalysisPanel::tr("original"),
+                     HelpTips::term(AnalysisPanel::tr("adapted"), QStringLiteral("glasgow_adapted")));
     html += row3(AnalysisPanel::tr("Index"), value(r.glasgow.index()), value(r.glasgowAdapted.index()));
     if (!r.glasgow.isEmpty() || !r.glasgowAdapted.isEmpty()) {
+        static const char *const kGlasgowKeys[GiComponentCount] = { "gi_skew", "gi_spike", "gi_flattop", "gi_topheavy",
+            "gi_multipeak", "gi_nopause", "gi_inspirrate", "gi_multibreath", "gi_ampvar" };
         const QString names[GiComponentCount] = {
             AnalysisPanel::tr("Skew"), AnalysisPanel::tr("Spike"), AnalysisPanel::tr("Flat top"),
             AnalysisPanel::tr("Top heavy (not in the sum)"), AnalysisPanel::tr("Double peak"), AnalysisPanel::tr("No pause"),
             AnalysisPanel::tr("Inspiration rate"), AnalysisPanel::tr("Double inspiration"), AnalysisPanel::tr("Variable amplitude"),
         };
         for (int k = 0; k < GiComponentCount; ++k) {
-            html += row3(QStringLiteral("<font size=-1>&nbsp;&nbsp;%1</font>").arg(names[k]),
+            html += row3(QStringLiteral("<font size=-1>&nbsp;&nbsp;%1</font>").arg(HelpTips::term(names[k], QLatin1String(kGlasgowKeys[k]))),
                          QStringLiteral("<font size=-1>%1</font>").arg(value(r.glasgow.fraction(GlasgowComponent(k)))),
                          QStringLiteral("<font size=-1>%1</font>").arg(value(r.glasgowAdapted.fraction(GlasgowComponent(k)))));
         }
@@ -151,45 +155,46 @@ QString AnalysisPanel::sidebarHtml(Day *day, const DayResult &r, const QString &
         html += kTable;
         html += QStringLiteral("<tr><td></td><td align=right><b>%1</b></td><td align=right><b>%2</b></td></tr>")
                     .arg(tr("Device"), tr("Analysis"));
-        html += row3(tr("AHI"), day ? number(day->calcAHI()) : QStringLiteral("&mdash;"), perHour(r.apneas.size() + r.hypopneas.size(), analysisHours));
-        html += row3(tr("Apneas /h"), perHour(devApneas, deviceHours), perHour(r.apneas.size(), analysisHours));
+        html += row3(HelpTips::term(tr("AHI"), QStringLiteral("an_ahi")), day ? number(day->calcAHI()) : QStringLiteral("&mdash;"), perHour(r.apneas.size() + r.hypopneas.size(), analysisHours));
+        html += row3(HelpTips::term(tr("Apneas /h"), QStringLiteral("all_apnea")), perHour(devApneas, deviceHours), perHour(r.apneas.size(), analysisHours));
         html += row3(QStringLiteral("&nbsp;&nbsp;OA &middot; CA &middot; A"),
                      QStringLiteral("%1 &middot; %2 &middot; %3").arg(dev(CPAP_Obstructive)).arg(dev(CPAP_ClearAirway)).arg(dev(CPAP_Apnea) + dev(CPAP_AllApnea)),
                      QStringLiteral("%1 &middot; %2 &middot; %3").arg(oa).arg(ca).arg(a));
-        html += row3(tr("Hypopneas /h"), perHour(devHypopneas, deviceHours), perHour(r.hypopneas.size(), analysisHours));
+        html += row3(HelpTips::term(tr("Hypopneas /h"), QStringLiteral("hi")), perHour(devHypopneas, deviceHours), perHour(r.hypopneas.size(), analysisHours));
         html += row3(QStringLiteral("&nbsp;&nbsp;OH &middot; CH &middot; H"),
                      QStringLiteral("%1 &middot; %2 &middot; %3").arg(dev(CPAP_ObstructiveHypopnea)).arg(dev(CPAP_CentralHypopnea)).arg(dev(CPAP_Hypopnea)),
                      QStringLiteral("%1 &middot; %2 &middot; %3").arg(oh).arg(ch).arg(h));
         const bool deviceRera = day && day->channelExists(CPAP_RERA);
-        html += row3(tr("RERA /h"), deviceRera ? perHour(dev(CPAP_RERA), deviceHours) : QStringLiteral("&mdash;"),
+        html += row3(HelpTips::term(tr("RERA /h"), QStringLiteral("rera")), deviceRera ? perHour(dev(CPAP_RERA), deviceHours) : QStringLiteral("&mdash;"),
                      perHour(r.reras.size(), analysisHours));
         const bool deviceFl = day && day->channelExists(CPAP_FlowLimit);
-        html += row3(tr("Flow limitation, % time"), deviceFl ? number(day->calcPON(CPAP_FlowLimit)) : QStringLiteral("&mdash;"),
+        html += row3(HelpTips::term(tr("Flow limitation, % time"), QStringLiteral("fl_time")), deviceFl ? number(day->calcPON(CPAP_FlowLimit)) : QStringLiteral("&mdash;"),
                      r.flScored && r.flowSeconds > 0 ? number(100.0 * r.flSeconds / r.flowSeconds) : QStringLiteral("&mdash;"));
         const bool devicePb = day && (day->channelExists(CPAP_CSR) || day->channelExists(CPAP_PB));
-        html += row3(tr("Periodic breathing, % time"),
+        html += row3(HelpTips::term(tr("Periodic breathing, % time"), QStringLiteral("csr")),
                      devicePb ? number(day->calcPON(CPAP_CSR) + day->calcPON(CPAP_PB)) : QStringLiteral("&mdash;"),
                      r.flowSeconds > 0 ? number(100.0 * r.pbSeconds / r.flowSeconds) : QStringLiteral("&mdash;"));
         html += row3(tr("Hours"), number(deviceHours, 2), number(analysisHours, 2));
         html += QStringLiteral("</table>");
 
         if (r.flScored && r.flBreaths > 0) {
-            html += QStringLiteral("<p>%1</p>").arg(r.flLimitedBreaths >= 0
+            html += QStringLiteral("<p>%1</p>").arg(HelpTips::term(r.flLimitedBreaths >= 0
                 ? tr("Flow limitation: %1, longest run %2; %3% of breaths")
                       .arg(duration(1000LL * r.flSeconds), duration(1000LL * r.flLongestSeconds),
                            number(100.0 * r.flLimitedBreaths / r.flBreaths, 0))
-                : tr("Flow limitation: %1, longest run %2").arg(duration(1000LL * r.flSeconds), duration(1000LL * r.flLongestSeconds)));
+                : tr("Flow limitation: %1, longest run %2").arg(duration(1000LL * r.flSeconds), duration(1000LL * r.flLongestSeconds)),
+                QStringLiteral("fl_time")));
         }
         html += glasgowHtml(r);
 
         html += QStringLiteral("<p>%1: AASM 3 % %2 &middot; CMS 4 % %3 &middot; %4 %5</p>")
-                    .arg(tr("Hypopnea index by rule"), perHour(r.hypopneasAasm3, analysisHours),
+                    .arg(HelpTips::term(tr("Hypopnea index by rule"), QStringLiteral("hypopnea_rule")), perHour(r.hypopneasAasm3, analysisHours),
                          perHour(r.hypopneasCms4, analysisHours), tr("Flow only"), perHour(r.hypopneasFlowOnly, analysisHours));
 
         if (r.hasComparison) {
             const MatchResult &m = r.match;
             html += QStringLiteral("<p>%1</p>").arg(
-                tr("Agreement with the device: %1% (matched %2, device only %3, analysis only %4, different type %5).")
+                HelpTips::term(tr("Agreement with the device: %1% (matched %2, device only %3, analysis only %4, different type %5)."), QStringLiteral("agreement"))
                     .arg(number(100.0 * m.agreement(), 0)).arg(m.matched.size()).arg(m.deviceOnly.size())
                     .arg(m.analysisOnly.size()).arg(m.typeMismatch)
                 + QStringLiteral(" <a href='analysis=differences'>%1</a>").arg(tr("Show differences")));
@@ -202,9 +207,9 @@ QString AnalysisPanel::sidebarHtml(Day *day, const DayResult &r, const QString &
         const double oxiHours = o.spo2Seconds / 3600.0;
         html += kTable;
         html += wide(QStringLiteral("<b>%1</b>").arg(tr("Oximetry")));
-        html += row(tr("SpO2 mean / nadir"), QStringLiteral("%1 % / %2 %").arg(number(o.spo2Sum / qMax(1, o.spo2Seconds)))
+        html += row(HelpTips::term(tr("SpO2 mean / nadir"), QStringLiteral("spo2")), QStringLiteral("%1 % / %2 %").arg(number(o.spo2Sum / qMax(1, o.spo2Seconds)))
                                                    .arg(number(o.spo2Nadir, 0)));
-        html += row(tr("ODI 3% / 4%"), QStringLiteral("%1 / %2").arg(perHour(o.countDesaturations(3), oxiHours),
+        html += row(HelpTips::term(tr("ODI 3% / 4%"), QStringLiteral("odi3")), QStringLiteral("%1 / %2").arg(perHour(o.countDesaturations(3), oxiHours),
                                                                        perHour(o.countDesaturations(4), oxiHours)));
         if (!o.desaturations.isEmpty()) {
             double depth = 0, ms = 0;
@@ -237,12 +242,12 @@ QString AnalysisPanel::sidebarHtml(Day *day, const DayResult &r, const QString &
         }
 
         html += kTable;
-        html += row(tr("Problem zones"), o.zones.isEmpty() ? tr("none")
+        html += row(HelpTips::term(tr("Problem zones"), QStringLiteral("oxi_zones")), o.zones.isEmpty() ? tr("none")
                     : tr("%1, %2 (marked %3)").arg(o.zones.size()).arg(duration(1000LL * o.zoneSeconds(1)), duration(1000LL * o.zoneSeconds(2))));
         if (r.hasCpap && r.hasFlow) {
-            html += row(tr("Hypoxic burden (approx.)"), analysisHours > 0
+            html += row(HelpTips::term(tr("Hypoxic burden (approx.)"), QStringLiteral("hypoxic_burden")), analysisHours > 0
                         ? QStringLiteral("%1 %&middot;min/h").arg(number(r.linkedDesatArea / 60.0 / analysisHours)) : QStringLiteral("&mdash;"));
-            html += row(tr("Unexplained desaturations"), QString::number(r.unexplained.size()));
+            html += row(HelpTips::term(tr("Unexplained desaturations"), QStringLiteral("unexplained_desat")), QString::number(r.unexplained.size()));
         }
         html += row(tr("SpO2 source"), oxiSource.toHtmlEscaped() + (r.oxiScope == QLatin1String("cpap") ? tr(" (CPAP time only)") : QString()));
         html += QStringLiteral("</table>");
@@ -255,9 +260,9 @@ QString AnalysisPanel::sidebarHtml(Day *day, const DayResult &r, const QString &
         html += wide(QStringLiteral("<b>%1</b>").arg(tr("Pulse")));
         html += row(tr("Mean / min / max"), QStringLiteral("%1 / %2 / %3").arg(number(o.pulseSum / qMax(1, o.pulseSeconds), 0))
                                                    .arg(number(o.pulseMin, 0), number(o.pulseMax, 0)));
-        html += row(tr("Pulse rises /h"), perHour(o.pulseRises.size(), pulseHours));
+        html += row(HelpTips::term(tr("Pulse rises /h"), QStringLiteral("pulse_change")), perHour(o.pulseRises.size(), pulseHours));
         if (r.dhrEvents > 0) {
-            html += row(tr("Pulse response to events"), tr("+%1 bpm (%2 events)").arg(number(r.dhrSum / r.dhrEvents)).arg(r.dhrEvents));
+            html += row(HelpTips::term(tr("Pulse response to events"), QStringLiteral("pulse_response")), tr("+%1 bpm (%2 events)").arg(number(r.dhrSum / r.dhrEvents)).arg(r.dhrEvents));
         }
         if (o.bradySeconds() > 0 || o.tachySeconds() > 0) {
             html += row(tr("Low / high pulse"), QStringLiteral("%1 / %2").arg(duration(1000LL * o.bradySeconds()), duration(1000LL * o.tachySeconds())));

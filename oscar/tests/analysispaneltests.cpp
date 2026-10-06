@@ -458,3 +458,18 @@ void AnalysisPanelTests::testGlasgowLessReliableBelowTwentyHz()
     r.flowRateHz = 10;
     QVERIFY(AnalysisPanel::sidebarHtml(nullptr, r, QString(), {}).contains(note.arg(10)));
 }
+
+void AnalysisPanelTests::testSidebarTerms()
+{
+    DayResult r = cpapNight();
+    r.flScored = true;
+    r.flBreaths = 1000;
+    r.flLimitedBreaths = 300;
+    r.glasgow.breaths = r.glasgowAdapted.breaths = 1000;
+    const QString html = AnalysisPanel::sidebarHtml(nullptr, r, QStringLiteral("CMS50F"), { 90 });
+    for (const char *key : { "an_ahi", "hypopnea_rule", "agreement", "fl_time", "glasgow", "glasgow_adapted", "gi_skew",
+                             "gi_spike", "gi_flattop", "gi_topheavy", "gi_multipeak", "gi_nopause", "gi_inspirrate",
+                             "gi_multibreath", "gi_ampvar", "odi3", "hypoxic_burden" }) {
+        QVERIFY2(html.contains(QStringLiteral("help:%1'").arg(QLatin1String(key))), key);
+    }
+}

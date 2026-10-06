@@ -29,6 +29,7 @@ private slots:
     void testFlowLimitationFromRow();
     void testFlowLimitationInAhiTile();
     void testGlasgowLessReliableInTile();
+    void testTilesHaveHelp();
 
 private:
     class QApplication *m_app = nullptr;

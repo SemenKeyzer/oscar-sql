@@ -7,6 +7,7 @@
  * for more details. */
 
 #include "nightsummary.h"
+#include "helptips.h"
 
 #include <QCoreApplication>
 #include <QFrame>
@@ -491,7 +492,13 @@ QLabel *NightSummaryView::richLabel(const QString &text, const QString &objectNa
     l->setWordWrap(true);
     l->setTextInteractionFlags(Qt::TextBrowserInteraction);
     l->setOpenExternalLinks(false);
-    connect(l, &QLabel::linkActivated, this, &NightSummaryView::linkActivated);
+    // a "help:" term explains itself; other links go to the main window
+    connect(l, &QLabel::linkActivated, this, [this](const QString &link) {
+        const QString key = HelpTips::keyOf(QUrl(link));
+        if (!key.isEmpty()) HelpTips::instance()->open(key);
+        else emit linkActivated(link);
+    });
+    connect(l, &QLabel::linkHovered, this, [](const QString &link) { HelpTips::instance()->hover(HelpTips::keyOf(QUrl(link))); });
     return l;
 }
 
@@ -575,26 +582,29 @@ void NightSummaryView::setSummary(const NightSummary &s)
     // --- a tile per figure
     int col = 0;
     if (s.hasCpap) {
-        addTile(col++, tr("Usage"), usageFigure(s.hours),
-                tr("target %1 h or more").arg(s.complianceHours), s.usageLevel());
+        HelpTips::attach(addTile(col++, tr("Usage"), usageFigure(s.hours),
+                                 tr("target %1 h or more").arg(s.complianceHours), s.usageLevel()), QStringLiteral("usage"));
         QString ahiNote = tr("target under %1").arg(NightSummary::kAhiTarget);
-        if (s.hasAnalysisAhi) ahiNote += QStringLiteral("<br/>") + tr("OSCAR's analysis: %1").arg(num(s.analysisAhi));
+        if (s.hasAnalysisAhi) {
+            ahiNote += QStringLiteral("<br/>") + HelpTips::term(tr("OSCAR's analysis: %1").arg(num(s.analysisAhi)), QStringLiteral("an_ahi"));
+        }
         if (s.hasFlowLimitation) {
             const QString fl = QString::number(s.flPercent, 'f', 0), minutes = QString::number(s.flMinutes, 'f', 0);
-            ahiNote += QStringLiteral("<br/>") + (s.hasGlasgow
-                ? tr("flow limitation %1% (%2 min) · Glasgow %3 / %4").arg(fl, minutes, num(s.glasgow), num(s.glasgowAdapted))
-                      + (s.glasgowLessReliable ? QLatin1Char(' ') + tr("(less reliable on this device)") : QString())
-                : tr("flow limitation %1% (%2 min)").arg(fl, minutes));
+            ahiNote += QStringLiteral("<br/>") + HelpTips::term(tr("flow limitation %1% (%2 min)").arg(fl, minutes), QStringLiteral("fl_time"));
+            if (s.hasGlasgow) {
+                ahiNote += QStringLiteral(" · ") + HelpTips::term(tr("Glasgow %1 / %2").arg(num(s.glasgow), num(s.glasgowAdapted)), QStringLiteral("glasgow"))
+                         + (s.glasgowLessReliable ? QLatin1Char(' ') + tr("(less reliable on this device)") : QString());
+            }
         }
-        addTile(col++, tr("AHI"), num(s.ahi), ahiNote, s.ahiLevel(),
-                tr("Apneas and hypopneas per hour, as the device counted them."));
+        HelpTips::attach(addTile(col++, tr("AHI"), num(s.ahi), ahiNote, s.ahiLevel(),
+                                 tr("Apneas and hypopneas per hour, as the device counted them.")), QStringLiteral("ahi"));
         if (s.hasLeak) {
             const QString note = s.leakRedline > 0 ? tr("average; red line %1").arg(s.leakRedline) : tr("average");
-            addTile(col++, tr("Leak"), figure(num(s.leak), s.leakUnits), note, s.leakLevel());
+            HelpTips::attach(addTile(col++, tr("Leak"), figure(num(s.leak), s.leakUnits), note, s.leakLevel()), QStringLiteral("leak"));
         }
         if (!s.pressure.isEmpty()) {
-            addTile(col++, tr("Pressure"), figure(s.pressure, s.pressureUnits), pressureTileNote(s).toHtmlEscaped(),
-                    NightSummary::Unknown);
+            HelpTips::attach(addTile(col++, tr("Pressure"), figure(s.pressure, s.pressureUnits), pressureTileNote(s).toHtmlEscaped(),
+                                     NightSummary::Unknown), QStringLiteral("p95"));
         }
     }
     if (s.oxi.valid && !s.oxi.spotChecks && s.oxi.spo2Avg > 0) {
@@ -605,18 +615,20 @@ void NightSummaryView::setSummary(const NightSummary &s)
         if (s.hasCpap && s.oxi.pulseAvg > 0) {   // no room for a pulse tile next to the CPAP ones
             note += QStringLiteral("<br/>") + tr("pulse %1 (%2 to %3)").arg(num(s.oxi.pulseAvg, 0), num(s.oxi.pulseMin, 0), num(s.oxi.pulseMax, 0));
         }
-        addTile(col++, tr("SpO2 below 90%"), figure(num(s.oxi.percentBelow90), QStringLiteral("%")),
-                note, s.spo2Level(),
-                tr("Share of the time with valid SpO2 readings spent below 90%: %1 min.").arg(qRound(s.oxi.minutesBelow90)));
+        HelpTips::attach(addTile(col++, tr("SpO2 below 90%"), figure(num(s.oxi.percentBelow90), QStringLiteral("%")),
+                                 note, s.spo2Level(),
+                                 tr("Share of the time with valid SpO2 readings spent below 90%: %1 min.").arg(qRound(s.oxi.minutesBelow90))),
+                         QStringLiteral("t90"));
     } else if (s.lastOximetry.isValid()) {
-        addTile(col++, tr("SpO2"), QStringLiteral("&mdash;"),
+        HelpTips::attach(addTile(col++, tr("SpO2"), QStringLiteral("&mdash;"),
                 tr("not recorded this night; latest <a href='daily=%1'>%2</a>")
                     .arg(s.lastOximetry.toString(Qt::ISODate), QLocale().toString(s.lastOximetry, QLocale::ShortFormat)),
-                NightSummary::Unknown);
+                NightSummary::Unknown), QStringLiteral("spo2"));
     }
     if (!s.hasCpap && s.oxi.valid && !s.oxi.spotChecks && s.oxi.pulseAvg > 0) {
-        addTile(col++, tr("Pulse"), figure(num(s.oxi.pulseAvg, 0), tr("bpm")),
-                tr("from %1 to %2").arg(num(s.oxi.pulseMin, 0), num(s.oxi.pulseMax, 0)), NightSummary::Unknown);
+        HelpTips::attach(addTile(col++, tr("Pulse"), figure(num(s.oxi.pulseAvg, 0), tr("bpm")),
+                                 tr("from %1 to %2").arg(num(s.oxi.pulseMin, 0), num(s.oxi.pulseMax, 0)), NightSummary::Unknown),
+                         QStringLiteral("pulse"));
     }
 
     // --- the nights before

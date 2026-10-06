@@ -37,6 +37,8 @@
 
 #include "saveGraphLayoutSettings.h"
 #include "daily.h"
+#include "glossary.h"
+#include "helptips.h"
 #include "ui_daily.h"
 #include "dailySearchTab.h"
 
@@ -240,6 +242,11 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
 
     webView=new MyTextBrowser(widget);
     webView->setOpenLinks(false);
+    // an event row ("event=<channel>") explains its event in the help panel
+    connect(webView, &QTextBrowser::highlighted, this, [](const QUrl &url) {
+        const QString link = url.toString();
+        if (link.startsWith(QLatin1String("event="))) HelpTips::instance()->hover(Glossary::keyForChannel(link.mid(6).toInt()));
+    });
     layout2->insertWidget(0,webView, 1);
     layout2->insertWidget(1,sessionbar,0);
     // add the sessionbar after it.
@@ -1817,8 +1824,9 @@ QString Daily::getStatisticsInfo(Day * day)
         tooltip.replace("'", "&apos;");
 //        qDebug() << schema::channel[code].label() << "old tooltip" << oldtip << "; new tooltip" << tooltip ;
 
+        const QString helpKey = Glossary::keyForChannel(code);
         html+=QString("<tr><td align=left title='%6'>%1</td><td align=right>%2</td><td align=right>%3</td><td align=right>%4</td><td align=right>%5</td></tr>")
-            .arg(schema::channel[code].label())
+            .arg(helpKey.isEmpty() ? schema::channel[code].label() : HelpTips::term(schema::channel[code].label(), helpKey))
             .arg(mn,0,'f',2)
             .arg(med,0,'f',2)
             .arg(perc,0,'f',2)
@@ -2038,6 +2046,7 @@ QString Daily::getIndices(Day * day, QHash<ChannelID, EventDataType>& values ) {
         // than the duration of timed breaths per hour.
         values[code] = val;
         QString tooltip=schema::channel[code].description();
+        if (HelpTips::instance()->enabled() && !Glossary::keyForChannel(code).isEmpty()) tooltip = Glossary::channelTooltip(code);
         tooltip.replace("'", "&apos;");
         QColor altcolor = (brightness(chan.defaultColor()) < 0.3) ? Qt::white : Qt::black; // pick a contrasting color
         html+=QString("<tr><td align='left' bgcolor='%1'><b><font color='%2'><a href='event=%5' style='text-decoration:none;color:%2' title='<p>%6</p>'>%3</a></font></b></td><td width=20% bgcolor='%1'><b><font color='%2'>%4</font></b></td></tr>")
@@ -2305,6 +2314,23 @@ QString Daily::getLeftSidebar (bool honorPieChart) {
             + htmlLeftFooter;
 
     return html;
+}
+
+MyTextBrowser::MyTextBrowser(QWidget *parent) : QTextBrowser(parent)
+{
+    // hovering a term tells the help panel which one
+    connect(this, &QTextBrowser::highlighted, this, [](const QUrl &url) { HelpTips::instance()->hover(HelpTips::keyOf(url)); });
+}
+
+void MyTextBrowser::mouseReleaseEvent(QMouseEvent *e)
+{
+    const QString key = HelpTips::keyOf(QUrl(anchorAt(e->position().toPoint())));
+    if (e->button() == Qt::LeftButton && !key.isEmpty()) {
+        HelpTips::instance()->open(key);
+        e->accept();
+        return;
+    }
+    QTextBrowser::mouseReleaseEvent(e);
 }
 
 QVariant MyTextBrowser::loadResource(int type, const QUrl &url)

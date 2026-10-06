@@ -9,7 +9,9 @@
 #ifndef HELPTIPS_H
 #define HELPTIPS_H
 
+#include <QCoreApplication>
 #include <QObject>
+#include <QPointer>
 #include <QString>
 #include <QUrl>
 
@@ -50,6 +52,7 @@ class HelpTips : public QObject
   private:
     HelpTips();
     bool m_enabled = true;   // used when there are no application settings (tests)
+    QPointer<QCoreApplication> m_filtered;   // the application the filter is installed on
 };
 
 #endif // HELPTIPS_H

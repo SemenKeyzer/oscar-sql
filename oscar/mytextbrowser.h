@@ -15,9 +15,12 @@ class MyTextBrowser:public QTextBrowser
 {
     Q_OBJECT
 public:
-    MyTextBrowser(QWidget * parent):QTextBrowser(parent) {}
+    MyTextBrowser(QWidget * parent);
     virtual ~MyTextBrowser() {}
     virtual QVariant loadResource(int type, const QUrl &url) Q_DECL_OVERRIDE;
+protected:
+    //! A click on a "help:" term opens its explanation and does not reach the page's links.
+    void mouseReleaseEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
 };
 
 
