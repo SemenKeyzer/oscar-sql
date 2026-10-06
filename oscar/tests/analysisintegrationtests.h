@@ -25,6 +25,7 @@ private slots:
     void testClearDayRestoresDevice();
     void testEditsSurviveReopen();
     void testAhiSameEverywhere();
+    void testScoringAllowedInClinicalMode();
     void initTestCase();
     void cleanupTestCase();
     void testAnalysisChannelsAreComputed();

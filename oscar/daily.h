@@ -204,6 +204,10 @@ private slots:
     void on_ReloadDay();
 
     void onAlignButtonClicked(bool checked);
+    // Manual scoring mode
+    void onScoringButtonToggled(bool on);
+    void onScoringRange(gGraph *graph, qint64 startMs, qint64 endMs, QPoint globalPos);
+    void onScoringContext(gGraph *graph, qint64 timeMs, QPoint globalPos);
     void onAlignRequestedForGraph(gGraph *graph);
     void onAlignDeviceChosen(Machine *mach);
     void onAlignOffsetChanged(qint64 ms);
@@ -425,6 +429,8 @@ private:
 
     //! \a analysisAhi: OSCAR's analysis of that night, shown under the device's; < 0 for none.
     QString getAHI (Day * day, bool isBrick, double analysisAhi = -1);
+    //! The sidebar block listing the night's manual scoring, empty without it.
+    QString getManualScoring(Day *day);
     QString getSessionInformation(Day *);
     QString getMachineSettings(Day *);
     QString getStatisticsInfo(Day *);
@@ -447,6 +453,12 @@ private:
     void refreshAlignStatus();
     void updateAlignButton(Day *day);
     QPushButton *alignButton = nullptr;
+    // Manual scoring (SleepLib/manual_scoring)
+    QPushButton *scoringButton = nullptr;
+    QLabel *m_scoringBanner = nullptr;
+    //! Applies a choice from a scoring menu to the day shown; the stretch is for "add"/"exclude".
+    void applyScoring(const QVariantMap &choice, qint64 startMs, qint64 endMs);
+    void scoringChanged();
     TimeAlignBar *m_alignBar = nullptr;
     TimeAlignSession *m_alignSession = nullptr;
     qint64 m_alignDragBaseMs = 0;

@@ -1723,3 +1723,21 @@ void AnalysisIntegrationTests::testAhiSameEverywhere()
     ManualScoring::clearDay(day);
     delete day;
 }
+
+// unlike switching sessions off, scoring is the doctor's work and stays allowed in clinical mode
+void AnalysisIntegrationTests::testScoringAllowedInClinicalMode()
+{
+    Machine cpap(p_profile, 78);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    const bool clinical = p_profile->cpap->clinicalMode();
+    p_profile->cpap->setClinicalMode(true);
+    Day day;
+    Session *s = scoredSession(&cpap, 781, m_machineRow);
+    day.addSession(s);
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Add, CPAP_Hypopnea, 480, 500)));
+    QVERIFY(day.hasManualScoring());
+    QCOMPARE(day.count(CPAP_Hypopnea), EventDataType(2));
+    ManualScoring::clearDay(&day);
+    p_profile->cpap->setClinicalMode(clinical);
+}

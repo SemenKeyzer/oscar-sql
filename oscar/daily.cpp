@@ -17,7 +17,9 @@
 #include <QElapsedTimer>
 #include <QBuffer>
 #include <QPixmap>
+#include <QMenu>
 #include <QMessageBox>
+#include <limits>
 #include <QResizeEvent>
 #include <QScrollBar>
 #include <QSpacerItem>
@@ -50,6 +52,9 @@
 #include "SleepLib/analysis/analysis_channels.h"
 #include "SleepLib/analysis/analysis_service.h"
 #include "analysispanel.h"
+#include "scoringmenus.h"
+#include "SleepLib/manual_scoring.h"
+#include "database/manual_scoring_repository.h"
 #include "nightsummary.h"
 #include "SleepLib/loader_plugins/applehealth_loader.h"
 #include "SleepLib/loader_plugins/prisma_loader.h"
@@ -721,6 +726,25 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     }
     connect(alignButton, &QPushButton::clicked, this, &Daily::onAlignButtonClicked);
 
+    // Manual scoring: the button next to Align, a banner above the graphs while it is on
+    scoringButton = new QPushButton(tr("Scoring"), this);
+    scoringButton->setObjectName(QStringLiteral("scoringButton"));
+    scoringButton->setCheckable(true);
+    scoringButton->setToolTip(tr("Correct the device's apneas and hypopneas by hand"));
+    if (auto *bar = qobject_cast<QBoxLayout *>(ui->frame->layout())) {
+        bar->insertWidget(bar->indexOf(ui->graphHelp), scoringButton);
+    }
+    m_scoringBanner = new QLabel(tr("Scoring mode: drag across the flow graph to mark a stretch, or right-click an event · Esc to leave"), this);
+    m_scoringBanner->setObjectName(QStringLiteral("scoringBanner"));
+    m_scoringBanner->setStyleSheet(QStringLiteral("QLabel { background: #fff3cd; color: #664d03; padding: 3px 6px; }"));
+    m_scoringBanner->setWordWrap(true);
+    m_scoringBanner->hide();
+    ui->verticalLayout_3->insertWidget(ui->verticalLayout_3->indexOf(ui->graphMainArea), m_scoringBanner);
+    connect(scoringButton, &QPushButton::toggled, this, &Daily::onScoringButtonToggled);
+    connect(GraphView, &gGraphView::scoringRangeSelected, this, &Daily::onScoringRange);
+    connect(GraphView, &gGraphView::scoringContextRequested, this, &Daily::onScoringContext);
+    connect(GraphView, &gGraphView::scoringModeExitRequested, this, [this]() { scoringButton->setChecked(false); });
+
     connect(m_alignSession, &TimeAlignSession::offsetChanged, this, &Daily::onAlignOffsetChanged);
     connect(m_alignBar, &TimeAlignBar::deviceChosen, this, &Daily::onAlignDeviceChosen);
     connect(m_alignBar, &TimeAlignBar::nudgeRequested, this, &Daily::onAlignNudge);
@@ -814,6 +838,32 @@ void Daily::Link_clicked(const QUrl &url)
     SessionID sid=data.toUInt();
     Day *day=nullptr;
 
+    if (code == "scoring") {   // the manual scoring block: jump to, undo one, or clear all
+        Day *sday = p_profile->GetDay(previous_date, MT_CPAP);
+        if (!sday) return;
+        const QString what = data.section(':', 0, 0);
+        const qint64 id = data.section(':', 1).toLongLong();
+        if (what == QLatin1String("clear")) {
+            if (QMessageBox::question(this, tr("Manual scoring"), tr("Undo all manual scoring of this night?"),
+                                      QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes) return;
+            ManualScoring::clearDay(sday);
+            scoringChanged();
+            return;
+        }
+        for (Session *s : sday->sessions) {
+            for (const ManualScoring::Edit &e : ManualScoringRepository::editsForSession(ManualScoring::keyOf(s))) {
+                if (e.id != id) continue;
+                if (what == QLatin1String("undo")) {
+                    ManualScoring::removeEdit(s, id);
+                    scoringChanged();
+                } else {   // jump: a minute either side
+                    GraphView->SetXBounds(e.startMs - 60000, e.endMs + 60000);
+                }
+                return;
+            }
+        }
+        return;
+    }
     if (code=="togglecpapsession") { // Enable/Disable CPAP session
         day=p_profile->GetDay(previous_date,MT_CPAP);
         if (!day) return;
@@ -1994,6 +2044,13 @@ QString Daily::getAHI(Day * day, bool isBrick, double analysisAhi) {
     }
     html +="</tr>\n";
 
+    // corrected by hand: the device's own figure next to it
+    if (!isBrick && day->hasManualScoring()) {
+        html += QString("<tr><td colspan=5 bgcolor='%1' align=center><font color='%2'>%3</font></td></tr>\n")
+                    .arg("#F88017", COLOR_Text.name(),
+                         HelpTips::term(tr("device %1 · corrected by hand").arg(day->deviceAHI(), 0, 'f', 2), QStringLiteral("manual_scoring")));
+    }
+
     // Obstructive and central breakdown of the same index, shown only for a device that
     // scores hypopneas by mechanism — for any other device OAHI would just restate AHI
     // (GitLab #261). The two always sum to AHI, so they are shown together on one line
@@ -2503,7 +2560,7 @@ void Daily::Load(QDate date)
         PERF_TIMER_START("Daily::Load::LeftPanel");
         modestr=schema::channel[CPAP_Mode].m_options[mode];
         if (hours>0) {
-            htmlLeftAHI= getAHI(day,isBrick, figures.hasAnalysisAhi ? figures.analysisAhi : -1);
+            htmlLeftAHI= getAHI(day,isBrick, figures.hasAnalysisAhi ? figures.analysisAhi : -1) + getManualScoring(day);
 
             htmlLeftMachineInfo = getCPAPInformation(day);
 
@@ -4155,4 +4212,176 @@ void Daily::refreshAnalysis()
     GraphView->setDay(day);
     if (maxx > minx) GraphView->SetXBounds(minx, maxx);
     else GraphView->redraw();
+}
+
+// ---- Manual scoring
+
+void Daily::onScoringButtonToggled(bool on)
+{
+    GraphView->setScoringMode(on);
+    m_scoringBanner->setVisible(on);
+    if (on) GraphView->setFocus();
+}
+
+namespace {
+
+//! The enabled CPAP session of \a day that holds \a t, or the nearest one.
+Session *scoringSessionAt(Day *day, qint64 t)
+{
+    Session *best = nullptr;
+    qint64 bestGap = std::numeric_limits<qint64>::max();
+    for (Session *s : day->sessions) {
+        if (s->type() != MT_CPAP || !s->enabled()) continue;
+        const qint64 gap = t < s->first() ? s->first() - t : (t > s->last() ? t - s->last() : 0);
+        if (gap < bestGap) {
+            best = s;
+            bestGap = gap;
+        }
+    }
+    return best;
+}
+
+QString scoringTime(qint64 ms) { return QDateTime::fromMSecsSinceEpoch(ms).time().toString(QStringLiteral("HH:mm:ss")); }
+
+} // namespace
+
+void Daily::applyScoring(const QVariantMap &choice, qint64 startMs, qint64 endMs)
+{
+    Day *day = p_profile->GetDay(previous_date, MT_CPAP);
+    if (!day) return;
+    using ManualScoring::Kind;
+    const QString action = choice.value(QStringLiteral("action")).toString();
+    const ChannelID channel = choice.value(QStringLiteral("channel")).toUInt();
+    const qint64 timeMs = choice.value(QStringLiteral("timeMs")).toLongLong();
+    ManualScoring::Edit e;
+    e.channel = channel;
+    if (action == QLatin1String("add")) {
+        e.kind = Kind::Add;
+        e.startMs = startMs;
+        e.endMs = endMs;
+        if (Session *s = scoringSessionAt(day, endMs)) ManualScoring::addEdit(s, e);
+    } else if (action == QLatin1String("exclude")) {
+        e.kind = Kind::Exclude;
+        e.startMs = startMs;
+        e.endMs = endMs;
+        for (Session *s : day->sessions) {   // every session the stretch touches
+            if (s->type() == MT_CPAP && s->first() < endMs && s->last() > startMs) ManualScoring::addEdit(s, e);
+        }
+    } else if (action == QLatin1String("remove") || action == QLatin1String("retype")) {
+        e.kind = action == QLatin1String("remove") ? Kind::Remove : Kind::Retype;
+        e.newChannel = choice.value(QStringLiteral("newChannel")).toUInt();
+        e.startMs = timeMs;
+        e.endMs = timeMs;
+        if (Session *s = scoringSessionAt(day, timeMs)) ManualScoring::addEdit(s, e);
+    } else if (action == QLatin1String("undo")) {
+        const qint64 id = choice.value(QStringLiteral("editId")).toLongLong();
+        for (Session *s : day->sessions) {
+            for (const ManualScoring::Edit &old : ManualScoringRepository::editsForSession(ManualScoring::keyOf(s))) {
+                if (old.id == id) ManualScoring::removeEdit(s, id);
+            }
+        }
+    } else {
+        return;
+    }
+    scoringChanged();
+}
+
+void Daily::scoringChanged()
+{
+    // as when a session is switched off: every page shows the corrected figures
+    if (mainwin) mainwin->refreshAnalysisViews();
+    else LoadDate(previous_date);
+}
+
+void Daily::onScoringRange(gGraph *graph, qint64 startMs, qint64 endMs, QPoint globalPos)
+{
+    Q_UNUSED(graph)
+    QScopedPointer<QMenu> menu(ScoringMenus::forRange(endMs - startMs, this));
+    QAction *title = new QAction(menu->title(), menu.data());
+    title->setEnabled(false);
+    menu->insertAction(menu->actions().value(0), title);
+    if (QAction *chosen = menu->exec(globalPos)) applyScoring(chosen->data().toMap(), startMs, endMs);
+}
+
+void Daily::onScoringContext(gGraph *graph, qint64 timeMs, QPoint globalPos)
+{
+    Day *day = p_profile->GetDay(previous_date, MT_CPAP);
+    if (!day || !graph) return;
+    // a few pixels' worth of slack around the mark
+    const int plotWidth = qMax(1, graph->rect().width() - graph->left - graph->right);
+    const qint64 slack = qMax<qint64>(2000, qint64(8.0 * double(graph->max_x - graph->min_x) / plotWidth));
+    const ManualScoring::EffectiveEvent *best = nullptr;
+    QList<ManualScoring::EffectiveEvent> events;
+    for (Session *s : day->sessions) {
+        if (s->type() != MT_CPAP || !s->enabled()) continue;
+        events += ManualScoring::resultFor(s).events;
+    }
+    qint64 bestGap = slack + 1;
+    for (const ManualScoring::EffectiveEvent &e : events) {
+        const qint64 start = e.endMs - qint64(e.durationSec * 1000);
+        const qint64 gap = (timeMs >= start && timeMs <= e.endMs) ? 0 : qMin(qAbs(timeMs - e.endMs), qAbs(timeMs - start));
+        if (gap < bestGap) {
+            best = &e;
+            bestGap = gap;
+        }
+    }
+    QScopedPointer<QMenu> menu;
+    if (best) {
+        menu.reset(ScoringMenus::forEvent(*best, this));
+    } else {
+        // inside an excluded stretch?
+        for (Session *s : day->sessions) {
+            for (const ManualScoring::Edit &e : ManualScoringRepository::editsForSession(ManualScoring::keyOf(s))) {
+                if (e.kind == ManualScoring::Kind::Exclude && timeMs >= e.startMs && timeMs <= e.endMs) {
+                    menu.reset(ScoringMenus::forExcluded(e.id, this));
+                }
+            }
+        }
+    }
+    if (!menu) return;
+    if (QAction *chosen = menu->exec(globalPos)) applyScoring(chosen->data().toMap(), 0, 0);
+}
+
+QString Daily::getManualScoring(Day *day)
+{
+    if (!day || !day->hasManualScoring()) return QString();
+    using ManualScoring::Kind;
+    int added = 0, removed = 0, retyped = 0, stretches = 0, notFound = 0;
+    qint64 excludedMs = 0;
+    QString rows;
+    for (Session *s : day->sessions) {
+        if (s->type() != MT_CPAP) continue;
+        excludedMs += s->manualExcludedMs();
+        notFound += s->manualNotFound();
+        for (const ManualScoring::Edit &e : ManualScoringRepository::editsForSession(ManualScoring::keyOf(s))) {
+            QString what;
+            switch (e.kind) {
+            case Kind::Add: ++added; what = tr("added: %1").arg(ScoringMenus::typeName(e.channel)); break;
+            case Kind::Remove: ++removed; what = tr("removed: %1").arg(ScoringMenus::typeName(e.channel)); break;
+            case Kind::Retype:
+                ++retyped;
+                what = tr("%1 → %2").arg(ScoringMenus::typeName(e.channel), ScoringMenus::typeName(e.newChannel));
+                break;
+            case Kind::Exclude:
+                ++stretches;
+                what = tr("excluded %1 min").arg(qRound((e.endMs - e.startMs) / 60000.0));
+                break;
+            }
+            rows += QStringLiteral("<tr><td colspan=4><a href='scoring=jump:%1'>%2</a> %3</td><td align=right><a href='scoring=undo:%1' title='%4'>&#x2715;</a></td></tr>\n")
+                        .arg(e.id).arg(scoringTime(e.endMs), what.toHtmlEscaped(), tr("Undo this change").toHtmlEscaped());
+        }
+    }
+    QString html = QStringLiteral("<table cellspacing=0 cellpadding=1 border=0 width='100%'>\n");
+    html += QStringLiteral("<tr><td colspan=5 align=center><b>%1</b></td></tr>\n").arg(HelpTips::term(tr("Manual scoring"), QStringLiteral("manual_scoring")));
+    html += QStringLiteral("<tr><td colspan=5>%1</td></tr>\n")
+                .arg(tr("added %1, removed %2, type changed %3, excluded %4 min (%5 stretches)")
+                         .arg(added).arg(removed).arg(retyped).arg(qRound(excludedMs / 60000.0)).arg(stretches).toHtmlEscaped());
+    if (notFound > 0) {
+        html += QStringLiteral("<tr><td colspan=5><font color='#c0392b'>%1</font></td></tr>\n")
+                    .arg(tr("%n change(s) refer to an event that is no longer there", nullptr, notFound).toHtmlEscaped());
+    }
+    html += rows;
+    html += QStringLiteral("<tr><td colspan=5 align=center><a href='scoring=clear'>%1</a></td></tr>\n").arg(tr("Undo all scoring of this night").toHtmlEscaped());
+    html += QStringLiteral("</table>\n");
+    return html;
 }

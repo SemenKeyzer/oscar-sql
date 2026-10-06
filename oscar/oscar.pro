@@ -366,6 +366,7 @@ SOURCES += \
     preferencessearch.cpp \
     pdfreportoptions.cpp \
     glossary.cpp \
+    scoringmenus.cpp \
     SleepLib/manual_scoring.cpp \
     Graphs/scoringgesture.cpp \
     database/manual_scoring_repository.cpp \
@@ -699,6 +700,7 @@ HEADERS  += \
     preferencessearch.h \
     pdfreportoptions.h \
     glossary.h \
+    scoringmenus.h \
     SleepLib/manual_scoring.h \
     Graphs/scoringgesture.h \
     database/manual_scoring_repository.h \
@@ -923,6 +925,7 @@ test {
         tests/uicoveragetests.cpp \
         tests/manualscoringtests.cpp \
         tests/scoringmodetests.cpp \
+        tests/scoringmenustests.cpp \
         tests/helplinkstests.cpp \
         tests/htmlpagestests.cpp \
         tests/channelstoretests.cpp \
@@ -976,6 +979,7 @@ test {
         tests/uicoveragetests.h \
         tests/manualscoringtests.h \
         tests/scoringmodetests.h \
+        tests/scoringmenustests.h \
         tests/helplinkstests.h \
         tests/htmlpagestests.h \
         tests/channelstoretests.h \
