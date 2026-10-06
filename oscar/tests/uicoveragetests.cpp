@@ -131,9 +131,14 @@ void UiCoverageTests::testMenusCovered()
     QMainWindow host;
     Ui::MainWindow ui;
     ui.setupUi(&host);
+    // in no menu: hidden, or reached only by a shortcut
+    const QStringList exempt = { QStringLiteral("actionChange_User"), QStringLiteral("actionExport_Review"),
+                                 QStringLiteral("actionManage_Reports"), QStringLiteral("actionPurge_Current_Selected_Day"),
+                                 QStringLiteral("actionUse_AntiAliasing"), QStringLiteral("actionView_Welcome"),
+                                 QStringLiteral("action_CycleTabs"), QStringLiteral("action_Profiles") };
     QStringList missing;
     for (QAction *a : host.findChildren<QAction *>()) {
-        if (a->isSeparator() || a->objectName().isEmpty() || a->text().isEmpty()) continue;
+        if (a->isSeparator() || a->objectName().isEmpty() || a->text().isEmpty() || exempt.contains(a->objectName())) continue;
         if (!Glossary::find(QStringLiteral("ui.menu.") + a->objectName())) missing << a->objectName();
     }
     missing.removeDuplicates();
