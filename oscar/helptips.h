@@ -31,6 +31,13 @@ class HelpTips : public QObject
 
     //! Tags \a w with the glossary entry \a key.
     static void attach(QWidget *w, const QString &key);
+    //! Tags every widget under \a root that has an entry "ui.<window>.<objectName>"; a label takes
+    //! the key of its buddy. Keys already set are kept. Returns how many widgets were tagged.
+    static int attachAll(QWidget *root, const QString &window);
+    //! Every menu under \a owner: a highlighted item with an entry "ui.menu.<objectName>" is hovered.
+    static void attachMenus(QWidget *owner);
+    //! The key of \a w or of the nearest tagged widget it sits in (up to its window).
+    static QString keyFor(QWidget *w);
     //! \a text as a link to the glossary entry \a key, with the short explanation as its tooltip;
     //! \a text as it is when the explanations are off or the key is unknown.
     static QString term(const QString &text, const QString &key);

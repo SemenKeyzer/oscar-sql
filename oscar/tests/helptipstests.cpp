@@ -10,7 +10,12 @@
 
 #include <QApplication>
 #include <QHelpEvent>
+#include <QCheckBox>
 #include <QLabel>
+#include <QMainWindow>
+#include <QMenu>
+#include <QMenuBar>
+#include <QTimeEdit>
 #include <QSignalSpy>
 #include <QTextBlock>
 #include <QTextDocument>
@@ -105,4 +110,80 @@ void HelpTipsTests::testTermEscapes()
         }
     }
     QCOMPARE(anchors, 1);
+}
+
+namespace {
+// entries of the controls' table used by these tests
+const QString kPrefsKey = QStringLiteral("ui.prefs.timeEdit");
+const QString kMenuKey = QStringLiteral("ui.menu.actionPurgeCurrentDayAll");
+}
+
+void HelpTipsTests::testAttachAllByObjectName()
+{
+    QWidget root;
+    auto *known = new QTimeEdit(&root);
+    known->setObjectName(QStringLiteral("timeEdit"));
+    auto *unknown = new QCheckBox(&root);
+    unknown->setObjectName(QStringLiteral("noSuchSetting"));
+    QCOMPARE(HelpTips::attachAll(&root, QStringLiteral("prefs")), 1);
+    QCOMPARE(known->property("helpKey").toString(), kPrefsKey);
+    QVERIFY(unknown->property("helpKey").toString().isEmpty());
+    QCOMPARE(HelpTips::keyFor(known), kPrefsKey);
+}
+
+void HelpTipsTests::testLabelTakesBuddyKey()
+{
+    QWidget root;
+    auto *field = new QTimeEdit(&root);
+    field->setObjectName(QStringLiteral("timeEdit"));
+    auto *label = new QLabel(QStringLiteral("Day Split Time"), &root);
+    label->setObjectName(QStringLiteral("label_2"));
+    label->setBuddy(field);
+    HelpTips::attachAll(&root, QStringLiteral("prefs"));
+    QCOMPARE(label->property("helpKey").toString(), kPrefsKey);
+}
+
+void HelpTipsTests::testMenuHoverFollowsAction()
+{
+    QMainWindow win;
+    QMenu *menu = win.menuBar()->addMenu(QStringLiteral("Data"));
+    QAction *action = menu->addAction(QStringLiteral("All including Notes"));
+    action->setObjectName(QStringLiteral("actionPurgeCurrentDayAll"));
+    HelpTips::attachMenus(&win);
+    QSignalSpy hovered(HelpTips::instance(), &HelpTips::hovered);
+    emit menu->hovered(action);
+    QCOMPARE(hovered.count(), 1);
+    QCOMPARE(hovered.first().first().toString(), kMenuKey);
+
+    HelpTips::instance()->setEnabled(false);
+    emit menu->hovered(action);
+    QCOMPARE(hovered.count(), 1);
+    HelpTips::instance()->setEnabled(true);
+}
+
+void HelpTipsTests::testMenuHoverSkipsDynamicItems()
+{
+    QMainWindow win;
+    QMenu *menu = win.menuBar()->addMenu(QStringLiteral("File"));
+    QMenu *recent = menu->addMenu(QStringLiteral("Recent"));
+    QAction *dynamic = recent->addAction(QStringLiteral("/some/folder"));   // no object name
+    HelpTips::attachMenus(&win);
+    QSignalSpy hovered(HelpTips::instance(), &HelpTips::hovered);
+    emit recent->hovered(dynamic);
+    QCOMPARE(hovered.count(), 0);
+}
+
+void HelpTipsTests::testMenuTooltipUsesActiveAction()
+{
+    QMenu menu;
+    QAction *action = menu.addAction(QStringLiteral("All including Notes"));
+    action->setObjectName(QStringLiteral("actionPurgeCurrentDayAll"));
+    menu.show();
+    menu.setActiveAction(action);
+    QHelpEvent help(QEvent::ToolTip, QPoint(5, 5), menu.mapToGlobal(QPoint(5, 5)));
+    QApplication::sendEvent(&menu, &help);
+    const QString term = Glossary::find(kMenuKey)->term;
+    QVERIFY2(QToolTip::text().contains(term), qPrintable(QToolTip::text()));
+    QToolTip::hideText();
+    menu.hide();
 }

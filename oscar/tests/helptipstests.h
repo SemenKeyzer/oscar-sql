@@ -24,6 +24,11 @@ private slots:
     void testDisabled();
     void testTerm();
     void testTermEscapes();
+    void testAttachAllByObjectName();
+    void testLabelTakesBuddyKey();
+    void testMenuHoverFollowsAction();
+    void testMenuHoverSkipsDynamicItems();
+    void testMenuTooltipUsesActiveAction();
 private:
     QApplication *m_app = nullptr;
 };

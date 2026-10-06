@@ -10,6 +10,8 @@
 
 #include <QApplication>
 #include <QHelpEvent>
+#include <QLabel>
+#include <QMenu>
 #include <QToolTip>
 #include <QWidget>
 
@@ -50,6 +52,55 @@ void HelpTips::attach(QWidget *w, const QString &key)
     if (w) w->setProperty(kKeyProperty, key);
 }
 
+int HelpTips::attachAll(QWidget *root, const QString &window)
+{
+    if (!root) return 0;
+    const QString prefix = QStringLiteral("ui.") + window + QLatin1Char('.');
+    auto keyOfName = [&prefix](const QObject *o) {
+        const QString key = prefix + o->objectName();
+        return !o->objectName().isEmpty() && Glossary::find(key) ? key : QString();
+    };
+    int tagged = 0;
+    QList<QWidget *> widgets = root->findChildren<QWidget *>();
+    widgets.prepend(root);
+    for (QWidget *w : widgets) {
+        if (!w->property(kKeyProperty).toString().isEmpty()) continue;
+        QString key = keyOfName(w);
+        if (key.isEmpty()) {
+            // a label explains the field it names
+            if (auto *label = qobject_cast<QLabel *>(w); label && label->buddy()) key = keyOfName(label->buddy());
+        }
+        if (!key.isEmpty()) {
+            attach(w, key);
+            ++tagged;
+        }
+    }
+    return tagged;
+}
+
+void HelpTips::attachMenus(QWidget *owner)
+{
+    if (!owner) return;
+    for (QMenu *menu : owner->findChildren<QMenu *>()) {
+        if (menu->property("helpMenuWatched").toBool()) continue;
+        menu->setProperty("helpMenuWatched", true);
+        connect(menu, &QMenu::hovered, instance(), [](QAction *action) {
+            HelpTips *tips = instance();
+            if (!tips->enabled() || !action || action->objectName().isEmpty()) return;
+            const QString key = QStringLiteral("ui.menu.") + action->objectName();
+            if (Glossary::find(key)) tips->hover(key);
+        });
+    }
+}
+
+QString HelpTips::keyFor(QWidget *w)
+{
+    // the key of the widget or of the tile/frame/group it sits in
+    QString key;
+    for (; w && key.isEmpty(); w = w->isWindow() ? nullptr : w->parentWidget()) key = w->property(kKeyProperty).toString();
+    return key;
+}
+
 QString HelpTips::term(const QString &text, const QString &key)
 {
     if (!instance()->enabled() || !Glossary::find(key)) return text;
@@ -75,10 +126,13 @@ void HelpTips::open(const QString &key)
 bool HelpTips::eventFilter(QObject *o, QEvent *e)
 {
     if ((e->type() == QEvent::ToolTip || e->type() == QEvent::Enter) && o->isWidgetType() && enabled()) {
-        // the key of the widget or of the tile/frame it sits in
-        QString key;
-        for (QWidget *w = static_cast<QWidget *>(o); w && key.isEmpty(); w = w->isWindow() ? nullptr : w->parentWidget())
-            key = w->property(kKeyProperty).toString();
+        QString key = keyFor(static_cast<QWidget *>(o));
+        if (auto *menu = qobject_cast<QMenu *>(o); menu && key.isEmpty() && menu->activeAction()
+            && !menu->activeAction()->objectName().isEmpty()) {
+            // a menu drawn by Qt (Windows, Linux): the highlighted item
+            const QString itemKey = QStringLiteral("ui.menu.") + menu->activeAction()->objectName();
+            if (Glossary::find(itemKey)) key = itemKey;
+        }
         if (!key.isEmpty()) {
             if (e->type() == QEvent::Enter) {
                 hover(key);
