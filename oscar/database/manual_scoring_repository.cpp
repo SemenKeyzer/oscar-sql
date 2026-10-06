@@ -17,8 +17,11 @@
 
 using ManualScoring::Edit;
 using ManualScoring::Kind;
+using ManualScoring::SessionKey;
 
 namespace {
+
+const QString kWhereKey = QStringLiteral("profile_id = ? AND machine_serial = ? AND session_id = ?");
 
 QString kindName(Kind k)
 {
@@ -39,11 +42,11 @@ Kind kindOf(const QString &name)
     return Kind::Add;
 }
 
-QString rowList(const QList<qint64> &rows)
+void bindKey(QSqlQuery &q, const SessionKey &key)
 {
-    QStringList ids;
-    for (qint64 r : rows) ids << QString::number(r);
-    return ids.join(QLatin1Char(','));
+    q.addBindValue(key.profileId);
+    q.addBindValue(key.serial.isNull() ? QStringLiteral("") : key.serial);   // a device without a serial: '', not NULL
+    q.addBindValue(qint64(key.session));
 }
 
 bool run(QSqlQuery &q, const char *what)
@@ -55,39 +58,36 @@ bool run(QSqlQuery &q, const char *what)
 
 } // namespace
 
-QList<Edit> ManualScoringRepository::editsForSessions(const QList<qint64> &sessionRows)
+QList<Edit> ManualScoringRepository::editsForSession(const SessionKey &key)
 {
     QList<Edit> out;
-    if (sessionRows.isEmpty()) return out;
     QSqlQuery q(DatabaseManager::instance().database());
-    // the ids are numbers made here, not user text
-    q.prepare(QStringLiteral("SELECT id, session_id, kind, channel, new_channel, start_ms, end_ms, note, created_at "
-                             "FROM manual_scoring WHERE session_id IN (%1) ORDER BY id").arg(rowList(sessionRows)));
-    if (!run(q, "editsForSessions")) return out;
+    q.prepare(QStringLiteral("SELECT id, kind, channel, new_channel, start_ms, end_ms, note, created_at "
+                             "FROM manual_scoring WHERE ") + kWhereKey + QStringLiteral(" ORDER BY id"));
+    bindKey(q, key);
+    if (!run(q, "editsForSession")) return out;
     while (q.next()) {
         Edit e;
         e.id = q.value(0).toLongLong();
-        e.sessionRow = q.value(1).toLongLong();
-        e.kind = kindOf(q.value(2).toString());
-        e.channel = q.value(3).toUInt();
-        e.newChannel = q.value(4).toUInt();
-        e.startMs = q.value(5).toLongLong();
-        e.endMs = q.value(6).toLongLong();
-        e.note = q.value(7).toString();
-        e.createdAt = QDateTime::fromString(q.value(8).toString(), Qt::ISODate);
+        e.key = key;
+        e.kind = kindOf(q.value(1).toString());
+        e.channel = q.value(2).toUInt();
+        e.newChannel = q.value(3).toUInt();
+        e.startMs = q.value(4).toLongLong();
+        e.endMs = q.value(5).toLongLong();
+        e.note = q.value(6).toString();
+        e.createdAt = QDateTime::fromString(q.value(7).toString(), Qt::ISODate);
         out.append(e);
     }
     return out;
 }
 
-QList<Edit> ManualScoringRepository::editsForSession(qint64 sessionRow) { return editsForSessions({ sessionRow }); }
-
 qint64 ManualScoringRepository::add(const Edit &e)
 {
     QSqlQuery q(DatabaseManager::instance().database());
-    q.prepare(QStringLiteral("INSERT INTO manual_scoring (session_id, kind, channel, new_channel, start_ms, end_ms, note, created_at) "
-                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?)"));
-    q.addBindValue(e.sessionRow);
+    q.prepare(QStringLiteral("INSERT INTO manual_scoring (profile_id, machine_serial, session_id, kind, channel, new_channel, "
+                             "start_ms, end_ms, note, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"));
+    bindKey(q, e.key);
     q.addBindValue(kindName(e.kind));
     q.addBindValue(e.channel);
     q.addBindValue(e.newChannel);
@@ -106,32 +106,33 @@ bool ManualScoringRepository::remove(qint64 id)
     return run(q, "remove");
 }
 
-bool ManualScoringRepository::removeAllForSessions(const QList<qint64> &sessionRows)
+bool ManualScoringRepository::removeAllForSession(const SessionKey &key)
 {
-    if (sessionRows.isEmpty()) return true;
     QSqlQuery q(DatabaseManager::instance().database());
-    q.prepare(QStringLiteral("DELETE FROM manual_scoring WHERE session_id IN (%1)").arg(rowList(sessionRows)));
-    return run(q, "removeAllForSessions");
+    q.prepare(QStringLiteral("DELETE FROM manual_scoring WHERE ") + kWhereKey);
+    bindKey(q, key);
+    return run(q, "removeAllForSession");
 }
 
-bool ManualScoringRepository::storeSummary(qint64 sessionRow, const ManualScoring::Result &r)
+bool ManualScoringRepository::storeSummary(const SessionKey &key, const ManualScoring::Result &r)
 {
     QStringList deltas;
     for (auto it = r.delta.cbegin(); it != r.delta.cend(); ++it) deltas << QStringLiteral("%1:%2").arg(it.key()).arg(it.value());
     QSqlQuery q(DatabaseManager::instance().database());
-    q.prepare(QStringLiteral("INSERT OR REPLACE INTO manual_scoring_summary (session_id, deltas, excluded_ms, not_found) VALUES (?, ?, ?, ?)"));
-    q.addBindValue(sessionRow);
+    q.prepare(QStringLiteral("INSERT OR REPLACE INTO manual_scoring_summary (profile_id, machine_serial, session_id, deltas, "
+                             "excluded_ms, not_found) VALUES (?, ?, ?, ?, ?, ?)"));
+    bindKey(q, key);
     q.addBindValue(deltas.join(QLatin1Char(',')));
     q.addBindValue(r.excludedMs);
     q.addBindValue(int(r.notFound.size()));
     return run(q, "storeSummary");
 }
 
-bool ManualScoringRepository::loadSummary(qint64 sessionRow, QHash<ChannelID, int> &delta, qint64 &excludedMs, int &notFound)
+bool ManualScoringRepository::loadSummary(const SessionKey &key, QHash<ChannelID, int> &delta, qint64 &excludedMs, int &notFound)
 {
     QSqlQuery q(DatabaseManager::instance().database());
-    q.prepare(QStringLiteral("SELECT deltas, excluded_ms, not_found FROM manual_scoring_summary WHERE session_id = ?"));
-    q.addBindValue(sessionRow);
+    q.prepare(QStringLiteral("SELECT deltas, excluded_ms, not_found FROM manual_scoring_summary WHERE ") + kWhereKey);
+    bindKey(q, key);
     if (!run(q, "loadSummary") || !q.next()) return false;
     delta.clear();
     for (const QString &part : q.value(0).toString().split(QLatin1Char(','), Qt::SkipEmptyParts)) {
@@ -143,10 +144,10 @@ bool ManualScoringRepository::loadSummary(qint64 sessionRow, QHash<ChannelID, in
     return true;
 }
 
-bool ManualScoringRepository::removeSummary(qint64 sessionRow)
+bool ManualScoringRepository::removeSummary(const SessionKey &key)
 {
     QSqlQuery q(DatabaseManager::instance().database());
-    q.prepare(QStringLiteral("DELETE FROM manual_scoring_summary WHERE session_id = ?"));
-    q.addBindValue(sessionRow);
+    q.prepare(QStringLiteral("DELETE FROM manual_scoring_summary WHERE ") + kWhereKey);
+    bindKey(q, key);
     return run(q, "removeSummary");
 }

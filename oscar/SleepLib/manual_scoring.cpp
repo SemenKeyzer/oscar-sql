@@ -10,7 +10,12 @@
 
 #include <algorithm>
 
+#include "SleepLib/day.h"
+#include "SleepLib/machine.h"
+#include "SleepLib/profiles.h"
 #include "SleepLib/schema.h"
+#include "SleepLib/session.h"
+#include "database/manual_scoring_repository.h"
 
 namespace ManualScoring {
 
@@ -111,6 +116,78 @@ Result apply(const QList<DeviceEvent> &device, const QList<Edit> &edits, const Q
         if (d != 0) r.delta.insert(c, d);
     }
     return r;
+}
+
+// ---- on real sessions and days
+
+SessionKey keyOf(Session *s)
+{
+    SessionKey k;
+    Machine *m = s ? s->machine() : nullptr;
+    if (m) k.profileId = m->getProfileId();
+    if (m) k.serial = m->serial();
+    if (s) k.session = s->session();
+    return k;
+}
+
+void loadSummary(Session *s)
+{
+    QHash<ChannelID, int> delta;
+    qint64 excludedMs = 0;
+    int notFound = 0;
+    const bool has = ManualScoringRepository::loadSummary(keyOf(s), delta, excludedMs, notFound);
+    s->setManualScoring(delta, excludedMs, notFound, has);
+}
+
+Result resultFor(Session *s)
+{
+    const QList<Edit> edits = ManualScoringRepository::editsForSession(keyOf(s));
+    // the device events are needed; load them for the call if they are not in memory
+    const bool opened = s->eventlist.isEmpty() && s->OpenEvents();
+    QList<DeviceEvent> device;
+    for (ChannelID code : scoredChannels()) {
+        for (EventList *el : s->eventlist.value(code)) {
+            for (quint32 i = 0; i < el->count(); ++i) device.append({ code, el->time(i), double(el->data(i)) });
+        }
+    }
+    if (opened) s->TrashEvents();
+    return apply(device, edits, { { s->first(), s->last() } });
+}
+
+void refresh(Session *s)
+{
+    const SessionKey key = keyOf(s);
+    if (ManualScoringRepository::editsForSession(key).isEmpty()) {
+        ManualScoringRepository::removeSummary(key);
+        s->setManualScoring({}, 0, 0, false);
+        return;
+    }
+    const Result r = resultFor(s);
+    ManualScoringRepository::storeSummary(key, r);
+    s->setManualScoring(r.delta, r.excludedMs, int(r.notFound.size()), true);
+}
+
+bool addEdit(Session *s, Edit edit)
+{
+    edit.key = keyOf(s);
+    if (ManualScoringRepository::add(edit) == 0) return false;
+    refresh(s);
+    return true;
+}
+
+bool removeEdit(Session *s, qint64 id)
+{
+    if (!ManualScoringRepository::remove(id)) return false;
+    refresh(s);
+    return true;
+}
+
+void clearDay(Day *day)
+{
+    for (Session *s : day->sessions) {
+        ManualScoringRepository::removeAllForSession(keyOf(s));
+        refresh(s);
+    }
 }
 
 } // namespace ManualScoring

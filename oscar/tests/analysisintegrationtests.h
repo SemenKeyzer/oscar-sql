@@ -16,6 +16,14 @@ class AnalysisIntegrationTests : public QObject
 {
     Q_OBJECT
 private slots:
+    // manual scoring on real sessions and days
+    void testDayCountsEdits();
+    void testAddedTypeAbsentFromDevice();
+    void testAhiHoursSubtractsExcluded();
+    void testDisabledSessionEditsIgnored();
+    void testNotFoundAfterRebuild();
+    void testClearDayRestoresDevice();
+    void testEditsSurviveReopen();
     void initTestCase();
     void cleanupTestCase();
     void testAnalysisChannelsAreComputed();

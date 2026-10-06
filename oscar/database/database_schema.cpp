@@ -2168,6 +2168,8 @@ bool DatabaseSchema::createManualScoringTables(QSqlDatabase& db)
         QStringLiteral(
             "CREATE TABLE IF NOT EXISTS manual_scoring ("
             "    id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "    profile_id INTEGER NOT NULL,"
+            "    machine_serial TEXT NOT NULL,"
             "    session_id INTEGER NOT NULL,"
             "    kind TEXT NOT NULL,"
             "    channel INTEGER NOT NULL DEFAULT 0,"
@@ -2176,16 +2178,19 @@ bool DatabaseSchema::createManualScoringTables(QSqlDatabase& db)
             "    end_ms INTEGER NOT NULL,"
             "    note TEXT,"
             "    created_at TEXT NOT NULL,"
-            "    FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE"
+            "    FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE"
             ")"),
-        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_manual_scoring_session ON manual_scoring(session_id)"),
+        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_manual_scoring_session ON manual_scoring(profile_id, machine_serial, session_id)"),
         QStringLiteral(
             "CREATE TABLE IF NOT EXISTS manual_scoring_summary ("
-            "    session_id INTEGER PRIMARY KEY,"
+            "    profile_id INTEGER NOT NULL,"
+            "    machine_serial TEXT NOT NULL,"
+            "    session_id INTEGER NOT NULL,"
             "    deltas TEXT NOT NULL DEFAULT '',"
             "    excluded_ms INTEGER NOT NULL DEFAULT 0,"
             "    not_found INTEGER NOT NULL DEFAULT 0,"
-            "    FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE"
+            "    PRIMARY KEY (profile_id, machine_serial, session_id),"
+            "    FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE"
             ")"),
     };
     for (const QString &sql : statements) {

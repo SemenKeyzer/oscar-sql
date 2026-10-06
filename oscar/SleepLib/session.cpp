@@ -37,6 +37,8 @@
 #include "../database/session_repository.h"
 #include "../database/session_settings_repository.h"
 #include "../database/session_channels_repository.h"
+#include "../database/manual_scoring_repository.h"
+#include "manual_scoring.h"
 #include "../database/session_channel_values_repository.h"
 #include "../database/session_slices_repository.h"
 #include "../database/session_summaries_repository.h"
@@ -3089,6 +3091,9 @@ bool Session::StoreToDatabase()
     StoreSummaryToDatabase();
     PERF_TIMER_STOP("Session::StoreDB::Summaries");
 
+    // a session imported again (or rebuilt) gets its manual scoring recalculated on its new events
+    if (!ManualScoringRepository::editsForSession(ManualScoring::keyOf(this)).isEmpty()) ManualScoring::refresh(this);
+
 #ifdef DBDEBUG
     qDebug() << "Session::StoreToDatabase(): Saved session" << s_session << "to database with ID" << m_sessionrow_id;
 #endif
@@ -3327,6 +3332,7 @@ bool Session::LoadFromDatabase()
 
     // Mark summary as loaded since we have the cached statistics
     s_summary_loaded = true;
+    ManualScoring::loadSummary(this);   // the doctor's corrections, if any
     
 #ifdef DBDEBUG
     qDebug() << "Session::LoadFromDatabase(): Successfully loaded session" << s_session

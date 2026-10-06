@@ -23,10 +23,20 @@ namespace ManualScoring {
 
 enum class Kind { Add, Remove, Retype, Exclude };
 
+//! Which session an edit belongs to. Kept by what survives a rebuild of the device's data
+//! (which deletes and re-creates the database rows): the profile, the device's serial number and
+//! the device's own session number.
+struct SessionKey {
+    qint64 profileId = 0;
+    QString serial;
+    SessionID session = 0;
+    bool operator==(const SessionKey &o) const { return profileId == o.profileId && serial == o.serial && session == o.session; }
+};
+
 //! One correction. Remove and Retype name the device event by its channel and end time.
 struct Edit {
     qint64 id = 0;
-    qint64 sessionRow = 0;      //!< the session's row in the database (Session::sessionRowId)
+    SessionKey key;
     Kind kind = Kind::Add;
     ChannelID channel = 0;      //!< the added type, or the device event's own type
     ChannelID newChannel = 0;   //!< Retype: the new type
@@ -71,6 +81,25 @@ QList<ChannelID> scoredChannels();
 
 //! The corrected night of one session or day. \a sessionSpans are the sessions' [start, end) in ms.
 Result apply(const QList<DeviceEvent> &device, const QList<Edit> &edits, const QList<QPair<qint64, qint64>> &sessionSpans);
+
+// ---- on real sessions and days
+} // namespace ManualScoring
+class Session;
+class Day;
+namespace ManualScoring {
+
+SessionKey keyOf(Session *s);
+//! Reads the session's stored result into it (count deltas, excluded time).
+void loadSummary(Session *s);
+//! The corrected night of the session from its events (loaded for the call if needed).
+Result resultFor(Session *s);
+//! Recalculates the session's result from its edits and stores it; no edits: no result.
+void refresh(Session *s);
+//! Stores \a edit for \a s (its key is set here) and recalculates.
+bool addEdit(Session *s, Edit edit);
+bool removeEdit(Session *s, qint64 id);
+//! Removes every edit of the day's sessions.
+void clearDay(Day *day);
 
 } // namespace ManualScoring
 

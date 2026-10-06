@@ -11,6 +11,8 @@
 
 #include "tests/AutoTest.h"
 
+#include "SleepLib/manual_scoring.h"
+
 //! \brief Tests for the doctor's manual scoring of respiratory events.
 class ManualScoringTests : public QObject
 {
@@ -31,7 +33,8 @@ private slots:
     void testStoreAndLoadEdits();
     void testRemoveEdit();
     void testSummaryRoundTrip();
-    void testSessionDeleteCascades();
+    void testEditsOutliveSessionRows();
+    void testProfileDeleteCascades();
     void testMigration21To22();
     void cleanupTestCase();
 private:
@@ -39,6 +42,8 @@ private:
     class QTemporaryDir *m_tempDir = nullptr;
     class QCoreApplication *m_app = nullptr;
     qint64 m_machineRow = 0;
+    qint64 m_profileRow = 0;
+    ManualScoring::SessionKey key(SessionID session) const;
 };
 DECLARE_TEST(ManualScoringTests)
 

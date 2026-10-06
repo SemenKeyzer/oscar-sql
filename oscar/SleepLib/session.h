@@ -539,6 +539,20 @@ class Session
     //! \brief Get the machine database ID for this session
     qint64 sessionRowId() const { return m_sessionrow_id; }
 
+    // The doctor's manual scoring (SleepLib/manual_scoring): the change it makes to the
+    // counts of the scored channels and the time excluded from the AHI.
+    const QHash<ChannelID, int> &manualDelta() const { return m_manualDelta; }
+    qint64 manualExcludedMs() const { return m_manualExcludedMs; }
+    int manualNotFound() const { return m_manualNotFound; }
+    bool hasManualScoring() const { return m_hasManualScoring; }
+    void setManualScoring(const QHash<ChannelID, int> &delta, qint64 excludedMs, int notFound, bool has)
+    {
+        m_manualDelta = delta;
+        m_manualExcludedMs = excludedMs;
+        m_manualNotFound = notFound;
+        m_hasManualScoring = has;
+    }
+
     //! \brief Completely purges Session from memory and disk.
     bool Destroy();
 
@@ -566,6 +580,10 @@ protected:
     
     //! \brief Database primary key (0 if not in database)
     qint64 m_sessionrow_id;
+    QHash<ChannelID, int> m_manualDelta;
+    qint64 m_manualExcludedMs = 0;
+    int m_manualNotFound = 0;
+    bool m_hasManualScoring = false;
     
     bool s_changed;
     bool s_lonesession;

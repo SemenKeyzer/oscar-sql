@@ -28,7 +28,9 @@
 #include "SleepLib/machine.h"
 #include "SleepLib/preferences.h"
 #include "SleepLib/profiles.h"
+#include "SleepLib/manual_scoring.h"
 #include "SleepLib/schema.h"
+#include "database/manual_scoring_repository.h"
 #include "SleepLib/session.h"
 #include "Graphs/gFlagsLine.h"
 #include "database/analysis_daily_repository.h"
@@ -1500,4 +1502,186 @@ void AnalysisIntegrationTests::testRdiRowExplainsRdi()
     p_profile->general->setCalculateRDI(was);
     QCOMPARE(rdi, QStringLiteral("rdi"));
     QCOMPARE(ahi, QStringLiteral("ahi"));
+}
+
+// ---- manual scoring
+
+namespace {
+
+// One hour from synth::kStart: OA at 100 s and 200 s, CA at 300 s, H at 400 s.
+Session *scoredSession(Machine *mach, SessionID id, qint64 machineRow)
+{
+    Session *sess = new Session(mach, id);
+    const qint64 t0 = synth::kStart;
+    sess->really_set_first(t0);
+    sess->really_set_last(t0 + 3600000);
+    sess->AddEventList(CPAP_Obstructive, EVL_Event)->AddEvent(t0 + 100000, 12);
+    sess->eventlist[CPAP_Obstructive].first()->AddEvent(t0 + 200000, 15);
+    sess->AddEventList(CPAP_ClearAirway, EVL_Event)->AddEvent(t0 + 300000, 11);
+    sess->AddEventList(CPAP_Hypopnea, EVL_Event)->AddEvent(t0 + 400000, 20);
+    sess->setCount(CPAP_Obstructive, 2);
+    sess->setCount(CPAP_ClearAirway, 1);
+    sess->setCount(CPAP_Hypopnea, 1);
+    sess->setSessionRowId(insertRow(QStringLiteral("INSERT INTO sessions (session_id, machine_id, start_time, end_time, duration) "
+                                                   "VALUES (?, ?, ?, ?, 3600)"), { id, machineRow, sess->first(), sess->last() }));
+    return sess;
+}
+
+ManualScoring::Edit scoringEdit(ManualScoring::Kind kind, ChannelID channel, qint64 startS, qint64 endS, ChannelID newChannel = 0)
+{
+    ManualScoring::Edit e;
+    e.kind = kind;
+    e.channel = channel;
+    e.newChannel = newChannel;
+    e.startMs = synth::kStart + startS * 1000;
+    e.endMs = synth::kStart + endS * 1000;
+    return e;
+}
+
+} // namespace
+
+void AnalysisIntegrationTests::testDayCountsEdits()
+{
+    Machine cpap(p_profile, 70);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    Session *s = scoredSession(&cpap, 701, m_machineRow);
+    day.addSession(s);
+    QCOMPARE(day.count(AllAhiChannels), EventDataType(4));
+    const EventDataType device = day.calcAHI();
+    QVERIFY(!day.hasManualScoring());
+
+    using ManualScoring::Kind;
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(Kind::Add, CPAP_Hypopnea, 480, 500)));
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(Kind::Remove, CPAP_Obstructive, 88, 100)));
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(Kind::Retype, CPAP_ClearAirway, 289, 300, CPAP_Obstructive)));
+    QVERIFY(day.hasManualScoring());
+    QCOMPARE(day.count(CPAP_Hypopnea), EventDataType(2));
+    QCOMPARE(day.count(CPAP_Obstructive), EventDataType(2));   // 2 − removed + retyped
+    QCOMPARE(day.count(CPAP_ClearAirway), EventDataType(0));
+    QCOMPARE(day.count(AllAhiChannels), EventDataType(4));     // +1 added, −1 removed
+    QCOMPARE(day.calcAHI(), device);
+    QCOMPARE(day.deviceAHI(), device);
+    ManualScoring::clearDay(&day);
+}
+
+void AnalysisIntegrationTests::testAddedTypeAbsentFromDevice()
+{
+    Machine cpap(p_profile, 71);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    Session *s = scoredSession(&cpap, 711, m_machineRow);
+    day.addSession(s);
+    QVERIFY(!s->m_cnt.contains(CPAP_Apnea));
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Add, CPAP_Apnea, 600, 615)));
+    QCOMPARE(day.count(CPAP_Apnea), EventDataType(1));
+    QCOMPARE(day.count(AllAhiChannels), EventDataType(5));
+    ManualScoring::clearDay(&day);
+}
+
+void AnalysisIntegrationTests::testAhiHoursSubtractsExcluded()
+{
+    Machine cpap(p_profile, 72);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    Session *s = scoredSession(&cpap, 721, m_machineRow);
+    day.addSession(s);
+    // half an hour out, holding OA@200, CA@300 and H@400
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Exclude, 0, 150, 1950)));
+    QCOMPARE(day.hours(MT_CPAP), EventDataType(1.0));   // usage unchanged
+    QCOMPARE(day.ahiHours(), 0.5);
+    QCOMPARE(day.count(AllAhiChannels), EventDataType(1));
+    QCOMPARE(day.calcAHI(), EventDataType(2.0));         // 1 event in half an hour
+    QCOMPARE(day.deviceAHI(), EventDataType(4.0));       // 4 events in an hour
+
+    // the whole night out: no division by zero
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Exclude, 0, -10, 4000)));
+    QCOMPARE(day.ahiHours(), 0.0);
+    QCOMPARE(day.calcAHI(), EventDataType(0));
+    ManualScoring::clearDay(&day);
+}
+
+void AnalysisIntegrationTests::testDisabledSessionEditsIgnored()
+{
+    Machine cpap(p_profile, 73);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    const bool clinical = p_profile->cpap->clinicalMode();
+    p_profile->cpap->setClinicalMode(false);
+    Day day;
+    Session *a = scoredSession(&cpap, 731, m_machineRow);
+    Session *b = scoredSession(&cpap, 732, m_machineRow);
+    day.addSession(a);
+    day.addSession(b);
+    QVERIFY(ManualScoring::addEdit(b, scoringEdit(ManualScoring::Kind::Add, CPAP_Hypopnea, 480, 500)));
+    QCOMPARE(day.count(CPAP_Hypopnea), EventDataType(3));
+    b->setEnabled(false);
+    QCOMPARE(day.count(CPAP_Hypopnea), EventDataType(1));
+    b->setEnabled(true);
+    ManualScoring::clearDay(&day);
+    p_profile->cpap->setClinicalMode(clinical);
+}
+
+void AnalysisIntegrationTests::testNotFoundAfterRebuild()
+{
+    Machine cpap(p_profile, 74);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    Session *s = scoredSession(&cpap, 741, m_machineRow);
+    day.addSession(s);
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Remove, CPAP_Obstructive, 88, 100)));
+    QCOMPARE(day.count(CPAP_Obstructive), EventDataType(1));
+
+    // the night is imported again and the apnea now ends 5 s later
+    s->destroyEvent(CPAP_Obstructive);
+    s->AddEventList(CPAP_Obstructive, EVL_Event)->AddEvent(synth::kStart + 105000, 12);
+    s->eventlist[CPAP_Obstructive].first()->AddEvent(synth::kStart + 200000, 15);
+    s->setCount(CPAP_Obstructive, 2);
+    ManualScoring::refresh(s);
+    QCOMPARE(s->manualNotFound(), 1);
+    QCOMPARE(day.count(CPAP_Obstructive), EventDataType(2));
+    ManualScoring::clearDay(&day);
+}
+
+void AnalysisIntegrationTests::testClearDayRestoresDevice()
+{
+    Machine cpap(p_profile, 75);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    Session *s = scoredSession(&cpap, 751, m_machineRow);
+    day.addSession(s);
+    const EventDataType device = day.calcAHI();
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Exclude, 0, 0, 1800)));
+    const QList<ManualScoring::Edit> edits = ManualScoringRepository::editsForSession(ManualScoring::keyOf(s));
+    QCOMPARE(edits.size(), 1);
+    QVERIFY(ManualScoring::removeEdit(s, edits.first().id));
+    QVERIFY(!day.hasManualScoring());
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Add, CPAP_Hypopnea, 480, 500)));
+    ManualScoring::clearDay(&day);
+    QVERIFY(!day.hasManualScoring());
+    QCOMPARE(day.calcAHI(), device);
+    QVERIFY(ManualScoringRepository::editsForSession(ManualScoring::keyOf(s)).isEmpty());
+}
+
+void AnalysisIntegrationTests::testEditsSurviveReopen()
+{
+    Machine cpap(p_profile, 76);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Session *s = scoredSession(&cpap, 761, m_machineRow);
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Add, CPAP_Hypopnea, 480, 500)));
+
+    // a session object made afresh, as when the profile is opened again
+    Session again(&cpap, 761);
+    ManualScoring::loadSummary(&again);
+    QVERIFY(again.hasManualScoring());
+    QCOMPARE(again.manualDelta().value(CPAP_Hypopnea), 1);
+    ManualScoringRepository::removeAllForSession(ManualScoring::keyOf(&again));
+    ManualScoringRepository::removeSummary(ManualScoring::keyOf(&again));
+    delete s;
 }

@@ -12,21 +12,21 @@
 #include "SleepLib/manual_scoring.h"
 
 //! The doctor's scoring edits (table manual_scoring) and their per-session result
-//! (manual_scoring_summary), both keyed by the session's database row.
+//! (manual_scoring_summary), keyed by profile, device serial number and device session number,
+//! so they outlive a rebuild of the device's data.
 class ManualScoringRepository
 {
   public:
-    static QList<ManualScoring::Edit> editsForSession(qint64 sessionRow);
-    static QList<ManualScoring::Edit> editsForSessions(const QList<qint64> &sessionRows);
+    static QList<ManualScoring::Edit> editsForSession(const ManualScoring::SessionKey &key);
     //! Stores \a edit (its id is ignored); returns the new id, 0 on failure.
     static qint64 add(const ManualScoring::Edit &edit);
     static bool remove(qint64 id);
-    static bool removeAllForSessions(const QList<qint64> &sessionRows);
+    static bool removeAllForSession(const ManualScoring::SessionKey &key);
 
-    static bool storeSummary(qint64 sessionRow, const ManualScoring::Result &result);
+    static bool storeSummary(const ManualScoring::SessionKey &key, const ManualScoring::Result &result);
     //! False when the session has no stored result.
-    static bool loadSummary(qint64 sessionRow, QHash<ChannelID, int> &delta, qint64 &excludedMs, int &notFound);
-    static bool removeSummary(qint64 sessionRow);
+    static bool loadSummary(const ManualScoring::SessionKey &key, QHash<ChannelID, int> &delta, qint64 &excludedMs, int &notFound);
+    static bool removeSummary(const ManualScoring::SessionKey &key);
 };
 
 #endif // MANUAL_SCORING_REPOSITORY_H

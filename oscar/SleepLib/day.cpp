@@ -1146,6 +1146,9 @@ EventDataType Day::count(ChannelID code)
     for (auto & sess : sessions) {
 //        qDebug() << "Day::count session" << numsess++;
 
+        if (sess->enabled() && sess->hasManualScoring()) {
+            total += sess->manualDelta().value(code);   // also for a type the device did not record
+        }
         if (sess->enabled() && sess->m_cnt.contains(code)) {
             total += sess->count(code);
 //            EventDataType f = sess->count(code);
@@ -1739,4 +1742,34 @@ EventDataType Day::calc(ChannelID code, ChannelCalcType type)
         break;
     };
     return value;
+}
+
+double Day::ahiHours()
+{
+    double excludedMs = 0;
+    for (Session *sess : sessions) {
+        if (sess->enabled() && sess->type() == MT_CPAP) excludedMs += sess->manualExcludedMs();
+    }
+    return qMax(0.0, double(hours(MT_CPAP)) - excludedMs / 3600000.0);
+}
+
+bool Day::hasManualScoring()
+{
+    for (Session *sess : sessions) {
+        if (sess->enabled() && sess->hasManualScoring()) return true;
+    }
+    return false;
+}
+
+EventDataType Day::deviceAHI()
+{
+    EventDataType c = 0;
+    for (Session *sess : sessions) {
+        if (!sess->enabled()) continue;
+        for (ChannelID code : *ahiChannelGroup(AllAhiChannels)) {
+            if (sess->m_cnt.contains(code)) c += sess->count(code);
+        }
+    }
+    const EventDataType minutes = hours(MT_CPAP) * 60.0;
+    return minutes > 0 ? (c * 60.0) / minutes : 0;
 }

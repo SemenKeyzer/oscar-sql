@@ -246,10 +246,17 @@ class Day
 
     // Some more very much CPAP only related stuff
 
+    //! \brief Hours the AHI is counted over: the CPAP hours less the stretches excluded by manual scoring.
+    double ahiHours();
+    //! \brief Whether any session of the day carries manual scoring.
+    bool hasManualScoring();
+    //! \brief The AHI as the device scored it, without manual scoring.
+    EventDataType deviceAHI();
+
     //! \brief Calculate AHI (Apnea Hypopnea Index)
     EventDataType calcAHI() {
         EventDataType c = count(AllAhiChannels);
-        EventDataType minutes = hours(MT_CPAP) * 60.0;
+        EventDataType minutes = ahiHours() * 60.0;
         if (minutes <= 0) return 0;
         return (c * 60.0) / minutes;
     }
@@ -260,7 +267,7 @@ class Day
     //! always equals calcAHI().
     EventDataType calcOAHI() {
         EventDataType c = count(AllOahiChannels);
-        EventDataType minutes = hours(MT_CPAP) * 60.0;
+        EventDataType minutes = ahiHours() * 60.0;
         if (minutes <= 0) return 0;
         return (c * 60.0) / minutes;
     }
@@ -268,7 +275,7 @@ class Day
     //! \brief Calculate CAHI (Central Apnea Hypopnea Index)
     EventDataType calcCAHI() {
         EventDataType c = count(AllCahiChannels);
-        EventDataType minutes = hours(MT_CPAP) * 60.0;
+        EventDataType minutes = ahiHours() * 60.0;
         if (minutes <= 0) return 0;
         return (c * 60.0) / minutes;
     }
@@ -276,7 +283,7 @@ class Day
     //! \brief Calculate RDI (Respiratory Disturbance Index)
     EventDataType calcRDI() {
         EventDataType c = count(AllAhiChannels) + count(CPAP_RERA);
-        EventDataType minutes = hours(MT_CPAP) * 60.0;
+        EventDataType minutes = ahiHours() * 60.0;
         if (minutes <= 0) return 0;
         return (c * 60.0) / minutes;
     }
