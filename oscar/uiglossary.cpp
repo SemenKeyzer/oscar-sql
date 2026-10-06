@@ -724,7 +724,7 @@ const UiGlossaryRaw kUiEntries[] = {
     { "ui.prefs.IgnoreSlider", QT_TRANSLATE_NOOP("Glossary", "Ignore short sessions"),
       QT_TRANSLATE_NOOP("Glossary", "Preferences → Import"),
       QT_TRANSLATE_NOOP("Glossary", "Sessions shorter than this many minutes are not shown or counted."),
-      QT_TRANSLATE_NOOP("Glossary", "A few minutes hide mask fitting at bedtime; 0 shows everything. Hidden sessions still count for compliance on some devices."),
+      QT_TRANSLATE_NOOP("Glossary", "A few minutes hide mask fitting at bedtime; 0 shows everything."),
       "", "sessions,usage" },
     { "ui.prefs.LockSummarySessionSplitting", QT_TRANSLATE_NOOP("Glossary", "Don't split summary days"),
       QT_TRANSLATE_NOOP("Glossary", "Preferences → Import"),
