@@ -187,7 +187,9 @@ void UiCoverageTests::testPrefsCovered()
     Ui::PreferencesDialog ui;
     ui.setupUi(&host);
     AnalysisPreferencesPage analysis;
-    const QStringList missing = uncovered(&host, QStringLiteral("prefs"), {}) + uncovered(&analysis, QStringLiteral("prefs"), {});
+    // OK and Cancel need no explanation
+    const QStringList missing = uncovered(&host, QStringLiteral("prefs"), { QStringLiteral("okButton"), QStringLiteral("cancelButton") })
+                                + uncovered(&analysis, QStringLiteral("prefs"), {});
     QVERIFY2(missing.isEmpty(), qPrintable(QString::number(missing.size()) + QStringLiteral(": ") + missing.join(QStringLiteral(", "))));
 }
 

@@ -11,6 +11,8 @@
 #include <QApplication>
 #include <QHelpEvent>
 #include <QCheckBox>
+#include <QGridLayout>
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QMainWindow>
 #include <QMenu>
@@ -141,6 +143,34 @@ void HelpTipsTests::testLabelTakesBuddyKey()
     label->setBuddy(field);
     HelpTips::attachAll(&root, QStringLiteral("prefs"));
     QCOMPARE(label->property("helpKey").toString(), kPrefsKey);
+}
+
+void HelpTipsTests::testLabelTakesNeighbourKey()
+{
+    // a label without a buddy explains the control after it in its row
+    QWidget box;
+    auto *row = new QHBoxLayout(&box);
+    auto *label = new QLabel(QStringLiteral("Day Split Time"), &box);
+    auto *field = new QTimeEdit(&box);
+    field->setObjectName(QStringLiteral("timeEdit"));
+    row->addWidget(label);
+    row->addWidget(field);
+
+    QWidget grid;
+    auto *g = new QGridLayout(&grid);
+    auto *gridLabel = new QLabel(QStringLiteral("Day Split Time"), &grid);
+    auto *other = new QLabel(QStringLiteral("other row"), &grid);
+    auto *gridField = new QTimeEdit(&grid);
+    gridField->setObjectName(QStringLiteral("timeEdit"));
+    g->addWidget(gridLabel, 0, 0);
+    g->addWidget(gridField, 0, 1);
+    g->addWidget(other, 1, 0);
+
+    HelpTips::attachAll(&box, QStringLiteral("prefs"));
+    HelpTips::attachAll(&grid, QStringLiteral("prefs"));
+    QCOMPARE(label->property("helpKey").toString(), kPrefsKey);
+    QCOMPARE(gridLabel->property("helpKey").toString(), kPrefsKey);
+    QVERIFY(other->property("helpKey").toString().isEmpty());
 }
 
 void HelpTipsTests::testMenuHoverFollowsAction()

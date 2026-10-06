@@ -10,6 +10,9 @@
 
 #include <QApplication>
 #include <QHelpEvent>
+#include <QBoxLayout>
+#include <QFormLayout>
+#include <QGridLayout>
 #include <QLabel>
 #include <QMenu>
 #include <QToolTip>
@@ -20,6 +23,40 @@
 
 namespace {
 const char *kKeyProperty = "helpKey";
+
+//! The widget after \a label in its row (grid, form or horizontal box); null when there is none.
+QWidget *rowNeighbour(QLabel *label, QLayout *layout)
+{
+    if (!layout) return nullptr;
+    const int i = layout->indexOf(label);
+    if (i < 0) {
+        for (int j = 0; j < layout->count(); ++j) {
+            if (QWidget *w = rowNeighbour(label, layout->itemAt(j)->layout())) return w;
+        }
+        return nullptr;
+    }
+    if (auto *grid = qobject_cast<QGridLayout *>(layout)) {
+        int row, col, rowSpan, colSpan;
+        grid->getItemPosition(i, &row, &col, &rowSpan, &colSpan);
+        for (int c = col + colSpan; c < grid->columnCount(); ++c) {
+            if (QLayoutItem *item = grid->itemAtPosition(row, c); item && item->widget()) return item->widget();
+        }
+        return nullptr;
+    }
+    if (auto *form = qobject_cast<QFormLayout *>(layout)) {
+        int row;
+        QFormLayout::ItemRole role;
+        form->getItemPosition(i, &row, &role);
+        QLayoutItem *field = role == QFormLayout::LabelRole ? form->itemAt(row, QFormLayout::FieldRole) : nullptr;
+        return field ? field->widget() : nullptr;
+    }
+    auto *box = qobject_cast<QBoxLayout *>(layout);
+    if (!box || (box->direction() != QBoxLayout::LeftToRight && box->direction() != QBoxLayout::RightToLeft)) return nullptr;
+    for (int j = i + 1; j < box->count(); ++j) {
+        if (QWidget *w = box->itemAt(j)->widget()) return w;
+    }
+    return nullptr;
+}
 }
 
 HelpTips::HelpTips() {}
@@ -72,6 +109,16 @@ int HelpTips::attachAll(QWidget *root, const QString &window)
         }
         if (!key.isEmpty()) {
             attach(w, key);
+            ++tagged;
+        }
+    }
+    // a label without a buddy explains the control after it in its row
+    for (QLabel *label : root->findChildren<QLabel *>()) {
+        if (!label->property(kKeyProperty).toString().isEmpty() || label->buddy() || !label->parentWidget()) continue;
+        QWidget *next = rowNeighbour(label, label->parentWidget()->layout());
+        const QString key = next ? next->property(kKeyProperty).toString() : QString();
+        if (!key.isEmpty() && key.startsWith(prefix)) {
+            attach(label, key);
             ++tagged;
         }
     }

@@ -26,6 +26,7 @@ private slots:
     void testTermEscapes();
     void testAttachAllByObjectName();
     void testLabelTakesBuddyKey();
+    void testLabelTakesNeighbourKey();
     void testMenuHoverFollowsAction();
     void testMenuHoverSkipsDynamicItems();
     void testMenuTooltipUsesActiveAction();
