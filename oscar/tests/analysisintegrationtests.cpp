@@ -1741,3 +1741,48 @@ void AnalysisIntegrationTests::testScoringAllowedInClinicalMode()
     ManualScoring::clearDay(&day);
     p_profile->cpap->setClinicalMode(clinical);
 }
+
+// the doctor sees both figures when nights were corrected by hand
+void AnalysisIntegrationTests::testPdfShowsDeviceAhi()
+{
+    Machine cpap(p_profile, 79);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    const QDate date = kNightDate.addDays(82);
+    Day *day = new Day();
+    day->setDate(date);
+    Session *s = scoredSession(&cpap, 791, m_machineRow);
+    day->addSession(s);
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Add, CPAP_Hypopnea, 2480, 2500)));
+    p_profile->daylist.insert(date, day);
+    Statistics stats;
+    const DoctorReport r = stats.doctorReport(date, date);
+    p_profile->daylist.remove(date);
+    QCOMPARE(r.correctedNights, 1);
+    QCOMPARE(r.deviceAhi, 5.0);                 // 5 events in an hour, as corrected
+    QCOMPARE(r.deviceAhiUncorrected, 4.0);      // the device's own 4
+    const QString page = DoctorReportPage::html(r, QString(), QSizeF(100, 100));
+    QVERIFY2(page.contains(QStringLiteral("by the device ") + QLocale().toString(4.0, 'f', 1)), qPrintable(page.left(400)));
+    ManualScoring::clearDay(day);
+    delete day;
+}
+
+void AnalysisIntegrationTests::testStatisticsFootnote()
+{
+    Machine cpap(p_profile, 80);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    const QDate date = kNightDate.addDays(84);
+    Day *day = new Day();
+    day->setDate(date);
+    Session *s = scoredSession(&cpap, 801, m_machineRow);
+    day->addSession(s);
+    p_profile->daylist.insert(date, day);
+    QVERIFY(Statistics::manualScoringNote(date, date).isEmpty());
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Add, CPAP_Hypopnea, 2480, 2500)));
+    const QString note = Statistics::manualScoringNote(date.addDays(-3), date);
+    QVERIFY2(note.contains(QStringLiteral("1 night")) && note.contains(QStringLiteral("corrected by hand")), qPrintable(note));
+    p_profile->daylist.remove(date);
+    ManualScoring::clearDay(day);
+    delete day;
+}

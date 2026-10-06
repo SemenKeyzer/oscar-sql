@@ -260,6 +260,8 @@ NightSummary buildNightSummaryFor(Profile *profile, analysis::AnalysisService *s
         s.cpapPixmap = cpap->getPixmapPath();
         s.hours = day->hours(MT_CPAP);
         s.ahi = day->calcAHI();
+        s.correctedByHand = day->hasManualScoring();
+        s.deviceAhi = day->deviceAHI();
         if (row.id && row.hasFlow && row.flowSeconds > 0) {
             s.hasAnalysisAhi = true;
             const int events = row.nObstructiveApnea + row.nCentralApnea + row.nApnea
@@ -592,6 +594,9 @@ void NightSummaryView::setSummary(const NightSummary &s)
         HelpTips::attach(addTile(col++, tr("Usage"), usageFigure(s.hours),
                                  tr("target %1 h or more").arg(s.complianceHours), s.usageLevel()), QStringLiteral("usage"));
         QString ahiNote = tr("target under %1").arg(NightSummary::kAhiTarget);
+        if (s.correctedByHand) {
+            ahiNote += QStringLiteral("<br/>") + HelpTips::term(tr("corrected by hand (device %1)").arg(num(s.deviceAhi)), QStringLiteral("manual_scoring"));
+        }
         if (s.hasAnalysisAhi) {
             ahiNote += QStringLiteral("<br/>") + HelpTips::term(tr("OSCAR's analysis: %1").arg(num(s.analysisAhi)), QStringLiteral("an_ahi"));
         }

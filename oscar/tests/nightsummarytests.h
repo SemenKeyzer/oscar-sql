@@ -28,6 +28,7 @@ private slots:
     void testViewShowsTheNight();
     void testFlowLimitationFromRow();
     void testFlowLimitationInAhiTile();
+    void testNightTileMark();
     void testGlasgowLessReliableInTile();
     void testTilesHaveHelp();
     void testTileLinkKeepsItsOwnTooltip();

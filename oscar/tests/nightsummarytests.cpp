@@ -438,3 +438,17 @@ void NightSummaryTests::testTileTooltipFromInnerLabel()
     QVERIFY2(QToolTip::text().contains(Glossary::find(QStringLiteral("leak"))->term), qPrintable(QToolTip::text()));
     QToolTip::hideText();
 }
+
+void NightSummaryTests::testNightTileMark()
+{
+    NightSummaryView view;
+    view.resize(900, 400);
+    NightSummary s = goodNight();
+    s.correctedByHand = true;
+    s.deviceAhi = 4.26;
+    view.setSummary(s);
+    QStringList notes;
+    for (QLabel *l : view.findChildren<QLabel *>(QStringLiteral("nsNote"))) notes << l->text();
+    const QString all = notes.join(QLatin1Char('\n'));
+    QVERIFY2(all.contains(QStringLiteral("corrected by hand (device 4.3)")), qPrintable(all));
+}

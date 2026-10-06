@@ -176,7 +176,8 @@ QString gAHIChart::tooltipData(Day *day, int idx)
 {
     QVector<SummaryChartSlice> & slices = cache[idx];
     float total = 0;
-    float hour = day->hours(m_machtype);
+    float hour = m_machtype == MT_CPAP ? day->ahiHours() : day->hours(m_machtype);
+    if (hour <= 0) return QString();
     QString txt;
     int i = slices.size();
     while (i > 0) {
@@ -187,6 +188,9 @@ QString gAHIChart::tooltipData(Day *day, int idx)
     // Label the total to match the index the user asked for (RDI includes RERA)
     const QString & indexLabel = p_profile->general->calculateRDI() ? STR_TR_RDI : STR_TR_AHI;
 
+    if (day->hasManualScoring()) {
+        txt += QStringLiteral("\n") + QCoreApplication::translate("gAHIChart", "corrected by hand (device %1)").arg(day->deviceAHI(), 0, 'f', 2);
+    }
     return QString("\n%1: %2").arg(indexLabel).arg(float(total) / hour,0,'f',2)+txt;
 }
 

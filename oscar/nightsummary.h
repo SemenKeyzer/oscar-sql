@@ -47,6 +47,8 @@ struct NightSummary {
     double hours = 0;               //!< mask-on time
     double complianceHours = 4;
     double ahi = 0;                 //!< the device's
+    bool correctedByHand = false;   //!< the night carries manual scoring; ahi is the corrected figure
+    double deviceAhi = 0;           //!< the device's AHI without the manual scoring
     bool hasAnalysisAhi = false;
     double analysisAhi = 0;         //!< OSCAR's analysis of the flow
     bool hasFlowLimitation = false; //!< scored by the analysis (flow at 10 Hz or more)

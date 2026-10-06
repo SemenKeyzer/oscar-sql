@@ -57,6 +57,8 @@ struct DoctorReport {
     double complianceHours = 4;
     QString ahiName = QStringLiteral("AHI");
     double deviceAhi = kNoValue;
+    int correctedNights = 0;                   //!< nights with manual scoring (deviceAhi is corrected)
+    double deviceAhiUncorrected = kNoValue;    //!< the device's own AHI over the same nights
     double analysisAhi = kNoValue;
     double flowLimitation = kNoValue;
     double flowLimitationMinutes = kNoValue;   //!< per night with flow limitation scored

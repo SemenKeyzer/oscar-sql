@@ -235,6 +235,8 @@ class Statistics : public QObject
     explicit Statistics(QObject *parent = 0);
 
     QString GenerateHTML();
+    //! A note that \a from – \a to holds nights with manual scoring; empty when none.
+    static QString manualScoringNote(const QDate &from, const QDate &to);
 
     QString UpdateRecordsBox();
 

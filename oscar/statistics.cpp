@@ -1840,7 +1840,7 @@ DoctorReport Statistics::doctorReport(const QDate &from, const QDate &to, const 
     };
 
     // night by night: CPAP hours only, events per the AHI or RDI setting
-    double hours = 0, ahiHours = 0, events = 0, leak = 0, leakHours = 0, pressure = 0, pressureHours = 0;
+    double hours = 0, ahiHours = 0, events = 0, rawEvents = 0, leak = 0, leakHours = 0, pressure = 0, pressureHours = 0;
     QDate firstNight, lastNight;
     for (QDate date = from; date.isValid() && date <= to; date = date.addDays(1)) {
         DoctorReport::Night night;
@@ -1859,6 +1859,8 @@ DoctorReport Statistics::doctorReport(const QDate &from, const QDate &to, const 
             night.hours = h;
             night.ahi = ah > 0 ? e / ah : 0;
             ahiHours += ah;
+            rawEvents += day->deviceAHI() * h;   // the device's own events, before manual scoring
+            if (day->hasManualScoring()) ++r.correctedNights;
             ++r.nights;
             hours += h;
             events += e;
@@ -1878,6 +1880,7 @@ DoctorReport Statistics::doctorReport(const QDate &from, const QDate &to, const 
     }
     if (r.nights > 0) r.meanHours = hours / r.nights;
     if (ahiHours > 0) r.deviceAhi = events / ahiHours;
+    if (hours > 0) r.deviceAhiUncorrected = rawEvents / hours;
     if (leakHours > 0) r.leak = leak / leakHours;
     if (pressureHours > 0) r.pressure = pressure / pressureHours;
 
@@ -2337,6 +2340,10 @@ QString Statistics::GenerateHTML()
     }
 
     htmlUsage = GenerateCPAPUsage();
+    if (!htmlUsage.isEmpty()) {
+        const QString note = manualScoringNote(p_profile->FirstDay(MT_CPAP), p_profile->LastDay(MT_CPAP));
+        if (!note.isEmpty()) htmlUsage += QStringLiteral("<p><i>%1</i></p>").arg(note.toHtmlEscaped());
+    }
 
     if (htmlUsage == "") {
         return htmlReportHeader + htmlNoData() + htmlReportFooter;
@@ -2884,4 +2891,16 @@ void Statistics::updateReportDate() {
         lastdate = last;
         firstdate = first;
     }
+}
+
+QString Statistics::manualScoringNote(const QDate &from, const QDate &to)
+{
+    if (!p_profile || !from.isValid() || !to.isValid()) return QString();
+    int nights = 0;
+    for (QDate date = from; date <= to; date = date.addDays(1)) {
+        Day *day = p_profile->GetDay(date, MT_CPAP);
+        if (day && day->hasManualScoring()) ++nights;
+    }
+    if (nights == 0) return QString();
+    return tr("* %n night(s) corrected by hand: the AHI and the event indices count the corrected events.", nullptr, nights);
 }

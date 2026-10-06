@@ -26,6 +26,8 @@ private slots:
     void testEditsSurviveReopen();
     void testAhiSameEverywhere();
     void testScoringAllowedInClinicalMode();
+    void testPdfShowsDeviceAhi();
+    void testStatisticsFootnote();
     void initTestCase();
     void cleanupTestCase();
     void testAnalysisChannelsAreComputed();
