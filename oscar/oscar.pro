@@ -366,6 +366,7 @@ SOURCES += \
     preferencessearch.cpp \
     pdfreportoptions.cpp \
     glossary.cpp \
+    uiglossary.cpp \
     helptips.cpp \
     helppanel.cpp \
     htmlpages.cpp \
@@ -694,6 +695,7 @@ HEADERS  += \
     preferencessearch.h \
     pdfreportoptions.h \
     glossary.h \
+    uiglossary.h \
     helptips.h \
     helppanel.h \
     htmlpages.h \

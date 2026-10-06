@@ -68,7 +68,8 @@ void HelpPanel::search(const QString &text)
     const QStringList keys = Glossary::search(text);
     for (const QString &key : keys) {
         const GlossaryEntry *e = Glossary::find(key);
-        auto *item = new QListWidgetItem(e->expansion.isEmpty() ? e->term : e->term + QStringLiteral(" — ") + e->expansion, m_results);
+        const QString detail = !e->place.isEmpty() ? e->place : e->expansion;   // a control shows where it is
+        auto *item = new QListWidgetItem(detail.isEmpty() ? e->term : e->term + QStringLiteral(" — ") + detail, m_results);
         item->setData(Qt::UserRole, key);
     }
     m_results->setVisible(!text.trimmed().isEmpty());

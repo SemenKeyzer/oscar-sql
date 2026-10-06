@@ -22,6 +22,10 @@ private slots:
     void testTooltipAndPanel();
     void testChannelFallback();
     void testSearch();
+    void testUiEntriesComplete();
+    void testCautionOnlyWhereListed();
+    void testUiTooltipShowsAdviceAndCaution();
+    void testSearchFindsUiEntries();
 };
 DECLARE_TEST(GlossaryTests)
 

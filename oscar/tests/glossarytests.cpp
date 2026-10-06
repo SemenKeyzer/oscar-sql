@@ -24,7 +24,9 @@ void GlossaryTests::testEntriesComplete()
     QVERIFY2(entries.size() >= 75, qPrintable(QString::number(entries.size())));
     QSet<QString> keys;
     for (const GlossaryEntry &e : entries) {
-        QVERIFY2(!e.key.isEmpty() && !e.term.isEmpty() && !e.summary.isEmpty() && !e.details.isEmpty(), qPrintable(e.key));
+        // the controls' entries (ui.*) have no details; they are checked in testUiEntriesComplete
+        QVERIFY2(!e.key.isEmpty() && !e.term.isEmpty() && !e.summary.isEmpty()
+                 && (e.key.startsWith(QLatin1String("ui.")) || !e.details.isEmpty()), qPrintable(e.key));
         QVERIFY2(e.summary.size() <= 300, qPrintable(e.key));
         QVERIFY2(!keys.contains(e.key), qPrintable(e.key));
         keys.insert(e.key);
@@ -81,4 +83,66 @@ void GlossaryTests::testSearch()
     QVERIFY(Glossary::search(QStringLiteral("glasgow")).contains(QStringLiteral("glasgow_adapted")));
     QVERIFY(Glossary::search(QStringLiteral("x")).size() <= Glossary::all().size());
     QVERIFY(Glossary::search(QString()).isEmpty());
+}
+
+namespace {
+const QString kPurgeDay = QStringLiteral("ui.menu.actionPurgeCurrentDayAll");
+}
+
+void GlossaryTests::testUiEntriesComplete()
+{
+    QSet<QString> keys;
+    for (const GlossaryEntry &e : Glossary::all()) keys.insert(e.key);
+    int ui = 0;
+    for (const GlossaryEntry &e : Glossary::all()) {
+        if (!e.key.startsWith(QLatin1String("ui."))) continue;
+        ++ui;
+        QVERIFY2(!e.term.isEmpty() && !e.place.isEmpty() && !e.summary.isEmpty(), qPrintable(e.key));
+        QVERIFY2(e.summary.size() <= 300, qPrintable(e.key));
+        for (const QString &k : e.seeAlso) QVERIFY2(keys.contains(k), qPrintable(e.key + QStringLiteral(" -> ") + k));
+    }
+    QVERIFY(ui > 0);
+    QCOMPARE(keys.size(), Glossary::all().size());   // unique across both tables
+}
+
+void GlossaryTests::testCautionOnlyWhereListed()
+{
+    QSet<QString> withCaution;
+    for (const GlossaryEntry &e : Glossary::all()) {
+        if (!e.caution.isEmpty()) withCaution.insert(e.key);
+    }
+    const QStringList listed = Glossary::cautionKeys();
+    QVERIFY(!listed.isEmpty());
+    const QSet<QString> expected(listed.cbegin(), listed.cend());
+    QVERIFY2(withCaution == expected,
+             qPrintable(QStringList((withCaution - expected).values()).join(QStringLiteral(", ")) + QStringLiteral(" | missing: ")
+                        + QStringList((expected - withCaution).values()).join(QStringLiteral(", "))));
+}
+
+void GlossaryTests::testUiTooltipShowsAdviceAndCaution()
+{
+    const GlossaryEntry *e = Glossary::find(kPurgeDay);
+    QVERIFY(e);
+    QVERIFY(!e->caution.isEmpty());
+    const QString tip = Glossary::tooltip(kPurgeDay);
+    QVERIFY(tip.contains(QStringLiteral("<b>") + e->term.toHtmlEscaped() + QStringLiteral("</b>")));
+    QVERIFY(tip.contains(e->caution.toHtmlEscaped()));
+    QVERIFY(tip.contains(QStringLiteral("color:")));
+    if (!e->advice.isEmpty()) QVERIFY(tip.contains(e->advice.toHtmlEscaped()));
+    QVERIFY(Glossary::panel(kPurgeDay).contains(e->place.toHtmlEscaped()));
+
+    // an entry with advice shows it
+    for (const GlossaryEntry &a : Glossary::all()) {
+        if (a.key.startsWith(QLatin1String("ui.")) && !a.advice.isEmpty()) {
+            QVERIFY(Glossary::tooltip(a.key).contains(a.advice.toHtmlEscaped()));
+            QVERIFY(Glossary::panel(a.key).contains(a.advice.toHtmlEscaped()));
+            return;
+        }
+    }
+    QFAIL("no UI entry with advice");
+}
+
+void GlossaryTests::testSearchFindsUiEntries()
+{
+    QVERIFY(Glossary::search(QStringLiteral("purge")).contains(kPurgeDay));
 }

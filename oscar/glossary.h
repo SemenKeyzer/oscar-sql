@@ -26,6 +26,10 @@ struct GlossaryEntry {
     bool experimental = false;   //!< a measure of OSCAR's own analysis, not a medical norm
     QStringList seeAlso;  //!< keys of related entries
     QStringList channels; //!< codes of the channels this entry explains
+    // the controls' entries (key "ui.<window>.<objectName>")
+    QString place;        //!< where the control is: "Preferences → Import"
+    QString advice;       //!< what to choose; empty when there is nothing to advise
+    QString caution;      //!< what the action deletes or recalculates; empty for safe controls
 };
 
 //! The explanations shown when hovering OSCAR's figures and in the help panel.
@@ -42,6 +46,8 @@ QString keyForChannel(ChannelID code);
 QString channelTooltip(ChannelID code);
 //! Keys of the entries whose texts contain \a text (case and ё/е ignored).
 QStringList search(const QString &text);
+//! Keys of the controls whose explanation must carry a caution.
+QStringList cautionKeys();
 }
 
 #endif // GLOSSARY_H

@@ -12,6 +12,7 @@
 #include <QHash>
 
 #include "SleepLib/schema.h"
+#include "uiglossary.h"
 
 namespace {
 
@@ -271,6 +272,30 @@ GlossaryEntry entry(const Raw &r)
     return e;
 }
 
+GlossaryEntry entry(const UiGlossaryRaw &r)
+{
+    GlossaryEntry e;
+    e.key = QString::fromLatin1(r.key);
+    e.term = tr(r.term);
+    e.place = tr(r.place);
+    e.summary = tr(r.summary);
+    e.advice = tr(r.advice);
+    e.caution = tr(r.caution);
+    e.seeAlso = split(r.seeAlso);
+    return e;
+}
+
+//! The keys of both tables, in table order.
+QStringList allKeys()
+{
+    QStringList out;
+    for (const Raw &r : kEntries) out << QString::fromLatin1(r.key);
+    int n = 0;
+    const UiGlossaryRaw *ui = uiGlossaryEntries(n);
+    for (int i = 0; i < n; ++i) out << QString::fromLatin1(ui[i].key);
+    return out;
+}
+
 QString folded(const QString &s)
 {
     QString out = s.toLower();
@@ -293,6 +318,9 @@ const GlossaryEntry *find(const QString &key)
     if (cachedFor != lang) {
         cache.clear();
         for (const Raw &r : kEntries) cache.insert(QString::fromLatin1(r.key), entry(r));
+        int n = 0;
+        const UiGlossaryRaw *ui = uiGlossaryEntries(n);
+        for (int i = 0; i < n; ++i) cache.insert(QString::fromLatin1(ui[i].key), entry(ui[i]));
         cachedFor = lang;
     }
     const auto it = cache.constFind(key);
@@ -302,7 +330,7 @@ const GlossaryEntry *find(const QString &key)
 QList<GlossaryEntry> all()
 {
     QList<GlossaryEntry> out;
-    for (const Raw &r : kEntries) out << *find(QString::fromLatin1(r.key));
+    for (const QString &k : allKeys()) out << *find(k);
     return out;
 }
 
@@ -311,6 +339,13 @@ QString tooltip(const QString &key)
     const GlossaryEntry *e = find(key);
     if (!e) return {};
     QString html = QStringLiteral("<b>%1</b>").arg(e->term.toHtmlEscaped());
+    if (!e->place.isEmpty()) {
+        // a control: what it does, what to choose, what it deletes
+        html += QStringLiteral(" — ") + e->summary.toHtmlEscaped();
+        if (!e->advice.isEmpty()) html += QStringLiteral("<br><i>%1</i>").arg(e->advice.toHtmlEscaped());
+        if (!e->caution.isEmpty()) html += QStringLiteral("<br><span style='color:#c0392b'>⚠ %1</span>").arg(e->caution.toHtmlEscaped());
+        return html;
+    }
     if (!e->expansion.isEmpty()) html += QStringLiteral(" — ") + e->expansion.toHtmlEscaped();
     html += QStringLiteral("<br>") + e->summary.toHtmlEscaped();
     if (!e->norm.isEmpty()) html += QStringLiteral("<br><i>%1</i>").arg(e->norm.toHtmlEscaped());
@@ -326,7 +361,19 @@ QString panel(const QString &key)
     };
     QString html = QStringLiteral("<h2>%1</h2>").arg(e->term.toHtmlEscaped());
     if (!e->expansion.isEmpty()) html += QStringLiteral("<p><i>%1</i></p>").arg(e->expansion.toHtmlEscaped());
-    html += heading(QT_TRANSLATE_NOOP("Glossary", "What it is")) + QStringLiteral("<p>%1</p>").arg(e->summary.toHtmlEscaped());
+    if (!e->place.isEmpty()) {
+        html += QStringLiteral("<p><i>%1</i></p>").arg(e->place.toHtmlEscaped());
+        html += heading(QT_TRANSLATE_NOOP("Glossary", "What it does")) + QStringLiteral("<p>%1</p>").arg(e->summary.toHtmlEscaped());
+        if (!e->advice.isEmpty()) {
+            html += heading(QT_TRANSLATE_NOOP("Glossary", "Advice")) + QStringLiteral("<p>%1</p>").arg(e->advice.toHtmlEscaped());
+        }
+        if (!e->caution.isEmpty()) {
+            html += heading(QT_TRANSLATE_NOOP("Glossary", "Caution"))
+                    + QStringLiteral("<p style='color:#c0392b'>⚠ %1</p>").arg(e->caution.toHtmlEscaped());
+        }
+    } else {
+        html += heading(QT_TRANSLATE_NOOP("Glossary", "What it is")) + QStringLiteral("<p>%1</p>").arg(e->summary.toHtmlEscaped());
+    }
     if (!e->details.isEmpty()) {
         html += heading(QT_TRANSLATE_NOOP("Glossary", "How to read it")) + QStringLiteral("<p>%1</p>").arg(e->details.toHtmlEscaped());
     }
@@ -374,7 +421,8 @@ QStringList search(const QString &text)
     QStringList byTerm, byText;
     for (const GlossaryEntry &e : all()) {
         if (folded(e.term + QLatin1Char(' ') + e.expansion).contains(q)) byTerm << e.key;
-        else if (folded(e.summary + QLatin1Char(' ') + e.details).contains(q)) byText << e.key;
+        else if (folded(e.summary + QLatin1Char(' ') + e.details + QLatin1Char(' ') + e.place + QLatin1Char(' ') + e.advice)
+                     .contains(q)) byText << e.key;
     }
     return byTerm + byText;
 }
