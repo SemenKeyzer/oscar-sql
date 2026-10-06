@@ -198,7 +198,8 @@ void UiCoverageTests::testOximportCovered()
     QDialog host;
     Ui::OximeterImport ui;
     ui.setupUi(&host);
-    QStringList missing = uncovered(&host, QStringLiteral("oximport"), {});
+    // Cancel needs no explanation
+    QStringList missing = uncovered(&host, QStringLiteral("oximport"), { QStringLiteral("cancelButton") });
 #ifdef HAVE_BLUETOOTH
     BluetoothOximeterPage page;
     missing += uncovered(&page, QStringLiteral("ble"), {});
