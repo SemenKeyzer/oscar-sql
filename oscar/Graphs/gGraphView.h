@@ -594,6 +594,12 @@ class gGraphView
     //!        selecting/zooming; arrow keys, Enter and Esc report alignNudge/alignAccept/alignCancel.
     void setAlignMode(bool on, const QSet<QString>& targetGraphNames = QSet<QString>());
     bool alignMode() const { return m_alignMode; }
+
+    //! \brief Manual scoring mode: a drag on the flow graph selects a stretch to score
+    //!        (scoringRangeSelected) and a right click on the flow or event flags graph asks for
+    //!        the event's menu (scoringContextRequested); Esc asks to leave the mode.
+    void setScoringMode(bool on) { m_scoringMode = on; m_scoringEscPressed = false; }
+    bool scoringMode() const { return m_scoringMode; }
     //! \brief Shows \a text next to the mouse pointer (used while an alignment drag is in progress).
     void showAlignLabel(const QString& text);
     //! \brief Decides for which graphs the context menu offers "Align device time...".
@@ -730,6 +736,8 @@ class gGraphView
     void noteAlignTarget(gGraph *g);
     void paintAlignFrames(QPainter &painter);
     bool m_alignMode = false;
+    bool m_scoringMode = false;
+    bool m_scoringEscPressed = false;   //!< Esc went down on this view (not in a dialog)
     QSet<QString> m_alignTargets;
     QList<QPair<gGraph *, QRect>> m_alignPainted;   //!< plot rects of target graphs painted in the last frame
     int m_alignPinnedHeight = 0;                     //!< height of the pinned area in the last frame
@@ -806,6 +814,9 @@ class gGraphView
     void alignNudge(qint64 deltaMs);
     void alignAccept();
     void alignCancel();
+    void scoringRangeSelected(gGraph *graph, qint64 startMs, qint64 endMs, QPoint globalPos);
+    void scoringContextRequested(gGraph *graph, qint64 timeMs, QPoint globalPos);
+    void scoringModeExitRequested();
     void alignRequestedForGraph(gGraph *graph);
 
   public slots:

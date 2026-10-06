@@ -3233,6 +3233,13 @@ void gGraphView::keyReleaseEvent(QKeyEvent *event)
     // Esc normally steps back through the zoom history here; in alignment mode it cancels
     // the alignment instead (and must not also change the zoom). A release without a press
     // on this view is the tail of an Esc that closed a dialog: ignore it.
+    if (m_scoringMode && (event->key() == Qt::Key_Escape)) {
+        const bool pressedHere = m_scoringEscPressed;
+        m_scoringEscPressed = false;
+        if (pressedHere) emit scoringModeExitRequested();
+        event->accept();
+        return;
+    }
     if (m_alignMode && (event->key() == Qt::Key_Escape)) {
         const bool pressedHere = m_alignEscPressed;
         m_alignEscPressed = false;
@@ -3573,6 +3580,11 @@ void gGraphView::getSelectionTimes(qint64 & start, qint64 & end)
 
 void gGraphView::keyPressEvent(QKeyEvent *event)
 {
+    if (m_scoringMode && (event->key() == Qt::Key_Escape)) {
+        m_scoringEscPressed = true;   // acted on in keyReleaseEvent
+        event->accept();
+        return;
+    }
     if (m_alignMode) {
         const qint64 step = (event->modifiers() & Qt::ShiftModifier) ? 60000 : 10000;
         switch (event->key()) {

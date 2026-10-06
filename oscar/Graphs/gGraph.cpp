@@ -11,6 +11,7 @@
 #include "test_macros.h"
 
 #include "Graphs/gGraph.h"
+#include "Graphs/scoringgesture.h"
 
 #include <QLabel>
 #include <QTextDocumentFragment>
@@ -1086,6 +1087,15 @@ void gGraph::mouseReleaseEvent(QMouseEvent *event)
             return;
         }
 
+        // manual scoring: the drag selects a stretch to score instead of zooming
+        if (m_graphview->horizTravel() > mouse_movement_threshold
+            && ScoringGesture::actionFor(m_graphview->scoringMode(), name(), event->button(), true) == ScoringGesture::Action::SelectRange) {
+            const QPair<qint64, qint64> r = ScoringGesture::rangeFor(min_x, max_x, w, x - left, x2 - left);
+            m_graphview->redraw();
+            if (r.second > r.first) emit m_graphview->scoringRangeSelected(this, r.first, r.second, event->globalPosition().toPoint());
+            return;
+        }
+
         if (m_graphview->horizTravel() > mouse_movement_threshold) {
             x -= left; //+m_marginleft;
             //y -= top; //+m_margintop;
@@ -1158,6 +1168,11 @@ void gGraph::mouseReleaseEvent(QMouseEvent *event)
             qint64 start = time - period;
             qint64 end   = time + small;
             m_graphview->SetXBounds(start, end);
+            return;
+        }
+        // manual scoring: a right click asks for the menu of the event under the mouse
+        if (ScoringGesture::actionFor(m_graphview->scoringMode(), name(), event->button(), false) == ScoringGesture::Action::ContextMenu) {
+            emit m_graphview->scoringContextRequested(this, qint64(screenToTime(x)), event->globalPosition().toPoint());
             return;
         }
         // normal click in main area
