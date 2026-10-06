@@ -2166,6 +2166,7 @@ p, li { white-space: pre-wrap; }
     <addaction name="action_Sidebar_Toggle"/>
     <addaction name="separator"/>
     <addaction name="actionShowPersonalData"/>
+    <addaction name="actionHoverExplanations"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
     <property name="title">
@@ -2765,6 +2766,20 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="text">
     <string>Show Personal Data</string>
+   </property>
+  </action>
+  <action name="actionHoverExplanations">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Hover Explanations</string>
+   </property>
+   <property name="toolTip">
+    <string>Explain figures and terms when the mouse rests on them</string>
    </property>
   </action>
   <action name="action_Check_for_Updates">

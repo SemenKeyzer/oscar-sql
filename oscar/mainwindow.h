@@ -462,6 +462,7 @@ class MainWindow : public QMainWindow
     void on_statisticsView_anchorClicked(const QUrl &url);
 
     void on_actionShowPersonalData_toggled(bool visible);
+    void on_actionHoverExplanations_toggled(bool on);
 
 public slots:
     void reloadProfile();

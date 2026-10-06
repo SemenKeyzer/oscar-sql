@@ -119,6 +119,7 @@
 #include "reports.h"
 #include "statistics.h"
 #include "pdfreportdialog.h"
+#include "helptips.h"
 #include "zip.h"
 #include "speedcheck.h"
 
@@ -362,6 +363,9 @@ void MainWindow::SetupGUI()
     bool oldState = ui->actionShowPersonalData->blockSignals(true);
     ui->actionShowPersonalData->setChecked(AppSetting->showPersonalData());
     ui->actionShowPersonalData->blockSignals(oldState);
+    oldState = ui->actionHoverExplanations->blockSignals(true);
+    ui->actionHoverExplanations->setChecked(HelpTips::instance()->enabled());   // also installs the hover filter
+    ui->actionHoverExplanations->blockSignals(oldState);
 
     oldState = ui->actionPie_Chart->blockSignals(true);
     ui->actionPie_Chart->setChecked(AppSetting->showPieChart());
@@ -4111,6 +4115,16 @@ void MainWindow::on_actionLeft_Daily_Sidebar_toggled(bool visible)
 void MainWindow::on_actionDaily_Calendar_toggled(bool visible)
 {
     if (daily) daily->setCalendarVisible(visible);
+}
+
+void MainWindow::on_actionHoverExplanations_toggled(bool on)
+{
+    HelpTips::instance()->setEnabled(on);
+    if (setupRunning) return;
+    // the pages carry their explanations in their HTML: build them again
+    if (p_profile) GenerateStatistics();
+    if (welcome) welcome->refreshPage();
+    if (daily && daily->getDate().isValid()) daily->LoadDateNow(daily->getDate());
 }
 
 void MainWindow::on_actionShowPersonalData_toggled(bool visible)
