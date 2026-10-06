@@ -39,6 +39,9 @@ HelpPanel::HelpPanel(QWidget *parent) : QDockWidget(tr("Help Panel"), parent)
     connect(m_results, &QListWidget::itemClicked, this, [this](QListWidgetItem *item) {
         show(item->data(Qt::UserRole).toString());
     });
+    connect(m_results, &QListWidget::currentItemChanged, this, [this](QListWidgetItem *item) {   // arrow keys
+        if (item) show(item->data(Qt::UserRole).toString());
+    });
     connect(m_text, &QTextBrowser::anchorClicked, this, [this](const QUrl &url) { show(HelpTips::keyOf(url)); });
     // the article of the term last hovered stays until another one is hovered
     connect(HelpTips::instance(), &HelpTips::hovered, this, &HelpPanel::show);

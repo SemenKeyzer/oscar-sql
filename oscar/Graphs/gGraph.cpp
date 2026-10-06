@@ -13,6 +13,7 @@
 #include "Graphs/gGraph.h"
 
 #include <QLabel>
+#include <QTextDocumentFragment>
 #include <QTimer>
 #include <cmath>
 #include <exception>
@@ -20,6 +21,8 @@
 #include "mainwindow.h"
 #include "Graphs/gGraphView.h"
 #include "Graphs/layer.h"
+#include "glossary.h"
+#include "helptips.h"
 #include "SleepLib/profiles.h"
 
 extern MainWindow *mainwin;
@@ -658,26 +661,33 @@ bool gGraph::isDynamicScalingEnabled() {
 }
 
 QString gGraph::unitsTooltip() {
+    // with hover explanations on, what the graph shows comes from the glossary (and the help
+    // panel shows its full article)
+    QString units = m_units;
+    if (HelpTips::instance()->enabled() && !m_helpKey.isEmpty() && Glossary::find(m_helpKey)) {
+        units = QTextDocumentFragment::fromHtml(Glossary::tooltip(m_helpKey)).toPlainText();
+        HelpTips::instance()->hover(m_helpKey);
+    }
     if (isDynamicScalingEnabled()) {
         if(dynamicScalingOn) {
             if (zoomY() == ZS_AUTO_FIT ) {
-                return QString("%1%2%3").arg(m_units).arg("\n").arg(tr("Double click Y-axis: Return to AUTO-FIT Scaling"));
+                return QString("%1%2%3").arg(units).arg("\n").arg(tr("Double click Y-axis: Return to AUTO-FIT Scaling"));
             } else if (zoomY() == ZS_DEFAULT ) {
-                return QString("%1%2%3").arg(m_units).arg("\n").arg(tr("Double click Y-axis: Return to DEFAULT Scaling"));
+                return QString("%1%2%3").arg(units).arg("\n").arg(tr("Double click Y-axis: Return to DEFAULT Scaling"));
             } else {
-                return QString("%1%2%3").arg(m_units).arg("\n").arg(tr("Double click Y-axis: Return to OVERRIDE Scaling"));
+                return QString("%1%2%3").arg(units).arg("\n").arg(tr("Double click Y-axis: Return to OVERRIDE Scaling"));
             }
         } else {
-            return QString("%1%2%3").arg(m_units).arg("\n").arg(tr("Double click Y-axis: For Dynamic Scaling"));
+            return QString("%1%2%3").arg(units).arg("\n").arg(tr("Double click Y-axis: For Dynamic Scaling"));
         }
     } else {
         if (zoomY() == ZS_AUTO_FIT ) {
-            return QString("%1%2%3").arg(m_units).arg("\n").arg(tr("Double click Y-axis: Select DEFAULT Scaling"));
+            return QString("%1%2%3").arg(units).arg("\n").arg(tr("Double click Y-axis: Select DEFAULT Scaling"));
         } else if (zoomY() == ZS_DEFAULT ) {
-            return QString("%1%2%3").arg(m_units).arg("\n").arg(tr("Double click Y-axis: Select AUTO-FIT Scaling"));
+            return QString("%1%2%3").arg(units).arg("\n").arg(tr("Double click Y-axis: Select AUTO-FIT Scaling"));
         }
     }
-    return m_units;
+    return units;
 }
 
 void gGraph::dynamicScaling(EventDataType &miny, EventDataType &maxy) {

@@ -89,6 +89,11 @@ void HelpPanelTests::testSearch()
     QVERIFY(adapted);
     emit results->itemClicked(adapted);
     QCOMPARE(panel.currentKey(), QStringLiteral("glasgow_adapted"));
+    // choosing a result with the keyboard (or a screen reader) shows it too
+    for (int i = 0; i < results->count(); ++i) {
+        if (results->item(i)->data(Qt::UserRole).toString() == QLatin1String("glasgow")) results->setCurrentRow(i);
+    }
+    QCOMPARE(panel.currentKey(), QStringLiteral("glasgow"));
     search->clear();
     QVERIFY(results->isHidden());
 }
