@@ -291,7 +291,7 @@ QDataStream & operator>>(QDataStream & in, RXItem & rx)
     in >> rx.ahi;
     in >> rx.rdi;
     in >> rx.hours;
-    rx.ahiHours = rx.hours;   // not in the cache file; recounted when the rows are rebuilt
+    in >> rx.ahiHours;   // since cache version 3
 
     QString loadername;
     in >> loadername;
@@ -332,6 +332,7 @@ QDataStream & operator<<(QDataStream & out, const RXItem & rx)
     out << rx.ahi;
     out << rx.rdi;
     out << rx.hours;
+    out << rx.ahiHours;
 
     out << rx.machine->loaderName();
     out << rx.machine->serial();
@@ -371,7 +372,7 @@ void Statistics::loadRXChanges()
     // The items hold ready-made texts (mode, relief, pressure): a cache from before the
     // language was kept, or in another language, is rebuilt. Before version 2 a period's
     // first night counted the oximeter's time as well, so those caches are rebuilt too.
-    if (version < 2) {
+    if (version < 3) {   // version 3 added the hours the AHI counts over (manual scoring)
         return;
     }
     QString language;
@@ -408,7 +409,7 @@ void Statistics::saveRXChanges()
     out.setByteOrder(QDataStream::LittleEndian);
     out.setVersion(QDataStream::Qt_5_0);
     out << magic;
-    out << (quint16)2;
+    out << (quint16)3;
     out << currentLanguage();
     out << rxitems;
 
@@ -417,9 +418,9 @@ void Statistics::saveRXChanges()
 bool rxAHILessThan(const RXItem * rx1, const RXItem * rx2)
 {
     if (p_profile->general->calculateRDI()) {
-        return (double(rx1->rdi) / rx1->hours) < (double(rx2->rdi) / rx2->hours);
+        return (double(rx1->rdi) / rx1->ahiHours) < (double(rx2->rdi) / rx2->ahiHours);
     }
-    return (double(rx1->ahi) / rx1->hours) < (double(rx2->ahi) / rx2->hours);
+    return (double(rx1->ahi) / rx1->ahiHours) < (double(rx2->ahi) / rx2->ahiHours);
 }
 
 QDate firstGoodDay() {
@@ -636,7 +637,6 @@ void Statistics::updateRXChanges()
                     rx.ahi += tmp;
                     rx.rdi += tmp + day->count(CPAP_RERA);
                     rx.hours += day->hours(MT_CPAP);
-                rx.ahiHours += day->ahiHours();
                     rx.ahiHours += day->ahiHours();
 
                     // Add this date to RX cache
@@ -2903,4 +2903,9 @@ QString Statistics::manualScoringNote(const QDate &from, const QDate &to)
     }
     if (nights == 0) return QString();
     return tr("* %n night(s) corrected by hand: the AHI and the event indices count the corrected events.", nullptr, nights);
+}
+
+void Statistics::forgetRXChanges()
+{
+    if (p_profile) QFile::remove(p_profile->Get("{" + STR_GEN_DataFolder + "}/RXChanges.cache"));
 }

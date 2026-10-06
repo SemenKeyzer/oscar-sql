@@ -92,13 +92,19 @@ namespace ManualScoring {
 SessionKey keyOf(Session *s);
 //! Reads the session's stored result into it (count deltas, excluded time).
 void loadSummary(Session *s);
-//! The corrected night of the session from its events (loaded for the call if needed).
+//! The corrected night of the session from its events (loaded for the call if needed), in graph time
+//! (the device time plus its correction).
 Result resultFor(Session *s);
 //! Recalculates the session's result from its edits and stores it; no edits: no result.
 void refresh(Session *s);
-//! Stores \a edit for \a s (its key is set here) and recalculates.
+//! Stores \a edit for \a s (its key is set here; its times are as the graphs show them) and recalculates.
 bool addEdit(Session *s, Edit edit);
 bool removeEdit(Session *s, qint64 id);
+//! Undoes the edit \a id of \a day's sessions; an excluded stretch stored with several sessions
+//! is undone in all of them.
+bool undoEdit(Day *day, qint64 id);
+//! Stores the day's daily summary again (its AHI changed); the SQL reports read it.
+void storeDaySummary(Day *day);
 //! Removes every edit of the day's sessions.
 void clearDay(Day *day);
 

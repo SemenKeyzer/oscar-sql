@@ -234,19 +234,20 @@ bool Report::paint(QPainter &painter, QPrinter &printer, gGraphView *gv, const Q
 
             if (p_profile->general->calculateRDI()) { ahi += day->count(CPAP_RERA); }
 
-            float hours = day->ahiHours();   // less the stretches excluded by manual scoring
-            ahi = hours > 0 ? ahi / hours : 0;
+            const float ahiHours = day->ahiHours();   // less the stretches excluded by manual scoring
+            ahi = ahiHours > 0 ? ahi / ahiHours : 0;   // the scored indices below divide by it too
+            float hours = day->hours(MT_CPAP);
             float csr = (100.0 / hours) * (day->sum(CPAP_CSR) / 3600.0);
             //float pb = (100.0 / hours) * (day->sum(CPAP_PB) / 3600.0);
-            float uai = day->count(CPAP_Apnea) / hours;
-            float oai = day->count(CPAP_Obstructive) / hours;
-            float ai = day->count(CPAP_AllApnea) / hours;
-            float hi = (day->count(CPAP_ExP) + day->count(CPAP_Hypopnea)) / hours;
+            float uai = day->count(CPAP_Apnea) / ahiHours;  // the scored events, over the AHI hours
+            float oai = day->count(CPAP_Obstructive) / ahiHours;  // the scored events, over the AHI hours
+            float ai = day->count(CPAP_AllApnea) / ahiHours;  // the scored events, over the AHI hours
+            float hi = (day->count(CPAP_ExP) + day->count(CPAP_Hypopnea)) / ahiHours;
             float ohi = day->count(CPAP_ObstructiveHypopnea) / hours;
             float chi = day->count(CPAP_CentralHypopnea) / hours;
             float oahi = day->calcOAHI();
             float cahi = day->calcCAHI();
-            float cai = day->count(CPAP_ClearAirway) / hours;
+            float cai = day->count(CPAP_ClearAirway) / ahiHours;  // the scored events, over the AHI hours
             float rei = day->count(CPAP_RERA) / hours;
             float vsi = day->count(CPAP_VSnore) / hours;
             if (day->channelHasData(CPAP_VSnore2)) {  // PRS1 puts its 2-minute VS count in a different channel rather than reporting each incident.

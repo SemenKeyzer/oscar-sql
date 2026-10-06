@@ -1750,7 +1750,8 @@ double Day::ahiHours()
     for (Session *sess : sessions) {
         if (sess->enabled() && sess->type() == MT_CPAP) excludedMs += sess->manualExcludedMs();
     }
-    return qMax(0.0, double(hours(MT_CPAP)) - excludedMs / 3600000.0);
+    const double h = double(hours(MT_CPAP)) - excludedMs / 3600000.0;
+    return h < 1.0 / 3600 ? 0.0 : h;   // under a second left: nothing to count over (float rounding)
 }
 
 bool Day::hasManualScoring()

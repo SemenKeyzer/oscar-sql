@@ -31,6 +31,7 @@
 #include "SleepLib/manual_scoring.h"
 #include "SleepLib/schema.h"
 #include "database/manual_scoring_repository.h"
+#include "database/daily_summary_repository.h"
 #include "SleepLib/session.h"
 #include "Graphs/gFlagsLine.h"
 #include "database/analysis_daily_repository.h"
@@ -941,6 +942,8 @@ class RXStatistics : public Statistics
   public:
     using Statistics::updateRXChanges;
     using Statistics::rxitems;
+    using Statistics::loadRXChanges;
+    using Statistics::saveRXChanges;
 };
 
 } // namespace
@@ -1785,4 +1788,181 @@ void AnalysisIntegrationTests::testStatisticsFootnote()
     p_profile->daylist.remove(date);
     ManualScoring::clearDay(day);
     delete day;
+}
+
+// edits are made on the graphs, which show the device time plus its correction
+void AnalysisIntegrationTests::testScoringFollowsTimeCorrection()
+{
+    Machine cpap(p_profile, 81);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    cpap.rebuildCorrections({ TimeCorrectionRow { kNightDate.addDays(-10), QDate(), QStringLiteral("offset"), 600000, 0, 0.0 } });
+    Day day;
+    day.setDate(kNightDate);
+    Session *s = scoredSession(&cpap, 811, m_machineRow);
+    day.addSession(s);   // the session takes the day's night, and with it the night's correction
+    QCOMPARE(s->correctionMs(), qint64(600000));
+    // as shown: the OA that ends at 100 s ends at 700 s on the graph
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Remove, CPAP_Obstructive, 688, 700)));
+    QCOMPARE(s->manualNotFound(), 0);
+    QCOMPARE(day.count(CPAP_Obstructive), EventDataType(1));
+    // the stretch shown at 750–950 s holds OA@200 and CA@300
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Exclude, 0, 750, 950)));
+    QCOMPARE(day.count(CPAP_Obstructive), EventDataType(0));
+    QCOMPARE(day.count(CPAP_ClearAirway), EventDataType(0));
+    QCOMPARE(s->manualExcludedMs(), qint64(200000));
+    // the drawn result is in graph time
+    bool shown = false;
+    for (const ManualScoring::EffectiveEvent &e : ManualScoring::resultFor(s).events) {
+        if (e.origin == ManualScoring::Origin::Removed) shown = e.endMs == synth::kStart + 700000;
+    }
+    QVERIFY(shown);
+    ManualScoring::clearDay(&day);
+}
+
+// an excluded stretch over a mask-off break takes out only the time that was counted
+void AnalysisIntegrationTests::testExcludeSkipsMaskOff()
+{
+    Machine cpap(p_profile, 82);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    Session *s = scoredSession(&cpap, 821, m_machineRow);
+    const qint64 t0 = synth::kStart;
+    s->m_slices = { SessionSlice(t0, t0 + 1800000, MaskOn), SessionSlice(t0 + 1800000, t0 + 2400000, MaskOff),
+                    SessionSlice(t0 + 2400000, t0 + 3600000, MaskOn) };
+    day.addSession(s);
+    QVERIFY(qAbs(day.hours(MT_CPAP) - 50.0 / 60) < 1e-4);
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Exclude, 0, 1700, 2500)));
+    QCOMPARE(s->manualExcludedMs(), qint64(200000));   // 1700–1800 and 2400–2500
+    QVERIFY(qAbs(day.ahiHours() - (3000.0 - 200.0) / 3600) < 1e-4);
+    ManualScoring::clearDay(&day);
+}
+
+// the analysis may hold only some channels of a session: scoring loads the ones it needs
+void AnalysisIntegrationTests::testScoringWithPartialEvents()
+{
+    Machine cpap(p_profile, 83);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Session *s = scoredSession(&cpap, 831, m_machineRow);
+    QVERIFY(s->StoreEventsToDatabase());
+    s->TrashEvents();
+    QVERIFY(s->LoadEventsFromDatabase(QSet<ChannelID> { CPAP_Hypopnea }));
+    QVERIFY(s->partialEvents());
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Remove, CPAP_Obstructive, 88, 100)));
+    QCOMPARE(s->manualNotFound(), 0);
+    QCOMPARE(s->manualDelta().value(CPAP_Obstructive), -1);
+    ManualScoringRepository::removeAllForSession(ManualScoring::keyOf(s));
+    ManualScoring::refresh(s);
+    s->TrashEvents();
+    delete s;
+}
+
+// a night left out completely: no index at all, in RDI mode too
+void AnalysisIntegrationTests::testFullyExcludedNightRdi()
+{
+    Machine cpap(p_profile, 84);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    Session *s = scoredSession(&cpap, 841, m_machineRow);
+    s->really_set_last(synth::kStart + 3599992);   // hours a float rounds up: a hair would be left
+    s->setCount(CPAP_RERA, 3);
+    day.addSession(s);
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Exclude, 0, -10, 4000)));
+    QCOMPARE(day.ahiHours(), 0.0);
+    QCOMPARE(day.calcAHI(), EventDataType(0));
+    QCOMPARE(day.calcRDI(), EventDataType(0));
+    ManualScoring::clearDay(&day);
+}
+
+QDataStream &operator<<(QDataStream &out, const RXItem &rx);   // statistics.cpp
+QDataStream &operator>>(QDataStream &in, RXItem &rx);
+
+// the settings rows are cached on disk: the hours the AHI counts over go with them, and a
+// scoring change throws the cache away
+void AnalysisIntegrationTests::testRxCacheKeepsAhiHours()
+{
+    const QString cache = p_profile->Get("{" + STR_GEN_DataFolder + "}/RXChanges.cache");
+    QFile::remove(cache);
+    Machine cpap(p_profile, 85);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    const QDate date = kNightDate.addDays(90);
+    Day *day = new Day();
+    day->setDate(date);
+    Session *s = scoredSession(&cpap, 851, m_machineRow);
+    day->addSession(s);
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Exclude, 0, 1800, 3600)));
+    p_profile->daylist.insert(date, day);
+
+    RXStatistics built;
+    built.updateRXChanges();
+    QVERIFY(!built.rxitems.isEmpty());
+    QCOMPARE(built.rxitems.last().ahiHours, 0.5);
+    // a row written to the cache and read back keeps them
+    QByteArray bytes;
+    {
+        QDataStream out(&bytes, QIODevice::WriteOnly);
+        out << built.rxitems.last();
+    }
+    RXItem back;
+    {
+        QDataStream in(bytes);
+        in >> back;
+    }
+    QCOMPARE(back.ahiHours, 0.5);
+    QCOMPARE(back.hours, 1.0);
+    built.saveRXChanges();
+    QVERIFY(QFile::exists(cache));
+
+    Statistics::forgetRXChanges();
+    QVERIFY(!QFile::exists(cache));
+
+    p_profile->daylist.remove(date);
+    ManualScoring::clearDay(day);
+    delete day;
+}
+
+// a stretch left out across two sessions is stored with each; undoing it undoes both
+void AnalysisIntegrationTests::testUndoStretchAcrossSessions()
+{
+    Machine cpap(p_profile, 86);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    Session *a = scoredSession(&cpap, 861, m_machineRow);
+    Session *b = scoredSession(&cpap, 862, m_machineRow);
+    b->really_set_first(synth::kStart + 3600000);
+    b->really_set_last(synth::kStart + 7200000);
+    day.addSession(a);
+    day.addSession(b);
+    const ManualScoring::Edit stretch = scoringEdit(ManualScoring::Kind::Exclude, 0, 3000, 4200);
+    QVERIFY(ManualScoring::addEdit(a, stretch));
+    QVERIFY(ManualScoring::addEdit(b, stretch));
+    const qint64 id = ManualScoringRepository::editsForSession(ManualScoring::keyOf(a)).first().id;
+    QVERIFY(ManualScoring::undoEdit(&day, id));
+    QVERIFY(ManualScoringRepository::editsForSession(ManualScoring::keyOf(a)).isEmpty());
+    QVERIFY(ManualScoringRepository::editsForSession(ManualScoring::keyOf(b)).isEmpty());
+    QVERIFY(!day.hasManualScoring());
+}
+
+// the stored daily summaries (used by the SQL reports) follow a scoring change
+void AnalysisIntegrationTests::testDailySummaryFollowsScoring()
+{
+    Machine cpap(p_profile, 87);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    const QDate date = kNightDate.addDays(95);
+    Day day;
+    day.setDate(date);
+    Session *s = scoredSession(&cpap, 871, m_machineRow);
+    day.addSession(s);
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Add, CPAP_Hypopnea, 2480, 2500)));
+    ManualScoring::storeDaySummary(&day);
+    const DailySummaryData row = DailySummaryRepository().findByProfileAndDate(m_profileId, date);
+    QVERIFY(row.id > 0);
+    QCOMPARE(row.ahi, double(day.calcAHI()));
+    ManualScoring::clearDay(&day);
 }

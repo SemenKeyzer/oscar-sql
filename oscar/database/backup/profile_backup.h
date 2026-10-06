@@ -325,6 +325,7 @@ private:
      * \param tempDir  Path to the temporary working directory.
      */
     bool exportDailySummaries(const QString& tempDir);
+    bool exportManualScoring(const QString& tempDir);
 
     /*!
      * \brief Build and save the manifest.json file.

@@ -53,6 +53,7 @@
 #include "SleepLib/analysis/analysis_service.h"
 #include "analysispanel.h"
 #include "scoringmenus.h"
+#include "statistics.h"
 #include "Graphs/gManualScoringLayer.h"
 #include "SleepLib/manual_scoring.h"
 #include "database/manual_scoring_repository.h"
@@ -863,7 +864,7 @@ void Daily::Link_clicked(const QUrl &url)
             for (const ManualScoring::Edit &e : ManualScoringRepository::editsForSession(ManualScoring::keyOf(s))) {
                 if (e.id != id) continue;
                 if (what == QLatin1String("undo")) {
-                    ManualScoring::removeEdit(s, id);
+                    ManualScoring::undoEdit(sday, id);
                     scoringChanged();
                 } else {   // jump: a minute either side
                     GraphView->SetXBounds(e.startMs - 60000, e.endMs + 60000);
@@ -4285,12 +4286,7 @@ void Daily::applyScoring(const QVariantMap &choice, qint64 startMs, qint64 endMs
         e.endMs = timeMs;
         if (Session *s = scoringSessionAt(day, timeMs)) ManualScoring::addEdit(s, e);
     } else if (action == QLatin1String("undo")) {
-        const qint64 id = choice.value(QStringLiteral("editId")).toLongLong();
-        for (Session *s : day->sessions) {
-            for (const ManualScoring::Edit &old : ManualScoringRepository::editsForSession(ManualScoring::keyOf(s))) {
-                if (old.id == id) ManualScoring::removeEdit(s, id);
-            }
-        }
+        ManualScoring::undoEdit(day, choice.value(QStringLiteral("editId")).toLongLong());
     } else {
         return;
     }
@@ -4299,6 +4295,8 @@ void Daily::applyScoring(const QVariantMap &choice, qint64 startMs, qint64 endMs
 
 void Daily::scoringChanged()
 {
+    Statistics::forgetRXChanges();   // the cached settings rows hold the old counts
+    ManualScoring::storeDaySummary(p_profile->GetDay(previous_date, MT_CPAP));   // read by the SQL reports
     // as when a session is switched off: every page shows the corrected figures
     if (mainwin) mainwin->refreshAnalysisViews();
     else LoadDate(previous_date);
@@ -4358,6 +4356,7 @@ QString Daily::getManualScoring(Day *day)
     if (!day || !day->hasManualScoring()) return QString();
     using ManualScoring::Kind;
     int added = 0, removed = 0, retyped = 0, stretches = 0, notFound = 0;
+    QSet<QPair<qint64, qint64>> stretchesSeen;
     qint64 excludedMs = 0;
     QString rows;
     for (Session *s : day->sessions) {
@@ -4365,6 +4364,11 @@ QString Daily::getManualScoring(Day *day)
         excludedMs += s->manualExcludedMs();
         notFound += s->manualNotFound();
         for (const ManualScoring::Edit &e : ManualScoringRepository::editsForSession(ManualScoring::keyOf(s))) {
+            if (e.kind == Kind::Exclude) {   // a stretch over several sessions is listed once
+                const QPair<qint64, qint64> span(e.startMs, e.endMs);
+                if (stretchesSeen.contains(span)) continue;
+                stretchesSeen.insert(span);
+            }
             QString what;
             switch (e.kind) {
             case Kind::Add: ++added; what = tr("added: %1").arg(ScoringMenus::typeName(e.channel)); break;

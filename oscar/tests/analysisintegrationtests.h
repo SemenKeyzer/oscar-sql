@@ -28,6 +28,14 @@ private slots:
     void testScoringAllowedInClinicalMode();
     void testPdfShowsDeviceAhi();
     void testStatisticsFootnote();
+    // final review
+    void testScoringFollowsTimeCorrection();
+    void testExcludeSkipsMaskOff();
+    void testScoringWithPartialEvents();
+    void testFullyExcludedNightRdi();
+    void testRxCacheKeepsAhiHours();
+    void testUndoStretchAcrossSessions();
+    void testDailySummaryFollowsScoring();
     void initTestCase();
     void cleanupTestCase();
     void testAnalysisChannelsAreComputed();

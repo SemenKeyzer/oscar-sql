@@ -196,6 +196,15 @@ void ManualScoringTests::testAddedInsideExcludeNotCounted()
     QCOMPARE(r.delta.value(CPAP_Hypopnea), 0);
 }
 
+void ManualScoringTests::testExcludeDropsRera()
+{
+    // a RERA cannot be edited, but a stretch left out leaves it out of the RDI too
+    QList<DeviceEvent> device = deviceEvents();
+    device.append({ CPAP_RERA, 250 * kSec, 8 });
+    const Result r = apply(device, { edit(1, Kind::Exclude, 0, 150 * kSec, 350 * kSec) }, oneSession());
+    QCOMPARE(r.delta.value(CPAP_RERA), -1);
+}
+
 // ---- storage
 
 SessionKey ManualScoringTests::key(SessionID session) const

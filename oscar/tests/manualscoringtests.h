@@ -29,6 +29,7 @@ private slots:
     void testExcludeOverlapAndClip();
     void testExcludeWholeNight();
     void testAddedInsideExcludeNotCounted();
+    void testExcludeDropsRera();
     // storage
     void testStoreAndLoadEdits();
     void testRemoveEdit();

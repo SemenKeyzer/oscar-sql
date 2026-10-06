@@ -3457,9 +3457,9 @@ Hint: Change the start date first</source>
         <location filename="../oscar/doctorreport.cpp" line="234"/>
         <source>corrected by hand on %n night(s), by the device %1</source>
         <translation>
-            <numerusform>исправлено вручную в %n ночь, по аппарату %1</numerusform>
-            <numerusform>исправлено вручную в %n ночи, по аппарату %1</numerusform>
-            <numerusform>исправлено вручную в %n ночей, по аппарату %1</numerusform>
+            <numerusform>исправлено вручную за %n ночь, по аппарату %1</numerusform>
+            <numerusform>исправлено вручную за %n ночи, по аппарату %1</numerusform>
+            <numerusform>исправлено вручную за %n ночей, по аппарату %1</numerusform>
         </translation>
     </message>
     <message>
@@ -26895,7 +26895,7 @@ Make sure you trust the recipient before sharing this data.</source>
         <translation>
             <numerusform>* %n ночь исправлена вручную: AHI и индексы событий считают исправленные события.</numerusform>
             <numerusform>* %n ночи исправлены вручную: AHI и индексы событий считают исправленные события.</numerusform>
-            <numerusform>* %n ночей исправлены вручную: AHI и индексы событий считают исправленные события.</numerusform>
+            <numerusform>* %n ночей исправлено вручную: AHI и индексы событий считают исправленные события.</numerusform>
         </translation>
     </message>
     <message>

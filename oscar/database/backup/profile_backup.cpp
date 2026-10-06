@@ -438,6 +438,10 @@ bool ProfileBackup::createBackup()
         emit backupFailed(m_errorMessage);
         return false;
     }
+    if (!exportManualScoring(tmpPath)) {
+        emit backupFailed(m_errorMessage);
+        return false;
+    }
 
     // Record uncompressed size before packaging.
     m_uncompressedSize = directorySize(dbDir);
@@ -896,6 +900,25 @@ bool ProfileBackup::exportDailySummaries(const QString& tempDir)
         m_errorMessage = QString("Failed to export daily_summaries: %1")
                              .arg(exporter.errorMessage());
         return false;
+    }
+    return true;
+}
+
+/*!
+ * \brief Export the doctor's manual scoring (both tables), whole: it is keyed by the device's
+ *        own session numbers, not by date. profile_id becomes the @PROFILE_ID@ placeholder.
+ */
+bool ProfileBackup::exportManualScoring(const QString& tempDir)
+{
+    const QString dbDir = tempDir + QStringLiteral("/database");
+    SqlExporter exporter;
+    exporter.setColumnPlaceholders({{"profile_id", "@PROFILE_ID@"}});
+    const QString where = QString("profile_id = %1").arg(m_profileId);
+    for (const char *table : { "manual_scoring", "manual_scoring_summary" }) {
+        if (!exporter.exportTable(table, where, dbDir + QStringLiteral("/%1.sql").arg(QLatin1String(table)))) {
+            m_errorMessage = QString("Failed to export %1: %2").arg(QLatin1String(table), exporter.errorMessage());
+            return false;
+        }
     }
     return true;
 }

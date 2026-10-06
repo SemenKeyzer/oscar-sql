@@ -16,6 +16,7 @@
 #include "SleepLib/schema.h"
 #include "SleepLib/session.h"
 #include "database/manual_scoring_repository.h"
+#include "database/daily_summary_repository.h"
 
 namespace ManualScoring {
 
@@ -50,7 +51,8 @@ QList<QPair<qint64, qint64>> clippedUnion(const QList<QPair<qint64, qint64>> &sp
 
 Result apply(const QList<DeviceEvent> &device, const QList<Edit> &edits, const QList<QPair<qint64, qint64>> &sessionSpans)
 {
-    const QList<ChannelID> scored = scoredChannels();
+    // RERA cannot be edited, but an excluded stretch leaves out its RERAs too (they count in the RDI)
+    const QList<ChannelID> scored = scoredChannels() + QList<ChannelID> { CPAP_RERA };
     Result r;
     QHash<ChannelID, int> deviceCount;
     for (const DeviceEvent &d : device) {
@@ -143,16 +145,36 @@ void loadSummary(Session *s)
 Result resultFor(Session *s)
 {
     const QList<Edit> edits = ManualScoringRepository::editsForSession(keyOf(s));
-    // the device events are needed; load them for the call if they are not in memory
-    const bool opened = s->eventlist.isEmpty() && s->OpenEvents();
+    QList<ChannelID> channels = scoredChannels();
+    channels << CPAP_RERA;
+    // the device events are needed: load the scored channels if they are not all in memory
+    // (nothing loaded, or the analysis holds only some channels)
+    const bool wasEmpty = s->eventlist.isEmpty() && !s->eventsLoaded();
+    if (wasEmpty || s->partialEvents()) s->LoadEventsFromDatabase(QSet<ChannelID>(channels.cbegin(), channels.cend()));
     QList<DeviceEvent> device;
-    for (ChannelID code : scoredChannels()) {
+    for (ChannelID code : channels) {
         for (EventList *el : s->eventlist.value(code)) {
             for (quint32 i = 0; i < el->count(); ++i) device.append({ code, el->time(i), double(el->data(i)) });
         }
     }
-    if (opened) s->TrashEvents();
-    return apply(device, edits, { { s->first(), s->last() } });
+    if (wasEmpty) s->TrashEvents();
+
+    // the time counted: the mask-on slices, or the whole session (device time, like the events)
+    QList<QPair<qint64, qint64>> spans;
+    for (const SessionSlice &slice : s->m_slices) {
+        if (slice.status == MaskOn) spans.append({ slice.start, slice.end });
+    }
+    if (spans.isEmpty()) spans.append({ s->realFirst(), s->realLast() });
+    Result r = apply(device, edits, spans);
+
+    // shown on the graphs with the device's time correction
+    const qint64 c = s->correctionMs();
+    for (EffectiveEvent &e : r.events) e.endMs += c;
+    for (auto &span : r.excludedSpans) {
+        span.first += c;
+        span.second += c;
+    }
+    return r;
 }
 
 void refresh(Session *s)
@@ -171,6 +193,10 @@ void refresh(Session *s)
 bool addEdit(Session *s, Edit edit)
 {
     edit.key = keyOf(s);
+    // made on the graphs, which show the device time plus its correction: stored in device time
+    const qint64 c = s->correctionMs();
+    edit.startMs -= c;
+    edit.endMs -= c;
     if (ManualScoringRepository::add(edit) == 0) return false;
     refresh(s);
     return true;
@@ -181,6 +207,39 @@ bool removeEdit(Session *s, qint64 id)
     if (!ManualScoringRepository::remove(id)) return false;
     refresh(s);
     return true;
+}
+
+bool undoEdit(Day *day, qint64 id)
+{
+    // find the edit
+    Edit target;
+    bool found = false;
+    for (Session *s : day->sessions) {
+        for (const Edit &e : ManualScoringRepository::editsForSession(keyOf(s))) {
+            if (e.id == id) {
+                target = e;
+                found = true;
+            }
+        }
+    }
+    if (!found) return false;
+    for (Session *s : day->sessions) {
+        bool changed = false;
+        for (const Edit &e : ManualScoringRepository::editsForSession(keyOf(s))) {
+            const bool same = e.id == id
+                              || (target.kind == Kind::Exclude && e.kind == Kind::Exclude && e.startMs == target.startMs
+                                  && e.endMs == target.endMs);
+            if (same) changed = ManualScoringRepository::remove(e.id) || changed;
+        }
+        if (changed) refresh(s);
+    }
+    return true;
+}
+
+void storeDaySummary(Day *day)
+{
+    Machine *cpap = day ? day->machine(MT_CPAP) : nullptr;
+    if (cpap && cpap->getProfileId() > 0) DailySummaryRepository().calculateAndStoreFromDay(day, cpap->getProfileId());
 }
 
 void clearDay(Day *day)

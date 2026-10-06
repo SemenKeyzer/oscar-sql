@@ -265,6 +265,8 @@ class Statistics : public QObject
     const QList<StatisticsRow> &rowList() const { return rows; }
 
     static void updateReportDate();
+    //! Deletes the cached settings rows, so they are counted again (after manual scoring changed).
+    static void forgetRXChanges();
     static void resetReportDate();
 
     void adjustRange(QDate& start , QDate& last);

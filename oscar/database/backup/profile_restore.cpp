@@ -1094,7 +1094,8 @@ bool ProfileRestore::executeSqlFile(const QString& sqlFile)
                         newFk = m_machineIdMap.value(oldFk, -1);
 
                     } else if (col == QLatin1String("session_id")
-                               && tableName != QLatin1String("sessions")) {
+                               && tableName != QLatin1String("sessions")
+                               && !tableName.startsWith(QLatin1String("manual_scoring"))) {
                         // sessions.session_id is the machine's native session ID
                         // (natural key), not a FK to sessions.id — never remap it.
                         newFk = m_sessionIdMap.value(oldFk, -1);
@@ -1110,8 +1111,10 @@ bool ProfileRestore::executeSqlFile(const QString& sqlFile)
                         remapped = QString::number(newFk);
                     } else if (newFk == -1) {
                         // Mapping not found — determine whether this is fatal.
+                        // manual_scoring keys by the device's session number, not a session row
                         if ((col == QLatin1String("session_id")
-                             && tableName != QLatin1String("sessions"))
+                             && tableName != QLatin1String("sessions")
+                             && !tableName.startsWith(QLatin1String("manual_scoring")))
                          || (col == QLatin1String("session_channel_id"))
                          || (col == QLatin1String("eventlist_id"))
                          || (col == QLatin1String("machine_id")
@@ -1234,7 +1237,9 @@ bool ProfileRestore::restoreInTransaction()
         QStringLiteral("session_slices"),
         QStringLiteral("event_lists"),
         QStringLiteral("event_data"),
-        QStringLiteral("daily_summaries")
+        QStringLiteral("daily_summaries"),
+        QStringLiteral("manual_scoring"),
+        QStringLiteral("manual_scoring_summary")
     };
 
     qDebug() << "ProfileRestore::restoreInTransaction entered";

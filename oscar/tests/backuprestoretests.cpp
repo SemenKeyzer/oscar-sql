@@ -337,6 +337,41 @@ bool extract(const QString &zipPath, const QString &destDir)
 // The temp folder the restore extracts into is reached through a symlink on macOS
 // (/var -> /private/var). Ordinary entries must still extract there, while an entry that
 // climbs out of the folder is refused and nothing is written outside it.
+// the doctor's manual scoring travels with the profile, keyed by the device's own session number
+void BackupRestoreTests::testBackupKeepsManualScoring()
+{
+    QSqlQuery q(DatabaseManager::instance().database());
+    q.prepare(QStringLiteral("INSERT INTO manual_scoring (profile_id, machine_serial, session_id, kind, channel, new_channel, start_ms, end_ms, note, created_at) "
+                             "VALUES (?, 'SN1', 424242, 'exclude', 0, 0, 1000, 2000, 'awake', '2026-10-07T08:00:00')"));
+    q.addBindValue(m_profileId);
+    QVERIFY(q.exec());
+    q.prepare(QStringLiteral("INSERT INTO manual_scoring_summary (profile_id, machine_serial, session_id, deltas, excluded_ms, not_found) "
+                             "VALUES (?, 'SN1', 424242, '', 1000, 0)"));
+    q.addBindValue(m_profileId);
+    QVERIFY(q.exec());
+
+    const QString package = makePackage(false, QStringLiteral("scoring"));
+    QVERIFY(!package.isEmpty());
+    ProfileRestore restore(package);
+    QVERIFY2(restore.validatePackage(), qPrintable(restore.getErrorMessage()));
+    QVERIFY(restore.checkCompatibility());
+    restore.setNewUsername(QStringLiteral("Carol"));
+    restore.setConflictResolution(ConflictResolution::Rename);
+    QVERIFY2(restore.restoreProfile(), qPrintable(restore.getErrorMessage()));
+    const qint64 carol = restore.getRestoredProfileId();
+    QVERIFY(carol > 0 && carol != m_profileId);
+
+    q.prepare(QStringLiteral("SELECT session_id, note FROM manual_scoring WHERE profile_id = ?"));
+    q.addBindValue(carol);
+    QVERIFY(q.exec() && q.next());
+    QCOMPARE(q.value(0).toLongLong(), qint64(424242));   // the device's number, not remapped
+    QCOMPARE(q.value(1).toString(), QStringLiteral("awake"));
+    q.prepare(QStringLiteral("SELECT excluded_ms FROM manual_scoring_summary WHERE profile_id = ? AND session_id = 424242"));
+    q.addBindValue(carol);
+    QVERIFY(q.exec() && q.next());
+    QCOMPARE(q.value(0).toLongLong(), qint64(1000));
+}
+
 void BackupRestoreTests::testExtractKeepsEntriesInsideRoot()
 {
     QTemporaryDir tmp(QDir::tempPath() + QStringLiteral("/oscar-zipslip-XXXXXX"));
