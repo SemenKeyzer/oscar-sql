@@ -366,6 +366,7 @@ SOURCES += \
     preferencessearch.cpp \
     pdfreportoptions.cpp \
     glossary.cpp \
+    helpstrip.cpp \
     uiglossary.cpp \
     helptips.cpp \
     helppanel.cpp \
@@ -695,6 +696,7 @@ HEADERS  += \
     preferencessearch.h \
     pdfreportoptions.h \
     glossary.h \
+    helpstrip.h \
     uiglossary.h \
     helptips.h \
     helppanel.h \
@@ -911,6 +913,7 @@ test {
         tests/glossarytests.cpp \
         tests/helptipstests.cpp \
         tests/helppaneltests.cpp \
+        tests/helpstriptests.cpp \
         tests/helplinkstests.cpp \
         tests/htmlpagestests.cpp \
         tests/channelstoretests.cpp \
@@ -960,6 +963,7 @@ test {
         tests/glossarytests.h \
         tests/helptipstests.h \
         tests/helppaneltests.h \
+        tests/helpstriptests.h \
         tests/helplinkstests.h \
         tests/htmlpagestests.h \
         tests/channelstoretests.h \
