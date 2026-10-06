@@ -27,6 +27,7 @@
 
 #include "SleepLib/profiles.h"
 #include "overview.h"
+#include "glossary.h"
 #include "ui_overview.h"
 #include "combocheckdelegate.h"
 #include "common_gui.h"
@@ -504,10 +505,23 @@ void Overview::setGraphVisibility(const OverviewPresets::Visibility &visibility)
 // Create an overview graph, adding it to the overview gGraphView object
 // param QString name  The title of the graph
 // param QString units The units of measurements to show in the popup
+QString Overview::helpKeyForGraph(const QString &name)
+{
+    static const QHash<QString, QString> graphs {
+        { "AHIBreakdown", "ahi" }, { STR_GRAPH_Usage, "usage" }, { "New Session", "sessions" }, { "Pressure Settings", "pressure" },
+        { "AnalysisAHI", "an_ahi" }, { "AnalysisODI", "odi3" }, { "AnalysisSpO2Ranges", "t90" }, { "AnalysisZones", "oxi_zones" },
+        { "AnalysisHB", "hypoxic_burden" }, { "AnalysisFL", "fl_time" }, { "AnalysisFLMinutes", "fl_time" },
+        { "AnalysisGlasgow", "glasgow" }, { "AnalysisPulseRises", "pulse_change" },
+    };
+    const QString key = graphs.value(name);
+    return key.isEmpty() ? Glossary::keyForChannel(schema::channel[name].id()) : key;
+}
+
 gGraph *Overview::createGraph(QString code, QString name, QString units, YTickerType yttype)
 {
     int default_height = AppSetting->graphHeight();
     gGraph *g = new gGraph(code, GraphView, name, units, default_height, 0);
+    g->setHelpKey(helpKeyForGraph(code));
 
     gYAxis *yt;
 

@@ -52,6 +52,7 @@ HelpPanel::HelpPanel(QWidget *parent) : QDockWidget(tr("Help Panel"), parent)
 
 void HelpPanel::show(const QString &key)
 {
+    if (key == m_key) return;   // hovering the same graph keeps sending its key
     const QString html = Glossary::panel(key);
     if (html.isEmpty()) return;
     m_key = key;

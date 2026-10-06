@@ -73,6 +73,8 @@ class Overview : public QWidget
     Q_OBJECT
 
   public:
+    //! The glossary entry explaining the Overview graph \a name; empty when its channel's description does.
+    static QString helpKeyForGraph(const QString &name);
     explicit Overview(QWidget *parent, gGraphView *shared = nullptr);
     ~Overview();
 

@@ -21,6 +21,7 @@ private slots:
     void initTestCase();
     void cleanupTestCase();
     void testHelpLinkDoesNotNavigate();
+    void testGraphKeysComplete();
 private:
     QApplication *m_app = nullptr;
 };

@@ -17,7 +17,11 @@
 #include <QTextDocument>
 
 #include "SleepLib/schema.h"
+#include "Graphs/gAnalysisCharts.h"
+#include "daily.h"
+#include "glossary.h"
 #include "helptips.h"
+#include "overview.h"
 #include "mytextbrowser.h"
 
 namespace {
@@ -88,4 +92,24 @@ void HelpLinksTests::testHelpLinkDoesNotNavigate()
 
     QTest::mouseClick(browser.viewport(), Qt::LeftButton, Qt::NoModifier, anchorPoint(browser, QStringLiteral("daily=2026-10-01")));
     QCOMPARE(clicked.count(), 1);   // the page's own link still works
+}
+
+// Every graph of Daily and of Overview's analysis set explains itself: its own entry, or its
+// channel's description.
+void HelpLinksTests::testGraphKeysComplete()
+{
+    for (const QString &name : Daily::standardGraphNames()) {
+        const QString key = Daily::helpKeyForGraph(name);
+        const bool known = !key.isEmpty() && Glossary::find(key);
+        const bool channelText = !Glossary::channelTooltip(schema::channel[name].id()).isEmpty();
+        QVERIFY2(known || channelText, qPrintable(name));
+    }
+    QCOMPARE(Daily::helpKeyForGraph(QStringLiteral("SF")), QStringLiteral("event_flags"));
+    QCOMPARE(Daily::helpKeyForGraph(QStringLiteral("AnGlasgowIndex")), QStringLiteral("glasgow"));
+    for (gAnalysisChart::Kind kind : gAnalysisChart::kinds()) {
+        const QString key = Overview::helpKeyForGraph(gAnalysisChart::code(kind));
+        QVERIFY2(Glossary::find(key), qPrintable(gAnalysisChart::code(kind)));
+    }
+    QCOMPARE(Overview::helpKeyForGraph(QStringLiteral("AHIBreakdown")), QStringLiteral("ahi"));
+    QCOMPARE(Overview::helpKeyForGraph(QStringLiteral("Leak")), QStringLiteral("leak"));
 }

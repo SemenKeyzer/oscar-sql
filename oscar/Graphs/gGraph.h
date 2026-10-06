@@ -170,6 +170,9 @@ class gGraph : public QObject
 
     //! \brief Sets the measurement Units the Y scale is referring to
     void setUnits(const QString units) { m_units = units; }
+    //! The glossary entry explaining this graph; empty for none.
+    QString helpKey() const { return m_helpKey; }
+    void setHelpKey(const QString &key) { m_helpKey = key; }
 
     //virtual void repaint(); // Repaint individual graph..
 
@@ -380,6 +383,7 @@ class gGraph : public QObject
     gGraphView *m_graphview;
     QString m_title;
     QString m_units;
+    QString m_helpKey;
 
     //! \brief Vector containing all this graphs Layers
     QVector<Layer *> m_layers;

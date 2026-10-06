@@ -111,6 +111,10 @@ public:
     void LoadDate(QDate date);
     //! As LoadDate(), but the day is loaded before this returns: for printing one day after another.
     void LoadDateNow(QDate date);
+    //! The names of the graphs in their standard order.
+    static QStringList standardGraphNames();
+    //! The glossary entry explaining the graph \a name; empty when its channel's description does.
+    static QString helpKeyForGraph(const QString &name);
 
     /*! \fn getDate()
         \brief Returns the most recently loaded Date

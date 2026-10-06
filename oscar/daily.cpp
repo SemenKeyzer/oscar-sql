@@ -581,6 +581,7 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
         g->AddLayer(glasgow);
         g->setForceMinY(0);
     }
+    for (auto it = graphlist.cbegin(); it != graphlist.cend(); ++it) it.value()->setHelpKey(helpKeyForGraph(it.key()));
     //graphlist[schema::channel[CPAP_RespiratoryEvent].code()]->AddLayer(AddCPAP(new gLineChart(CPAP_RespiratoryEvent, true)));
     if (auto *g = graphlist.value(schema::channel[CPAP_IE].code())) g->AddLayer(lc=new gLineChart(CPAP_IE, false));      // this should be inverse of supplied value
     if (auto *g = graphlist.value(schema::channel[CPAP_Te].code())) g->AddLayer(lc=new gLineChart(CPAP_Te, false));
@@ -1289,6 +1290,18 @@ void Daily::LoadDate(QDate date)
     }
     selectCalendarDate(date);
     on_calendar_selectionChanged();
+}
+
+QStringList Daily::standardGraphNames() { return standardGraphOrder; }
+
+QString Daily::helpKeyForGraph(const QString &name)
+{
+    static const QHash<QString, QString> graphs {
+        { STR_GRAPH_SleepFlags, "event_flags" }, { STR_GRAPH_AnalysisFlags, "an_flags" }, { STR_GRAPH_AHI, "ahi" },
+        { STR_GRAPH_TAP, "pressure" },
+    };
+    const QString key = graphs.value(name);
+    return key.isEmpty() ? Glossary::keyForChannel(schema::channel[name].id()) : key;
 }
 
 void Daily::LoadDateNow(QDate date)

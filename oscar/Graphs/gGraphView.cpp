@@ -29,6 +29,11 @@
 #include <QFile>
 #include "Graphs/gGraphView.h"
 
+#include <QTextDocumentFragment>
+
+#include "glossary.h"
+#include "helptips.h"
+
 
 #ifdef DEBUG_EFFICIENCY
 # include <QElapsedTimer>
@@ -2123,6 +2128,13 @@ void gGraphView::mouseMoveEvent(QMouseEvent *event)
                                                     if (i<count) {
                                                         ChannelID code=fg->visibleLayers()[i]->code();
                                                         QString ttip=schema::channel[code].description();
+                                                        if (HelpTips::instance()->enabled()) {
+                                                            const QString key = Glossary::keyForChannel(code);
+                                                            if (!key.isEmpty()) {
+                                                                ttip = QTextDocumentFragment::fromHtml(Glossary::tooltip(key)).toPlainText();
+                                                                HelpTips::instance()->hover(key);
+                                                            }
+                                                        }
                                                         m_tooltip->display(ttip,x,y-20,AppSetting->tooltipTimeout());
                                                         redraw();
                                                         //qDebug() << code << ttip;
@@ -2133,7 +2145,14 @@ void gGraphView::mouseMoveEvent(QMouseEvent *event)
                                             }
                                         }
                                     } else {
-                                        if (!m_graphs[i]->units().isEmpty()) {
+                                        const QString key = m_graphs[i]->helpKey();
+                                        if (HelpTips::instance()->enabled() && !key.isEmpty() && Glossary::find(key)) {
+                                            // what the graph shows, from the glossary, and its full article in the help panel
+                                            m_tooltip->display(QTextDocumentFragment::fromHtml(Glossary::tooltip(key)).toPlainText(), x, y-20,
+                                                               AppSetting->tooltipTimeout());
+                                            HelpTips::instance()->hover(key);
+                                            redraw();
+                                        } else if (!m_graphs[i]->units().isEmpty()) {
                                             m_tooltip->display(m_graphs[i]->units(),x,y-20,AppSetting->tooltipTimeout());
                                             redraw();
                                         }
