@@ -51,6 +51,7 @@ void GlossaryTests::testRequiredKeys()
         "gi_inspirrate", "gi_multibreath", "gi_ampvar", "best_value", "few_nights",
     };
     for (const QString &k : required) QVERIFY2(Glossary::find(k) != nullptr, qPrintable(k));
+    QVERIFY(Glossary::find(QStringLiteral("manual_scoring")));   // the sidebar block and the AHI notes link to it
 }
 
 void GlossaryTests::testTooltipAndPanel()

@@ -218,7 +218,7 @@ void UiCoverageTests::testOximportCovered()
 
 void UiCoverageTests::testCodeCreatedControlsCovered()
 {
-    QStringList keys = { QStringLiteral("ui.menu.actionRecalculateAnalysis"), QStringLiteral("ui.menu.actionHelpPanel"), QStringLiteral("ui.daily.alignButton"),
+    QStringList keys = { QStringLiteral("ui.menu.actionRecalculateAnalysis"), QStringLiteral("ui.menu.actionHelpPanel"), QStringLiteral("ui.daily.alignButton"), QStringLiteral("ui.daily.scoringButton"),
                          QStringLiteral("ui.prefs.searchSettings"), QStringLiteral("ui.oximport.bluetoothImportButton"),
                          QStringLiteral("ui.oximport.bluetoothRetryButton"), QStringLiteral("ui.oximport.bluetoothDoneButton") };
     // the Daily search tab is built in code
