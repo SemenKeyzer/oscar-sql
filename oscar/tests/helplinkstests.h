@@ -24,6 +24,7 @@ private slots:
     void testGraphKeysComplete();
     void testDragOntoTermDoesNotOpen();
     void testKeyboardOpensHelpLink();
+    void testSelectInsideTermDoesNotOpen();
 private:
     QApplication *m_app = nullptr;
 };

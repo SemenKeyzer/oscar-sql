@@ -16,6 +16,7 @@
 #include <QLabel>
 #include <QMenu>
 #include <QTextDocument>
+#include <QTextDocumentFragment>
 #include <QToolTip>
 #include <QWidget>
 
@@ -190,9 +191,13 @@ bool HelpTips::eventFilter(QObject *o, QEvent *e)
             if (e->type() == QEvent::Enter) {
                 hover(key);
             } else if (QString tip = Glossary::tooltip(key); !tip.isEmpty()) {
-                // the control's own tooltip may say more (a warning, a format): it stays, under the explanation
-                const QString own = static_cast<QWidget *>(o)->toolTip();
-                if (!own.isEmpty()) tip += QStringLiteral("<hr>") + (Qt::mightBeRichText(own) ? own : own.toHtmlEscaped());
+                // a control with a warning keeps its own tooltip under the explanation, as plain text;
+                // elsewhere it mostly repeats the explanation
+                const GlossaryEntry *entry = Glossary::find(key);
+                QString own = static_cast<QWidget *>(o)->toolTip();
+                if (Qt::mightBeRichText(own)) own = QTextDocumentFragment::fromHtml(own).toPlainText();
+                if (entry && !entry->caution.isEmpty() && !own.trimmed().isEmpty())
+                    tip += QStringLiteral("<hr>") + own.trimmed().toHtmlEscaped();
                 QToolTip::showText(static_cast<QHelpEvent *>(e)->globalPos(), tip, static_cast<QWidget *>(o));
                 return true;
             }

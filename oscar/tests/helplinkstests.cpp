@@ -155,3 +155,20 @@ void HelpLinksTests::testKeyboardOpensHelpLink()
     QCOMPARE(opened.count(), 1);
     QCOMPARE(opened.first().first().toString(), QStringLiteral("ahi"));
 }
+
+// Selecting part of a term with the mouse does not open it either.
+void HelpLinksTests::testSelectInsideTermDoesNotOpen()
+{
+    MyTextBrowser browser(nullptr);
+    showTermPage(browser);
+    QVERIFY(QTest::qWaitForWindowExposed(&browser));
+    QSignalSpy opened(HelpTips::instance(), &HelpTips::openRequested);
+    const QPoint start = anchorPoint(browser, QStringLiteral("help:ahi"));
+    QVERIFY(!start.isNull());
+    const QPoint end = start + QPoint(browser.fontMetrics().horizontalAdvance(QStringLiteral("AHI val")), 0);
+    QTest::mousePress(browser.viewport(), Qt::LeftButton, Qt::NoModifier, start);
+    QMouseEvent move(QEvent::MouseMove, end, browser.viewport()->mapToGlobal(end), Qt::NoButton, Qt::LeftButton, Qt::NoModifier);
+    QApplication::sendEvent(browser.viewport(), &move);
+    QTest::mouseRelease(browser.viewport(), Qt::LeftButton, Qt::NoModifier, end);
+    QCOMPARE(opened.count(), 0);
+}

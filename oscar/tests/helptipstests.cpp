@@ -288,7 +288,8 @@ void HelpTipsTests::testTermKeepsTooltipOutOfArg()
     QVERIFY2(!html.contains(QStringLiteral("about 5.2")), qPrintable(html));
 }
 
-// A control's own Qt tooltip still shows, under the explanation.
+// A control with a warning keeps its own Qt tooltip under the explanation, as plain text;
+// the others show only the explanation (their own tooltip mostly says the same).
 void HelpTipsTests::testOwnTooltipKept()
 {
     QLabel label(QStringLiteral("AHI"));
@@ -299,7 +300,15 @@ void HelpTipsTests::testOwnTooltipKept()
     QHelpEvent help(QEvent::ToolTip, QPoint(5, 5), label.mapToGlobal(QPoint(5, 5)));
     QApplication::sendEvent(&label, &help);
     QVERIFY2(QToolTip::text().contains(QStringLiteral("Apnea-Hypopnea")), qPrintable(QToolTip::text()));
-    QVERIFY2(QToolTip::text().contains(QStringLiteral("Own words of the control")), qPrintable(QToolTip::text()));
+    QVERIFY2(!QToolTip::text().contains(QStringLiteral("Own words")), qPrintable(QToolTip::text()));
+
+    const QString warned = QStringLiteral("ui.prefs.LockSummarySessionSplitting");
+    QVERIFY(!Glossary::find(warned)->caution.isEmpty());
+    label.setToolTip(QStringLiteral("<html><head/><body><p><span style=\" font-size:11pt;\">Read this warning</span></p></body></html>"));
+    HelpTips::attach(&label, warned);
+    QApplication::sendEvent(&label, &help);
+    QVERIFY2(QToolTip::text().contains(QStringLiteral("Read this warning")), qPrintable(QToolTip::text()));
+    QVERIFY2(!QToolTip::text().contains(QStringLiteral("font-size")), qPrintable(QToolTip::text()));
     QToolTip::hideText();
 }
 

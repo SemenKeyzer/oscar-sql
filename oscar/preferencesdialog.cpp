@@ -476,6 +476,9 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
     buttonRow->setContentsMargins(0, 0, 0, 0);
     ui->gridLayout_17->removeWidget(ui->cancelButton);
     ui->gridLayout_17->removeWidget(ui->okButton);
+    ui->gridLayout_17->removeItem(ui->horizontalSpacer_5);   // or its empty row stays under the page
+    delete ui->horizontalSpacer_5;
+    ui->horizontalSpacer_5 = nullptr;
     buttonRow->addWidget(ui->cancelButton);
     buttonRow->addWidget(ui->okButton);
     buttonRow->addStretch();

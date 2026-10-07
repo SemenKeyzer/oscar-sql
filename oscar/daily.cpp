@@ -2486,7 +2486,8 @@ void MyTextBrowser::mouseReleaseEvent(QMouseEvent *e)
 {
     const QString key = HelpTips::keyOf(QUrl(anchorAt(e->position().toPoint())));
     const QString pressed = std::exchange(m_pressedKey, QString());
-    if (e->button() == Qt::LeftButton && !key.isEmpty() && key == pressed) {   // not the end of a drag-select
+    // not the end of a drag-select, nor a selection inside the term
+    if (e->button() == Qt::LeftButton && !key.isEmpty() && key == pressed && !textCursor().hasSelection()) {
         HelpTips::instance()->open(key);
         e->accept();
         return;
