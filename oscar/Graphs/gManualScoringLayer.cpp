@@ -56,12 +56,23 @@ void gManualScoringLayer::paint(QPainter &painter, gGraph &w, const QRegion &reg
     painter.save();
     painter.setClipRect(r);
     for (const Item &it : items(*m_result, w.min_x, w.max_x, m_markers)) {
-        const double x1 = px(it.start), x2 = qMax(px(it.end), x1 + 2);
+        // at least 4 px, so a short stretch still shows on a whole night
+        double x1 = px(it.start), x2 = px(it.end);
+        if (x2 - x1 < 4) {
+            const double mid = (x1 + x2) / 2;
+            x1 = mid - 2;
+            x2 = mid + 2;
+        }
         const QRectF box(x1, r.top(), x2 - x1, r.height());
         const QColor color = it.channel ? schema::channel[it.channel].defaultColor() : QColor(Qt::gray);
         switch (it.kind) {
         case Item::Excluded:
-            painter.fillRect(box, QBrush(QColor(128, 128, 128, 70), Qt::BDiagPattern));
+            painter.fillRect(box, QColor(128, 128, 128, 45));
+            painter.fillRect(box, QBrush(QColor(90, 90, 90, 140), Qt::BDiagPattern));
+            painter.setPen(QPen(QColor(90, 90, 90, 180), 1));
+            painter.drawLine(QPointF(x1, r.top()), QPointF(x1, r.bottom()));
+            painter.drawLine(QPointF(x2, r.top()), QPointF(x2, r.bottom()));
+            if (m_markers) painter.fillRect(QRectF(x1, r.top(), x2 - x1, 5), QColor(90, 90, 90));   // a tab on top
             break;
         case Item::Added:
             painter.setPen(QPen(color, 2, Qt::DashLine));

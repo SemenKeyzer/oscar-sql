@@ -32,6 +32,7 @@
 #include "SleepLib/schema.h"
 #include "database/manual_scoring_repository.h"
 #include "database/daily_summary_repository.h"
+#include "scoringmenus.h"
 #include "SleepLib/session.h"
 #include "Graphs/gFlagsLine.h"
 #include "database/analysis_daily_repository.h"
@@ -1964,5 +1965,37 @@ void AnalysisIntegrationTests::testDailySummaryFollowsScoring()
     const DailySummaryData row = DailySummaryRepository().findByProfileAndDate(m_profileId, date);
     QVERIFY(row.id > 0);
     QCOMPARE(row.ahi, double(day.calcAHI()));
+    ManualScoring::clearDay(&day);
+}
+
+// the list of the night's edits (Events tab and sidebar): one row per edit, a stretch kept with
+// two sessions once, in graph time
+void AnalysisIntegrationTests::testEditRowsListEveryEdit()
+{
+    Machine cpap(p_profile, 88);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    Session *a = scoredSession(&cpap, 881, m_machineRow);
+    Session *b = scoredSession(&cpap, 882, m_machineRow);
+    b->really_set_first(synth::kStart + 3600000);
+    b->really_set_last(synth::kStart + 7200000);
+    day.addSession(a);
+    day.addSession(b);
+    const ManualScoring::Edit stretch = scoringEdit(ManualScoring::Kind::Exclude, 0, 3000, 4200);
+    QVERIFY(ManualScoring::addEdit(a, stretch));
+    QVERIFY(ManualScoring::addEdit(b, stretch));
+    QVERIFY(ManualScoring::addEdit(a, scoringEdit(ManualScoring::Kind::Add, CPAP_Hypopnea, 480, 500)));
+    QVERIFY(ManualScoring::addEdit(a, scoringEdit(ManualScoring::Kind::Remove, CPAP_Obstructive, 88, 100)));
+
+    const QList<ScoringMenus::EditRow> rows = ScoringMenus::editRows(&day);
+    QCOMPARE(rows.size(), 3);
+    QCOMPARE(rows[0].timeMs, synth::kStart + 100000);   // in time order
+    QVERIFY(rows[0].text.contains(QStringLiteral("removed")));
+    QCOMPARE(rows[1].timeMs, synth::kStart + 500000);
+    QVERIFY(rows[1].text.contains(QStringLiteral("Hypopnea")));
+    QCOMPARE(rows[2].timeMs, synth::kStart + 3000000);   // a stretch: where it starts
+    QVERIFY(rows[2].text.contains(QStringLiteral("excluded 20 min")));
+    QVERIFY(rows[2].editId > 0);
     ManualScoring::clearDay(&day);
 }

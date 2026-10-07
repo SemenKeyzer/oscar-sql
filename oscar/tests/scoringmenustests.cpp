@@ -10,6 +10,7 @@
 
 #include <QApplication>
 #include <QMenu>
+#include <QTreeWidgetItem>
 
 #include "SleepLib/schema.h"
 #include "scoringmenus.h"
@@ -126,4 +127,18 @@ void ScoringMenusTests::testExcludedMenu()
     QCOMPARE(texts(m.data()), QStringList({ QStringLiteral("Cancel exclusion") }));
     QCOMPARE(m->actions().first()->data().toMap().value(QStringLiteral("editId")).toLongLong(), qint64(7));
     QCOMPARE(m->actions().first()->data().toMap().value(QStringLiteral("action")).toString(), QStringLiteral("undo"));
+}
+
+void ScoringMenusTests::testTreeNode()
+{
+    const QList<ScoringMenus::EditRow> rows = { { 7, 1000000, QStringLiteral("removed: Obstructive apnea") },
+                                                { 9, 2000000, QStringLiteral("excluded 1 min") } };
+    QScopedPointer<QTreeWidgetItem> node(ScoringMenus::treeNode(rows));
+    QCOMPARE(node->text(0), QStringLiteral("Manual scoring (2)"));
+    QCOMPARE(node->type(), ScoringMenus::kTreeNodeType);
+    QCOMPARE(node->childCount(), 2);
+    QVERIFY(node->child(1)->text(0).endsWith(QStringLiteral("excluded 1 min")));
+    QCOMPARE(node->child(1)->data(0, Qt::UserRole).toLongLong(), qint64(2000000));
+    QCOMPARE(node->child(1)->data(0, ScoringMenus::kEditIdRole).toLongLong(), qint64(9));
+    QVERIFY(!ScoringMenus::treeNode({}));   // nothing to list: no node
 }

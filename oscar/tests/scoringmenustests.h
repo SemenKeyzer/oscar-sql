@@ -25,6 +25,7 @@ private slots:
     void testEventMenu();
     void testUndoOnlyForEdited();
     void testExcludedMenu();
+    void testTreeNode();
 private:
     QApplication *m_app = nullptr;
 };

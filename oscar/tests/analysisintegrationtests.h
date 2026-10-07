@@ -36,6 +36,7 @@ private slots:
     void testRxCacheKeepsAhiHours();
     void testUndoStretchAcrossSessions();
     void testDailySummaryFollowsScoring();
+    void testEditRowsListEveryEdit();
     void initTestCase();
     void cleanupTestCase();
     void testAnalysisChannelsAreComputed();

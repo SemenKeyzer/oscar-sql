@@ -8,9 +8,16 @@
 
 #include "scoringmenus.h"
 
+#include <QDateTime>
 #include <QMenu>
+#include <QSet>
+#include <QTreeWidgetItem>
+#include <algorithm>
 
+#include "SleepLib/day.h"
 #include "SleepLib/schema.h"
+#include "SleepLib/session.h"
+#include "database/manual_scoring_repository.h"
 
 using ManualScoring::EffectiveEvent;
 using ManualScoring::Origin;
@@ -75,4 +82,51 @@ QMenu *ScoringMenus::forExcluded(qint64 editId, QWidget *parent)
     menu->setObjectName(QStringLiteral("scoringExcludedMenu"));
     menu->addAction(tr("Cancel exclusion"))->setData(data("undo", 0, 0, 0, editId));
     return menu;
+}
+
+QList<ScoringMenus::EditRow> ScoringMenus::editRows(Day *day)
+{
+    using ManualScoring::Kind;
+    QList<EditRow> rows;
+    if (!day) return rows;
+    QSet<QPair<qint64, qint64>> stretches;
+    for (Session *s : day->sessions) {
+        if (s->type() != MT_CPAP) continue;
+        const qint64 c = s->correctionMs();   // stored in device time, listed in graph time
+        for (const ManualScoring::Edit &e : ManualScoringRepository::editsForSession(ManualScoring::keyOf(s))) {
+            QString text;
+            qint64 at = e.endMs + c;
+            switch (e.kind) {
+            case Kind::Add: text = tr("added: %1").arg(typeName(e.channel)); break;
+            case Kind::Remove: text = tr("removed: %1").arg(typeName(e.channel)); break;
+            case Kind::Retype: text = tr("%1 → %2").arg(typeName(e.channel), typeName(e.newChannel)); break;
+            case Kind::Exclude: {
+                const QPair<qint64, qint64> span(e.startMs, e.endMs);
+                if (stretches.contains(span)) continue;
+                stretches.insert(span);
+                at = e.startMs + c;
+                const qint64 seconds = (e.endMs - e.startMs) / 1000;
+                text = seconds < 120 ? tr("excluded %1 s").arg(seconds) : tr("excluded %1 min").arg(qRound(seconds / 60.0));
+                break;
+            }
+            }
+            rows.append({ e.id, at, text });
+        }
+    }
+    std::sort(rows.begin(), rows.end(), [](const EditRow &a, const EditRow &b) { return a.timeMs < b.timeMs; });
+    return rows;
+}
+
+QTreeWidgetItem *ScoringMenus::treeNode(const QList<EditRow> &rows)
+{
+    if (rows.isEmpty()) return nullptr;
+    auto *node = new QTreeWidgetItem(QStringList(tr("Manual scoring (%1)").arg(rows.size())), kTreeNodeType);
+    for (const EditRow &r : rows) {
+        const QString time = QDateTime::fromMSecsSinceEpoch(r.timeMs).time().toString(QStringLiteral("HH:mm:ss"));
+        auto *item = new QTreeWidgetItem(QStringList(QStringLiteral("%1 — %2").arg(time, r.text)));
+        item->setData(0, Qt::UserRole, r.timeMs);
+        item->setData(0, kEditIdRole, r.editId);
+        node->addChild(item);
+    }
+    return node;
 }

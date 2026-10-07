@@ -751,6 +751,26 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     m_scoringBanner->hide();
     ui->verticalLayout_3->insertWidget(ui->verticalLayout_3->indexOf(ui->graphMainArea), m_scoringBanner);
     connect(scoringButton, &QPushButton::toggled, this, &Daily::onScoringButtonToggled);
+    ui->treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->treeWidget, &QTreeWidget::customContextMenuRequested, this, [this](const QPoint &pos) {
+        QTreeWidgetItem *item = ui->treeWidget->itemAt(pos);
+        Day *day = p_profile->GetDay(previous_date, MT_CPAP);
+        if (!item || !day) return;
+        QMenu menu(this);
+        const bool isNode = item->type() == ScoringMenus::kTreeNodeType;
+        const bool isEdit = !isNode && item->parent() && item->parent()->type() == ScoringMenus::kTreeNodeType;
+        if (!isNode && !isEdit) return;
+        QAction *act = menu.addAction(isNode ? tr("Undo all scoring of this night") : tr("Undo this change"));
+        if (menu.exec(ui->treeWidget->viewport()->mapToGlobal(pos)) != act) return;
+        if (isNode) {
+            if (QMessageBox::question(this, tr("Manual scoring"), tr("Undo all manual scoring of this night?"),
+                                      QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes) return;
+            ManualScoring::clearDay(day);
+        } else {
+            ManualScoring::undoEdit(day, item->data(0, ScoringMenus::kEditIdRole).toLongLong());
+        }
+        scoringChanged();
+    });
     connect(GraphView, &gGraphView::scoringRangeSelected, this, &Daily::onScoringRange);
     connect(GraphView, &gGraphView::scoringContextRequested, this, &Daily::onScoringContext);
     connect(GraphView, &gGraphView::scoringModeExitRequested, this, [this]() { scoringButton->setChecked(false); });
@@ -866,8 +886,9 @@ void Daily::Link_clicked(const QUrl &url)
                 if (what == QLatin1String("undo")) {
                     ManualScoring::undoEdit(sday, id);
                     scoringChanged();
-                } else {   // jump: a minute either side
-                    GraphView->SetXBounds(e.startMs - 60000, e.endMs + 60000);
+                } else {   // jump: a minute either side, on the graphs' clock
+                    const qint64 c = s->correctionMs();
+                    GraphView->SetXBounds(e.startMs + c - 60000, e.endMs + c + 60000);
                 }
                 return;
             }
@@ -1162,6 +1183,13 @@ void Daily::UpdateEventsTree(QTreeWidget *tree,Day *day)
     // Sort the top-level nodes (i.e., event types)
     // note: Done here so that UA occurs before Session Start/End
     tree->sortByColumn(0,Qt::AscendingOrder);
+
+    // the doctor's manual scoring first: click a row to go there, right-click to undo it
+    if (QTreeWidgetItem *scoring = ScoringMenus::treeNode(ScoringMenus::editRows(day))) {
+        tree->insertTopLevelItem(0, scoring);
+        scoring->setExpanded(true);
+        ++cnt;
+    }
 
     if (day->hasMachine(MT_CPAP) || day->hasMachine(MT_OXIMETER) || day->hasMachine(MT_POSITION)) {
         QTreeWidgetItem * start = new QTreeWidgetItem(QStringList(tr("Session Start Times")),eventTypeStart);
@@ -3161,7 +3189,10 @@ void Daily::on_treeWidget_itemClicked(QTreeWidgetItem *item, int )
         qint64 small  = period/10;
 
         qint64 start,end;
-        if (eventType == eventTypeStart ) {
+        if (eventType == ScoringMenus::kTreeNodeType) {   // a manual edit: centred
+            start = time - period / 2;
+            end = time + period / 2;
+        } else if (eventType == eventTypeStart ) {
             start = time - small;
             end = time + period;
         } else {
@@ -4355,42 +4386,32 @@ QString Daily::getManualScoring(Day *day)
 {
     if (!day || !day->hasManualScoring()) return QString();
     using ManualScoring::Kind;
-    int added = 0, removed = 0, retyped = 0, stretches = 0, notFound = 0;
-    QSet<QPair<qint64, qint64>> stretchesSeen;
+    int added = 0, removed = 0, retyped = 0, notFound = 0;
     qint64 excludedMs = 0;
-    QString rows;
+    QSet<QPair<qint64, qint64>> stretches;
     for (Session *s : day->sessions) {
         if (s->type() != MT_CPAP) continue;
         excludedMs += s->manualExcludedMs();
         notFound += s->manualNotFound();
         for (const ManualScoring::Edit &e : ManualScoringRepository::editsForSession(ManualScoring::keyOf(s))) {
-            if (e.kind == Kind::Exclude) {   // a stretch over several sessions is listed once
-                const QPair<qint64, qint64> span(e.startMs, e.endMs);
-                if (stretchesSeen.contains(span)) continue;
-                stretchesSeen.insert(span);
-            }
-            QString what;
             switch (e.kind) {
-            case Kind::Add: ++added; what = tr("added: %1").arg(ScoringMenus::typeName(e.channel)); break;
-            case Kind::Remove: ++removed; what = tr("removed: %1").arg(ScoringMenus::typeName(e.channel)); break;
-            case Kind::Retype:
-                ++retyped;
-                what = tr("%1 → %2").arg(ScoringMenus::typeName(e.channel), ScoringMenus::typeName(e.newChannel));
-                break;
-            case Kind::Exclude:
-                ++stretches;
-                what = tr("excluded %1 min").arg(qRound((e.endMs - e.startMs) / 60000.0));
-                break;
+            case Kind::Add: ++added; break;
+            case Kind::Remove: ++removed; break;
+            case Kind::Retype: ++retyped; break;
+            case Kind::Exclude: stretches.insert({ e.startMs, e.endMs }); break;
             }
-            rows += QStringLiteral("<tr><td colspan=4><a href='scoring=jump:%1'>%2</a> %3</td><td align=right><a href='scoring=undo:%1' title='%4'>&#x2715;</a></td></tr>\n")
-                        .arg(e.id).arg(scoringTime(e.endMs), what.toHtmlEscaped(), tr("Undo this change").toHtmlEscaped());
         }
+    }
+    QString rows;
+    for (const ScoringMenus::EditRow &r : ScoringMenus::editRows(day)) {
+        rows += QStringLiteral("<tr><td colspan=4><a href='scoring=jump:%1'>%2</a> %3</td><td align=right><a href='scoring=undo:%1' title='%4'>&#x2715;</a></td></tr>\n")
+                    .arg(r.editId).arg(scoringTime(r.timeMs), r.text.toHtmlEscaped(), tr("Undo this change").toHtmlEscaped());
     }
     QString html = QStringLiteral("<table cellspacing=0 cellpadding=1 border=0 width='100%'>\n");
     html += QStringLiteral("<tr><td colspan=5 align=center><b>%1</b></td></tr>\n").arg(HelpTips::term(tr("Manual scoring"), QStringLiteral("manual_scoring")));
     html += QStringLiteral("<tr><td colspan=5>%1</td></tr>\n")
                 .arg(tr("added %1, removed %2, type changed %3, excluded %4 min (%5 stretches)")
-                         .arg(added).arg(removed).arg(retyped).arg(qRound(excludedMs / 60000.0)).arg(stretches).toHtmlEscaped());
+                         .arg(added).arg(removed).arg(retyped).arg(qRound(excludedMs / 60000.0)).arg(stretches.size()).toHtmlEscaped());
     if (notFound > 0) {
         html += QStringLiteral("<tr><td colspan=5><font color='#c0392b'>%1</font></td></tr>\n")
                     .arg(tr("%n change(s) refer to an event that is no longer there", nullptr, notFound).toHtmlEscaped());
