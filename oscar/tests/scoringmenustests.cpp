@@ -9,7 +9,9 @@
 #include "scoringmenustests.h"
 
 #include <QApplication>
+#include <QKeyEvent>
 #include <QMenu>
+#include <QSignalSpy>
 #include <QTreeWidgetItem>
 
 #include "SleepLib/schema.h"
@@ -25,7 +27,7 @@ QStringList texts(QMenu *menu)
 {
     QStringList out;
     for (QAction *a : menu->actions()) {
-        if (!a->isSeparator()) out << a->text();
+        if (!a->isSeparator()) out << a->text().section(QLatin1Char('\t'), 0, 0);   // without the key column
     }
     return out;
 }
@@ -33,7 +35,7 @@ QStringList texts(QMenu *menu)
 QAction *find(QMenu *menu, const QString &text)
 {
     for (QAction *a : menu->actions()) {
-        if (a->text() == text) return a;
+        if (a->text().section(QLatin1Char('\t'), 0, 0) == text) return a;
         if (a->menu()) {
             if (QAction *in = find(a->menu(), text)) return in;
         }
@@ -141,4 +143,32 @@ void ScoringMenusTests::testTreeNode()
     QCOMPARE(node->child(1)->data(0, Qt::UserRole).toLongLong(), qint64(2000000));
     QCOMPARE(node->child(1)->data(0, ScoringMenus::kEditIdRole).toLongLong(), qint64(9));
     QVERIFY(!ScoringMenus::treeNode({}));   // nothing to list: no node
+}
+
+// one letter picks an item, on the Latin and on the Russian layout (the same key)
+void ScoringMenusTests::testLetterKeys()
+{
+    QScopedPointer<QMenu> range(ScoringMenus::forRange(15000, nullptr));
+    QCOMPARE(find(range.data(), QStringLiteral("Hypopnea"))->text(), QStringLiteral("Hypopnea\tH"));
+    QCOMPARE(ScoringMenus::actionForKey(range.data(), QStringLiteral("h")), find(range.data(), QStringLiteral("Hypopnea")));
+    QCOMPARE(ScoringMenus::actionForKey(range.data(), QStringLiteral("р")), find(range.data(), QStringLiteral("Hypopnea")));   // Russian layout
+    QCOMPARE(ScoringMenus::actionForKey(range.data(), QStringLiteral("O")), find(range.data(), QStringLiteral("Obstructive apnea")));
+    QCOMPARE(ScoringMenus::actionForKey(range.data(), QStringLiteral("x")), find(range.data(), QStringLiteral("Exclude stretch (noise / awake)")));
+    QVERIFY(!ScoringMenus::actionForKey(range.data(), QStringLiteral("z")));
+
+    QScopedPointer<QMenu> ev(ScoringMenus::forEvent(scoredEvent(Origin::Retyped, CPAP_Obstructive, CPAP_ClearAirway, 42), nullptr));
+    QCOMPARE(ScoringMenus::actionForKey(ev.data(), QStringLiteral("r")), find(ev.data(), QStringLiteral("Remove event (do not count)")));
+    QAction *type = ScoringMenus::actionForKey(ev.data(), QStringLiteral("е"));   // T on the Russian layout
+    QVERIFY(type && type->menu());
+    QCOMPARE(ScoringMenus::actionForKey(type->menu(), QStringLiteral("c")), find(type->menu(), QStringLiteral("Central apnea")));
+    QCOMPARE(ScoringMenus::actionForKey(ev.data(), QStringLiteral("u")), find(ev.data(), QStringLiteral("Undo this change")));
+
+    // pressed in the open menu, the letter chooses the item
+    QScopedPointer<QMenu> open(ScoringMenus::forRange(15000, nullptr));
+    QSignalSpy chosen(open.data(), &QMenu::triggered);
+    open->popup(QPoint(10, 10));
+    QKeyEvent press(QEvent::KeyPress, Qt::Key_H, Qt::NoModifier, QStringLiteral("h"));
+    QCoreApplication::sendEvent(open.data(), &press);
+    QCOMPARE(chosen.count(), 1);
+    QCOMPARE(chosen.first().first().value<QAction *>(), find(open.data(), QStringLiteral("Hypopnea")));
 }

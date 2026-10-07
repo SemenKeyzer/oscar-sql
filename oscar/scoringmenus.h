@@ -14,6 +14,7 @@
 #include "SleepLib/manual_scoring.h"
 
 class Day;
+class QAction;
 class QMenu;
 class QTreeWidgetItem;
 class QWidget;
@@ -33,6 +34,9 @@ class ScoringMenus
     static QMenu *forExcluded(qint64 editId, QWidget *parent);
     //! The name of a scored channel in the menus: "Obstructive apnea", …
     static QString typeName(ChannelID channel);
+    //! The item of \a menu whose letter key is \a text (O C A H X R T U; the same keys on the
+    //! Russian layout too: Щ С Ф Р Ч К Е Г); null for none.
+    static QAction *actionForKey(QMenu *menu, const QString &text);
 
     //! One edit of a night as listed (Events tab, sidebar): where it is on the graphs and what it did.
     struct EditRow {
