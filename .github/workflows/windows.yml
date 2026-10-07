@@ -58,6 +58,12 @@ jobs:
           Remove-Item OSCAR-Windows\Translations\*.ts -ErrorAction SilentlyContinue
           windeployqt --release --compiler-runtime --no-translations OSCAR-Windows\OSCAR.exe
           if ($LASTEXITCODE -ne 0) { throw "windeployqt failed" }
+          # a start file that keeps this test build's data apart from an installed OSCAR's
+          Set-Content -Path "OSCAR-Windows\Start OSCAR (test data).bat" -Encoding ascii -Value @(
+            '@echo off',
+            'rem This test build keeps its data in Documents\OSCAR_Data_test, apart from an installed OSCAR.',
+            'start "" "%~dp0OSCAR.exe" --datadir OSCAR_Data_test'
+          )
           Get-ChildItem OSCAR-Windows | Format-Table Name, Length
 
       - name: Upload the zip
