@@ -23,6 +23,7 @@ private slots:
     void testRangeFromPixels();
     void testLayerItems();
     void testWholeNightGraphsUseWholeRange();
+    void testEventBoxesWhenZoomed();
     void initTestCase();
 };
 DECLARE_TEST(ScoringModeTests)

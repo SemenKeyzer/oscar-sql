@@ -100,3 +100,33 @@ void ScoringModeTests::testWholeNightGraphsUseWholeRange()
     QCOMPARE(zoomed.first, qint64(1000));
     QCOMPARE(zoomed.second, qint64(2000));
 }
+
+// zoomed in to 20 minutes or less, the flow graph shows each event as a box: "OA 12.0 s"
+void ScoringModeTests::testEventBoxesWhenZoomed()
+{
+    using ManualScoring::Origin;
+    using Item = gManualScoringLayer::Item;
+    ManualScoring::Result r;
+    r.events = { { CPAP_Obstructive, CPAP_Obstructive, 100000, 12, Origin::Device, 0, false },
+                 { CPAP_Hypopnea, CPAP_Hypopnea, 200000, 20, Origin::Added, 1, false },
+                 { CPAP_Obstructive, CPAP_ClearAirway, 300000, 15, Origin::Retyped, 2, false },
+                 { CPAP_ClearAirway, CPAP_ClearAirway, 400000, 11, Origin::Device, 0, true } };   // excluded: no box
+    const QString s = gManualScoringLayer::tr("s");
+    auto label = [&](ChannelID c, double sec) {
+        return QStringLiteral("%1 %2 %3").arg(schema::channel[c].label(), QLocale().toString(sec, 'f', 1), s);
+    };
+
+    const QList<Item> boxes = gManualScoringLayer::items(r, 0, 10 * 60000, true, true);
+    QCOMPARE(boxes.size(), 3);
+    QCOMPARE(int(boxes[0].kind), int(Item::Event));
+    QCOMPARE(boxes[0].start, qint64(88000));
+    QCOMPARE(boxes[0].label, label(CPAP_Obstructive, 12));
+    QCOMPARE(int(boxes[1].kind), int(Item::Added));
+    QVERIFY(boxes[1].label.startsWith(label(CPAP_Hypopnea, 20)));
+    QVERIFY(boxes[2].label.startsWith(label(CPAP_Obstructive, 15)));
+    QVERIFY(boxes[2].label.contains(QStringLiteral("was %1").arg(schema::channel[CPAP_ClearAirway].label())));
+
+    // the whole night, or a graph without boxes: no box for the device's own events
+    QCOMPARE(gManualScoringLayer::items(r, 0, 9 * 3600000, true, true).size(), 2);
+    QCOMPARE(gManualScoringLayer::items(r, 0, 10 * 60000, true, false).size(), 2);
+}

@@ -708,7 +708,7 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     for (auto it = graphlist.cbegin(); it != graphlist.cend(); ++it) {
         if (it.key() == STR_GRAPH_EventBreakdown) continue;   // not a time graph
         const bool markers = it.key() == STR_GRAPH_FlowRate || it.key() == STR_GRAPH_SleepFlags;
-        it.value()->AddLayer(new gManualScoringLayer(m_scoringDrawn, markers));
+        it.value()->AddLayer(new gManualScoringLayer(m_scoringDrawn, markers, it.key() == STR_GRAPH_FlowRate));
     }
 
     GraphView->resetLayout();

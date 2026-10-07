@@ -8,6 +8,7 @@
 
 #include "Graphs/gManualScoringLayer.h"
 
+#include <QLocale>
 #include <QPainter>
 
 #include "Graphs/gGraph.h"
@@ -16,26 +17,34 @@
 using ManualScoring::EffectiveEvent;
 using ManualScoring::Origin;
 
-gManualScoringLayer::gManualScoringLayer(QSharedPointer<ManualScoring::Result> result, bool drawsMarkers)
-    : Layer(NoChannel), m_result(result), m_markers(drawsMarkers)
+gManualScoringLayer::gManualScoringLayer(QSharedPointer<ManualScoring::Result> result, bool drawsMarkers, bool drawsBoxes)
+    : Layer(NoChannel), m_result(result), m_markers(drawsMarkers), m_boxes(drawsBoxes)
 {
 }
 
 QList<gManualScoringLayer::Item> gManualScoringLayer::items(const ManualScoring::Result &result, qint64 minX, qint64 maxX,
-                                                            bool markers)
+                                                            bool markers, bool boxes)
 {
     QList<Item> out;
+    const bool zoomed = boxes && (maxX - minX) <= kBoxRangeMs;
     if (markers) {
         for (const EffectiveEvent &e : result.events) {
             const qint64 start = e.endMs - qint64(e.durationSec * 1000);
-            if (e.origin == Origin::Device || e.endMs < minX || start > maxX) continue;
+            if (e.endMs < minX || start > maxX) continue;
+            // zoomed in: the type and length, as a sleep lab marks it ("OA 11.8 s")
+            const QString what = QStringLiteral("%1 %2 %3")
+                                     .arg(schema::channel[e.channel].label(), QLocale().toString(e.durationSec, 'f', 1), tr("s"));
             switch (e.origin) {
-            case Origin::Added: out.append({ Item::Added, start, e.endMs, e.channel, tr("manual") }); break;
-            case Origin::Removed: out.append({ Item::Removed, start, e.endMs, e.channel, QString() }); break;
-            case Origin::Retyped:
-                out.append({ Item::Retyped, start, e.endMs, e.channel, tr("was %1").arg(schema::channel[e.originalChannel].label()) });
+            case Origin::Device:
+                if (zoomed && !e.excluded) out.append({ Item::Event, start, e.endMs, e.channel, what });
                 break;
-            case Origin::Device: break;
+            case Origin::Added: out.append({ Item::Added, start, e.endMs, e.channel, zoomed ? what + QStringLiteral(" · ") + tr("manual") : tr("manual") }); break;
+            case Origin::Removed: out.append({ Item::Removed, start, e.endMs, e.channel, QString() }); break;
+            case Origin::Retyped: {
+                const QString was = tr("was %1").arg(schema::channel[e.originalChannel].label());
+                out.append({ Item::Retyped, start, e.endMs, e.channel, zoomed ? what + QStringLiteral(" · ") + was : was });
+                break;
+            }
             }
         }
     }
@@ -61,7 +70,7 @@ void gManualScoringLayer::paint(QPainter &painter, gGraph &w, const QRegion &reg
 
     painter.save();
     painter.setClipRect(r);
-    for (const Item &it : items(*m_result, range.first, range.second, m_markers)) {
+    for (const Item &it : items(*m_result, range.first, range.second, m_markers, m_boxes && !w.blockZoom())) {
         // at least 4 px, so a short stretch still shows on a whole night
         double x1 = px(it.start), x2 = px(it.end);
         if (x2 - x1 < 4) {
@@ -79,6 +88,14 @@ void gManualScoringLayer::paint(QPainter &painter, gGraph &w, const QRegion &reg
             painter.drawLine(QPointF(x1, r.top()), QPointF(x1, r.bottom()));
             painter.drawLine(QPointF(x2, r.top()), QPointF(x2, r.bottom()));
             if (m_markers) painter.fillRect(QRectF(x1, r.top(), x2 - x1, 5), QColor(90, 90, 90));   // a tab on top
+            break;
+        case Item::Event:
+            painter.fillRect(box, QColor(color.red(), color.green(), color.blue(), 55));
+            painter.setPen(QPen(QColor(color.red(), color.green(), color.blue(), 170), 1));
+            painter.setBrush(Qt::NoBrush);
+            painter.drawRect(box.adjusted(0.5, 0.5, -0.5, -0.5));
+            painter.setPen(QColor(40, 40, 40));
+            painter.drawText(QPointF(x1 + 3, r.top() + painter.fontMetrics().ascent() + 2), it.label);
             break;
         case Item::Added:
             painter.setPen(QPen(color, 2, Qt::DashLine));
