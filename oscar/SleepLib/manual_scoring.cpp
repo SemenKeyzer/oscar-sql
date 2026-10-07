@@ -138,7 +138,9 @@ void loadSummary(Session *s)
     QHash<ChannelID, int> delta;
     qint64 excludedMs = 0;
     int notFound = 0;
-    const bool has = ManualScoringRepository::loadSummary(keyOf(s), delta, excludedMs, notFound);
+    const SessionKey key = keyOf(s);
+    // most sessions have none: no query for them
+    const bool has = ManualScoringRepository::hasScoring(key) && ManualScoringRepository::loadSummary(key, delta, excludedMs, notFound);
     s->setManualScoring(delta, excludedMs, notFound, has);
 }
 
@@ -180,7 +182,7 @@ Result resultFor(Session *s)
 void refresh(Session *s)
 {
     const SessionKey key = keyOf(s);
-    if (ManualScoringRepository::editsForSession(key).isEmpty()) {
+    if (!ManualScoringRepository::hasScoring(key)) {
         ManualScoringRepository::removeSummary(key);
         s->setManualScoring({}, 0, 0, false);
         return;

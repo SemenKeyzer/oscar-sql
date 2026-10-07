@@ -37,6 +37,7 @@ private slots:
     void testEditsOutliveSessionRows();
     void testProfileDeleteCascades();
     void testMigration21To22();
+    void testHasScoringFollowsEdits();
     void cleanupTestCase();
 private:
     qint64 sessionRow(qint64 deviceSessionId);

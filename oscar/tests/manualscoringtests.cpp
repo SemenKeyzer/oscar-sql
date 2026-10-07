@@ -325,3 +325,20 @@ void ManualScoringTests::testMigration21To22()
     QVERIFY(db.tables().contains(QStringLiteral("manual_scoring")));
     QVERIFY(db.tables().contains(QStringLiteral("manual_scoring_summary")));
 }
+
+// which sessions have manual scoring, known without a query per session
+void ManualScoringTests::testHasScoringFollowsEdits()
+{
+    QVERIFY(!ManualScoringRepository::hasScoring(key(201)));
+    Edit e = edit(0, Kind::Add, CPAP_Hypopnea, 1, 2);
+    e.key = key(201);
+    const qint64 id = ManualScoringRepository::add(e);
+    QVERIFY(ManualScoringRepository::hasScoring(key(201)));
+    QVERIFY(!ManualScoringRepository::hasScoring(key(202)));
+    QVERIFY(ManualScoringRepository::remove(id));
+    QVERIFY(!ManualScoringRepository::hasScoring(key(201)));
+    e.key = key(203);
+    ManualScoringRepository::add(e);
+    QVERIFY(ManualScoringRepository::removeAllForSession(key(203)));
+    QVERIFY(!ManualScoringRepository::hasScoring(key(203)));
+}

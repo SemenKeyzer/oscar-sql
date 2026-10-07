@@ -18,6 +18,9 @@ class ManualScoringRepository
 {
   public:
     static QList<ManualScoring::Edit> editsForSession(const ManualScoring::SessionKey &key);
+    //! Whether the session has edits. The sessions with edits are read once per profile and
+    //! database, then kept up to date here, so opening a profile asks no query per session.
+    static bool hasScoring(const ManualScoring::SessionKey &key);
     //! Stores \a edit (its id is ignored); returns the new id, 0 on failure.
     static qint64 add(const ManualScoring::Edit &edit);
     static bool remove(qint64 id);

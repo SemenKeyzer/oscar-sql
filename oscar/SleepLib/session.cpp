@@ -3092,7 +3092,7 @@ bool Session::StoreToDatabase()
     PERF_TIMER_STOP("Session::StoreDB::Summaries");
 
     // a session imported again (or rebuilt) gets its manual scoring recalculated on its new events
-    if (!ManualScoringRepository::editsForSession(ManualScoring::keyOf(this)).isEmpty()) ManualScoring::refresh(this);
+    if (ManualScoringRepository::hasScoring(ManualScoring::keyOf(this))) ManualScoring::refresh(this);
 
 #ifdef DBDEBUG
     qDebug() << "Session::StoreToDatabase(): Saved session" << s_session << "to database with ID" << m_sessionrow_id;
