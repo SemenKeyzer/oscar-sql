@@ -19,6 +19,7 @@
 #include "analysispanel.h"
 #include "analysisprefs.h"
 #include <QComboBox>
+#include <QDoubleSpinBox>
 #include <QLabel>
 #include <QLineEdit>
 #include "statistics.h"
@@ -323,6 +324,39 @@ void AnalysisPanelTests::testPreferencesPage()
     QVERIFY(thresholds != nullptr);
     thresholds->setText(QStringLiteral("85, 94, x, 120, 90, 88, 80, 75, 70"));
     QCOMPARE(page.spo2Thresholds(), QList<double>({ 94, 90, 88, 85, 80, 75 }));
+}
+
+// The line under the switch says how many nights the settings on the page would recalculate.
+void AnalysisPanelTests::testPreferencesRecalculationNote()
+{
+    AnalysisPreferencesPage page;
+    AnalysisParams p;
+    page.load(p, { 90, 88 });
+    page.setRecalculationCounter([](const AnalysisParams &c) { return c.flow.minEventSec != AnalysisParams().flow.minEventSec ? 18 : 0; }, true);
+    QLabel *note = page.findChild<QLabel *>(QStringLiteral("recalculationNote"));
+    QVERIFY(note != nullptr);
+    QTRY_COMPARE(note->text(), QStringLiteral("No recalculation needed."));
+    QVERIFY(!note->isHidden());
+
+    QDoubleSpinBox *minEvent = nullptr;
+    for (QDoubleSpinBox *box : page.findChildren<QDoubleSpinBox *>()) {
+        if (box->objectName() == QLatin1String("minEventSec")) minEvent = box;
+    }
+    QVERIFY(minEvent != nullptr);
+    minEvent->setValue(20);
+    QTRY_COMPARE(note->text(), QStringLiteral("With these settings 18 night(s) will need recalculation."));
+
+    // switched off: nothing to say
+    page.findChild<QCheckBox *>(QStringLiteral("analysisEnabled"))->setChecked(false);
+    QTRY_VERIFY(note->isHidden());
+
+    // off until now, switched on: the nights are analysed for the first time
+    AnalysisParams off;
+    off.enabled = false;
+    page.load(off, { 90, 88 });
+    page.setRecalculationCounter([](const AnalysisParams &) { return 26; }, false);
+    page.findChild<QCheckBox *>(QStringLiteral("analysisEnabled"))->setChecked(true);
+    QTRY_COMPARE(note->text(), QStringLiteral("26 night(s) will be analysed."));
 }
 
 // What the flow graph marks: each difference from the device with its kind, its span and a

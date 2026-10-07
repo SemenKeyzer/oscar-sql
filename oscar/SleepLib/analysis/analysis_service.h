@@ -58,6 +58,9 @@ class AnalysisService : public QObject
     QList<QDate> outdatedDays();
     //! outdatedDays().size(), kept until something may have changed it (for notices).
     int outdatedCount();
+    //! How many days \a candidate settings would leave missing or outdated (0 when they switch
+    //! the analysis off): the count asked about after Preferences, for settings not saved yet.
+    int outdatedCountFor(const AnalysisParams &candidate);
 
     //! Every day with something to analyse, or with a stored row.
     QList<QDate> allDays();
@@ -90,7 +93,7 @@ class AnalysisService : public QObject
     void ensureCache();
     void refreshRow(const QDate &date);
     //! \a pendingOnly: skip the days whose stage 1 is outdated.
-    QList<QDate> daysToUpdate(bool pendingOnly);
+    QList<QDate> daysToUpdate(bool pendingOnly, const AnalysisParams &params);
 
     AnalysisParams m_params;
     qint64 m_cacheProfile = 0;

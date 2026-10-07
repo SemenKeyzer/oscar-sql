@@ -85,10 +85,10 @@ QList<AnalysisDailyData> AnalysisService::rows(const QDate &from, const QDate &t
     return out;
 }
 
-QList<QDate> AnalysisService::daysToUpdate(bool pendingOnly)
+QList<QDate> AnalysisService::daysToUpdate(bool pendingOnly, const AnalysisParams &params)
 {
     QList<QDate> out;
-    if (!p_profile || !m_params.enabled) return out;
+    if (!p_profile || !params.enabled) return out;
     ensureCache();
     for (auto it = p_profile->daylist.begin(); it != p_profile->daylist.end(); ++it) {
         Day *day = p_profile->GetDay(it.key());
@@ -99,10 +99,10 @@ QList<QDate> AnalysisService::daysToUpdate(bool pendingOnly)
         }
         if (pendingOnly) {
             bool stageOneCurrent = true;
-            for (Session *s : sessions) stageOneCurrent = stageOneCurrent && !stageOneNeeded(s, m_params).any();
+            for (Session *s : sessions) stageOneCurrent = stageOneCurrent && !stageOneNeeded(s, params).any();
             if (!stageOneCurrent) continue;
         }
-        if (dayOutdated(day, m_params, m_rows.value(it.key()))) out.append(it.key());
+        if (dayOutdated(day, params, m_rows.value(it.key()))) out.append(it.key());
     }
     // rows of days that are gone altogether
     for (auto it = m_rows.begin(); it != m_rows.end(); ++it) {
@@ -115,12 +115,12 @@ QList<QDate> AnalysisService::daysToUpdate(bool pendingOnly)
 QList<QDate> AnalysisService::pendingDays()
 {
     m_outdatedCount = -1;   // asked for after data changed
-    return daysToUpdate(true);
+    return daysToUpdate(true, m_params);
 }
 
 QList<QDate> AnalysisService::outdatedDays()
 {
-    const QList<QDate> days = daysToUpdate(false);
+    const QList<QDate> days = daysToUpdate(false, m_params);
     m_outdatedCount = int(days.size());
     return days;
 }
@@ -129,6 +129,11 @@ int AnalysisService::outdatedCount()
 {
     if (m_outdatedCount < 0) outdatedDays();
     return m_outdatedCount;
+}
+
+int AnalysisService::outdatedCountFor(const AnalysisParams &candidate)
+{
+    return int(daysToUpdate(false, candidate).size());
 }
 
 QList<QDate> AnalysisService::allDays()

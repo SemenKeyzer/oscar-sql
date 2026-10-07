@@ -10,6 +10,7 @@
 #define ANALYSISPREFS_H
 
 #include <QList>
+#include <functional>
 #include <QWidget>
 
 #include "SleepLib/analysis/analysis_params.h"
@@ -20,6 +21,7 @@ class QDoubleSpinBox;
 class QGroupBox;
 class QLabel;
 class QLineEdit;
+class QTimer;
 
 /*! \class AnalysisPreferencesPage
     \brief The Analysis tab of the Preferences dialog (spec §5.4): OSCAR's own sleep
@@ -40,7 +42,12 @@ class AnalysisPreferencesPage : public QWidget
     //! What a hypopnea rule means, as shown under the selector.
     static QString ruleDescription(analysis::HypopneaRule rule);
 
+    //! Shows under the switch how many nights the settings on the page would recalculate, as
+    //! \a counter says; \a enabledNow: whether the analysis is on in the saved settings.
+    void setRecalculationCounter(const std::function<int(const analysis::AnalysisParams &)> &counter, bool enabledNow);
+
   private:
+    void updateRecalculationNote();
     void showRuleDescription();
     void resetToDefaults();
     QDoubleSpinBox *number(double min, double max, double step, int decimals, const QString &suffix);
@@ -61,6 +68,10 @@ class AnalysisPreferencesPage : public QWidget
     };
     QList<Field> m_fields;
     QDoubleSpinBox *m_zoneMinDesats;
+    QLabel *m_recalcNote;
+    QTimer *m_recalcTimer;
+    std::function<int(const analysis::AnalysisParams &)> m_counter;
+    bool m_enabledNow = true;
 };
 
 #endif // ANALYSISPREFS_H

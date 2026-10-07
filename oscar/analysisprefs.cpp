@@ -16,6 +16,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QTimer>
 #include <QVBoxLayout>
 #include <algorithm>
 #include <functional>
@@ -39,6 +40,16 @@ AnalysisPreferencesPage::AnalysisPreferencesPage(QWidget *parent)
     m_enabled = new QCheckBox(tr("Analyse nights with OSCAR's own analysis (experimental)"), this);
     m_enabled->setObjectName(QStringLiteral("analysisEnabled"));
     layout->addWidget(m_enabled);
+    // how many nights the settings on the page would recalculate; filled in once a counter is set
+    m_recalcNote = new QLabel(this);
+    m_recalcNote->setObjectName(QStringLiteral("recalculationNote"));
+    m_recalcNote->setWordWrap(true);
+    m_recalcNote->hide();
+    layout->addWidget(m_recalcNote);
+    m_recalcTimer = new QTimer(this);
+    m_recalcTimer->setSingleShot(true);
+    m_recalcTimer->setInterval(300);   // not on every click of a spin box arrow
+    connect(m_recalcTimer, &QTimer::timeout, this, &AnalysisPreferencesPage::updateRecalculationNote);
 
     // hypopnea rule: a selector with what each rule means under it
     auto *ruleBox = new QGroupBox(tr("Hypopnea rule"), this);
@@ -147,6 +158,37 @@ AnalysisPreferencesPage::AnalysisPreferencesPage(QWidget *parent)
     layout->addStretch(1);
 
     resetToDefaults();
+
+    auto schedule = [this]() { m_recalcTimer->start(); };
+    connect(m_enabled, &QCheckBox::toggled, this, schedule);
+    connect(m_rule, &QComboBox::currentIndexChanged, this, schedule);
+    for (QCheckBox *box : { m_limitOxi, m_pulseArousal, m_classify }) connect(box, &QCheckBox::toggled, this, schedule);
+    for (const Field &f : m_fields) connect(f.box, &QDoubleSpinBox::valueChanged, this, schedule);
+    connect(m_zoneMinDesats, &QDoubleSpinBox::valueChanged, this, schedule);
+}
+
+void AnalysisPreferencesPage::setRecalculationCounter(const std::function<int(const AnalysisParams &)> &counter, bool enabledNow)
+{
+    m_counter = counter;
+    m_enabledNow = enabledNow;
+    m_recalcTimer->start();
+}
+
+void AnalysisPreferencesPage::updateRecalculationNote()
+{
+    const AnalysisParams p = params();
+    if (!m_counter || !p.enabled) {
+        m_recalcNote->hide();
+        return;
+    }
+    const int nights = m_counter(p);
+    QString text;
+    if (nights == 0) text = tr("No recalculation needed.");
+    else if (!m_enabledNow) text = tr("%n night(s) will be analysed.", nullptr, nights);
+    else text = tr("With these settings %n night(s) will need recalculation.", nullptr, nights);
+    m_recalcNote->setText(text);
+    m_recalcNote->setStyleSheet(nights == 0 ? QStringLiteral("color: gray") : QString());
+    m_recalcNote->show();
 }
 
 QDoubleSpinBox *AnalysisPreferencesPage::number(double min, double max, double step, int decimals, const QString &suffix)

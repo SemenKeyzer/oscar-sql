@@ -72,6 +72,7 @@ private slots:
     void testDayAnalysisLoadsOnlyWhatItNeeds();
     void testAnalysisSettingsRoundTrip();
     void testAnalysisServiceKeepsDaysCurrent();
+    void testOutdatedCountForCandidate();
     void testFlagsGraphsSplitDeviceAndAnalysis();
     void testAnalysisReportQuery();
     void testSettingsPeriodCountsCpapHoursOnly();

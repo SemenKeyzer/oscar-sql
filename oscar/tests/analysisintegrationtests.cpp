@@ -8,6 +8,8 @@
 
 #include "analysisintegrationtests.h"
 
+#include <QScopeGuard>
+
 #include <QApplication>
 #include <QCoreApplication>
 #include <QFile>
@@ -822,6 +824,60 @@ void AnalysisIntegrationTests::testAnalysisServiceKeepsDaysCurrent()
     setActiveParams(AnalysisParams());
     p_profile->daylist.remove(date);
     delete day;
+}
+
+// The Preferences line "N nights will be recalculated": the same count OSCAR asks about after
+// OK, for settings not saved yet.
+void AnalysisIntegrationTests::testOutdatedCountForCandidate()
+{
+    Machine cpap(p_profile, 45);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    const QDate date = kNightDate.addDays(6);
+    Day *day = p_profile->addDay(date);
+    day->OpenSummary();
+    Session *cs = hypopneaSession(&cpap, 64, m_machineRow);
+    analyzeSession(cs, AnalysisParams());
+    day->addSession(cs);
+    // a failed check returns early: the day must not outlive the machine on this stack
+    const auto cleanup = qScopeGuard([date, day]() {
+        p_profile->analysis->resetToDefaults();
+        setActiveParams(AnalysisParams());
+        p_profile->daylist.remove(date);
+        delete day;
+    });
+
+    p_profile->analysis->resetToDefaults();
+    AnalysisService service;
+    service.reloadSettings();
+    service.updateDays(service.outdatedDays());
+    QCOMPARE(service.outdatedCount(), 0);
+
+    // what the line says equals what OSCAR asks about once the settings are saved
+    AnalysisParams strict;
+    strict.flow.minEventSec = 20;
+    AnalysisParams oxi;
+    oxi.oxi.desatMinDrop = 4;
+    AnalysisParams off;
+    off.enabled = false;
+    QList<int> predicted, asked;
+    for (const AnalysisParams &candidate : { AnalysisParams(), strict, oxi, off }) {
+        predicted << service.outdatedCountFor(candidate);
+        p_profile->analysis->setParams(candidate);
+        service.reloadSettings();
+        asked << (candidate.enabled ? service.outdatedCount() : 0);
+        p_profile->analysis->resetToDefaults();
+        service.reloadSettings();
+    }
+    QCOMPARE(predicted, asked);
+    QCOMPARE(predicted.at(0), 0);   // the settings as they are
+    QCOMPARE(predicted.at(1), 1);   // a flow threshold: the flow night
+    QCOMPARE(predicted.at(3), 0);   // switched off
+
+    // the analysis switched on with no row stored yet: the night is to be analysed
+    AnalysisDailyRepository().remove(m_profileId, date);
+    service.reloadCache();
+    QCOMPARE(service.outdatedCountFor(AnalysisParams()), 1);
 }
 
 void AnalysisIntegrationTests::testFlagsGraphsSplitDeviceAndAnalysis()

@@ -34,6 +34,7 @@ private slots:
     void testStatisticsFigures();
     void testStatisticsFigureValues();
     void testPreferencesPage();
+    void testPreferencesRecalculationNote();
 
 private:
     class QApplication *m_app = nullptr;

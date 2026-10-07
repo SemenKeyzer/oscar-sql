@@ -186,6 +186,11 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
     m_searchResults->installEventFilter(this);
     QTimer::singleShot(0, m_search, [this]() { m_search->setFocus(); });
     m_analysisPage->load(profile->analysis->params(), profile->analysis->spo2Thresholds());
+    if (mainwin && mainwin->analysisService()) {
+        analysis::AnalysisService *service = mainwin->analysisService();
+        m_analysisPage->setRecalculationCounter([service](const analysis::AnalysisParams &p) { return service->outdatedCountFor(p); },
+                                                profile->analysis->params().enabled);
+    }
 
     //i=ui->timeZoneCombo->findText((*profile)["TimeZone"].toString());
     //ui->timeZoneCombo->setCurrentIndex(i);
