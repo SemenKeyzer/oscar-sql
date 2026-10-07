@@ -170,8 +170,7 @@ QList<ScoringMenus::EditRow> ScoringMenus::editRows(Day *day)
                 if (stretches.contains(span)) continue;
                 stretches.insert(span);
                 at = e.startMs + c;
-                const qint64 seconds = (e.endMs - e.startMs) / 1000;
-                text = seconds < 120 ? tr("excluded %1 s").arg(seconds) : tr("excluded %1 min").arg(qRound(seconds / 60.0));
+                text = excludedText(e.endMs - e.startMs);
                 break;
             }
             }
@@ -211,4 +210,10 @@ QAction *ScoringMenus::actionForKey(QMenu *menu, const QString &text)
         if (a->property(kKeyProperty).toString() == QString(key)) return a;
     }
     return nullptr;
+}
+
+QString ScoringMenus::excludedText(qint64 ms)
+{
+    const qint64 seconds = ms / 1000;
+    return seconds < 120 ? tr("excluded %1 s").arg(seconds) : tr("excluded %1 min").arg(qRound(seconds / 60.0));
 }

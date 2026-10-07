@@ -8,6 +8,7 @@
  * for more details. */
 
 #define TEST_MACROS_ENABLEDoff
+#include <QHBoxLayout>
 #include <QKeyEvent>
 #include <QLineEdit>
 #include <QListWidget>
@@ -470,7 +471,18 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
         ui->baseSpO2Option->setCurrentIndex(100-baseoption_data);
 
     // hover explanations: the strip at the bottom shows what the setting under the mouse does
-    ui->mainlayout->addWidget(new HelpStrip({ QStringLiteral("ui.prefs.") }, this));
+    // the OK/Cancel row leaves the scrolled page, so the strip can sit between the page and the buttons
+    auto *buttonRow = new QHBoxLayout;
+    buttonRow->setContentsMargins(0, 0, 0, 0);
+    ui->gridLayout_17->removeWidget(ui->cancelButton);
+    ui->gridLayout_17->removeWidget(ui->okButton);
+    buttonRow->addWidget(ui->cancelButton);
+    buttonRow->addWidget(ui->okButton);
+    buttonRow->addStretch();
+    auto *buttons = new QWidget(this);
+    buttons->setLayout(buttonRow);
+    ui->mainlayout->addWidget(buttons);
+    HelpStrip::placeAbove(ui->mainlayout, buttons, new HelpStrip({ QStringLiteral("ui.prefs.") }, this));
     HelpTips::attachAll(this, QStringLiteral("prefs"));
 }
 

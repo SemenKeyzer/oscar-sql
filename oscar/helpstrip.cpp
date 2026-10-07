@@ -8,6 +8,8 @@
 
 #include "helpstrip.h"
 
+#include <QBoxLayout>
+
 #include "glossary.h"
 #include "helptips.h"
 
@@ -46,4 +48,10 @@ void HelpStrip::showKey(const QString &key)
 void HelpStrip::showEmpty()
 {
     setHtml(QStringLiteral("<p style='color:gray'>%1</p>").arg(tr("Hover over a setting to see what it does.").toHtmlEscaped()));
+}
+
+void HelpStrip::placeAbove(QBoxLayout *layout, QWidget *buttons, HelpStrip *strip)
+{
+    const int i = layout->indexOf(buttons);
+    layout->insertWidget(i < 0 ? layout->count() : i, strip);
 }

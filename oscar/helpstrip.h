@@ -12,6 +12,8 @@
 #include <QStringList>
 #include <QTextBrowser>
 
+class QBoxLayout;
+
 //! A few lines at the bottom of a modal dialog with the explanation of the control last hovered
 //! in it: the help panel of the main window is hidden behind the dialog.
 class HelpStrip : public QTextBrowser
@@ -22,6 +24,8 @@ class HelpStrip : public QTextBrowser
     HelpStrip(const QStringList &prefixes, QWidget *parent);
     //! The key of the entry shown; empty before anything was hovered.
     QString key() const { return m_key; }
+    //! Puts \a strip into \a layout right above \a buttons, the dialog's OK/Cancel row.
+    static void placeAbove(QBoxLayout *layout, QWidget *buttons, HelpStrip *strip);
 
   private:
     void showKey(const QString &key);

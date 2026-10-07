@@ -287,3 +287,33 @@ void HelpTipsTests::testTermKeepsTooltipOutOfArg()
     QVERIFY2(html.contains(QStringLiteral("AHI 5.2")), qPrintable(html));
     QVERIFY2(!html.contains(QStringLiteral("about 5.2")), qPrintable(html));
 }
+
+// A control's own Qt tooltip still shows, under the explanation.
+void HelpTipsTests::testOwnTooltipKept()
+{
+    QLabel label(QStringLiteral("AHI"));
+    label.setToolTip(QStringLiteral("Own words of the control"));
+    label.resize(100, 30);
+    label.show();
+    HelpTips::attach(&label, QStringLiteral("ahi"));
+    QHelpEvent help(QEvent::ToolTip, QPoint(5, 5), label.mapToGlobal(QPoint(5, 5)));
+    QApplication::sendEvent(&label, &help);
+    QVERIFY2(QToolTip::text().contains(QStringLiteral("Apnea-Hypopnea")), qPrintable(QToolTip::text()));
+    QVERIFY2(QToolTip::text().contains(QStringLiteral("Own words of the control")), qPrintable(QToolTip::text()));
+    QToolTip::hideText();
+}
+
+// Entering a menu drawn by Qt does not report the item highlighted the last time it was open.
+void HelpTipsTests::testMenuEnterIgnoresStaleItem()
+{
+    QMenu menu;
+    QAction *action = menu.addAction(QStringLiteral("All including Notes"));
+    action->setObjectName(QStringLiteral("actionPurgeCurrentDayAll"));
+    menu.show();
+    menu.setActiveAction(action);
+    QSignalSpy hovered(HelpTips::instance(), &HelpTips::hovered);
+    QEvent enter(QEvent::Enter);
+    QApplication::sendEvent(&menu, &enter);
+    QCOMPARE(hovered.count(), 0);
+    menu.hide();
+}

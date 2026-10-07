@@ -9,6 +9,8 @@
 #include "helpstriptests.h"
 
 #include <QApplication>
+#include <QCheckBox>
+#include <QLabel>
 #include <QVBoxLayout>
 
 #include "glossary.h"
@@ -56,10 +58,25 @@ void HelpStripTests::testShowsHoveredEntry()
 
 void HelpStripTests::testKeepsEntryAfterLeave()
 {
-    HelpStrip strip({ QStringLiteral("ui.prefs.") }, nullptr);
-    HelpTips::instance()->hover(kPrefsKey);
-    HelpTips::instance()->hover(QString());
-    QCOMPARE(strip.key(), kPrefsKey);
+    QWidget host;
+    auto *layout = new QVBoxLayout(&host);
+    auto *setting = new QCheckBox(QStringLiteral("setting"), &host);
+    auto *plain = new QLabel(QStringLiteral("no explanation"), &host);
+    auto *strip = new HelpStrip({ QStringLiteral("ui.prefs.") }, &host);
+    layout->addWidget(setting);
+    layout->addWidget(plain);
+    layout->addWidget(strip);
+    HelpTips::attach(setting, kPrefsKey);
+    host.show();
+    QEvent enter(QEvent::Enter);
+    QApplication::sendEvent(setting, &enter);
+    QCOMPARE(strip->key(), kPrefsKey);
+    // the mouse moves off the setting onto a widget without an explanation
+    QEvent leave(QEvent::Leave);
+    QApplication::sendEvent(setting, &leave);
+    QApplication::sendEvent(plain, &enter);
+    QCOMPARE(strip->key(), kPrefsKey);
+    QVERIFY(strip->toPlainText().contains(Glossary::find(kPrefsKey)->term));
 }
 
 void HelpStripTests::testStripIgnoresOtherWindows()
@@ -83,4 +100,19 @@ void HelpStripTests::testStripHiddenWhenOff()
     QVERIFY(!strip->isVisibleTo(&host));
     HelpTips::instance()->setEnabled(true);
     QVERIFY(strip->isVisibleTo(&host));
+}
+
+// The strip goes between the dialog's content and its OK/Cancel row, not under the buttons.
+void HelpStripTests::testPlacedAboveButtons()
+{
+    QWidget host;
+    auto *layout = new QVBoxLayout(&host);
+    auto *content = new QLabel(QStringLiteral("content"), &host);
+    auto *buttons = new QWidget(&host);
+    layout->addWidget(content);
+    layout->addWidget(buttons);
+    auto *strip = new HelpStrip({ QStringLiteral("ui.prefs.") }, &host);
+    HelpStrip::placeAbove(layout, buttons, strip);
+    QCOMPARE(layout->indexOf(strip), 1);
+    QCOMPARE(layout->indexOf(buttons), 2);
 }

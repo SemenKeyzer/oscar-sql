@@ -15,6 +15,7 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QMenu>
+#include <QTextDocument>
 #include <QToolTip>
 #include <QWidget>
 
@@ -176,8 +177,10 @@ bool HelpTips::eventFilter(QObject *o, QEvent *e)
 {
     if ((e->type() == QEvent::ToolTip || e->type() == QEvent::Enter) && o->isWidgetType() && enabled()) {
         QString key = keyFor(static_cast<QWidget *>(o));
-        if (auto *menu = qobject_cast<QMenu *>(o); menu && key.isEmpty() && menu->activeAction()) {
-            // a menu drawn by Qt (Windows, Linux): the highlighted item or submenu
+        auto *menu = qobject_cast<QMenu *>(o);
+        if (menu && key.isEmpty() && e->type() == QEvent::Enter) return QObject::eventFilter(o, e);   // its items report themselves (attachMenus); the active one may be left from the last time
+        if (menu && key.isEmpty() && menu->activeAction()) {
+            // a menu drawn by Qt (Windows, Linux): the tooltip of the highlighted item or submenu
             QAction *a = menu->activeAction();
             const QString name = a->menu() ? a->menu()->objectName() : a->objectName();
             const QString itemKey = QStringLiteral("ui.menu.") + name;
@@ -186,7 +189,10 @@ bool HelpTips::eventFilter(QObject *o, QEvent *e)
         if (!key.isEmpty()) {
             if (e->type() == QEvent::Enter) {
                 hover(key);
-            } else if (const QString tip = Glossary::tooltip(key); !tip.isEmpty()) {
+            } else if (QString tip = Glossary::tooltip(key); !tip.isEmpty()) {
+                // the control's own tooltip may say more (a warning, a format): it stays, under the explanation
+                const QString own = static_cast<QWidget *>(o)->toolTip();
+                if (!own.isEmpty()) tip += QStringLiteral("<hr>") + (Qt::mightBeRichText(own) ? own : own.toHtmlEscaped());
                 QToolTip::showText(static_cast<QHelpEvent *>(e)->globalPos(), tip, static_cast<QWidget *>(o));
                 return true;
             }

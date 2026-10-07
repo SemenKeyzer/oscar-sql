@@ -4470,8 +4470,8 @@ QString Daily::getManualScoring(Day *day)
     QString html = QStringLiteral("<table cellspacing=0 cellpadding=1 border=0 width='100%'>\n");
     html += QStringLiteral("<tr><td colspan=5 align=center><b>%1</b></td></tr>\n").arg(HelpTips::term(tr("Manual scoring"), QStringLiteral("manual_scoring")));
     html += QStringLiteral("<tr><td colspan=5>%1</td></tr>\n")
-                .arg(tr("added %1, removed %2, type changed %3, excluded %4 min (%5 stretches)")
-                         .arg(added).arg(removed).arg(retyped).arg(qRound(excludedMs / 60000.0)).arg(stretches.size()).toHtmlEscaped());
+                .arg(tr("added %1, removed %2, type changed %3, %4 (%5 stretches)")
+                         .arg(added).arg(removed).arg(retyped).arg(ScoringMenus::excludedText(excludedMs)).arg(stretches.size()).toHtmlEscaped());
     if (notFound > 0) {
         html += QStringLiteral("<tr><td colspan=5><font color='#c0392b'>%1</font></td></tr>\n")
                     .arg(tr("%n change(s) refer to an event that is no longer there", nullptr, notFound).toHtmlEscaped());

@@ -34,6 +34,8 @@ private slots:
     void testMenuTooltipUsesActiveAction();
     void testHoverSilentWhenOff();
     void testTermKeepsTooltipOutOfArg();
+    void testOwnTooltipKept();
+    void testMenuEnterIgnoresStaleItem();
 private:
     QApplication *m_app = nullptr;
 };

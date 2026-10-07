@@ -222,7 +222,7 @@ OximeterImport::OximeterImport(QWidget *parent) :
 #endif
 
     // hover explanations: the strip at the bottom shows what the control under the mouse does
-    ui->verticalLayout_5->addWidget(new HelpStrip({ QStringLiteral("ui.oximport."), QStringLiteral("ui.ble.") }, this));
+    HelpStrip::placeAbove(ui->verticalLayout_5, ui->frame_2, new HelpStrip({ QStringLiteral("ui.oximport."), QStringLiteral("ui.ble.") }, this));
     HelpTips::attachAll(this, QStringLiteral("oximport"));
 }
 

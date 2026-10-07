@@ -175,6 +175,23 @@ void GlossaryTests::testExplanationsMatchCode()
     // schema::resetChannels() applies at once, before OK or Cancel
     QVERIFY(e("ui.prefs.resetChannelDefaults").caution.contains(QStringLiteral("Cancel")));
     QVERIFY(e("ui.prefs.resetWaveformChannels").caution.contains(QStringLiteral("Cancel")));
+    // MainWindow::on_action_Fullscreen_triggered maximizes, it is not full screen
+    QVERIFY(!e("ui.menu.action_Fullscreen").summary.contains(QStringLiteral("full screen")));
+    // DelayedScreenshot asks where to save unless "Screenshots without asking" is on
+    QVERIFY(e("ui.menu.action_Screenshot").summary.contains(QStringLiteral("asks where")));
+    // the reset actions work on the page in view, Daily or Overview
+    for (const char *key : { "ui.menu.action_Standard_Graph_Order", "ui.menu.action_Advanced_Graph_Order",
+                             "ui.menu.action_Reset_Graph_Layout", "ui.menu.menu_Reset_Graphs" }) {
+        QVERIFY2(e(key).summary.contains(QStringLiteral("Overview")), key);
+    }
+    // OverviewPresets::graphNames(Oxygen) also has problem zones, hypoxic burden and pulse rises
+    QVERIFY(e("ui.overview.presetButton_3").summary.contains(QStringLiteral("hypoxic burden")));
+    // the clinical reset button is disabled and has no handler
+    QVERIFY(e("ui.prefs.resetClinicalDefaults").summary.contains(QStringLiteral("greyed out")));
+    QVERIFY(e("ui.prefs.resetClinicalDefaults").caution.isEmpty());
+    // SpO2 thresholds only redraw (analysisSettingsChanged(false)); the split lock warns in its own tooltip
+    QVERIFY(e("ui.prefs.spo2Thresholds").advice.contains(QStringLiteral("no recalculation")));
+    QVERIFY(!e("ui.prefs.LockSummarySessionSplitting").caution.isEmpty());
 }
 
 namespace {

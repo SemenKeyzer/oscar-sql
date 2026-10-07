@@ -36,6 +36,8 @@ class ScoringMenus
     static QMenu *forExcluded(qint64 editId, QWidget *parent);
     //! The name of a scored channel in the menus: "Obstructive apnea", …
     static QString typeName(ChannelID channel);
+    //! "excluded 17 s" under two minutes, "excluded 14 min" from two minutes on.
+    static QString excludedText(qint64 ms);
     //! The item of \a menu whose letter key is \a text (O C A H X R T U; the same keys on the
     //! Russian layout too: Щ С Ф Р Ч К Е Г); null for none.
     static QAction *actionForKey(QMenu *menu, const QString &text);

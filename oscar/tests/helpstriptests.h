@@ -25,6 +25,7 @@ private slots:
     void testKeepsEntryAfterLeave();
     void testStripIgnoresOtherWindows();
     void testStripHiddenWhenOff();
+    void testPlacedAboveButtons();
 private:
     QApplication *m_app = nullptr;
 };

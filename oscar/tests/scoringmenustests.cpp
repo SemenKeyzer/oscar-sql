@@ -196,3 +196,11 @@ void ScoringMenusTests::testBulkItems()
     QScopedPointer<QMenu> one(ScoringMenus::forEvent(scoredEvent(Origin::Device, CPAP_Obstructive, CPAP_Obstructive, 0), nullptr, 1));
     QVERIFY(!find(one.data(), QStringLiteral("Remove all Obstructive apnea (1)")));
 }
+
+// Excluded time reads in seconds under two minutes: 17 s is not "0 min".
+void ScoringMenusTests::testExcludedText()
+{
+    QCOMPARE(ScoringMenus::excludedText(17000), QStringLiteral("excluded 17 s"));
+    QCOMPARE(ScoringMenus::excludedText(119000), QStringLiteral("excluded 119 s"));
+    QCOMPARE(ScoringMenus::excludedText(14 * 60000 + 20000), QStringLiteral("excluded 14 min"));
+}
