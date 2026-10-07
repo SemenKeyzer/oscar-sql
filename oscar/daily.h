@@ -461,6 +461,8 @@ private:
     QComboBox *m_scoringType = nullptr;   //!< which events ◀ ▶ step through
     QComboBox *m_scoringWindow = nullptr; //!< how much of the night a step shows
     void stepScoring(bool forward);
+    int m_stepIndex = -1;                 //!< the event the last step showed, while the view stays there
+    qint64 m_stepMin = 0, m_stepMax = 0;
     void updateScoringTypes();
     QSharedPointer<ManualScoring::Result> m_scoringDrawn;   //!< what the graphs draw (gManualScoringLayer)
     void updateScoringLayer(Day *day);

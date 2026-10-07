@@ -171,6 +171,14 @@ void ScoringMenusTests::testLetterKeys()
     QCoreApplication::sendEvent(open.data(), &press);
     QCOMPARE(chosen.count(), 1);
     QCOMPARE(chosen.first().first().value<QAction *>(), find(open.data(), QStringLiteral("Hypopnea")));
+
+    // with a modifier it is a shortcut, not a letter: Cmd+C does not pick "Central apnea"
+    QScopedPointer<QMenu> again(ScoringMenus::forRange(15000, nullptr));
+    QSignalSpy none(again.data(), &QMenu::triggered);
+    again->popup(QPoint(10, 10));
+    QKeyEvent copy(QEvent::KeyPress, Qt::Key_C, Qt::ControlModifier, QStringLiteral("c"));
+    QCoreApplication::sendEvent(again.data(), &copy);
+    QCOMPARE(none.count(), 0);
 }
 
 void ScoringMenusTests::testBulkItems()

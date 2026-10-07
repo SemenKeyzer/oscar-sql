@@ -33,8 +33,9 @@ QList<gManualScoringLayer::Item> gManualScoringLayer::items(const ManualScoring:
             const qint64 start = e.endMs - qint64(e.durationSec * 1000);
             if (e.endMs < minX || start > maxX) continue;
             // zoomed in: the type and length, as a sleep lab marks it ("OA 11.8 s")
-            const QString what = QStringLiteral("%1 %2 %3")
-                                     .arg(schema::channel[e.channel].label(), QLocale().toString(e.durationSec, 'f', 1), tr("s"));
+            const QString what = zoomed ? QStringLiteral("%1 %2 %3")
+                                              .arg(schema::channel[e.channel].label(), QLocale().toString(e.durationSec, 'f', 1), tr("s"))
+                                        : QString();
             switch (e.origin) {
             case Origin::Device:
                 if (zoomed && !e.excluded) out.append({ Item::Event, start, e.endMs, e.channel, what });

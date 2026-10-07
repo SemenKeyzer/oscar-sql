@@ -94,9 +94,12 @@ struct BulkPlan {
 //! What it takes to turn every counted \a from event of \a r into \a to (0: remove them).
 BulkPlan bulkEdits(const Result &r, ChannelID from, ChannelID to);
 
-//! The end of the next (or, back, the previous) event of \a type (0: any of OA, CA, A, H) after
-//! \a centerMs, more than a second away; removed events are included, to review them; -1 for none.
-qint64 nextEvent(const QList<EffectiveEvent> &events, ChannelID type, qint64 centerMs, bool forward);
+//! The index of the next (or, back, the previous) event of \a type (0: any of OA, CA, A, H) after the
+//! position (\a fromMs, \a fromIndex): events are ordered by end, then by index, so events that end at
+//! the same moment are each visited. Removed events are included, to review them; -1 for none.
+int stepEvent(const QList<EffectiveEvent> &events, ChannelID type, qint64 fromMs, int fromIndex, bool forward);
+//! How many events of \a type (0: any of OA, CA, A, H) count: not removed, not in an excluded stretch.
+int countOf(const QList<EffectiveEvent> &events, ChannelID type);
 
 // ---- on real sessions and days
 } // namespace ManualScoring
@@ -117,6 +120,8 @@ bool addEdit(Session *s, Edit edit);
 bool removeEdit(Session *s, qint64 id);
 //! Stores several edits for \a s (times as the graphs show them) with one recalculation.
 bool addEdits(Session *s, QList<Edit> edits);
+//! Applies a bulk plan to \a s in one transaction: the undone edits and the new ones together.
+bool applyBulk(Session *s, const BulkPlan &plan);
 //! Undoes the edit \a id of \a day's sessions; an excluded stretch stored with several sessions
 //! is undone in all of them.
 bool undoEdit(Day *day, qint64 id);

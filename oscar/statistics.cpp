@@ -2834,7 +2834,7 @@ QString StatisticsRow::value(QDate start, QDate end, MachineType typeOverride)
                 break;
             case SC_CPH: {
                 // the scored channels (OA, CA, A, H) per hour over the hours the AHI counts
-                const bool scored = effectiveType == MT_CPAP && ManualScoring::scoredChannels().contains(code);
+                const bool scored = effectiveType == MT_CPAP && ManualScoring::countedChannels().contains(code);   // RERA, OH/CH too
                 val = p_profile->calcCount(code, effectiveType, start, end)
                       / (scored ? p_profile->calcAhiHours(start, end) : p_profile->calcHours(effectiveType, start, end));
             }

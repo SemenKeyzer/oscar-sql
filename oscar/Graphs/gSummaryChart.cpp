@@ -19,6 +19,7 @@
 #include "SleepLib/profiles.h"
 #include "SleepLib/machine_common.h"
 #include "gSummaryChart.h"
+#include "SleepLib/manual_scoring.h"
 
 #include "gYAxis.h"
 
@@ -205,7 +206,9 @@ void gSummaryChart::customCalc(Day *day, QVector<SummaryChartSlice> & slices)
         const SummaryChartSlice & slice = slices.at(i);
         SummaryCalcItem & calc = calcitems[i];
 
-        calc.update(slice.value, hour);
+        // the AHI's events and RERA weigh by the hours the AHI counts over (less excluded stretches)
+        const bool ahiTime = m_machtype == MT_CPAP && calc.type == ST_CPH && ManualScoring::countedChannels().contains(calc.code);
+        calc.update(slice.value, ahiTime ? float(day->ahiHours()) : hour);
      }
 }
 

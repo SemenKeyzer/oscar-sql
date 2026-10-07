@@ -4349,15 +4349,20 @@ void Daily::applyScoring(const QVariantMap &choice, qint64 startMs, qint64 endMs
         if (Session *s = scoringSessionAt(day, timeMs)) ManualScoring::addEdit(s, e);
     } else if (action == QLatin1String("retypeAll") || action == QLatin1String("removeAll")) {
         const ChannelID to = action == QLatin1String("retypeAll") ? choice.value(QStringLiteral("newChannel")).toUInt() : 0;
-        const int n = int(day->count(channel));
+        // plan first: the question names the events that will actually change
+        QList<QPair<Session *, ManualScoring::BulkPlan>> plans;
+        int n = 0;
+        for (Session *s : day->sessions) {
+            if (s->type() != MT_CPAP || !s->enabled()) continue;
+            plans.append({ s, ManualScoring::bulkEdits(ManualScoring::resultFor(s), channel, to) });
+            n += plans.last().second.count;
+        }
+        if (n == 0) return;
         const QString question = to ? tr("Change all %1 events of type \"%2\" to \"%3\"?").arg(n).arg(ScoringMenus::typeName(channel), ScoringMenus::typeName(to))
                                     : tr("Remove all %1 events of type \"%2\"? They will no longer count.").arg(n).arg(ScoringMenus::typeName(channel));
         if (QMessageBox::question(this, tr("Manual scoring"), question, QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes) return;
-        for (Session *s : day->sessions) {
-            if (s->type() != MT_CPAP || !s->enabled()) continue;
-            const ManualScoring::BulkPlan plan = ManualScoring::bulkEdits(ManualScoring::resultFor(s), channel, to);
-            for (qint64 id : plan.undo) ManualScoringRepository::remove(id);
-            if (!plan.add.isEmpty() || !plan.undo.isEmpty()) ManualScoring::addEdits(s, plan.add);
+        for (const auto &p : plans) {
+            if (!p.second.add.isEmpty() || !p.second.undo.isEmpty()) ManualScoring::applyBulk(p.first, p.second);
         }
     } else if (action == QLatin1String("undo")) {
         ManualScoring::undoEdit(day, choice.value(QStringLiteral("editId")).toLongLong());
@@ -4412,7 +4417,7 @@ void Daily::onScoringContext(gGraph *graph, qint64 timeMs, QPoint globalPos)
     }
     QScopedPointer<QMenu> menu;
     if (best) {
-        menu.reset(ScoringMenus::forEvent(*best, this, int(day->count(best->channel))));
+        menu.reset(ScoringMenus::forEvent(*best, this, ManualScoring::countOf(events, best->channel)));
     } else {
         // inside an excluded stretch?
         for (Session *s : day->sessions) {
@@ -4471,6 +4476,7 @@ void Daily::updateScoringLayer(Day *day)
 {
     if (!m_scoringDrawn) return;
     *m_scoringDrawn = ManualScoring::Result();
+    m_stepIndex = -1;   // the events are new
     // every CPAP session: the events are drawn as boxes and stepped through, scored or not
     for (Session *s : day ? day->sessions : QList<Session *>()) {
         if (s->type() != MT_CPAP || !s->enabled()) continue;
@@ -4487,16 +4493,13 @@ void Daily::updateScoringTypes()
     const ChannelID shown = m_scoringType->currentData().toUInt();
     QSignalBlocker block(m_scoringType);
     m_scoringType->clear();
-    QHash<ChannelID, int> counts;
-    int all = 0;
-    for (const ManualScoring::EffectiveEvent &e : m_scoringDrawn->events) {
-        if (!ManualScoring::scoredChannels().contains(e.channel)) continue;
-        ++counts[e.channel];
-        ++all;
-    }
-    m_scoringType->addItem(tr("All events [%1]").arg(all), 0u);
+    // the counts are the events that count, as in the menus
+    const QList<ManualScoring::EffectiveEvent> &events = m_scoringDrawn->events;
+    m_scoringType->addItem(tr("All events [%1]").arg(ManualScoring::countOf(events, 0)), 0u);
     for (ChannelID c : ManualScoring::scoredChannels()) {
-        if (counts.value(c) > 0) m_scoringType->addItem(QStringLiteral("%1 [%2]").arg(ScoringMenus::typeName(c)).arg(counts.value(c)), c);
+        bool present = false;   // listed while any are left, removed ones too (to review them)
+        for (const ManualScoring::EffectiveEvent &e : events) present = present || e.channel == c;
+        if (present) m_scoringType->addItem(QStringLiteral("%1 [%2]").arg(ScoringMenus::typeName(c)).arg(ManualScoring::countOf(events, c)), c);
     }
     const int i = m_scoringType->findData(shown);
     m_scoringType->setCurrentIndex(i < 0 ? 0 : i);
@@ -4506,9 +4509,27 @@ void Daily::stepScoring(bool forward)
 {
     gGraph *flow = GraphView->findGraph(STR_GRAPH_FlowRate);
     if (!flow || !m_scoringDrawn) return;
-    const qint64 center = (flow->min_x + flow->max_x) / 2;
-    const qint64 at = ManualScoring::nextEvent(m_scoringDrawn->events, m_scoringType->currentData().toUInt(), center, forward);
-    if (at < 0) return;
-    const qint64 half = qint64(m_scoringWindow->currentData().toInt()) * 30000;   // half the window
-    GraphView->SetXBounds(at - half, at + half);
+    const QList<ManualScoring::EffectiveEvent> &events = m_scoringDrawn->events;
+    const qint64 window = qint64(m_scoringWindow->currentData().toInt()) * 60000;
+    qint64 fromMs;
+    int fromIndex;
+    if (m_stepIndex >= 0 && m_stepIndex < events.size() && flow->min_x == m_stepMin && flow->max_x == m_stepMax) {
+        fromMs = events.at(m_stepIndex).endMs;   // from the event shown by the last step
+        fromIndex = m_stepIndex;
+    } else if (flow->max_x - flow->min_x > 2 * window) {
+        fromMs = forward ? flow->min_x : flow->max_x;   // a wide view: from its start (or end)
+        fromIndex = forward ? -1 : INT_MAX;
+    } else {
+        fromMs = (flow->min_x + flow->max_x) / 2;
+        fromIndex = forward ? INT_MAX : -1;
+    }
+    const int i = ManualScoring::stepEvent(events, m_scoringType->currentData().toUInt(), fromMs, fromIndex, forward);
+    if (i < 0) return;
+    // the whole event in the middle of the window
+    const ManualScoring::EffectiveEvent &e = events.at(i);
+    const qint64 middle = e.endMs - qint64(e.durationSec * 500);
+    GraphView->SetXBounds(middle - window / 2, middle + window / 2);
+    m_stepIndex = i;
+    m_stepMin = flow->min_x;
+    m_stepMax = flow->max_x;
 }

@@ -2071,8 +2071,8 @@ void AnalysisIntegrationTests::testBulkOnADay()
     QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Add, CPAP_Obstructive, 480, 500)));
     QCOMPARE(day.count(CPAP_Obstructive), EventDataType(3));
     const ManualScoring::BulkPlan plan = ManualScoring::bulkEdits(ManualScoring::resultFor(s), CPAP_Obstructive, CPAP_Hypopnea);
-    for (qint64 id : plan.undo) QVERIFY(ManualScoringRepository::remove(id));
-    QVERIFY(ManualScoring::addEdits(s, plan.add));
+    QCOMPARE(plan.count, 3);
+    QVERIFY(ManualScoring::applyBulk(s, plan));   // one transaction
     QCOMPARE(day.count(CPAP_Obstructive), EventDataType(0));
     QCOMPARE(day.count(CPAP_Hypopnea), EventDataType(4));
     QCOMPARE(day.count(AllAhiChannels), EventDataType(5));

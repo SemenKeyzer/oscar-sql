@@ -249,18 +249,48 @@ void ManualScoringTests::testBulkRemoveAll()
     QCOMPARE(apply(deviceEvents(), after, oneSession()).delta.value(CPAP_Obstructive), -2);
 }
 
-// stepping through the events of one type, as the doctor reviews them
+// stepping through the events of one type, as the doctor reviews them: by event, so two events
+// that end at the same moment are both visited
 void ManualScoringTests::testNextEvent()
 {
-    const Result r = apply(deviceEvents(), { edit(1, Kind::Remove, CPAP_Obstructive, 188 * kSec, 200 * kSec) }, oneSession());
-    // OA at 100 s and 200 s (removed, still listed to review it), CA at 300 s, H at 400 s
-    QCOMPARE(nextEvent(r.events, CPAP_Obstructive, 0, true), qint64(100 * kSec));
-    QCOMPARE(nextEvent(r.events, CPAP_Obstructive, 100 * kSec, true), qint64(200 * kSec));
-    QCOMPARE(nextEvent(r.events, CPAP_Obstructive, 200 * kSec, true), qint64(-1));
-    QCOMPARE(nextEvent(r.events, CPAP_Obstructive, 200 * kSec, false), qint64(100 * kSec));
-    QCOMPARE(nextEvent(r.events, 0, 250 * kSec, true), qint64(300 * kSec));   // 0: any scored type
-    QCOMPARE(nextEvent(r.events, 0, 250 * kSec, false), qint64(200 * kSec));
-    QCOMPARE(nextEvent(r.events, CPAP_Hypopnea, 400 * kSec + 500, true), qint64(-1));   // the one shown is not "next"
+    QList<DeviceEvent> device = deviceEvents();
+    device.append({ CPAP_Hypopnea, 300 * kSec, 20 });   // ends with the CA at 300 s
+    const Result r = apply(device, { edit(1, Kind::Remove, CPAP_Obstructive, 188 * kSec, 200 * kSec) }, oneSession());
+    auto end = [&](int i) { return i < 0 ? qint64(-1) : r.events.at(i).endMs; };
+    // OA at 100 s and 200 s (removed, still visited to review it), CA at 300 s, H at 300 s and 400 s
+    int i = stepEvent(r.events, CPAP_Obstructive, 0, -1, true);
+    QCOMPARE(end(i), qint64(100 * kSec));
+    i = stepEvent(r.events, CPAP_Obstructive, end(i), i, true);
+    QCOMPARE(end(i), qint64(200 * kSec));
+    QCOMPARE(stepEvent(r.events, CPAP_Obstructive, end(i), i, true), -1);
+    QCOMPARE(end(stepEvent(r.events, CPAP_Obstructive, end(i), i, false)), qint64(100 * kSec));
+    // any scored type: both events ending at 300 s are visited
+    i = stepEvent(r.events, 0, 250 * kSec, -1, true);
+    QCOMPARE(end(i), qint64(300 * kSec));
+    const int j = stepEvent(r.events, 0, end(i), i, true);
+    QCOMPARE(end(j), qint64(300 * kSec));
+    QVERIFY(j != i);
+    QCOMPARE(end(stepEvent(r.events, 0, end(j), j, true)), qint64(400 * kSec));
+}
+
+// how many events of a type count (not removed, not in an excluded stretch)
+void ManualScoringTests::testCountOf()
+{
+    const Result r = apply(deviceEvents(), { edit(1, Kind::Remove, CPAP_Obstructive, 188 * kSec, 200 * kSec),
+                                              edit(2, Kind::Exclude, 0, 290 * kSec, 310 * kSec) }, oneSession());
+    QCOMPARE(countOf(r.events, CPAP_Obstructive), 1);
+    QCOMPARE(countOf(r.events, CPAP_ClearAirway), 0);
+    QCOMPARE(countOf(r.events, 0), 2);   // OA@100, H@400
+}
+
+// changing all OA back to CA undoes an earlier CA → OA instead of adding "CA → CA"
+void ManualScoringTests::testBulkRetypeBackUndoes()
+{
+    const Result r = apply(deviceEvents(), { edit(5, Kind::Retype, CPAP_ClearAirway, 289 * kSec, 300 * kSec, CPAP_Obstructive) }, oneSession());
+    const BulkPlan plan = bulkEdits(r, CPAP_Obstructive, CPAP_ClearAirway);
+    QVERIFY(plan.undo.contains(5));
+    for (const Edit &e : plan.add) QVERIFY(!(e.kind == Kind::Retype && e.newChannel == e.channel));
+    QCOMPARE(plan.add.size(), 2);   // the two device OAs
 }
 
 // devices that split hypopneas by mechanism (Prisma: OH/CH) lose those in an excluded stretch too
@@ -275,7 +305,7 @@ void ManualScoringTests::testExcludeDropsMechanismHypopneas()
     // a RERA (or OH/CH) is never a step target, nor offered for editing
     device.append({ CPAP_RERA, 260 * kSec, 8 });
     const Result all = apply(device, {}, oneSession());
-    QCOMPARE(nextEvent(all.events, 0, 240 * kSec, true), qint64(300 * kSec));
+    QCOMPARE(all.events.at(stepEvent(all.events, 0, 240 * kSec, -1, true)).endMs, qint64(300 * kSec));
 }
 
 // ---- storage
@@ -414,4 +444,19 @@ void ManualScoringTests::testHasScoringFollowsEdits()
     ManualScoringRepository::add(e);
     QVERIFY(ManualScoringRepository::removeAllForSession(key(203)));
     QVERIFY(!ManualScoringRepository::hasScoring(key(203)));
+}
+
+// a cache read that fails is tried again next time, not kept as "no scoring"
+void ManualScoringTests::testFailedCacheReadIsNotKept()
+{
+    Edit e = edit(0, Kind::Add, CPAP_Hypopnea, 1, 2);
+    e.key = key(301);
+    ManualScoringRepository::add(e);
+    ManualScoringRepository::remove(-1);   // clears the cache
+    QSqlQuery q(DatabaseManager::instance().database());
+    QVERIFY(q.exec(QStringLiteral("ALTER TABLE manual_scoring RENAME TO manual_scoring_away")));
+    QVERIFY(!ManualScoringRepository::hasScoring(key(301)));   // the read fails
+    QVERIFY(q.exec(QStringLiteral("ALTER TABLE manual_scoring_away RENAME TO manual_scoring")));
+    QVERIFY(ManualScoringRepository::hasScoring(key(301)));
+    ManualScoringRepository::removeAllForSession(key(301));
 }

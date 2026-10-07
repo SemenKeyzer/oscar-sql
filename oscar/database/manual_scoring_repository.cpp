@@ -12,6 +12,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QHash>
+#include <QMutex>
 #include <QSet>
 #include <QStringList>
 
@@ -52,7 +53,9 @@ void bindKey(QSqlQuery &q, const SessionKey &key)
 }
 
 // The sessions with edits, per database file and profile: (serial, device session number).
+// Guarded by a mutex: sessions are stored from worker threads during an import.
 QHash<QString, QSet<QPair<QString, qint64>>> s_withScoring;
+QMutex s_withScoringLock;
 
 QString cacheKey(qint64 profileId)
 {
@@ -61,20 +64,23 @@ QString cacheKey(qint64 profileId)
 
 QPair<QString, qint64> sessionOf(const SessionKey &key) { return { key.serial, qint64(key.session) }; }
 
-//! The cached set for the key's profile, read from the database the first time.
-QSet<QPair<QString, qint64>> &withScoring(qint64 profileId)
+//! The cached set for the profile, read from the database when not cached; false if that read
+//! failed (then nothing is cached and the next call tries again).
+bool withScoring(qint64 profileId, QSet<QPair<QString, qint64>> **set)
 {
     const QString ck = cacheKey(profileId);
     auto it = s_withScoring.find(ck);
-    if (it != s_withScoring.end()) return it.value();
-    QSet<QPair<QString, qint64>> set;
-    QSqlQuery q(DatabaseManager::instance().database());
-    q.prepare(QStringLiteral("SELECT DISTINCT machine_serial, session_id FROM manual_scoring WHERE profile_id = ?"));
-    q.addBindValue(profileId);
-    if (q.exec()) {
-        while (q.next()) set.insert({ q.value(0).toString(), q.value(1).toLongLong() });
+    if (it == s_withScoring.end()) {
+        QSet<QPair<QString, qint64>> read;
+        QSqlQuery q(DatabaseManager::instance().database());
+        q.prepare(QStringLiteral("SELECT DISTINCT machine_serial, session_id FROM manual_scoring WHERE profile_id = ?"));
+        q.addBindValue(profileId);
+        if (!q.exec()) return false;
+        while (q.next()) read.insert({ q.value(0).toString(), q.value(1).toLongLong() });
+        it = s_withScoring.insert(ck, read);
     }
-    return s_withScoring.insert(ck, set).value();
+    *set = &it.value();
+    return true;
 }
 
 bool run(QSqlQuery &q, const char *what)
@@ -88,7 +94,9 @@ bool run(QSqlQuery &q, const char *what)
 
 bool ManualScoringRepository::hasScoring(const SessionKey &key)
 {
-    return withScoring(key.profileId).contains(sessionOf(key));
+    QMutexLocker lock(&s_withScoringLock);
+    QSet<QPair<QString, qint64>> *set = nullptr;
+    return withScoring(key.profileId, &set) && set->contains(sessionOf(key));
 }
 
 QList<Edit> ManualScoringRepository::editsForSession(const SessionKey &key)
@@ -129,7 +137,9 @@ qint64 ManualScoringRepository::add(const Edit &e)
     q.addBindValue(e.note);
     q.addBindValue((e.createdAt.isValid() ? e.createdAt : QDateTime::currentDateTime()).toString(Qt::ISODate));
     if (!run(q, "add")) return 0;
-    withScoring(e.key.profileId).insert(sessionOf(e.key));
+    QMutexLocker lock(&s_withScoringLock);
+    QSet<QPair<QString, qint64>> *set = nullptr;
+    if (withScoring(e.key.profileId, &set)) set->insert(sessionOf(e.key));
     return q.lastInsertId().toLongLong();
 }
 
@@ -139,6 +149,7 @@ bool ManualScoringRepository::remove(qint64 id)
     q.prepare(QStringLiteral("DELETE FROM manual_scoring WHERE id = ?"));
     q.addBindValue(id);
     const bool ok = run(q, "remove");
+    QMutexLocker lock(&s_withScoringLock);
     s_withScoring.clear();   // which session it was is not known here: read again when asked
     return ok;
 }
@@ -149,7 +160,9 @@ bool ManualScoringRepository::removeAllForSession(const SessionKey &key)
     q.prepare(QStringLiteral("DELETE FROM manual_scoring WHERE ") + kWhereKey);
     bindKey(q, key);
     const bool ok = run(q, "removeAllForSession");
-    if (ok) withScoring(key.profileId).remove(sessionOf(key));
+    QMutexLocker lock(&s_withScoringLock);
+    QSet<QPair<QString, qint64>> *set = nullptr;
+    if (ok && withScoring(key.profileId, &set)) set->remove(sessionOf(key));
     return ok;
 }
 

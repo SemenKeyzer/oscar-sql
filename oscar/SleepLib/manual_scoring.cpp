@@ -18,6 +18,8 @@
 #include "SleepLib/session.h"
 #include "database/manual_scoring_repository.h"
 #include "database/daily_summary_repository.h"
+#include "database/database_manager.h"
+#include <QSqlDatabase>
 
 namespace ManualScoring {
 
@@ -153,6 +155,10 @@ BulkPlan bulkEdits(const Result &r, ChannelID from, ChannelID to)
             }
             continue;
         }
+        if (e.origin == Origin::Retyped && to == e.originalChannel) {
+            plan.undo.append(e.editId);   // back to what the device said: take the retype back
+            continue;
+        }
         Edit change;   // a device event, as recorded or retyped before: named by its own type
         change.kind = to == 0 ? Kind::Remove : Kind::Retype;
         change.channel = e.originalChannel;
@@ -164,15 +170,35 @@ BulkPlan bulkEdits(const Result &r, ChannelID from, ChannelID to)
     return plan;
 }
 
-qint64 nextEvent(const QList<EffectiveEvent> &events, ChannelID type, qint64 centerMs, bool forward)
+int stepEvent(const QList<EffectiveEvent> &events, ChannelID type, qint64 fromMs, int fromIndex, bool forward)
 {
-    qint64 best = -1;
-    for (const EffectiveEvent &e : events) {
-        if (type == 0 ? !scoredChannels().contains(e.channel) : e.channel != type) continue;
-        if (forward ? e.endMs <= centerMs + 1000 : e.endMs >= centerMs - 1000) continue;
-        if (best < 0 || (forward ? e.endMs < best : e.endMs > best)) best = e.endMs;
+    const QList<ChannelID> scored = scoredChannels();
+    const QPair<qint64, int> from(fromMs, fromIndex);
+    int best = -1;
+    for (int i = 0; i < events.size(); ++i) {
+        const EffectiveEvent &e = events.at(i);
+        if (type == 0 ? !scored.contains(e.channel) : e.channel != type) continue;
+        const QPair<qint64, int> at(e.endMs, i);
+        if (forward ? !(from < at) : !(at < from)) continue;
+        if (best < 0) {
+            best = i;
+            continue;
+        }
+        const QPair<qint64, int> b(events.at(best).endMs, best);
+        if (forward ? at < b : b < at) best = i;
     }
     return best;
+}
+
+int countOf(const QList<EffectiveEvent> &events, ChannelID type)
+{
+    const QList<ChannelID> scored = scoredChannels();
+    int n = 0;
+    for (const EffectiveEvent &e : events) {
+        if (e.origin == Origin::Removed || e.excluded) continue;
+        if (type == 0 ? scored.contains(e.channel) : e.channel == type) ++n;
+    }
+    return n;
 }
 
 // ---- on real sessions and days
@@ -268,6 +294,29 @@ bool addEdits(Session *s, QList<Edit> edits)
         edit.endMs -= c;
         ok = ManualScoringRepository::add(edit) != 0 && ok;
     }
+    refresh(s);
+    return ok;
+}
+
+bool applyBulk(Session *s, const BulkPlan &plan)
+{
+    QSqlDatabase db = DatabaseManager::instance().database();
+    const bool tx = db.transaction();
+    const SessionKey key = keyOf(s);
+    const qint64 c = s->correctionMs();
+    bool ok = true;
+    for (qint64 id : plan.undo) ok = ManualScoringRepository::remove(id) && ok;
+    for (Edit edit : plan.add) {
+        edit.key = key;
+        edit.startMs -= c;
+        edit.endMs -= c;
+        ok = ManualScoringRepository::add(edit) != 0 && ok;
+    }
+    if (tx) {
+        if (ok) ok = db.commit();
+        else db.rollback();
+    }
+    if (!ok) ManualScoringRepository::remove(-1);   // the cache may hold what was rolled back
     refresh(s);
     return ok;
 }

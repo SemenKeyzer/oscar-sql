@@ -54,7 +54,10 @@ class LetterKeys : public QObject
     {
         auto *menu = qobject_cast<QMenu *>(o);
         if (!menu || e->type() != QEvent::KeyPress) return false;
-        QAction *a = ScoringMenus::actionForKey(menu, static_cast<QKeyEvent *>(e)->text());
+        auto *key = static_cast<QKeyEvent *>(e);
+        // with Ctrl, Cmd or Option it is a shortcut, not a letter
+        if (key->modifiers() & (Qt::ControlModifier | Qt::MetaModifier | Qt::AltModifier)) return false;
+        QAction *a = ScoringMenus::actionForKey(menu, key->text());
         if (!a || !a->isEnabled()) return false;
         // as if the item were highlighted and Return (or Right, for a submenu) pressed
         menu->setActiveAction(a);
