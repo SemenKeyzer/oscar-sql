@@ -37,6 +37,11 @@ private slots:
     void testBulkRetypeBackUndoes();
     void testFailedCacheReadIsNotKept();
     void testExcludeDropsMechanismHypopneas();
+    void testResize();
+    void testResizeIntoExclude();
+    void testResizeAndRetype();
+    void testResizeNotFound();
+    void testExcludeEditsListed();
     // storage
     void testStoreAndLoadEdits();
     void testRemoveEdit();

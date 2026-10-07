@@ -4463,6 +4463,7 @@ QString Daily::getManualScoring(Day *day)
             case Kind::Remove: ++removed; break;
             case Kind::Retype: ++retyped; break;
             case Kind::Exclude: stretches.insert({ e.startMs, e.endMs }); break;
+            case Kind::Resize: break;   // counted with Task 4
             }
         }
     }

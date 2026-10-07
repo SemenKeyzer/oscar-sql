@@ -71,7 +71,7 @@ Result apply(const QList<DeviceEvent> &device, const QList<Edit> &edits, const Q
     QHash<ChannelID, int> deviceCount;
     for (const DeviceEvent &d : device) {
         if (!scored.contains(d.channel)) continue;
-        r.events.append({ d.channel, d.channel, d.endMs, d.durationSec, Origin::Device, 0, false });
+        r.events.append({ d.channel, d.channel, d.endMs, d.durationSec, Origin::Device, 0, false, d.endMs, d.durationSec, 0 });
         ++deviceCount[d.channel];
     }
     const int deviceEnd = r.events.size();   // the device events come first
@@ -82,19 +82,23 @@ Result apply(const QList<DeviceEvent> &device, const QList<Edit> &edits, const Q
     for (const Edit &e : ordered) {
         switch (e.kind) {
         case Kind::Add:
-            r.events.append({ e.channel, e.channel, e.endMs, (e.endMs - e.startMs) / 1000.0, Origin::Added, e.id, false });
+            r.events.append({ e.channel, e.channel, e.endMs, (e.endMs - e.startMs) / 1000.0, Origin::Added, e.id, false,
+                              e.endMs, (e.endMs - e.startMs) / 1000.0, 0 });
             break;
         case Kind::Exclude:
             excludes.append({ e.startMs, e.endMs });
+            r.excludeEdits.append({ e.id, e.startMs, e.endMs });
             break;
         case Kind::Remove:
-        case Kind::Retype: {
-            // the nearest device event of that type; a later edit of the same event wins
+        case Kind::Retype:
+        case Kind::Resize: {
+            // the nearest device event of that type by its own end; a later edit of the same event wins
+            const qint64 match = e.kind == Kind::Resize ? e.matchEndMs : e.endMs;
             int best = -1;
             qint64 bestGap = kMatchToleranceMs + 1;
             for (int i = 0; i < deviceEnd; ++i) {
                 const EffectiveEvent &ev = r.events.at(i);
-                const qint64 gap = qAbs(ev.endMs - e.endMs);
+                const qint64 gap = qAbs(ev.originalEndMs - match);
                 if (ev.originalChannel == e.channel && gap < bestGap) {
                     best = i;
                     bestGap = gap;
@@ -105,6 +109,12 @@ Result apply(const QList<DeviceEvent> &device, const QList<Edit> &edits, const Q
                 break;
             }
             EffectiveEvent &ev = r.events[best];
+            if (e.kind == Kind::Resize) {   // new bounds; the type and the other edits stay
+                ev.endMs = e.endMs;
+                ev.durationSec = (e.endMs - e.startMs) / 1000.0;
+                ev.resizeEditId = e.id;
+                break;
+            }
             ev.editId = e.id;
             if (e.kind == Kind::Remove) {
                 ev.origin = Origin::Removed;
@@ -250,10 +260,17 @@ Result resultFor(Session *s)
 
     // shown on the graphs with the device's time correction
     const qint64 c = s->correctionMs();
-    for (EffectiveEvent &e : r.events) e.endMs += c;
+    for (EffectiveEvent &e : r.events) {
+        e.endMs += c;
+        e.originalEndMs += c;
+    }
     for (auto &span : r.excludedSpans) {
         span.first += c;
         span.second += c;
+    }
+    for (ExcludeEdit &x : r.excludeEdits) {
+        x.startMs += c;
+        x.endMs += c;
     }
     return r;
 }

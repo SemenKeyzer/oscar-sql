@@ -33,6 +33,7 @@ QString kindName(Kind k)
     case Kind::Remove: return QStringLiteral("remove");
     case Kind::Retype: return QStringLiteral("retype");
     case Kind::Exclude: return QStringLiteral("exclude");
+    case Kind::Resize: return QStringLiteral("resize");
     }
     return QString();
 }
@@ -42,6 +43,7 @@ Kind kindOf(const QString &name)
     if (name == QLatin1String("remove")) return Kind::Remove;
     if (name == QLatin1String("retype")) return Kind::Retype;
     if (name == QLatin1String("exclude")) return Kind::Exclude;
+    if (name == QLatin1String("resize")) return Kind::Resize;
     return Kind::Add;
 }
 

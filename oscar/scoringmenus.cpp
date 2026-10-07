@@ -165,6 +165,7 @@ QList<ScoringMenus::EditRow> ScoringMenus::editRows(Day *day)
             case Kind::Add: text = tr("added: %1").arg(typeName(e.channel)); break;
             case Kind::Remove: text = tr("removed: %1").arg(typeName(e.channel)); break;
             case Kind::Retype: text = tr("%1 → %2").arg(typeName(e.channel), typeName(e.newChannel)); break;
+            case Kind::Resize: continue;   // listed with Task 4
             case Kind::Exclude: {
                 const QPair<qint64, qint64> span(e.startMs, e.endMs);
                 if (stretches.contains(span)) continue;

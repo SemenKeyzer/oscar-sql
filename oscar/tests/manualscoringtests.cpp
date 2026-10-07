@@ -47,6 +47,22 @@ Edit edit(qint64 id, Kind kind, ChannelID channel, qint64 startMs, qint64 endMs,
     return e;
 }
 
+// the OA ending at 100 s (12 s long) given new bounds
+Edit resize(qint64 id, qint64 startMs, qint64 endMs, qint64 matchEndMs = 100 * kSec)
+{
+    Edit e = edit(id, Kind::Resize, CPAP_Obstructive, startMs, endMs);
+    e.matchEndMs = matchEndMs;
+    return e;
+}
+
+const EffectiveEvent *eventMatching(const Result &r, qint64 originalEndMs)
+{
+    for (const EffectiveEvent &e : r.events) {
+        if (e.originalEndMs == originalEndMs) return &e;
+    }
+    return nullptr;
+}
+
 int total(const QHash<ChannelID, int> &delta)
 {
     int sum = 0;
@@ -459,4 +475,63 @@ void ManualScoringTests::testFailedCacheReadIsNotKept()
     QVERIFY(q.exec(QStringLiteral("ALTER TABLE manual_scoring_away RENAME TO manual_scoring")));
     QVERIFY(ManualScoringRepository::hasScoring(key(301)));
     ManualScoringRepository::removeAllForSession(key(301));
+}
+
+void ManualScoringTests::testResize()
+{
+    const Result r = apply(deviceEvents(), { resize(7, 90 * kSec, 106 * kSec) }, oneSession());
+    const EffectiveEvent *e = eventMatching(r, 100 * kSec);
+    QVERIFY(e);
+    QCOMPARE(e->endMs, 106 * kSec);
+    QCOMPARE(e->durationSec, 16.0);
+    QCOMPARE(e->originalDurationSec, 12.0);
+    QCOMPARE(e->resizeEditId, qint64(7));
+    QCOMPARE(e->origin, Origin::Device);
+    QVERIFY(r.delta.isEmpty());
+    QVERIFY(r.notFound.isEmpty());
+}
+
+// the event counts at its new end: inside an excluded stretch it is left out, outside again counted
+void ManualScoringTests::testResizeIntoExclude()
+{
+    const Edit exclude = edit(1, Kind::Exclude, 0, 105 * kSec, 150 * kSec);
+    Result r = apply(deviceEvents(), { exclude, resize(2, 90 * kSec, 106 * kSec) }, oneSession());
+    QCOMPARE(r.delta.value(CPAP_Obstructive), -1);
+    r = apply(deviceEvents(), { exclude, resize(2, 90 * kSec, 104 * kSec) }, oneSession());
+    QCOMPARE(r.delta.value(CPAP_Obstructive), 0);
+}
+
+// a retype and new bounds of one event, in either order
+void ManualScoringTests::testResizeAndRetype()
+{
+    const Edit retype = edit(0, Kind::Retype, CPAP_Obstructive, 88 * kSec, 100 * kSec, CPAP_Hypopnea);
+    for (bool retypeFirst : { true, false }) {
+        Edit a = retype, b = resize(0, 90 * kSec, 106 * kSec);
+        a.id = retypeFirst ? 1 : 2;
+        b.id = retypeFirst ? 2 : 1;
+        const Result r = apply(deviceEvents(), { a, b }, oneSession());
+        const EffectiveEvent *e = eventMatching(r, 100 * kSec);
+        QVERIFY(e);
+        QCOMPARE(e->channel, CPAP_Hypopnea);
+        QCOMPARE(e->endMs, 106 * kSec);
+        QCOMPARE(r.delta.value(CPAP_Hypopnea), 1);
+        QVERIFY(r.notFound.isEmpty());
+    }
+}
+
+void ManualScoringTests::testResizeNotFound()
+{
+    const Result r = apply(deviceEvents(), { resize(3, 890 * kSec, 906 * kSec, 900 * kSec) }, oneSession());
+    QCOMPARE(r.notFound, QList<qint64>({ 3 }));
+}
+
+void ManualScoringTests::testExcludeEditsListed()
+{
+    const Result r = apply(deviceEvents(), { edit(1, Kind::Exclude, 0, 150 * kSec, 250 * kSec),
+                                             edit(2, Kind::Exclude, 0, 200 * kSec, 350 * kSec) }, oneSession());
+    QCOMPARE(r.excludeEdits.size(), 2);
+    QCOMPARE(r.excludeEdits.at(0).editId, qint64(1));
+    QCOMPARE(r.excludeEdits.at(0).startMs, 150 * kSec);
+    QCOMPARE(r.excludeEdits.at(1).endMs, 350 * kSec);
+    QCOMPARE(r.excludedSpans.size(), 1);   // merged as before
 }

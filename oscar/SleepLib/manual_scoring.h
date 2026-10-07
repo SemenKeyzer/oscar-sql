@@ -21,7 +21,7 @@
 //! events added, removed or retyped, and stretches excluded from scoring (noise, awake).
 namespace ManualScoring {
 
-enum class Kind { Add, Remove, Retype, Exclude };
+enum class Kind { Add, Remove, Retype, Exclude, Resize };
 
 //! Which session an edit belongs to. Kept by what survives a rebuild of the device's data
 //! (which deletes and re-creates the database rows): the profile, the device's serial number and
@@ -33,7 +33,8 @@ struct SessionKey {
     bool operator==(const SessionKey &o) const { return profileId == o.profileId && serial == o.serial && session == o.session; }
 };
 
-//! One correction. Remove and Retype name the device event by its channel and end time.
+//! One correction. Remove and Retype name the device event by its channel and end time; Resize by its
+//! channel and matchEndMs, and gives it the bounds startMs–endMs.
 struct Edit {
     qint64 id = 0;
     SessionKey key;
@@ -42,6 +43,7 @@ struct Edit {
     ChannelID newChannel = 0;   //!< Retype: the new type
     qint64 startMs = 0;
     qint64 endMs = 0;           //!< an event counts at its end
+    qint64 matchEndMs = 0;      //!< Resize: the device event's own end
     QString note;
     QDateTime createdAt;
 };
@@ -64,6 +66,15 @@ struct EffectiveEvent {
     Origin origin;
     qint64 editId;               //!< the edit that made it so; 0 for an untouched device event
     bool excluded;               //!< ends inside an excluded stretch: not counted
+    qint64 originalEndMs = 0;    //!< the device's end (Added: the same as endMs)
+    double originalDurationSec = 0;
+    qint64 resizeEditId = 0;     //!< the Resize edit giving it new bounds; 0 for none
+};
+
+//! An Exclude edit's own stretch, before stretches are merged.
+struct ExcludeEdit {
+    qint64 editId;
+    qint64 startMs, endMs;
 };
 
 struct Result {
@@ -72,6 +83,7 @@ struct Result {
     QList<QPair<qint64, qint64>> excludedSpans;   //!< the excluded stretches, merged and clipped to the sessions
     QList<qint64> notFound;        //!< Remove/Retype edits whose device event is not there
     QList<EffectiveEvent> events;  //!< every device and added event of the scored channels
+    QList<ExcludeEdit> excludeEdits;   //!< every Exclude edit, unmerged
 };
 
 constexpr qint64 kMatchToleranceMs = 1000;
