@@ -24,6 +24,7 @@ private slots:
     void testLayerItems();
     void testWholeNightGraphsUseWholeRange();
     void testEventBoxesWhenZoomed();
+    void testBoxesOnlyInScoringMode();
     void initTestCase();
 };
 DECLARE_TEST(ScoringModeTests)

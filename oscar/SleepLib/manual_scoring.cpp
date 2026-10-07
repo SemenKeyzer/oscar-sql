@@ -11,6 +11,7 @@
 #include <algorithm>
 
 #include "SleepLib/day.h"
+#include "SleepLib/machine_common.h"
 #include "SleepLib/machine.h"
 #include "SleepLib/profiles.h"
 #include "SleepLib/schema.h"
@@ -24,6 +25,16 @@ QList<ChannelID> scoredChannels()
 {
     // built on each call: the channel ids are set by schema::init()
     return { CPAP_Obstructive, CPAP_ClearAirway, CPAP_Apnea, CPAP_Hypopnea };
+}
+
+QList<ChannelID> countedChannels()
+{
+    QList<ChannelID> out = scoredChannels();
+    for (ChannelID c : *ahiChannelGroup(AllAhiChannels)) {
+        if (!out.contains(c)) out.append(c);
+    }
+    out.append(CPAP_RERA);
+    return out;
 }
 
 namespace {
@@ -51,8 +62,9 @@ QList<QPair<qint64, qint64>> clippedUnion(const QList<QPair<qint64, qint64>> &sp
 
 Result apply(const QList<DeviceEvent> &device, const QList<Edit> &edits, const QList<QPair<qint64, qint64>> &sessionSpans)
 {
-    // RERA cannot be edited, but an excluded stretch leaves out its RERAs too (they count in the RDI)
-    const QList<ChannelID> scored = scoredChannels() + QList<ChannelID> { CPAP_RERA };
+    // RERA and the hypopneas some devices split by mechanism (OH/CH) cannot be edited, but an
+    // excluded stretch leaves them out too: they count in the AHI or RDI
+    const QList<ChannelID> scored = countedChannels();
     Result r;
     QHash<ChannelID, int> deviceCount;
     for (const DeviceEvent &d : device) {
@@ -156,7 +168,7 @@ qint64 nextEvent(const QList<EffectiveEvent> &events, ChannelID type, qint64 cen
 {
     qint64 best = -1;
     for (const EffectiveEvent &e : events) {
-        if (type != 0 && e.channel != type) continue;
+        if (type == 0 ? !scoredChannels().contains(e.channel) : e.channel != type) continue;
         if (forward ? e.endMs <= centerMs + 1000 : e.endMs >= centerMs - 1000) continue;
         if (best < 0 || (forward ? e.endMs < best : e.endMs > best)) best = e.endMs;
     }
@@ -189,8 +201,7 @@ void loadSummary(Session *s)
 Result resultFor(Session *s)
 {
     const QList<Edit> edits = ManualScoringRepository::editsForSession(keyOf(s));
-    QList<ChannelID> channels = scoredChannels();
-    channels << CPAP_RERA;
+    const QList<ChannelID> channels = countedChannels();
     // the device events are needed: load the scored channels if they are not all in memory
     // (nothing loaded, or the analysis holds only some channels)
     const bool wasEmpty = s->eventlist.isEmpty() && !s->eventsLoaded();

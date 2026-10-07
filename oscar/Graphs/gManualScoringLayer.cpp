@@ -12,6 +12,7 @@
 #include <QPainter>
 
 #include "Graphs/gGraph.h"
+#include "Graphs/gGraphView.h"
 #include "SleepLib/schema.h"
 
 using ManualScoring::EffectiveEvent;
@@ -70,7 +71,7 @@ void gManualScoringLayer::paint(QPainter &painter, gGraph &w, const QRegion &reg
 
     painter.save();
     painter.setClipRect(r);
-    for (const Item &it : items(*m_result, range.first, range.second, m_markers, m_boxes && !w.blockZoom())) {
+    for (const Item &it : items(*m_result, range.first, range.second, m_markers, showsBoxes(m_boxes, w.graphView() && w.graphView()->scoringMode(), w.blockZoom()))) {
         // at least 4 px, so a short stretch still shows on a whole night
         double x1 = px(it.start), x2 = px(it.end);
         if (x2 - x1 < 4) {
@@ -117,4 +118,9 @@ void gManualScoringLayer::paint(QPainter &painter, gGraph &w, const QRegion &reg
         }
     }
     painter.restore();
+}
+
+bool gManualScoringLayer::showsBoxes(bool drawsBoxes, bool scoringMode, bool blockZoom)
+{
+    return drawsBoxes && scoringMode && !blockZoom;   // a scoring tool: the flow graph looks as before otherwise
 }

@@ -36,6 +36,8 @@ class gManualScoringLayer : public Layer
     //! \a drawsBoxes: zoomed in to kBoxRangeMs or less, every counted event is a labelled box (flow graph).
     gManualScoringLayer(QSharedPointer<ManualScoring::Result> result, bool drawsMarkers, bool drawsBoxes = false);
     static constexpr qint64 kBoxRangeMs = 20 * 60000;
+    //! Whether a layer that draws boxes shows them now.
+    static bool showsBoxes(bool drawsBoxes, bool scoringMode, bool blockZoom);
 
     virtual void paint(QPainter &painter, gGraph &w, const QRegion &region) override;
 

@@ -130,3 +130,12 @@ void ScoringModeTests::testEventBoxesWhenZoomed()
     QCOMPARE(gManualScoringLayer::items(r, 0, 9 * 3600000, true, true).size(), 2);
     QCOMPARE(gManualScoringLayer::items(r, 0, 10 * 60000, true, false).size(), 2);
 }
+
+// the boxes are a scoring tool: outside scoring mode the flow graph looks as before
+void ScoringModeTests::testBoxesOnlyInScoringMode()
+{
+    QVERIFY(gManualScoringLayer::showsBoxes(true, true, false));
+    QVERIFY(!gManualScoringLayer::showsBoxes(true, false, false));   // not scoring
+    QVERIFY(!gManualScoringLayer::showsBoxes(false, true, false));   // not the flow graph
+    QVERIFY(!gManualScoringLayer::showsBoxes(true, true, true));     // a whole-night graph
+}

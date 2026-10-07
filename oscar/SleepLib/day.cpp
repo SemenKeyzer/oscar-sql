@@ -1785,8 +1785,8 @@ EventDataType Day::deviceAHI()
 
 double Day::perHour(ChannelID code)
 {
-    // the scored events (and RERA, which an excluded stretch leaves out too) count over the AHI hours
-    const bool scored = code == CPAP_RERA || ManualScoring::scoredChannels().contains(code);
+    // the AHI's events (OH/CH too) and RERA, which an excluded stretch leaves out, count over the AHI hours
+    const bool scored = ManualScoring::countedChannels().contains(code);
     const double h = scored ? ahiHours() : double(hours(MT_CPAP));
     return h > 0 ? double(count(code)) / h : 0.0;
 }

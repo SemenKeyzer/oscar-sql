@@ -4400,7 +4400,9 @@ void Daily::onScoringContext(gGraph *graph, qint64 timeMs, QPoint globalPos)
         events += ManualScoring::resultFor(s).events;
     }
     qint64 bestGap = slack + 1;
+    const QList<ChannelID> scored = ManualScoring::scoredChannels();
     for (const ManualScoring::EffectiveEvent &e : events) {
+        if (!scored.contains(e.channel)) continue;   // RERA, OH/CH: not edited by hand
         const qint64 start = e.endMs - qint64(e.durationSec * 1000);
         const qint64 gap = (timeMs >= start && timeMs <= e.endMs) ? 0 : qMin(qAbs(timeMs - e.endMs), qAbs(timeMs - start));
         if (gap < bestGap) {
@@ -4486,8 +4488,13 @@ void Daily::updateScoringTypes()
     QSignalBlocker block(m_scoringType);
     m_scoringType->clear();
     QHash<ChannelID, int> counts;
-    for (const ManualScoring::EffectiveEvent &e : m_scoringDrawn->events) ++counts[e.channel];
-    m_scoringType->addItem(tr("All events [%1]").arg(m_scoringDrawn->events.size()), 0u);
+    int all = 0;
+    for (const ManualScoring::EffectiveEvent &e : m_scoringDrawn->events) {
+        if (!ManualScoring::scoredChannels().contains(e.channel)) continue;
+        ++counts[e.channel];
+        ++all;
+    }
+    m_scoringType->addItem(tr("All events [%1]").arg(all), 0u);
     for (ChannelID c : ManualScoring::scoredChannels()) {
         if (counts.value(c) > 0) m_scoringType->addItem(QStringLiteral("%1 [%2]").arg(ScoringMenus::typeName(c)).arg(counts.value(c)), c);
     }

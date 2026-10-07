@@ -79,6 +79,8 @@ constexpr double kShortEventSec = 10.0;
 
 //! The channels that can be scored: OA, CA, A, H.
 QList<ChannelID> scoredChannels();
+//! The channels an excluded stretch leaves out: every AHI channel (also OH/CH) and RERA.
+QList<ChannelID> countedChannels();
 
 //! The corrected night of one session or day. \a sessionSpans are the sessions' [start, end) in ms.
 Result apply(const QList<DeviceEvent> &device, const QList<Edit> &edits, const QList<QPair<qint64, qint64>> &sessionSpans);
@@ -92,7 +94,7 @@ struct BulkPlan {
 //! What it takes to turn every counted \a from event of \a r into \a to (0: remove them).
 BulkPlan bulkEdits(const Result &r, ChannelID from, ChannelID to);
 
-//! The end of the next (or, back, the previous) event of \a type (0: any scored type) after
+//! The end of the next (or, back, the previous) event of \a type (0: any of OA, CA, A, H) after
 //! \a centerMs, more than a second away; removed events are included, to review them; -1 for none.
 qint64 nextEvent(const QList<EffectiveEvent> &events, ChannelID type, qint64 centerMs, bool forward);
 

@@ -42,6 +42,7 @@ private slots:
     void testAddedTypeListed();
     void testEditRowsSkipDisabledSessions();
     void testBulkOnADay();
+    void testIndicesAddUpWithMechanismHypopneas();
     void initTestCase();
     void cleanupTestCase();
     void testAnalysisChannelsAreComputed();

@@ -2078,3 +2078,23 @@ void AnalysisIntegrationTests::testBulkOnADay()
     QCOMPARE(day.count(AllAhiChannels), EventDataType(5));
     ManualScoring::clearDay(&day);
 }
+
+// Prisma writes hypopneas as OH/CH: with a stretch excluded, the indices still add up to the AHI
+void AnalysisIntegrationTests::testIndicesAddUpWithMechanismHypopneas()
+{
+    Machine cpap(p_profile, 93);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    Session *s = scoredSession(&cpap, 931, m_machineRow);
+    s->AddEventList(CPAP_ObstructiveHypopnea, EVL_Event)->AddEvent(synth::kStart + 250000, 14);
+    s->eventlist[CPAP_ObstructiveHypopnea].first()->AddEvent(synth::kStart + 2500000, 14);
+    s->setCount(CPAP_ObstructiveHypopnea, 2);
+    day.addSession(s);
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Exclude, 0, 150, 1950)));
+    double sum = 0;
+    for (ChannelID c : *ahiChannelGroup(AllAhiChannels)) sum += day.perHour(c);
+    QVERIFY2(qAbs(sum - double(day.calcAHI())) < 1e-6, qPrintable(QStringLiteral("%1 vs %2").arg(sum).arg(day.calcAHI())));
+    QCOMPARE(day.count(CPAP_ObstructiveHypopnea), EventDataType(1));   // the one at 250 s was left out
+    ManualScoring::clearDay(&day);
+}
