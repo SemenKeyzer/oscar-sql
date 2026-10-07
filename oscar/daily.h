@@ -477,6 +477,8 @@ private:
     QPair<qint64, qint64> scoringLimits(const ScoringResize::Target &t);
     //! The time range the graphs show now; (0, 0) when none shows one.
     QPair<qint64, qint64> shownRange() const;
+    QPair<qint64, qint64> m_keepRange { 0, 0 };   //!< put back by the next reload of m_keepRangeDate
+    QDate m_keepRangeDate;
     TimeAlignBar *m_alignBar = nullptr;
     TimeAlignSession *m_alignSession = nullptr;
     qint64 m_alignDragBaseMs = 0;

@@ -1480,6 +1480,11 @@ void Daily::on_ReloadDay()
     load_time=time.restart();
 
     //GraphView->fadeIn(fadedir);
+    // a scoring change reloaded the same night: the graphs stay where they were
+    if (m_keepRange.second > m_keepRange.first && previous_date == m_keepRangeDate) {
+        GraphView->SetXBounds(m_keepRange.first, m_keepRange.second);
+    }
+    m_keepRange = { 0, 0 };
     GraphView->redraw();
     ui->calButton->setText(QLocale().toString(ui->calendar->selectedDate(), MedDateFormat));
     ui->calendar->setFocus(Qt::ActiveWindowFocusReason);
@@ -4396,10 +4401,11 @@ void Daily::scoringChanged()
     ManualScoring::storeDaySummary(p_profile->GetDay(previous_date, MT_CPAP));   // read by the SQL reports
     // as when a session is switched off: every page shows the corrected figures; the night reloads,
     // and the graphs stay where the doctor was looking
-    const QPair<qint64, qint64> shown = shownRange();
+    // (LoadDate reloads on the next turn of the event loop: the range is put back after that reload)
+    m_keepRange = shownRange();
+    m_keepRangeDate = previous_date;
     if (mainwin) mainwin->refreshAnalysisViews();
     else LoadDate(previous_date);
-    if (shown.second > shown.first) GraphView->SetXBounds(shown.first, shown.second);
 }
 
 void Daily::onScoringRange(gGraph *graph, qint64 startMs, qint64 endMs, QPoint globalPos)
