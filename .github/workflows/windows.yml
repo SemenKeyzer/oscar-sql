@@ -1,0 +1,68 @@
+# A Windows 11 (64-bit) build of OSCAR to try out: a zip that runs without installing.
+# Run by hand only (Actions tab → "Windows build" → Run workflow); the zip is kept 14 days.
+#
+# The fork is built and tested with clang on macOS, where warnings are errors; MinGW's GCC
+# warns about other things, so this build does not stop on warnings.
+
+name: Windows build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    name: Windows 11, Qt 6.10 (MinGW)
+    runs-on: windows-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # the version string comes from git
+
+      - name: Install Qt and MinGW
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.10.2'
+          host: windows
+          target: desktop
+          arch: win64_mingw
+          modules: 'qtserialport qtconnectivity'
+          tools: 'tools_mingw1310'
+          cache: true
+
+      - name: Build OSCAR
+        shell: cmd
+        run: |
+          set PATH=%IQTA_TOOLS%\mingw1310_64\bin;%PATH%
+          mkdir build
+          cd build
+          qmake ..\oscar\oscar.pro CONFIG+=release CONFIG-=debug_and_release -after "QMAKE_CXXFLAGS+=-Wno-error" "QMAKE_CFLAGS+=-Wno-error"
+          if errorlevel 1 exit /b 1
+          mingw32-make -j4 SHELL=cmd.exe
+          if errorlevel 1 exit /b 1
+
+      - name: Gather OSCAR and the Qt libraries
+        shell: pwsh
+        run: |
+          $env:PATH = "$env:IQTA_TOOLS\mingw1310_64\bin;$env:PATH"
+          $exe = Get-ChildItem -Path build -Recurse -Filter OSCAR.exe | Select-Object -First 1
+          if (-not $exe) { throw "OSCAR.exe was not built" }
+          New-Item -ItemType Directory -Path OSCAR | Out-Null
+          Copy-Item $exe.FullName OSCAR\
+          foreach ($dir in 'Translations', 'Html', 'Help') {
+            if (Test-Path "build\$dir") { Copy-Item "build\$dir" "OSCAR\$dir" -Recurse }
+          }
+          Remove-Item OSCAR\Translations\*.ts -ErrorAction SilentlyContinue
+          windeployqt --release --compiler-runtime --no-translations OSCAR\OSCAR.exe
+          if ($LASTEXITCODE -ne 0) { throw "windeployqt failed" }
+          Get-ChildItem OSCAR | Format-Table Name, Length
+
+      - name: Upload the zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: OSCAR-windows-${{ github.sha }}
+          path: OSCAR
+          retention-days: 14

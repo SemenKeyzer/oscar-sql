@@ -1,4 +1,5 @@
-# Builds OSCAR and runs the unit tests on every push and pull request.
+# Builds OSCAR and runs the unit tests. Run by hand only (Actions tab → Run workflow):
+# the fork's owner does not want a build on every push.
 #
 # Warnings are errors in this project (oscar.pro), so a build that passes here is
 # also warning-free with this compiler.
@@ -6,8 +7,6 @@
 name: Build and test
 
 on:
-  push:
-  pull_request:
   workflow_dispatch:
 
 permissions:
