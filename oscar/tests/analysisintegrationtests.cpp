@@ -1999,3 +1999,62 @@ void AnalysisIntegrationTests::testEditRowsListEveryEdit()
     QVERIFY(rows[2].editId > 0);
     ManualScoring::clearDay(&day);
 }
+
+// the per-hour indices of the scored events add up to the corrected AHI
+void AnalysisIntegrationTests::testPerHourUsesAhiHours()
+{
+    Machine cpap(p_profile, 89);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    Session *s = scoredSession(&cpap, 891, m_machineRow);
+    s->AddEventList(CPAP_FlowLimit, EVL_Event)->AddEvent(synth::kStart + 2500000, 5);
+    s->setCount(CPAP_FlowLimit, 1);
+    day.addSession(s);
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Exclude, 0, 1800, 3600)));   // half the hour out
+    // OA@100, OA@200, CA@300, H@400 stay, over half an hour
+    QCOMPARE(day.perHour(CPAP_Obstructive), 4.0);
+    QCOMPARE(day.perHour(CPAP_ClearAirway), 2.0);
+    QCOMPARE(day.perHour(CPAP_Hypopnea), 2.0);
+    QCOMPARE(day.perHour(CPAP_Obstructive) + day.perHour(CPAP_ClearAirway) + day.perHour(CPAP_Hypopnea), double(day.calcAHI()));
+    QCOMPARE(day.perHour(CPAP_FlowLimit), 1.0);   // not a scored event: over the whole hour
+    ManualScoring::clearDay(&day);
+}
+
+// a type added by hand that the device never recorded still gets its index row
+void AnalysisIntegrationTests::testAddedTypeListed()
+{
+    Machine cpap(p_profile, 90);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    Session *s = scoredSession(&cpap, 901, m_machineRow);
+    day.addSession(s);
+    QVERIFY(!day.getSortedMachineChannels(schema::FLAG).contains(CPAP_Apnea));
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Add, CPAP_Apnea, 600, 615)));
+    QVERIFY(day.getSortedMachineChannels(schema::FLAG).contains(CPAP_Apnea));
+    ManualScoring::clearDay(&day);
+}
+
+// a switched-off session's edits are not listed, as they do not count
+void AnalysisIntegrationTests::testEditRowsSkipDisabledSessions()
+{
+    Machine cpap(p_profile, 91);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    const bool clinical = p_profile->cpap->clinicalMode();
+    p_profile->cpap->setClinicalMode(false);
+    Day day;
+    Session *a = scoredSession(&cpap, 911, m_machineRow);
+    Session *b = scoredSession(&cpap, 912, m_machineRow);
+    day.addSession(a);
+    day.addSession(b);
+    QVERIFY(ManualScoring::addEdit(a, scoringEdit(ManualScoring::Kind::Add, CPAP_Hypopnea, 480, 500)));
+    QVERIFY(ManualScoring::addEdit(b, scoringEdit(ManualScoring::Kind::Add, CPAP_Hypopnea, 580, 600)));
+    QCOMPARE(ScoringMenus::editRows(&day).size(), 2);
+    b->setEnabled(false);
+    QCOMPARE(ScoringMenus::editRows(&day).size(), 1);
+    b->setEnabled(true);
+    ManualScoring::clearDay(&day);
+    p_profile->cpap->setClinicalMode(clinical);
+}

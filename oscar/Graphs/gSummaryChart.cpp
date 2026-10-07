@@ -365,7 +365,7 @@ void gSummaryChart::populate(Day * day, int idx)
         QColor color;
         switch (item.type) {
         case ST_CPH:
-            value = day->count(code) / hours;
+            value = m_machtype == MT_CPAP ? day->perHour(code) : day->count(code) / hours;
             name = chan.label();
             color = item.color;
             slices.append(SummaryChartSlice(&item, value, value, name, color));

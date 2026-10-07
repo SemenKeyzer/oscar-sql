@@ -2158,7 +2158,8 @@ QString Daily::getIndices(Day * day, QHash<ChannelID, EventDataType>& values ) {
             val = day->sum(code) / channelHours;
             data = QString("%1").arg(val,0,'f',2);
         } else {
-            val = day->count(code) / channelHours;
+            // CPAP events per hour as the AHI counts them (less what manual scoring left out)
+            val = chan.machtype() == MT_CPAP ? day->perHour(code) : day->count(code) / channelHours;
             data = QString("%1").arg(val,0,'f',2);
         }
         // TODO: percentage would be another useful option here for things like
@@ -4390,7 +4391,7 @@ QString Daily::getManualScoring(Day *day)
     qint64 excludedMs = 0;
     QSet<QPair<qint64, qint64>> stretches;
     for (Session *s : day->sessions) {
-        if (s->type() != MT_CPAP) continue;
+        if (s->type() != MT_CPAP || !s->enabled()) continue;   // as the AHI: only sessions that count
         excludedMs += s->manualExcludedMs();
         notFound += s->manualNotFound();
         for (const ManualScoring::Edit &e : ManualScoringRepository::editsForSession(ManualScoring::keyOf(s))) {

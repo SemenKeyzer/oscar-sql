@@ -37,6 +37,10 @@ private slots:
     void testUndoStretchAcrossSessions();
     void testDailySummaryFollowsScoring();
     void testEditRowsListEveryEdit();
+    // part 2
+    void testPerHourUsesAhiHours();
+    void testAddedTypeListed();
+    void testEditRowsSkipDisabledSessions();
     void initTestCase();
     void cleanupTestCase();
     void testAnalysisChannelsAreComputed();

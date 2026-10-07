@@ -248,6 +248,8 @@ class Day
 
     //! \brief Hours the AHI is counted over: the CPAP hours less the stretches excluded by manual scoring.
     double ahiHours();
+    //! \brief Events of \a code per hour: the scored events and RERA over ahiHours(), others over the CPAP hours.
+    double perHour(ChannelID code);
     //! \brief Whether any session of the day carries manual scoring.
     bool hasManualScoring();
     //! \brief The AHI as the device scored it, without manual scoring.

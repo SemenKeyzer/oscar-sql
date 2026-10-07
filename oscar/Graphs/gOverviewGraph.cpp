@@ -301,7 +301,7 @@ void gOverviewGraph::SetDay(Day * nullday)
                         break;
 
                     case ST_CPH:
-                        tmp = day->count(code) / day->hours(m_machinetype);
+                        tmp = m_machinetype == MT_CPAP ? day->perHour(code) : day->count(code) / day->hours(m_machinetype);
                         break;
 
                     case ST_SPH:

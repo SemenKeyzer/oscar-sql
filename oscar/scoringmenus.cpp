@@ -91,7 +91,7 @@ QList<ScoringMenus::EditRow> ScoringMenus::editRows(Day *day)
     if (!day) return rows;
     QSet<QPair<qint64, qint64>> stretches;
     for (Session *s : day->sessions) {
-        if (s->type() != MT_CPAP) continue;
+        if (s->type() != MT_CPAP || !s->enabled()) continue;   // a switched-off session's edits do not count
         const qint64 c = s->correctionMs();   // stored in device time, listed in graph time
         for (const ManualScoring::Edit &e : ManualScoringRepository::editsForSession(ManualScoring::keyOf(s))) {
             QString text;

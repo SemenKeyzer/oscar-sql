@@ -18,6 +18,7 @@
 #include <QDebug>
 
 #include "day.h"
+#include "manual_scoring.h"
 #include "machine.h"
 #include "profiles.h"
 #include "SleepLib/performance_timer.h"
@@ -1327,6 +1328,13 @@ QList<ChannelID> Day::getSortedMachineChannels(quint32 chantype)
         available.append(mi.value()->availableChannels(chantype));
     }
 
+    // a scored type added by hand that the device never recorded on this night still has a row
+    if ((chantype & schema::FLAG) && hasManualScoring()) {
+        for (ChannelID code : ManualScoring::scoredChannels()) {
+            if (!available.contains(code) && count(code) > 0) available.append(code);
+        }
+    }
+
     QMultiMap<int, ChannelID> order;
 
     for (auto code : available) {
@@ -1773,4 +1781,12 @@ EventDataType Day::deviceAHI()
     }
     const EventDataType minutes = hours(MT_CPAP) * 60.0;
     return minutes > 0 ? (c * 60.0) / minutes : 0;
+}
+
+double Day::perHour(ChannelID code)
+{
+    // the scored events (and RERA, which an excluded stretch leaves out too) count over the AHI hours
+    const bool scored = code == CPAP_RERA || ManualScoring::scoredChannels().contains(code);
+    const double h = scored ? ahiHours() : double(hours(MT_CPAP));
+    return h > 0 ? double(count(code)) / h : 0.0;
 }
