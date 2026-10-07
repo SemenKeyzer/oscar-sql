@@ -29,7 +29,9 @@ class ScoringMenus
     //! After a stretch of \a durationMs was selected on the flow graph.
     static QMenu *forRange(qint64 durationMs, QWidget *parent);
     //! For an event right-clicked on the graphs.
-    static QMenu *forEvent(const ManualScoring::EffectiveEvent &event, QWidget *parent);
+    //! \a countOfType: how many events of its type the night counts; with more than one, the menu
+    //! also offers to change or remove all of them.
+    static QMenu *forEvent(const ManualScoring::EffectiveEvent &event, QWidget *parent, int countOfType = 0);
     //! For an excluded stretch right-clicked on the graphs.
     static QMenu *forExcluded(qint64 editId, QWidget *parent);
     //! The name of a scored channel in the menus: "Obstructive apnea", …

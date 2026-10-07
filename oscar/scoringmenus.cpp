@@ -105,7 +105,7 @@ QMenu *ScoringMenus::forRange(qint64 durationMs, QWidget *parent)
     return menu;
 }
 
-QMenu *ScoringMenus::forEvent(const EffectiveEvent &e, QWidget *parent)
+QMenu *ScoringMenus::forEvent(const EffectiveEvent &e, QWidget *parent, int countOfType)
 {
     auto *menu = new QMenu(parent);
     menu->setObjectName(QStringLiteral("scoringEventMenu"));
@@ -123,6 +123,15 @@ QMenu *ScoringMenus::forEvent(const EffectiveEvent &e, QWidget *parent)
     if (e.origin != Origin::Device) {
         menu->addSeparator();
         keyed(menu, tr("Undo this change"), QLatin1Char('U'))->setData(data("undo", own, 0, e.endMs, e.editId));
+    }
+    // every event of this type at once
+    if (e.origin != Origin::Removed && countOfType > 1) {
+        menu->addSeparator();
+        QMenu *all = menu->addMenu(tr("Change type of all %1 (%2)").arg(typeName(e.channel)).arg(countOfType));
+        for (ChannelID c : ManualScoring::scoredChannels()) {
+            if (c != e.channel) all->addAction(typeName(c))->setData(data("retypeAll", e.channel, c));
+        }
+        menu->addAction(tr("Remove all %1 (%2)").arg(typeName(e.channel)).arg(countOfType))->setData(data("removeAll", e.channel));
     }
     installLetterKeys(menu);
     return menu;

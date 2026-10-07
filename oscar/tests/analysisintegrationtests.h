@@ -41,6 +41,7 @@ private slots:
     void testPerHourUsesAhiHours();
     void testAddedTypeListed();
     void testEditRowsSkipDisabledSessions();
+    void testBulkOnADay();
     void initTestCase();
     void cleanupTestCase();
     void testAnalysisChannelsAreComputed();

@@ -121,6 +121,37 @@ Result apply(const QList<DeviceEvent> &device, const QList<Edit> &edits, const Q
     return r;
 }
 
+BulkPlan bulkEdits(const Result &r, ChannelID from, ChannelID to)
+{
+    BulkPlan plan;
+    for (const EffectiveEvent &e : r.events) {
+        if (e.channel != from || e.origin == Origin::Removed || e.excluded) continue;
+        ++plan.count;
+        const qint64 start = e.endMs - qint64(e.durationSec * 1000);
+        if (e.origin == Origin::Added) {
+            // an event added by hand is taken back, and added again as the new type
+            plan.undo.append(e.editId);
+            if (to != 0) {
+                Edit add;
+                add.kind = Kind::Add;
+                add.channel = to;
+                add.startMs = start;
+                add.endMs = e.endMs;
+                plan.add.append(add);
+            }
+            continue;
+        }
+        Edit change;   // a device event, as recorded or retyped before: named by its own type
+        change.kind = to == 0 ? Kind::Remove : Kind::Retype;
+        change.channel = e.originalChannel;
+        change.newChannel = to;
+        change.startMs = start;
+        change.endMs = e.endMs;
+        plan.add.append(change);
+    }
+    return plan;
+}
+
 // ---- on real sessions and days
 
 SessionKey keyOf(Session *s)
@@ -202,6 +233,21 @@ bool addEdit(Session *s, Edit edit)
     if (ManualScoringRepository::add(edit) == 0) return false;
     refresh(s);
     return true;
+}
+
+bool addEdits(Session *s, QList<Edit> edits)
+{
+    const SessionKey key = keyOf(s);
+    const qint64 c = s->correctionMs();
+    bool ok = true;
+    for (Edit &edit : edits) {
+        edit.key = key;
+        edit.startMs -= c;
+        edit.endMs -= c;
+        ok = ManualScoringRepository::add(edit) != 0 && ok;
+    }
+    refresh(s);
+    return ok;
 }
 
 bool removeEdit(Session *s, qint64 id)

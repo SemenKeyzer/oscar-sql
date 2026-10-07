@@ -205,6 +205,50 @@ void ManualScoringTests::testExcludeDropsRera()
     QCOMPARE(r.delta.value(CPAP_RERA), -1);
 }
 
+// every OA of the night becomes a hypopnea: device events get an edit, a retyped one is edited
+// again, an added one is added anew as the new type
+void ManualScoringTests::testBulkRetypeAll()
+{
+    const QList<Edit> edits = { edit(1, Kind::Retype, CPAP_ClearAirway, 289 * kSec, 300 * kSec, CPAP_Obstructive),
+                                edit(2, Kind::Add, CPAP_Obstructive, 480 * kSec, 500 * kSec) };
+    const Result before = apply(deviceEvents(), edits, oneSession());
+    QCOMPARE(before.delta.value(CPAP_Obstructive), 2);   // 2 device + retyped + added
+    const BulkPlan plan = bulkEdits(before, CPAP_Obstructive, CPAP_Hypopnea);
+    QCOMPARE(plan.count, 4);
+    QCOMPARE(plan.undo, QList<qint64>({ 2 }));   // the added OA is taken back…
+    QList<Edit> after = edits;
+    after.removeAt(1);
+    qint64 id = 10;
+    for (Edit e : plan.add) {
+        e.id = ++id;
+        after.append(e);
+    }
+    const Result r = apply(deviceEvents(), after, oneSession());
+    QCOMPARE(r.delta.value(CPAP_Obstructive), -2);   // none left
+    QCOMPARE(r.delta.value(CPAP_ClearAirway), -1);
+    QCOMPARE(r.delta.value(CPAP_Hypopnea), 4);       // …and added again as a hypopnea
+}
+
+void ManualScoringTests::testBulkRemoveAll()
+{
+    const Result before = apply(deviceEvents(), { edit(1, Kind::Add, CPAP_Obstructive, 480 * kSec, 500 * kSec) }, oneSession());
+    const BulkPlan plan = bulkEdits(before, CPAP_Obstructive, 0);
+    QCOMPARE(plan.count, 3);
+    QCOMPARE(plan.undo, QList<qint64>({ 1 }));
+    QCOMPARE(plan.add.size(), 2);
+    for (const Edit &e : plan.add) {
+        QCOMPARE(int(e.kind), int(Kind::Remove));
+        QCOMPARE(e.channel, CPAP_Obstructive);
+    }
+    QList<Edit> after;
+    qint64 id = 10;
+    for (Edit e : plan.add) {
+        e.id = ++id;
+        after.append(e);
+    }
+    QCOMPARE(apply(deviceEvents(), after, oneSession()).delta.value(CPAP_Obstructive), -2);
+}
+
 // ---- storage
 
 SessionKey ManualScoringTests::key(SessionID session) const

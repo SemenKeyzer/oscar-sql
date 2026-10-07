@@ -172,3 +172,19 @@ void ScoringMenusTests::testLetterKeys()
     QCOMPARE(chosen.count(), 1);
     QCOMPARE(chosen.first().first().value<QAction *>(), find(open.data(), QStringLiteral("Hypopnea")));
 }
+
+void ScoringMenusTests::testBulkItems()
+{
+    QScopedPointer<QMenu> m(ScoringMenus::forEvent(scoredEvent(Origin::Device, CPAP_Obstructive, CPAP_Obstructive, 0), nullptr, 77));
+    QAction *all = find(m.data(), QStringLiteral("Change type of all Obstructive apnea (77)"));
+    QVERIFY(all && all->menu());
+    const QVariantMap toH = find(all->menu(), QStringLiteral("Hypopnea"))->data().toMap();
+    QCOMPARE(toH.value(QStringLiteral("action")).toString(), QStringLiteral("retypeAll"));
+    QCOMPARE(toH.value(QStringLiteral("channel")).toUInt(), CPAP_Obstructive);
+    QCOMPARE(toH.value(QStringLiteral("newChannel")).toUInt(), CPAP_Hypopnea);
+    const QVariantMap removeAll = find(m.data(), QStringLiteral("Remove all Obstructive apnea (77)"))->data().toMap();
+    QCOMPARE(removeAll.value(QStringLiteral("action")).toString(), QStringLiteral("removeAll"));
+    // a single event of its type: nothing to do in bulk
+    QScopedPointer<QMenu> one(ScoringMenus::forEvent(scoredEvent(Origin::Device, CPAP_Obstructive, CPAP_Obstructive, 0), nullptr, 1));
+    QVERIFY(!find(one.data(), QStringLiteral("Remove all Obstructive apnea (1)")));
+}

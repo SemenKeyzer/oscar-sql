@@ -83,6 +83,15 @@ QList<ChannelID> scoredChannels();
 //! The corrected night of one session or day. \a sessionSpans are the sessions' [start, end) in ms.
 Result apply(const QList<DeviceEvent> &device, const QList<Edit> &edits, const QList<QPair<qint64, qint64>> &sessionSpans);
 
+//! Changing (or removing) every counted event of one type at once.
+struct BulkPlan {
+    QList<Edit> add;      //!< new edits, in graph time like the result's events
+    QList<qint64> undo;   //!< edits to take back first (added events of that type)
+    int count = 0;        //!< events affected
+};
+//! What it takes to turn every counted \a from event of \a r into \a to (0: remove them).
+BulkPlan bulkEdits(const Result &r, ChannelID from, ChannelID to);
+
 // ---- on real sessions and days
 } // namespace ManualScoring
 class Session;
@@ -100,6 +109,8 @@ void refresh(Session *s);
 //! Stores \a edit for \a s (its key is set here; its times are as the graphs show them) and recalculates.
 bool addEdit(Session *s, Edit edit);
 bool removeEdit(Session *s, qint64 id);
+//! Stores several edits for \a s (times as the graphs show them) with one recalculation.
+bool addEdits(Session *s, QList<Edit> edits);
 //! Undoes the edit \a id of \a day's sessions; an excluded stretch stored with several sessions
 //! is undone in all of them.
 bool undoEdit(Day *day, qint64 id);

@@ -4317,6 +4317,18 @@ void Daily::applyScoring(const QVariantMap &choice, qint64 startMs, qint64 endMs
         e.startMs = timeMs;
         e.endMs = timeMs;
         if (Session *s = scoringSessionAt(day, timeMs)) ManualScoring::addEdit(s, e);
+    } else if (action == QLatin1String("retypeAll") || action == QLatin1String("removeAll")) {
+        const ChannelID to = action == QLatin1String("retypeAll") ? choice.value(QStringLiteral("newChannel")).toUInt() : 0;
+        const int n = int(day->count(channel));
+        const QString question = to ? tr("Change all %1 events of type \"%2\" to \"%3\"?").arg(n).arg(ScoringMenus::typeName(channel), ScoringMenus::typeName(to))
+                                    : tr("Remove all %1 events of type \"%2\"? They will no longer count.").arg(n).arg(ScoringMenus::typeName(channel));
+        if (QMessageBox::question(this, tr("Manual scoring"), question, QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes) return;
+        for (Session *s : day->sessions) {
+            if (s->type() != MT_CPAP || !s->enabled()) continue;
+            const ManualScoring::BulkPlan plan = ManualScoring::bulkEdits(ManualScoring::resultFor(s), channel, to);
+            for (qint64 id : plan.undo) ManualScoringRepository::remove(id);
+            if (!plan.add.isEmpty() || !plan.undo.isEmpty()) ManualScoring::addEdits(s, plan.add);
+        }
     } else if (action == QLatin1String("undo")) {
         ManualScoring::undoEdit(day, choice.value(QStringLiteral("editId")).toLongLong());
     } else {
@@ -4368,7 +4380,7 @@ void Daily::onScoringContext(gGraph *graph, qint64 timeMs, QPoint globalPos)
     }
     QScopedPointer<QMenu> menu;
     if (best) {
-        menu.reset(ScoringMenus::forEvent(*best, this));
+        menu.reset(ScoringMenus::forEvent(*best, this, int(day->count(best->channel))));
     } else {
         // inside an excluded stretch?
         for (Session *s : day->sessions) {

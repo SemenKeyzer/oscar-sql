@@ -2058,3 +2058,23 @@ void AnalysisIntegrationTests::testEditRowsSkipDisabledSessions()
     ManualScoring::clearDay(&day);
     p_profile->cpap->setClinicalMode(clinical);
 }
+
+// "change type of all OA" on a night, as the Daily menu does it
+void AnalysisIntegrationTests::testBulkOnADay()
+{
+    Machine cpap(p_profile, 92);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    Session *s = scoredSession(&cpap, 921, m_machineRow);
+    day.addSession(s);
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Add, CPAP_Obstructive, 480, 500)));
+    QCOMPARE(day.count(CPAP_Obstructive), EventDataType(3));
+    const ManualScoring::BulkPlan plan = ManualScoring::bulkEdits(ManualScoring::resultFor(s), CPAP_Obstructive, CPAP_Hypopnea);
+    for (qint64 id : plan.undo) QVERIFY(ManualScoringRepository::remove(id));
+    QVERIFY(ManualScoring::addEdits(s, plan.add));
+    QCOMPARE(day.count(CPAP_Obstructive), EventDataType(0));
+    QCOMPARE(day.count(CPAP_Hypopnea), EventDataType(4));
+    QCOMPARE(day.count(AllAhiChannels), EventDataType(5));
+    ManualScoring::clearDay(&day);
+}

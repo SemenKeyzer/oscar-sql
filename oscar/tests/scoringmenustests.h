@@ -26,6 +26,8 @@ private slots:
     void testUndoOnlyForEdited();
     void testExcludedMenu();
     void testTreeNode();
+    void testLetterKeys();
+    void testBulkItems();
 private:
     QApplication *m_app = nullptr;
 };
