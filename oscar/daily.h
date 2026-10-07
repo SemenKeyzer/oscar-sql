@@ -475,6 +475,8 @@ private:
     void scoringChanged();
     //! Where a dragged edge may go: the event's session, or the night's sessions for a stretch.
     QPair<qint64, qint64> scoringLimits(const ScoringResize::Target &t);
+    //! The time range the graphs show now; (0, 0) when none shows one.
+    QPair<qint64, qint64> shownRange() const;
     TimeAlignBar *m_alignBar = nullptr;
     TimeAlignSession *m_alignSession = nullptr;
     qint64 m_alignDragBaseMs = 0;

@@ -4291,18 +4291,19 @@ void Daily::refreshAnalysis()
     if (webView && !htmlLeftHeader.isEmpty()) webView->setHtml(getLeftSidebar(true));
 
     // The graphs pick up the new channels with the day; keep the zoom.
-    qint64 minx = 0, maxx = 0;
+    const QPair<qint64, qint64> shown = shownRange();
+    GraphView->setDay(day);
+    if (shown.second > shown.first) GraphView->SetXBounds(shown.first, shown.second);
+    else GraphView->redraw();
+}
+
+QPair<qint64, qint64> Daily::shownRange() const
+{
     for (int i = 0; i < GraphView->size(); ++i) {
         gGraph *g = (*GraphView)[i];
-        if (g->visible() && g->min_x < g->max_x) {
-            minx = g->min_x;
-            maxx = g->max_x;
-            break;
-        }
+        if (g->visible() && g->min_x < g->max_x) return { g->min_x, g->max_x };
     }
-    GraphView->setDay(day);
-    if (maxx > minx) GraphView->SetXBounds(minx, maxx);
-    else GraphView->redraw();
+    return { 0, 0 };
 }
 
 // ---- Manual scoring
@@ -4393,9 +4394,12 @@ void Daily::scoringChanged()
 {
     Statistics::forgetRXChanges();   // the cached settings rows hold the old counts
     ManualScoring::storeDaySummary(p_profile->GetDay(previous_date, MT_CPAP));   // read by the SQL reports
-    // as when a session is switched off: every page shows the corrected figures
+    // as when a session is switched off: every page shows the corrected figures; the night reloads,
+    // and the graphs stay where the doctor was looking
+    const QPair<qint64, qint64> shown = shownRange();
     if (mainwin) mainwin->refreshAnalysisViews();
     else LoadDate(previous_date);
+    if (shown.second > shown.first) GraphView->SetXBounds(shown.first, shown.second);
 }
 
 void Daily::onScoringRange(gGraph *graph, qint64 startMs, qint64 endMs, QPoint globalPos)
