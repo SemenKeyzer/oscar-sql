@@ -556,7 +556,7 @@ const UiGlossaryRaw kUiEntries[] = {
       "", "spo2" },
     { "ui.daily.scoringButton", QT_TRANSLATE_NOOP("Glossary", "Scoring"),
       QT_TRANSLATE_NOOP("Glossary", "Daily → bottom bar"),
-      QT_TRANSLATE_NOOP("Glossary", "Turns on manual scoring: drag across the flow graph to add an event or leave out a stretch, right-click an event to remove it or change its type."),
+      QT_TRANSLATE_NOOP("Glossary", "Turns on manual scoring: drag across the flow graph to add an event or leave out a stretch, drag the edge of an event box or stretch to change its bounds, right-click an event to remove it or change its type."),
       QT_TRANSLATE_NOOP("Glossary", "Esc or the button again leaves the mode. Every change is listed in the sidebar and can be undone."),
       "", "manual_scoring" },
     { "ui.daily.scoringType", QT_TRANSLATE_NOOP("Glossary", "Events to step through"),
