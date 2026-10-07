@@ -18,6 +18,9 @@
 #include <QBuffer>
 #include <QPixmap>
 #include <QMenu>
+#include <QHBoxLayout>
+#include <QComboBox>
+#include <QToolButton>
 #include <QMessageBox>
 #include <limits>
 #include <QResizeEvent>
@@ -744,10 +747,37 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     if (auto *bar = qobject_cast<QBoxLayout *>(ui->frame->layout())) {
         bar->insertWidget(bar->indexOf(ui->graphHelp), scoringButton);
     }
-    m_scoringBanner = new QLabel(tr("Scoring mode: drag across the flow graph to mark a stretch, or right-click an event · Esc to leave"), this);
+    // the banner: the hint, and stepping through the events of one type in a fixed window
+    m_scoringBanner = new QWidget(this);
     m_scoringBanner->setObjectName(QStringLiteral("scoringBanner"));
-    m_scoringBanner->setStyleSheet(QStringLiteral("QLabel { background: #fff3cd; color: #664d03; padding: 3px 6px; }"));
-    m_scoringBanner->setWordWrap(true);
+    m_scoringBanner->setStyleSheet(QStringLiteral("#scoringBanner { background: #fff3cd; } QLabel { color: #664d03; }"));
+    {
+        auto *row = new QHBoxLayout(m_scoringBanner);
+        row->setContentsMargins(6, 2, 6, 2);
+        auto *hint = new QLabel(tr("Scoring mode: drag across the flow graph to mark a stretch, or right-click an event · Esc to leave"), m_scoringBanner);
+        hint->setWordWrap(true);
+        row->addWidget(hint, 1);
+        m_scoringType = new QComboBox(m_scoringBanner);
+        m_scoringType->setObjectName(QStringLiteral("scoringType"));
+        row->addWidget(m_scoringType);
+        auto *prev = new QToolButton(m_scoringBanner);
+        prev->setObjectName(QStringLiteral("scoringPrev"));
+        prev->setText(QStringLiteral("◀"));
+        prev->setToolTip(tr("Previous event of this type"));
+        row->addWidget(prev);
+        auto *next = new QToolButton(m_scoringBanner);
+        next->setObjectName(QStringLiteral("scoringNext"));
+        next->setText(QStringLiteral("▶"));
+        next->setToolTip(tr("Next event of this type"));
+        row->addWidget(next);
+        m_scoringWindow = new QComboBox(m_scoringBanner);
+        m_scoringWindow->setObjectName(QStringLiteral("scoringWindow"));
+        for (int minutes : { 1, 3, 5, 10 }) m_scoringWindow->addItem(tr("%1 min").arg(minutes), minutes);
+        m_scoringWindow->setCurrentIndex(1);   // 3 minutes, as six 30-second epochs
+        row->addWidget(m_scoringWindow);
+        connect(prev, &QToolButton::clicked, this, [this]() { stepScoring(false); });
+        connect(next, &QToolButton::clicked, this, [this]() { stepScoring(true); });
+    }
     m_scoringBanner->hide();
     ui->verticalLayout_3->insertWidget(ui->verticalLayout_3->indexOf(ui->graphMainArea), m_scoringBanner);
     connect(scoringButton, &QPushButton::toggled, this, &Daily::onScoringButtonToggled);
@@ -4439,11 +4469,39 @@ void Daily::updateScoringLayer(Day *day)
 {
     if (!m_scoringDrawn) return;
     *m_scoringDrawn = ManualScoring::Result();
-    if (!day || !day->hasManualScoring()) return;
-    for (Session *s : day->sessions) {
-        if (s->type() != MT_CPAP || !s->enabled() || !s->hasManualScoring()) continue;
+    // every CPAP session: the events are drawn as boxes and stepped through, scored or not
+    for (Session *s : day ? day->sessions : QList<Session *>()) {
+        if (s->type() != MT_CPAP || !s->enabled()) continue;
         const ManualScoring::Result r = ManualScoring::resultFor(s);
         m_scoringDrawn->events += r.events;
         m_scoringDrawn->excludedSpans += r.excludedSpans;
     }
+    updateScoringTypes();
+}
+
+void Daily::updateScoringTypes()
+{
+    if (!m_scoringType || !m_scoringDrawn) return;
+    const ChannelID shown = m_scoringType->currentData().toUInt();
+    QSignalBlocker block(m_scoringType);
+    m_scoringType->clear();
+    QHash<ChannelID, int> counts;
+    for (const ManualScoring::EffectiveEvent &e : m_scoringDrawn->events) ++counts[e.channel];
+    m_scoringType->addItem(tr("All events [%1]").arg(m_scoringDrawn->events.size()), 0u);
+    for (ChannelID c : ManualScoring::scoredChannels()) {
+        if (counts.value(c) > 0) m_scoringType->addItem(QStringLiteral("%1 [%2]").arg(ScoringMenus::typeName(c)).arg(counts.value(c)), c);
+    }
+    const int i = m_scoringType->findData(shown);
+    m_scoringType->setCurrentIndex(i < 0 ? 0 : i);
+}
+
+void Daily::stepScoring(bool forward)
+{
+    gGraph *flow = GraphView->findGraph(STR_GRAPH_FlowRate);
+    if (!flow || !m_scoringDrawn) return;
+    const qint64 center = (flow->min_x + flow->max_x) / 2;
+    const qint64 at = ManualScoring::nextEvent(m_scoringDrawn->events, m_scoringType->currentData().toUInt(), center, forward);
+    if (at < 0) return;
+    const qint64 half = qint64(m_scoringWindow->currentData().toInt()) * 30000;   // half the window
+    GraphView->SetXBounds(at - half, at + half);
 }

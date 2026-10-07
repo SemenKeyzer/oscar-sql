@@ -249,6 +249,20 @@ void ManualScoringTests::testBulkRemoveAll()
     QCOMPARE(apply(deviceEvents(), after, oneSession()).delta.value(CPAP_Obstructive), -2);
 }
 
+// stepping through the events of one type, as the doctor reviews them
+void ManualScoringTests::testNextEvent()
+{
+    const Result r = apply(deviceEvents(), { edit(1, Kind::Remove, CPAP_Obstructive, 188 * kSec, 200 * kSec) }, oneSession());
+    // OA at 100 s and 200 s (removed, still listed to review it), CA at 300 s, H at 400 s
+    QCOMPARE(nextEvent(r.events, CPAP_Obstructive, 0, true), qint64(100 * kSec));
+    QCOMPARE(nextEvent(r.events, CPAP_Obstructive, 100 * kSec, true), qint64(200 * kSec));
+    QCOMPARE(nextEvent(r.events, CPAP_Obstructive, 200 * kSec, true), qint64(-1));
+    QCOMPARE(nextEvent(r.events, CPAP_Obstructive, 200 * kSec, false), qint64(100 * kSec));
+    QCOMPARE(nextEvent(r.events, 0, 250 * kSec, true), qint64(300 * kSec));   // 0: any scored type
+    QCOMPARE(nextEvent(r.events, 0, 250 * kSec, false), qint64(200 * kSec));
+    QCOMPARE(nextEvent(r.events, CPAP_Hypopnea, 400 * kSec + 500, true), qint64(-1));   // the one shown is not "next"
+}
+
 // ---- storage
 
 SessionKey ManualScoringTests::key(SessionID session) const

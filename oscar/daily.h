@@ -457,7 +457,11 @@ private:
     QPushButton *alignButton = nullptr;
     // Manual scoring (SleepLib/manual_scoring)
     QPushButton *scoringButton = nullptr;
-    QLabel *m_scoringBanner = nullptr;
+    QWidget *m_scoringBanner = nullptr;   //!< the hint and the navigation through the events
+    QComboBox *m_scoringType = nullptr;   //!< which events ◀ ▶ step through
+    QComboBox *m_scoringWindow = nullptr; //!< how much of the night a step shows
+    void stepScoring(bool forward);
+    void updateScoringTypes();
     QSharedPointer<ManualScoring::Result> m_scoringDrawn;   //!< what the graphs draw (gManualScoringLayer)
     void updateScoringLayer(Day *day);
     //! Applies a choice from a scoring menu to the day shown; the stretch is for "add"/"exclude".

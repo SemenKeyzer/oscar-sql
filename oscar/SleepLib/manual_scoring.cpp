@@ -152,6 +152,17 @@ BulkPlan bulkEdits(const Result &r, ChannelID from, ChannelID to)
     return plan;
 }
 
+qint64 nextEvent(const QList<EffectiveEvent> &events, ChannelID type, qint64 centerMs, bool forward)
+{
+    qint64 best = -1;
+    for (const EffectiveEvent &e : events) {
+        if (type != 0 && e.channel != type) continue;
+        if (forward ? e.endMs <= centerMs + 1000 : e.endMs >= centerMs - 1000) continue;
+        if (best < 0 || (forward ? e.endMs < best : e.endMs > best)) best = e.endMs;
+    }
+    return best;
+}
+
 // ---- on real sessions and days
 
 SessionKey keyOf(Session *s)

@@ -32,6 +32,7 @@ private slots:
     void testExcludeDropsRera();
     void testBulkRetypeAll();
     void testBulkRemoveAll();
+    void testNextEvent();
     // storage
     void testStoreAndLoadEdits();
     void testRemoveEdit();
