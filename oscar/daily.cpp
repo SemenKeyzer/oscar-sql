@@ -8,6 +8,7 @@
  * for more details. */
 
 
+#include <utility>
 #include <QTextCharFormat>
 #include <QPalette>
 #include <QTimeZone>
@@ -2471,12 +2472,21 @@ MyTextBrowser::MyTextBrowser(QWidget *parent) : QTextBrowser(parent)
 {
     // hovering a term tells the help panel which one
     connect(this, &QTextBrowser::highlighted, this, [](const QUrl &url) { HelpTips::instance()->hover(HelpTips::keyOf(url)); });
+    // Tab to a term and Enter: the keyboard's click
+    connect(this, &QTextBrowser::anchorClicked, this, [](const QUrl &url) { HelpTips::instance()->open(HelpTips::keyOf(url)); });
+}
+
+void MyTextBrowser::mousePressEvent(QMouseEvent *e)
+{
+    m_pressedKey = e->button() == Qt::LeftButton ? HelpTips::keyOf(QUrl(anchorAt(e->position().toPoint()))) : QString();
+    QTextBrowser::mousePressEvent(e);
 }
 
 void MyTextBrowser::mouseReleaseEvent(QMouseEvent *e)
 {
     const QString key = HelpTips::keyOf(QUrl(anchorAt(e->position().toPoint())));
-    if (e->button() == Qt::LeftButton && !key.isEmpty()) {
+    const QString pressed = std::exchange(m_pressedKey, QString());
+    if (e->button() == Qt::LeftButton && !key.isEmpty() && key == pressed) {   // not the end of a drag-select
         HelpTips::instance()->open(key);
         e->accept();
         return;

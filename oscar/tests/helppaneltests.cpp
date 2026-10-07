@@ -49,6 +49,7 @@ void HelpPanelTests::cleanupTestCase()
 void HelpPanelTests::testShowsHoveredArticle()
 {
     HelpPanel panel;
+    panel.setVisible(true);
     QVERIFY(panel.currentKey().isEmpty());
     QVERIFY(text(panel).contains(QStringLiteral("Hover over a figure or a term")));   // the empty state
     emit HelpTips::instance()->hovered(QStringLiteral("odi3"));
@@ -120,4 +121,15 @@ void HelpPanelTests::testOpenRequestedShowsPanel()
     HelpTips::instance()->open(QStringLiteral("leak"));
     QVERIFY(panel->isVisible());
     QCOMPARE(panel->currentKey(), QStringLiteral("leak"));
+}
+
+// A closed panel only remembers the last key; it draws the article when it is opened.
+void HelpPanelTests::testHiddenPanelRendersOnShow()
+{
+    HelpPanel panel;
+    emit HelpTips::instance()->hovered(QStringLiteral("odi3"));
+    QCOMPARE(panel.currentKey(), QStringLiteral("odi3"));
+    QVERIFY(!text(panel).contains(QStringLiteral("ODI")));
+    panel.setVisible(true);
+    QVERIFY(text(panel).contains(QStringLiteral("ODI")));
 }

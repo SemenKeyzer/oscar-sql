@@ -22,6 +22,8 @@ private slots:
     void cleanupTestCase();
     void testHelpLinkDoesNotNavigate();
     void testGraphKeysComplete();
+    void testDragOntoTermDoesNotOpen();
+    void testKeyboardOpensHelpLink();
 private:
     QApplication *m_app = nullptr;
 };

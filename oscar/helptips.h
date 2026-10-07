@@ -43,7 +43,7 @@ class HelpTips : public QObject
     static QString term(const QString &text, const QString &key);
     //! The key of a "help:key" link; empty for any other link.
     static QString keyOf(const QUrl &url);
-    //! Emits hovered(\a key) when it is not empty.
+    //! Emits hovered(\a key) when it is not empty and the explanations are on.
     void hover(const QString &key);
     //! A "help:" link was clicked: shows its entry.
     void open(const QString &key);

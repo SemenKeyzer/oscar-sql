@@ -28,6 +28,7 @@ class HelpPanel : public QDockWidget
     QString currentKey() const { return m_key; }
 
   private:
+    void render();
     void search(const QString &text);
     void showEmpty();
 
@@ -35,6 +36,7 @@ class HelpPanel : public QDockWidget
     QListWidget *m_results = nullptr;
     QTextBrowser *m_text = nullptr;
     QString m_key;
+    bool m_stale = false;   // m_key changed while the panel was closed
 };
 
 #endif // HELPPANEL_H

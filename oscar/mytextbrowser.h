@@ -20,7 +20,10 @@ public:
     virtual QVariant loadResource(int type, const QUrl &url) Q_DECL_OVERRIDE;
 protected:
     //! A click on a "help:" term opens its explanation and does not reach the page's links.
+    void mousePressEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
     void mouseReleaseEvent(QMouseEvent *e) Q_DECL_OVERRIDE;
+private:
+    QString m_pressedKey;   // the term under the mouse when the button went down
 };
 
 

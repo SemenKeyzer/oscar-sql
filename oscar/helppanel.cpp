@@ -51,16 +51,25 @@ HelpPanel::HelpPanel(QWidget *parent) : QDockWidget(tr("Help Panel"), parent)
         raise();
         show(key);
     });
+    connect(this, &QDockWidget::visibilityChanged, this, [this](bool visible) {
+        if (visible) render();
+    });
     showEmpty();
 }
 
 void HelpPanel::show(const QString &key)
 {
-    if (key == m_key) return;   // hovering the same graph keeps sending its key
-    const QString html = Glossary::panel(key);
-    if (html.isEmpty()) return;
+    if (key == m_key || !Glossary::find(key)) return;   // hovering the same graph keeps sending its key
     m_key = key;
-    m_text->setHtml(html);
+    m_stale = true;
+    if (isVisible()) render();   // a closed panel draws the article when it is opened
+}
+
+void HelpPanel::render()
+{
+    if (!m_stale) return;
+    m_stale = false;
+    m_text->setHtml(Glossary::panel(m_key));
 }
 
 void HelpPanel::search(const QString &text)

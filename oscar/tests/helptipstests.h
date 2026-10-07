@@ -32,6 +32,7 @@ private slots:
     void testMenuHoverSkipsDynamicItems();
     void testSubmenuHoverExplainsMenu();
     void testMenuTooltipUsesActiveAction();
+    void testHoverSilentWhenOff();
 private:
     QApplication *m_app = nullptr;
 };

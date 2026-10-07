@@ -26,6 +26,7 @@ private slots:
     void testSearch();
     void testPanelWorksWithHoverOff();
     void testOpenRequestedShowsPanel();
+    void testHiddenPanelRendersOnShow();
 private:
     QApplication *m_app = nullptr;
 };

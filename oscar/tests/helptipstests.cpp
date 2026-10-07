@@ -247,3 +247,15 @@ void HelpTipsTests::testMenuTooltipUsesActiveAction()
     QToolTip::hideText();
     menu.hide();
 }
+
+// With the explanations off nothing reports a hover, whoever asks (the Daily event rows too).
+void HelpTipsTests::testHoverSilentWhenOff()
+{
+    HelpTips::instance()->setEnabled(false);
+    QSignalSpy hovered(HelpTips::instance(), &HelpTips::hovered);
+    HelpTips::instance()->hover(QStringLiteral("ahi"));
+    QCOMPARE(hovered.count(), 0);
+    HelpTips::instance()->setEnabled(true);
+    HelpTips::instance()->hover(QStringLiteral("ahi"));
+    QCOMPARE(hovered.count(), 1);
+}

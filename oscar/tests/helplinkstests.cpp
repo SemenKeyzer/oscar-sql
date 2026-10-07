@@ -113,3 +113,45 @@ void HelpLinksTests::testGraphKeysComplete()
     QCOMPARE(Overview::helpKeyForGraph(QStringLiteral("AHIBreakdown")), QStringLiteral("ahi"));
     QCOMPARE(Overview::helpKeyForGraph(QStringLiteral("Leak")), QStringLiteral("leak"));
 }
+
+namespace {
+void showTermPage(MyTextBrowser &browser)
+{
+    browser.setOpenLinks(false);
+    browser.resize(400, 200);
+    browser.setHtml(QStringLiteral("<p>Some plain words before &nbsp; %1</p>")
+                        .arg(HelpTips::term(QStringLiteral("AHI value"), QStringLiteral("ahi"))));
+    browser.show();
+}
+} // namespace
+
+// Selecting text with the mouse and letting go over a term does not open the explanation.
+void HelpLinksTests::testDragOntoTermDoesNotOpen()
+{
+    MyTextBrowser browser(nullptr);
+    showTermPage(browser);
+    QVERIFY(QTest::qWaitForWindowExposed(&browser));
+    QSignalSpy opened(HelpTips::instance(), &HelpTips::openRequested);
+    const QPoint term = anchorPoint(browser, QStringLiteral("help:ahi"));
+    QVERIFY(!term.isNull());
+    const QPoint plain(term.x() / 4, term.y());
+    QTest::mousePress(browser.viewport(), Qt::LeftButton, Qt::NoModifier, plain);
+    QMouseEvent move(QEvent::MouseMove, term, browser.viewport()->mapToGlobal(term), Qt::NoButton, Qt::LeftButton, Qt::NoModifier);
+    QApplication::sendEvent(browser.viewport(), &move);
+    QTest::mouseRelease(browser.viewport(), Qt::LeftButton, Qt::NoModifier, term);
+    QCOMPARE(opened.count(), 0);
+}
+
+// Tab to a term and Enter opens its explanation, like a click.
+void HelpLinksTests::testKeyboardOpensHelpLink()
+{
+    MyTextBrowser browser(nullptr);
+    showTermPage(browser);
+    QVERIFY(QTest::qWaitForWindowExposed(&browser));
+    browser.setFocus();
+    QSignalSpy opened(HelpTips::instance(), &HelpTips::openRequested);
+    QTest::keyClick(&browser, Qt::Key_Tab);
+    QTest::keyClick(&browser, Qt::Key_Return);
+    QCOMPARE(opened.count(), 1);
+    QCOMPARE(opened.first().first().toString(), QStringLiteral("ahi"));
+}

@@ -163,7 +163,7 @@ QString HelpTips::keyOf(const QUrl &url)
 
 void HelpTips::hover(const QString &key)
 {
-    if (!key.isEmpty()) emit hovered(key);
+    if (!key.isEmpty() && enabled()) emit hovered(key);
 }
 
 void HelpTips::open(const QString &key)
