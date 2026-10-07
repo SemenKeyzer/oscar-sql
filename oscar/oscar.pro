@@ -369,6 +369,7 @@ SOURCES += \
     scoringmenus.cpp \
     SleepLib/manual_scoring.cpp \
     Graphs/scoringgesture.cpp \
+    Graphs/scoringresize.cpp \
     Graphs/gManualScoringLayer.cpp \
     database/manual_scoring_repository.cpp \
     helpstrip.cpp \
@@ -704,6 +705,7 @@ HEADERS  += \
     scoringmenus.h \
     SleepLib/manual_scoring.h \
     Graphs/scoringgesture.h \
+    Graphs/scoringresize.h \
     Graphs/gManualScoringLayer.h \
     database/manual_scoring_repository.h \
     helpstrip.h \

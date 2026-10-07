@@ -10,6 +10,7 @@
 
 #include "Graphs/gManualScoringLayer.h"
 #include "Graphs/scoringgesture.h"
+#include "Graphs/scoringresize.h"
 #include "SleepLib/schema.h"
 #include "common_gui.h"
 
@@ -138,4 +139,64 @@ void ScoringModeTests::testBoxesOnlyInScoringMode()
     QVERIFY(!gManualScoringLayer::showsBoxes(true, false, false));   // not scoring
     QVERIFY(!gManualScoringLayer::showsBoxes(false, true, false));   // not the flow graph
     QVERIFY(!gManualScoringLayer::showsBoxes(true, true, true));     // a whole-night graph
+}
+
+namespace {
+// a 600 px plot over 0–600 s: one pixel is one second
+ManualScoring::EffectiveEvent boxEvent(qint64 endS, double durS, ManualScoring::Origin origin = ManualScoring::Origin::Device)
+{
+    ManualScoring::EffectiveEvent e { CPAP_Obstructive, CPAP_Obstructive, endS * 1000, durS, origin, 0, false, endS * 1000, durS, 0 };
+    return e;
+}
+} // namespace
+
+void ScoringModeTests::testResizeHit()
+{
+    using ScoringResize::Target;
+    ManualScoring::Result r;
+    r.events = { boxEvent(600, 12) };   // 588–600 s
+    r.excludeEdits = { { 9, 100000, 200000 } };
+    Target t = ScoringResize::hit(r, 0, 600000, 600, 600, true);
+    QCOMPARE(t.kind, Target::Event);
+    QCOMPARE(t.eventIndex, 0);
+    QVERIFY(!t.leftEdge);
+    QCOMPARE(t.startMs, qint64(588000));
+    QCOMPARE(t.endMs, qint64(600000));
+    QCOMPARE(ScoringResize::hit(r, 0, 600000, 600, 596, true).kind, Target::Event);   // 4 px away
+    QCOMPARE(ScoringResize::hit(r, 0, 600000, 600, 595, true).kind, Target::None);    // 5 px away
+    QCOMPARE(ScoringResize::hit(r, 0, 600000, 600, 600, false).kind, Target::None);   // no boxes shown
+    t = ScoringResize::hit(r, 0, 600000, 600, 100, false);   // a stretch at any zoom
+    QCOMPARE(t.kind, Target::Excluded);
+    QCOMPARE(t.editId, qint64(9));
+    QVERIFY(t.leftEdge);
+}
+
+void ScoringModeTests::testResizeHitTieAndRemoved()
+{
+    using ScoringResize::Target;
+    ManualScoring::Result r;
+    r.events = { boxEvent(300, 10, ManualScoring::Origin::Removed) };
+    QCOMPARE(ScoringResize::hit(r, 0, 600000, 600, 300, true).kind, Target::None);   // removed: not grabbable
+    r.events = { boxEvent(300, 10) };
+    r.events[0].excluded = true;
+    QCOMPARE(ScoringResize::hit(r, 0, 600000, 600, 300, true).kind, Target::None);   // no box inside a stretch
+    r.events = { boxEvent(300, 10) };
+    r.excludeEdits = { { 4, 300000, 400000 } };
+    QCOMPARE(ScoringResize::hit(r, 0, 600000, 600, 300, true).kind, Target::Event);   // a tie goes to the event
+    QCOMPARE(ScoringResize::hit(r, 0, 600000, 600, 302, true).kind, Target::Event);
+}
+
+void ScoringModeTests::testResizeDragClamp()
+{
+    ScoringResize::Target right;
+    right.kind = ScoringResize::Target::Event;
+    right.startMs = 588000;
+    right.endMs = 600000;
+    QCOMPARE(ScoringResize::dragTo(right, 590000, 0, 3600000), qMakePair(qint64(588000), qint64(590000)));
+    QCOMPARE(ScoringResize::dragTo(right, 580000, 0, 3600000), qMakePair(qint64(588000), qint64(589000)));   // 1 s at least
+    QCOMPARE(ScoringResize::dragTo(right, 4000000, 0, 3600000), qMakePair(qint64(588000), qint64(3600000)));
+    ScoringResize::Target left = right;
+    left.leftEdge = true;
+    QCOMPARE(ScoringResize::dragTo(left, -50000, 0, 3600000), qMakePair(qint64(0), qint64(600000)));
+    QCOMPARE(ScoringResize::dragTo(left, 605000, 0, 3600000), qMakePair(qint64(599000), qint64(600000)));
 }

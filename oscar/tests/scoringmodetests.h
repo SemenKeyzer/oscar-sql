@@ -25,6 +25,9 @@ private slots:
     void testWholeNightGraphsUseWholeRange();
     void testEventBoxesWhenZoomed();
     void testBoxesOnlyInScoringMode();
+    void testResizeHit();
+    void testResizeHitTieAndRemoved();
+    void testResizeDragClamp();
     void initTestCase();
 };
 DECLARE_TEST(ScoringModeTests)
