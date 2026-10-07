@@ -50,19 +50,19 @@ jobs:
           $env:PATH = "$env:IQTA_TOOLS\mingw1310_64\bin;$env:PATH"
           $exe = Get-ChildItem -Path build -Recurse -Filter OSCAR.exe | Select-Object -First 1
           if (-not $exe) { throw "OSCAR.exe was not built" }
-          New-Item -ItemType Directory -Path OSCAR | Out-Null
-          Copy-Item $exe.FullName OSCAR\
+          New-Item -ItemType Directory -Path OSCAR-Windows | Out-Null   # not "OSCAR": Windows names ignore case, and oscar\ is the source
+          Copy-Item $exe.FullName OSCAR-Windows\
           foreach ($dir in 'Translations', 'Html', 'Help') {
-            if (Test-Path "build\$dir") { Copy-Item "build\$dir" "OSCAR\$dir" -Recurse }
+            if (Test-Path "build\$dir") { Copy-Item "build\$dir" "OSCAR-Windows\$dir" -Recurse }
           }
-          Remove-Item OSCAR\Translations\*.ts -ErrorAction SilentlyContinue
-          windeployqt --release --compiler-runtime --no-translations OSCAR\OSCAR.exe
+          Remove-Item OSCAR-Windows\Translations\*.ts -ErrorAction SilentlyContinue
+          windeployqt --release --compiler-runtime --no-translations OSCAR-Windows\OSCAR.exe
           if ($LASTEXITCODE -ne 0) { throw "windeployqt failed" }
-          Get-ChildItem OSCAR | Format-Table Name, Length
+          Get-ChildItem OSCAR-Windows | Format-Table Name, Length
 
       - name: Upload the zip
         uses: actions/upload-artifact@v4
         with:
           name: OSCAR-windows-${{ github.sha }}
-          path: OSCAR
+          path: OSCAR-Windows
           retention-days: 14
