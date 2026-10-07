@@ -345,6 +345,55 @@ bool removeEdit(Session *s, qint64 id)
     return true;
 }
 
+bool resizeEvent(Session *s, const EffectiveEvent &ev, qint64 startMs, qint64 endMs)
+{
+    if (ev.origin == Origin::Added || ev.origin == Origin::Removed || endMs - startMs < 1000) return false;
+    const qint64 c = s->correctionMs();
+    if (ev.resizeEditId > 0) {   // dragged before: the same edit
+        if (!ManualScoringRepository::update(ev.resizeEditId, startMs - c, endMs - c)) return false;
+        refresh(s);
+        return true;
+    }
+    Edit e;
+    e.kind = Kind::Resize;
+    e.channel = ev.originalChannel;
+    e.startMs = startMs;
+    e.endMs = endMs;
+    e.matchEndMs = ev.originalEndMs - c;   // device time already: addEdit shifts only the bounds
+    return addEdit(s, e);
+}
+
+bool updateEdit(Day *day, qint64 id, qint64 startMs, qint64 endMs)
+{
+    if (!day || endMs - startMs < 1000) return false;
+    Edit target;
+    bool found = false;
+    for (Session *s : day->sessions) {
+        for (const Edit &e : ManualScoringRepository::editsForSession(keyOf(s))) {
+            if (e.id == id) {
+                target = e;
+                found = true;
+            }
+        }
+    }
+    if (!found || (target.kind != Kind::Add && target.kind != Kind::Exclude)) return false;
+    bool ok = true;
+    for (Session *s : day->sessions) {
+        bool changed = false;
+        const qint64 c = s->correctionMs();
+        for (const Edit &e : ManualScoringRepository::editsForSession(keyOf(s))) {
+            const bool same = e.id == id
+                              || (target.kind == Kind::Exclude && e.kind == Kind::Exclude && e.startMs == target.startMs
+                                  && e.endMs == target.endMs);
+            if (!same) continue;
+            ok = ManualScoringRepository::update(e.id, startMs - c, endMs - c) && ok;
+            changed = true;
+        }
+        if (changed) refresh(s);
+    }
+    return ok;
+}
+
 bool undoEdit(Day *day, qint64 id)
 {
     // find the edit

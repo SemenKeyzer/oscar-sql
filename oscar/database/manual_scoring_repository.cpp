@@ -105,7 +105,7 @@ QList<Edit> ManualScoringRepository::editsForSession(const SessionKey &key)
 {
     QList<Edit> out;
     QSqlQuery q(DatabaseManager::instance().database());
-    q.prepare(QStringLiteral("SELECT id, kind, channel, new_channel, start_ms, end_ms, note, created_at "
+    q.prepare(QStringLiteral("SELECT id, kind, channel, new_channel, start_ms, end_ms, note, created_at, match_end_ms "
                              "FROM manual_scoring WHERE ") + kWhereKey + QStringLiteral(" ORDER BY id"));
     bindKey(q, key);
     if (!run(q, "editsForSession")) return out;
@@ -120,6 +120,7 @@ QList<Edit> ManualScoringRepository::editsForSession(const SessionKey &key)
         e.endMs = q.value(5).toLongLong();
         e.note = q.value(6).toString();
         e.createdAt = QDateTime::fromString(q.value(7).toString(), Qt::ISODate);
+        e.matchEndMs = q.value(8).toLongLong();   // NULL before schema 23: 0
         out.append(e);
     }
     return out;
@@ -129,7 +130,7 @@ qint64 ManualScoringRepository::add(const Edit &e)
 {
     QSqlQuery q(DatabaseManager::instance().database());
     q.prepare(QStringLiteral("INSERT INTO manual_scoring (profile_id, machine_serial, session_id, kind, channel, new_channel, "
-                             "start_ms, end_ms, note, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"));
+                             "start_ms, end_ms, note, created_at, match_end_ms) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"));
     bindKey(q, e.key);
     q.addBindValue(kindName(e.kind));
     q.addBindValue(e.channel);
@@ -138,11 +139,22 @@ qint64 ManualScoringRepository::add(const Edit &e)
     q.addBindValue(e.endMs);
     q.addBindValue(e.note);
     q.addBindValue((e.createdAt.isValid() ? e.createdAt : QDateTime::currentDateTime()).toString(Qt::ISODate));
+    q.addBindValue(e.kind == Kind::Resize ? QVariant(e.matchEndMs) : QVariant());
     if (!run(q, "add")) return 0;
     QMutexLocker lock(&s_withScoringLock);
     QSet<QPair<QString, qint64>> *set = nullptr;
     if (withScoring(e.key.profileId, &set)) set->insert(sessionOf(e.key));
     return q.lastInsertId().toLongLong();
+}
+
+bool ManualScoringRepository::update(qint64 id, qint64 startMs, qint64 endMs)
+{
+    QSqlQuery q(DatabaseManager::instance().database());
+    q.prepare(QStringLiteral("UPDATE manual_scoring SET start_ms = ?, end_ms = ? WHERE id = ?"));
+    q.addBindValue(startMs);
+    q.addBindValue(endMs);
+    q.addBindValue(id);
+    return run(q, "update") && q.numRowsAffected() == 1;
 }
 
 bool ManualScoringRepository::remove(qint64 id)

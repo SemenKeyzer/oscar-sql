@@ -345,6 +345,10 @@ void BackupRestoreTests::testBackupKeepsManualScoring()
                              "VALUES (?, 'SN1', 424242, 'exclude', 0, 0, 1000, 2000, 'awake', '2026-10-07T08:00:00')"));
     q.addBindValue(m_profileId);
     QVERIFY(q.exec());
+    q.prepare(QStringLiteral("INSERT INTO manual_scoring (profile_id, machine_serial, session_id, kind, channel, new_channel, start_ms, end_ms, "
+                             "match_end_ms, created_at) VALUES (?, 'SN1', 424242, 'resize', 4096, 0, 3000, 4600, 4000, '2026-10-07T08:00:00')"));
+    q.addBindValue(m_profileId);
+    QVERIFY(q.exec());
     q.prepare(QStringLiteral("INSERT INTO manual_scoring_summary (profile_id, machine_serial, session_id, deltas, excluded_ms, not_found) "
                              "VALUES (?, 'SN1', 424242, '', 1000, 0)"));
     q.addBindValue(m_profileId);
@@ -366,6 +370,10 @@ void BackupRestoreTests::testBackupKeepsManualScoring()
     QVERIFY(q.exec() && q.next());
     QCOMPARE(q.value(0).toLongLong(), qint64(424242));   // the device's number, not remapped
     QCOMPARE(q.value(1).toString(), QStringLiteral("awake"));
+    q.prepare(QStringLiteral("SELECT match_end_ms FROM manual_scoring WHERE profile_id = ? AND kind = 'resize'"));
+    q.addBindValue(carol);
+    QVERIFY(q.exec() && q.next());
+    QCOMPARE(q.value(0).toLongLong(), qint64(4000));
     q.prepare(QStringLiteral("SELECT excluded_ms FROM manual_scoring_summary WHERE profile_id = ? AND session_id = 424242"));
     q.addBindValue(carol);
     QVERIFY(q.exec() && q.next());

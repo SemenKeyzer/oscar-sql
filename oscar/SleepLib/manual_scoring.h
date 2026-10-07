@@ -134,6 +134,12 @@ bool removeEdit(Session *s, qint64 id);
 bool addEdits(Session *s, QList<Edit> edits);
 //! Applies a bulk plan to \a s in one transaction: the undone edits and the new ones together.
 bool applyBulk(Session *s, const BulkPlan &plan);
+//! New bounds (graph time) of the device event \a ev of \a s: its Resize edit is changed, or one is
+//! added that names the event by its own end.
+bool resizeEvent(Session *s, const EffectiveEvent &ev, qint64 startMs, qint64 endMs);
+//! New bounds (graph time) of the Add or Exclude edit \a id of \a day's sessions; an excluded
+//! stretch stored with several sessions moves in all of them.
+bool updateEdit(Day *day, qint64 id, qint64 startMs, qint64 endMs);
 //! Undoes the edit \a id of \a day's sessions; an excluded stretch stored with several sessions
 //! is undone in all of them.
 bool undoEdit(Day *day, qint64 id);

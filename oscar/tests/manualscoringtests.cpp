@@ -18,6 +18,7 @@
 #include "database/database_manager.h"
 #include "database/database_schema.h"
 #include "database/manual_scoring_repository.h"
+#include <QSqlRecord>
 #include "SleepLib/schema.h"
 
 using namespace ManualScoring;
@@ -440,7 +441,7 @@ void ManualScoringTests::testMigration21To22()
     QVERIFY(q.exec(QStringLiteral("DROP TABLE manual_scoring_summary")));
     QVERIFY(q.exec(QStringLiteral("UPDATE schema_version SET version = 21")));
     QVERIFY(DatabaseSchema::upgradeSchema(db, 21));
-    QCOMPARE(DatabaseSchema::getSchemaVersion(db), 22);
+    QCOMPARE(DatabaseSchema::getSchemaVersion(db), DatabaseSchema::CURRENT_SCHEMA_VERSION);
     QVERIFY(db.tables().contains(QStringLiteral("manual_scoring")));
     QVERIFY(db.tables().contains(QStringLiteral("manual_scoring_summary")));
 }
@@ -534,4 +535,44 @@ void ManualScoringTests::testExcludeEditsListed()
     QCOMPARE(r.excludeEdits.at(0).startMs, 150 * kSec);
     QCOMPARE(r.excludeEdits.at(1).endMs, 350 * kSec);
     QCOMPARE(r.excludedSpans.size(), 1);   // merged as before
+}
+
+// schema 23: the device event's own end of a Resize edit
+void ManualScoringTests::testMigration22To23()
+{
+    QSqlDatabase db = DatabaseManager::instance().database();
+    QSqlQuery q(db);
+    QVERIFY(q.exec(QStringLiteral("DROP TABLE manual_scoring")));
+    QVERIFY(q.exec(QStringLiteral("CREATE TABLE manual_scoring (id INTEGER PRIMARY KEY AUTOINCREMENT, profile_id INTEGER NOT NULL, "
+                                  "machine_serial TEXT NOT NULL, session_id INTEGER NOT NULL, kind TEXT NOT NULL, "
+                                  "channel INTEGER NOT NULL DEFAULT 0, new_channel INTEGER NOT NULL DEFAULT 0, start_ms INTEGER NOT NULL, "
+                                  "end_ms INTEGER NOT NULL, note TEXT, created_at TEXT NOT NULL)")));
+    QVERIFY(q.exec(QStringLiteral("INSERT INTO manual_scoring (profile_id, machine_serial, session_id, kind, start_ms, end_ms, created_at) "
+                                  "VALUES (1, 'S', 5, 'exclude', 10, 20, '2026-10-07T08:00:00')")));
+    QVERIFY(q.exec(QStringLiteral("UPDATE schema_version SET version = 22")));
+    QVERIFY(DatabaseSchema::upgradeSchema(db, 22));
+    QCOMPARE(DatabaseSchema::getSchemaVersion(db), 23);
+    QVERIFY(db.record(QStringLiteral("manual_scoring")).contains(QStringLiteral("match_end_ms")));
+    QVERIFY(q.exec(QStringLiteral("SELECT COUNT(*) FROM manual_scoring")) && q.next());
+    QCOMPARE(q.value(0).toInt(), 1);
+    QVERIFY(q.exec(QStringLiteral("DELETE FROM manual_scoring")));
+}
+
+void ManualScoringTests::testStoreResize()
+{
+    Edit e = edit(0, Kind::Resize, CPAP_Obstructive, 90 * kSec, 106 * kSec);
+    e.matchEndMs = 100 * kSec;
+    e.key = key(131);
+    e.id = ManualScoringRepository::add(e);
+    QVERIFY(e.id > 0);
+    const QList<Edit> loaded = ManualScoringRepository::editsForSession(key(131));
+    QCOMPARE(loaded.size(), 1);
+    QCOMPARE(loaded[0].kind, Kind::Resize);
+    QCOMPARE(loaded[0].matchEndMs, 100 * kSec);
+    QVERIFY(ManualScoringRepository::update(e.id, 92 * kSec, 108 * kSec));
+    const Edit back = ManualScoringRepository::editsForSession(key(131)).first();
+    QCOMPARE(back.startMs, 92 * kSec);
+    QCOMPARE(back.endMs, 108 * kSec);
+    QCOMPARE(back.matchEndMs, 100 * kSec);
+    QVERIFY(ManualScoringRepository::removeAllForSession(key(131)));
 }

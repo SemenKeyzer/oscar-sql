@@ -103,7 +103,7 @@ public:
      * - Added type field to channels
      * - Removed events_file and summary_file from sessions (no longer needed)
      */
-    static const int CURRENT_SCHEMA_VERSION = 22;
+    static const int CURRENT_SCHEMA_VERSION = 23;
 
     /*!
      * \brief Oldest schema version that can be restored into the current database.
@@ -247,6 +247,7 @@ private:
     static bool migrateV19ToV20(QSqlDatabase& db);
     static bool migrateV20ToV21(QSqlDatabase& db);
     static bool migrateV21ToV22(QSqlDatabase& db);   //!< manual scoring tables
+    static bool migrateV22ToV23(QSqlDatabase& db);   //!< manual_scoring.match_end_ms (Resize edits)
     static bool createManualScoringTables(QSqlDatabase& db);
 
     static bool createIndexes(QSqlDatabase& db);

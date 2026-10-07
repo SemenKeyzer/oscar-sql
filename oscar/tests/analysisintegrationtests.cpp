@@ -2154,3 +2154,106 @@ void AnalysisIntegrationTests::testIndicesAddUpWithMechanismHypopneas()
     QCOMPARE(day.count(CPAP_ObstructiveHypopnea), EventDataType(1));   // the one at 250 s was left out
     ManualScoring::clearDay(&day);
 }
+
+namespace {
+const ManualScoring::EffectiveEvent *oaAt(const ManualScoring::Result &r, qint64 originalEndMs)
+{
+    for (const ManualScoring::EffectiveEvent &e : r.events) {
+        if (e.originalChannel == CPAP_Obstructive && e.originalEndMs == originalEndMs) return &e;
+    }
+    return nullptr;
+}
+} // namespace
+
+// dragging a device event again changes its one Resize edit
+void AnalysisIntegrationTests::testResizeEventUpdatesSameEdit()
+{
+    Machine cpap(p_profile, 90);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    Session *s = scoredSession(&cpap, 901, m_machineRow);
+    day.addSession(s);
+    const qint64 t0 = synth::kStart;
+    const ManualScoring::Result first = ManualScoring::resultFor(s);
+    const ManualScoring::EffectiveEvent *ev = oaAt(first, t0 + 100000);
+    QVERIFY(ev);
+    QVERIFY(ManualScoring::resizeEvent(s, *ev, t0 + 90000, t0 + 106000));
+    ManualScoring::Result r = ManualScoring::resultFor(s);
+    ev = oaAt(r, t0 + 100000);
+    QVERIFY(ev && ev->resizeEditId > 0);
+    QCOMPARE(ev->durationSec, 16.0);
+    QVERIFY(ManualScoring::resizeEvent(s, *ev, t0 + 92000, t0 + 104000));
+    const QList<ManualScoring::Edit> edits = ManualScoringRepository::editsForSession(ManualScoring::keyOf(s));
+    QCOMPARE(edits.size(), 1);
+    QCOMPARE(edits.first().endMs, t0 + 104000);
+    QCOMPARE(oaAt(ManualScoring::resultFor(s), t0 + 100000)->durationSec, 12.0);
+    ManualScoring::clearDay(&day);
+}
+
+// a night with a time correction: graph times in, device times stored
+void AnalysisIntegrationTests::testResizeEventCorrection()
+{
+    Machine cpap(p_profile, 91);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    cpap.rebuildCorrections({ TimeCorrectionRow { kNightDate.addDays(-10), QDate(), QStringLiteral("offset"), 600000, 0, 0.0 } });
+    Day day;
+    day.setDate(kNightDate);
+    Session *s = scoredSession(&cpap, 911, m_machineRow);
+    day.addSession(s);
+    const qint64 t0 = synth::kStart;
+    const ManualScoring::Result before = ManualScoring::resultFor(s);
+    const ManualScoring::EffectiveEvent *ev = oaAt(before, t0 + 700000);   // the OA at 100 s, shown at 700 s
+    QVERIFY(ev);
+    QVERIFY(ManualScoring::resizeEvent(s, *ev, t0 + 690000, t0 + 706000));
+    const ManualScoring::Edit stored = ManualScoringRepository::editsForSession(ManualScoring::keyOf(s)).first();
+    QCOMPARE(stored.startMs, t0 + 90000);
+    QCOMPARE(stored.endMs, t0 + 106000);
+    QCOMPARE(stored.matchEndMs, t0 + 100000);
+    QCOMPARE(oaAt(ManualScoring::resultFor(s), t0 + 700000)->endMs, t0 + 706000);
+    ManualScoring::clearDay(&day);
+}
+
+// a stretch stored with two sessions: moving its edge moves both rows
+void AnalysisIntegrationTests::testUpdateExcludeAcrossSessions()
+{
+    Machine cpap(p_profile, 92);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    Session *a = scoredSession(&cpap, 921, m_machineRow);
+    Session *b = scoredSession(&cpap, 922, m_machineRow);
+    b->really_set_first(synth::kStart + 3600000);
+    b->really_set_last(synth::kStart + 7200000);
+    day.addSession(a);
+    day.addSession(b);
+    const ManualScoring::Edit stretch = scoringEdit(ManualScoring::Kind::Exclude, 0, 3000, 4200);
+    QVERIFY(ManualScoring::addEdit(a, stretch));
+    QVERIFY(ManualScoring::addEdit(b, stretch));
+    const qint64 id = ManualScoringRepository::editsForSession(ManualScoring::keyOf(a)).first().id;
+    QVERIFY(ManualScoring::updateEdit(&day, id, synth::kStart + 2800000, synth::kStart + 4200000));
+    QCOMPARE(ManualScoringRepository::editsForSession(ManualScoring::keyOf(a)).first().startMs, synth::kStart + 2800000);
+    QCOMPARE(ManualScoringRepository::editsForSession(ManualScoring::keyOf(b)).first().startMs, synth::kStart + 2800000);
+    QCOMPARE(a->manualExcludedMs(), qint64(800000));
+    ManualScoring::clearDay(&day);
+}
+
+void AnalysisIntegrationTests::testUpdateAdded()
+{
+    Machine cpap(p_profile, 93);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    Session *s = scoredSession(&cpap, 931, m_machineRow);
+    day.addSession(s);
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Add, CPAP_Hypopnea, 480, 500)));
+    const EventDataType before = day.count(CPAP_Hypopnea);
+    const qint64 id = ManualScoringRepository::editsForSession(ManualScoring::keyOf(s)).first().id;
+    QVERIFY(ManualScoring::updateEdit(&day, id, synth::kStart + 470000, synth::kStart + 505000));
+    const ManualScoring::Edit e = ManualScoringRepository::editsForSession(ManualScoring::keyOf(s)).first();
+    QCOMPARE(e.startMs, synth::kStart + 470000);
+    QCOMPARE(e.endMs, synth::kStart + 505000);
+    QCOMPARE(day.count(CPAP_Hypopnea), before);
+    ManualScoring::clearDay(&day);
+}

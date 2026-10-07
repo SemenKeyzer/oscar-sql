@@ -23,6 +23,8 @@ class ManualScoringRepository
     static bool hasScoring(const ManualScoring::SessionKey &key);
     //! Stores \a edit (its id is ignored); returns the new id, 0 on failure.
     static qint64 add(const ManualScoring::Edit &edit);
+    //! New bounds of the edit \a id (device time); false when there is no such edit.
+    static bool update(qint64 id, qint64 startMs, qint64 endMs);
     static bool remove(qint64 id);
     static bool removeAllForSession(const ManualScoring::SessionKey &key);
 

@@ -16,6 +16,7 @@
 #include <QSet>
 #include <QSqlQuery>
 #include <QSqlError>
+#include <QSqlRecord>
 #include <QDebug>
 #include <QSettings>
 #include "version.h"
@@ -253,6 +254,7 @@ bool DatabaseSchema::upgradeSchema(QSqlDatabase& db, int fromVersion,
         { 19, &migrateV19ToV20 },
         { 20, &migrateV20ToV21 },
         { 21, &migrateV21ToV22 },
+        { 22, &migrateV22ToV23 },
     };
     const int stepsAvailable = int(sizeof(steps) / sizeof(steps[0]));
 
@@ -2178,6 +2180,7 @@ bool DatabaseSchema::createManualScoringTables(QSqlDatabase& db)
             "    end_ms INTEGER NOT NULL,"
             "    note TEXT,"
             "    created_at TEXT NOT NULL,"
+            "    match_end_ms INTEGER,"
             "    FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE"
             ")"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_manual_scoring_session ON manual_scoring(profile_id, machine_serial, session_id)"),
@@ -2219,5 +2222,32 @@ bool DatabaseSchema::migrateV21ToV22(QSqlDatabase& db)
         return false;
     }
     qDebug() << "DatabaseSchema: Migration v21->v22 complete";
+    return true;
+}
+
+bool DatabaseSchema::migrateV22ToV23(QSqlDatabase& db)
+{
+    qDebug() << "DatabaseSchema: Migrating v22 -> v23";
+    if (!db.transaction()) {
+        qCritical() << "DatabaseSchema: migrateV22ToV23: failed to start transaction";
+        return false;
+    }
+    // a Resize edit names the device event by its own end; tables made at schema 23 have it already
+    bool ok = true;
+    if (!db.record(QStringLiteral("manual_scoring")).contains(QStringLiteral("match_end_ms"))) {
+        QSqlQuery q(db);
+        ok = q.exec(QStringLiteral("ALTER TABLE manual_scoring ADD COLUMN match_end_ms INTEGER"));
+        if (!ok) qCritical() << "DatabaseSchema: migrateV22ToV23 failed:" << q.lastError().text();
+    }
+    if (!ok || !setSchemaVersion(db, 23)) {
+        db.rollback();
+        return false;
+    }
+    if (!db.commit()) {
+        qCritical() << "DatabaseSchema: migrateV22ToV23: commit failed";
+        db.rollback();
+        return false;
+    }
+    qDebug() << "DatabaseSchema: Migration v22->v23 complete";
     return true;
 }
