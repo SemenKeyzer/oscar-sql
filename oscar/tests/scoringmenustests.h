@@ -28,6 +28,7 @@ private slots:
     void testTreeNode();
     void testLetterKeys();
     void testBulkItems();
+    void testResizedEventNamedByOwnEnd();
     void testExcludedText();
 private:
     QApplication *m_app = nullptr;

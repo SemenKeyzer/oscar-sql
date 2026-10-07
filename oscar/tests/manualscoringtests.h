@@ -42,6 +42,7 @@ private slots:
     void testResizeAndRetype();
     void testResizeNotFound();
     void testExcludeEditsListed();
+    void testBulkRetypeResized();
     // storage
     void testStoreAndLoadEdits();
     void testRemoveEdit();

@@ -78,6 +78,7 @@ private slots:
     void testUpdateExcludeAcrossSessions();
     void testUpdateAdded();
     void testEditRowResize();
+    void testUpdateExcludeIntoNextSession();
     void testScoringDragEsc();
     void testScoringDragClearedOnModeOff();
     void testFlagsGraphsSplitDeviceAndAnalysis();

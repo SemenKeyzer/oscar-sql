@@ -576,3 +576,21 @@ void ManualScoringTests::testStoreResize()
     QCOMPARE(back.matchEndMs, 100 * kSec);
     QVERIFY(ManualScoringRepository::removeAllForSession(key(131)));
 }
+
+// changing all of a type names a resized event by its own end, so the change finds it
+void ManualScoringTests::testBulkRetypeResized()
+{
+    const Result before = apply(deviceEvents(), { resize(1, 90 * kSec, 106 * kSec) }, oneSession());
+    const BulkPlan plan = bulkEdits(before, CPAP_Obstructive, CPAP_Hypopnea);
+    QCOMPARE(plan.add.size(), 2);
+    QList<Edit> edits = { resize(1, 90 * kSec, 106 * kSec) };
+    qint64 id = 2;
+    for (Edit e : plan.add) {
+        e.id = id++;
+        edits.append(e);
+    }
+    const Result after = apply(deviceEvents(), edits, oneSession());
+    QVERIFY(after.notFound.isEmpty());
+    QCOMPARE(after.delta.value(CPAP_Hypopnea), 2);
+    QCOMPARE(eventMatching(after, 100 * kSec)->endMs, 106 * kSec);   // the bounds stay
+}

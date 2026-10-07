@@ -45,7 +45,7 @@ QAction *find(QMenu *menu, const QString &text)
 
 EffectiveEvent scoredEvent(Origin origin, ChannelID channel, ChannelID original, qint64 editId)
 {
-    return { channel, original, 300000, 11, origin, editId, false };
+    return { channel, original, 300000, 11, origin, editId, false, 300000, 11, 0 };
 }
 
 } // namespace
@@ -203,4 +203,19 @@ void ScoringMenusTests::testExcludedText()
     QCOMPARE(ScoringMenus::excludedText(17000), QStringLiteral("excluded 17 s"));
     QCOMPARE(ScoringMenus::excludedText(119000), QStringLiteral("excluded 119 s"));
     QCOMPARE(ScoringMenus::excludedText(14 * 60000 + 20000), QStringLiteral("excluded 14 min"));
+}
+
+// an event given new bounds is still named by its own end when removed or retyped
+void ScoringMenusTests::testResizedEventNamedByOwnEnd()
+{
+    EffectiveEvent e = scoredEvent(Origin::Device, CPAP_Obstructive, CPAP_Obstructive, 0);
+    e.endMs = 306000;   // dragged 6 s later
+    e.durationSec = 17;
+    e.resizeEditId = 5;
+    QScopedPointer<QMenu> m(ScoringMenus::forEvent(e, nullptr));
+    QCOMPARE(find(m.data(), QStringLiteral("Remove event (do not count)"))->data().toMap().value(QStringLiteral("timeMs")).toLongLong(),
+             qint64(300000));
+    QAction *toH = find(m.data(), ScoringMenus::typeName(CPAP_Hypopnea));
+    QVERIFY(toH);
+    QCOMPARE(toH->data().toMap().value(QStringLiteral("timeMs")).toLongLong(), qint64(300000));
 }

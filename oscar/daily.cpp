@@ -4516,6 +4516,7 @@ void Daily::onScoringResized(const ScoringResize::Target &t, qint64 startMs, qin
 {
     Day *day = p_profile ? p_profile->GetDay(previous_date, MT_CPAP) : nullptr;
     if (!day || !m_scoringDrawn) return;
+    if (!ScoringResize::stillTargets(*m_scoringDrawn, t)) return;   // the night was rebuilt during the drag
     if (t.kind == ScoringResize::Target::Excluded) {
         ManualScoring::updateEdit(day, t.editId, startMs, endMs);
     } else if (t.kind == ScoringResize::Target::Event && t.eventIndex >= 0 && t.eventIndex < m_scoringDrawn->events.size()) {

@@ -28,6 +28,8 @@ private slots:
     void testResizeHit();
     void testResizeHitTieAndRemoved();
     void testResizeDragClamp();
+    void testResizedIntoStretchStaysGrabbable();
+    void testStaleTargetIgnored();
     void initTestCase();
 };
 DECLARE_TEST(ScoringModeTests)

@@ -35,6 +35,9 @@ struct Target {
 //! or one inside an excluded stretch (they have no box); a tie goes to the event.
 Target hit(const ManualScoring::Result &r, qint64 minX, qint64 maxX, int plotWidth, int x, bool boxesShown);
 
+//! Whether \a t still names the same event or stretch in \a r (the events may be rebuilt during a drag).
+bool stillTargets(const ManualScoring::Result &r, const Target &t);
+
 //! The bounds after the grabbed edge of \a t moved to \a timeMs: kept within [\a lowMs, \a highMs]
 //! and at least kMinMs long.
 QPair<qint64, qint64> dragTo(const Target &t, qint64 timeMs, qint64 lowMs, qint64 highMs);

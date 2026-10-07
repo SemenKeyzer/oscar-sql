@@ -169,12 +169,12 @@ BulkPlan bulkEdits(const Result &r, ChannelID from, ChannelID to)
             plan.undo.append(e.editId);   // back to what the device said: take the retype back
             continue;
         }
-        Edit change;   // a device event, as recorded or retyped before: named by its own type
+        Edit change;   // a device event, as recorded or retyped before: named by its own type and end
         change.kind = to == 0 ? Kind::Remove : Kind::Retype;
         change.channel = e.originalChannel;
         change.newChannel = to;
-        change.startMs = start;
-        change.endMs = e.endMs;
+        change.startMs = e.originalEndMs - qint64(e.originalDurationSec * 1000);
+        change.endMs = e.originalEndMs;
         plan.add.append(change);
     }
     return plan;
@@ -345,6 +345,44 @@ bool removeEdit(Session *s, qint64 id)
     return true;
 }
 
+namespace {
+//! An excluded stretch moved to startMs–endMs (graph time): stored with every session it touches now,
+//! and no longer with those it left (unless it touches none, then it stays where it was).
+bool moveStretch(Day *day, const Edit &target, qint64 startMs, qint64 endMs)
+{
+    QList<Session *> touched;
+    for (Session *s : day->sessions) {
+        if (s->type() != MT_CPAP || !s->enabled()) continue;
+        const qint64 c = s->correctionMs();
+        if (startMs < s->last() + c && endMs > s->first() + c) touched.append(s);
+    }
+    bool ok = true;
+    for (Session *s : day->sessions) {
+        const qint64 c = s->correctionMs();
+        bool stored = false, changed = false;
+        for (const Edit &e : ManualScoringRepository::editsForSession(keyOf(s))) {
+            if (e.kind != Kind::Exclude || (e.id != target.id && (e.startMs != target.startMs || e.endMs != target.endMs))) continue;
+            stored = true;
+            changed = true;
+            if (touched.isEmpty() || touched.contains(s)) ok = ManualScoringRepository::update(e.id, startMs - c, endMs - c) && ok;
+            else ok = ManualScoringRepository::remove(e.id) && ok;
+        }
+        if (!stored && touched.contains(s)) {
+            Edit e = target;
+            e.id = 0;
+            e.key = keyOf(s);
+            e.startMs = startMs - c;
+            e.endMs = endMs - c;
+            e.createdAt = QDateTime();
+            ok = ManualScoringRepository::add(e) != 0 && ok;
+            changed = true;
+        }
+        if (changed) refresh(s);
+    }
+    return ok;
+}
+} // namespace
+
 bool resizeEvent(Session *s, const EffectiveEvent &ev, qint64 startMs, qint64 endMs)
 {
     if (ev.origin == Origin::Added || ev.origin == Origin::Removed || endMs - startMs < 1000) return false;
@@ -377,6 +415,7 @@ bool updateEdit(Day *day, qint64 id, qint64 startMs, qint64 endMs)
         }
     }
     if (!found || (target.kind != Kind::Add && target.kind != Kind::Exclude)) return false;
+    if (target.kind == Kind::Exclude) return moveStretch(day, target, startMs, endMs);
     bool ok = true;
     for (Session *s : day->sessions) {
         bool changed = false;

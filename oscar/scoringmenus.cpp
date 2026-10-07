@@ -114,15 +114,16 @@ QMenu *ScoringMenus::forEvent(const EffectiveEvent &e, QWidget *parent, int coun
 {
     auto *menu = new QMenu(parent);
     menu->setObjectName(QStringLiteral("scoringEventMenu"));
-    // a device event is named by its own type, whatever it was changed to
+    // a device event is named by its own type and end, whatever it was changed to
     const ChannelID own = e.originalChannel;
+    const qint64 ownEnd = e.originalEndMs;
     if (e.origin != Origin::Added) {
-        if (e.origin != Origin::Removed) keyed(menu, tr("Remove event (do not count)"), QLatin1Char('R'))->setData(data("remove", own, 0, e.endMs));
+        if (e.origin != Origin::Removed) keyed(menu, tr("Remove event (do not count)"), QLatin1Char('R'))->setData(data("remove", own, 0, ownEnd));
         QMenu *types = menu->addMenu(tr("Change type"));
         types->menuAction()->setText(tr("Change type") + QStringLiteral("\tT"));
         types->menuAction()->setProperty(kKeyProperty, QStringLiteral("T"));
         for (ChannelID c : ManualScoring::scoredChannels()) {
-            if (c != e.channel) keyed(types, typeName(c), keyOf(c))->setData(data("retype", own, c, e.endMs));
+            if (c != e.channel) keyed(types, typeName(c), keyOf(c))->setData(data("retype", own, c, ownEnd));
         }
     }
     if (e.origin != Origin::Device) {

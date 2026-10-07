@@ -203,3 +203,29 @@ void ScoringModeTests::testResizeDragClamp()
     QCOMPARE(ScoringResize::dragTo(left, 605000, 0, 3600000), qMakePair(qint64(599000), qint64(600000)));
 }
 
+
+// an event dragged into an excluded stretch keeps its box and its edges, so it can come back out
+void ScoringModeTests::testResizedIntoStretchStaysGrabbable()
+{
+    ManualScoring::Result r;
+    r.events = { boxEvent(300, 10) };
+    r.events[0].excluded = true;
+    r.events[0].resizeEditId = 3;
+    QCOMPARE(ScoringResize::hit(r, 0, 600000, 600, 300, true).kind, ScoringResize::Target::Event);
+    const QList<gManualScoringLayer::Item> boxes = gManualScoringLayer::items(r, 0, 600000, true, true);
+    QCOMPARE(boxes.size(), 1);
+    QCOMPARE(int(boxes[0].kind), int(gManualScoringLayer::Item::Event));
+}
+
+// a drag that ends after the events were rebuilt does not land on another event
+void ScoringModeTests::testStaleTargetIgnored()
+{
+    ManualScoring::Result r;
+    r.events = { boxEvent(600, 12) };
+    const ScoringResize::Target t = ScoringResize::hit(r, 0, 600000, 600, 600, true);
+    QVERIFY(ScoringResize::stillTargets(r, t));
+    r.events = { boxEvent(300, 10) };   // rebuilt: index 0 is now another event
+    QVERIFY(!ScoringResize::stillTargets(r, t));
+    r.events.clear();
+    QVERIFY(!ScoringResize::stillTargets(r, t));
+}

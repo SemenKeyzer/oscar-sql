@@ -2313,3 +2313,27 @@ void AnalysisIntegrationTests::testScoringDragClearedOnModeOff()
     view.setScoringMode(false);
     QVERIFY(!view.scoringDrag());
 }
+
+// a stretch dragged into the next session is stored with it too, and leaves it when dragged back
+void AnalysisIntegrationTests::testUpdateExcludeIntoNextSession()
+{
+    Machine cpap(p_profile, 95);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    Session *a = scoredSession(&cpap, 951, m_machineRow);
+    Session *b = scoredSession(&cpap, 952, m_machineRow);
+    b->really_set_first(synth::kStart + 3600000);
+    b->really_set_last(synth::kStart + 7200000);
+    day.addSession(a);
+    day.addSession(b);
+    QVERIFY(ManualScoring::addEdit(a, scoringEdit(ManualScoring::Kind::Exclude, 0, 3000, 3500)));
+    const qint64 id = ManualScoringRepository::editsForSession(ManualScoring::keyOf(a)).first().id;
+    QVERIFY(ManualScoring::updateEdit(&day, id, synth::kStart + 3000000, synth::kStart + 4200000));
+    QCOMPARE(ManualScoringRepository::editsForSession(ManualScoring::keyOf(b)).size(), 1);
+    QCOMPARE(b->manualExcludedMs(), qint64(600000));
+    QVERIFY(ManualScoring::updateEdit(&day, id, synth::kStart + 3000000, synth::kStart + 3400000));
+    QVERIFY(ManualScoringRepository::editsForSession(ManualScoring::keyOf(b)).isEmpty());
+    QCOMPARE(a->manualExcludedMs(), qint64(400000));
+    ManualScoring::clearDay(&day);
+}

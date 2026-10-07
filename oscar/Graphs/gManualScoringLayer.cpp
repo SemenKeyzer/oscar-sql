@@ -39,7 +39,8 @@ QList<gManualScoringLayer::Item> gManualScoringLayer::items(const ManualScoring:
             const QString length = zoomed ? QStringLiteral("%1 %2").arg(QLocale().toString(e.durationSec, 'f', 1), tr("s")) : QString();
             switch (e.origin) {
             case Origin::Device:
-                if (zoomed && !e.excluded) out.append({ Item::Event, start, e.endMs, e.channel, type, length });
+                // inside a stretch only when dragged there: the box stays, to drag it back out
+                if (zoomed && (!e.excluded || e.resizeEditId > 0)) out.append({ Item::Event, start, e.endMs, e.channel, type, length });
                 break;
             case Origin::Added:
                 out.append({ Item::Added, start, e.endMs, e.channel, zoomed ? type + QStringLiteral(" · ") + tr("manual") : tr("manual"), length });

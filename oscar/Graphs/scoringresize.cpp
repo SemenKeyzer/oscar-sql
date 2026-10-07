@@ -29,7 +29,8 @@ Target hit(const ManualScoring::Result &r, qint64 minX, qint64 maxX, int plotWid
     if (boxesShown) {
         for (int i = 0; i < r.events.size(); ++i) {
             const ManualScoring::EffectiveEvent &e = r.events.at(i);
-            if (e.origin == ManualScoring::Origin::Removed || e.excluded) continue;
+            // inside a stretch only when dragged there: it keeps its box, so it can come back out
+            if (e.origin == ManualScoring::Origin::Removed || (e.excluded && e.resizeEditId == 0)) continue;
             Target t;
             t.kind = Target::Event;
             t.eventIndex = i;
@@ -53,6 +54,21 @@ Target hit(const ManualScoring::Result &r, qint64 minX, qint64 maxX, int plotWid
         consider(t, t.endMs);
     }
     return best;
+}
+
+bool stillTargets(const ManualScoring::Result &r, const Target &t)
+{
+    if (t.kind == Target::Event) {
+        if (t.eventIndex < 0 || t.eventIndex >= r.events.size()) return false;
+        const ManualScoring::EffectiveEvent &e = r.events.at(t.eventIndex);
+        return e.endMs == t.endMs && e.endMs - qint64(std::llround(e.durationSec * 1000)) == t.startMs;
+    }
+    if (t.kind == Target::Excluded) {
+        for (const ManualScoring::ExcludeEdit &x : r.excludeEdits) {
+            if (x.editId == t.editId) return x.startMs == t.startMs && x.endMs == t.endMs;
+        }
+    }
+    return false;
 }
 
 QPair<qint64, qint64> dragTo(const Target &t, qint64 timeMs, qint64 lowMs, qint64 highMs)
