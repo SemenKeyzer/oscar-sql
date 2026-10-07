@@ -8,6 +8,8 @@
 
 #include "scoringmenus.h"
 
+#include <QScopedPointer>
+#include <QLocale>
 #include <QDateTime>
 #include <QKeyEvent>
 #include <QMenu>
@@ -158,6 +160,7 @@ QList<ScoringMenus::EditRow> ScoringMenus::editRows(Day *day)
     for (Session *s : day->sessions) {
         if (s->type() != MT_CPAP || !s->enabled()) continue;   // a switched-off session's edits do not count
         const qint64 c = s->correctionMs();   // stored in device time, listed in graph time
+        QScopedPointer<ManualScoring::Result> result;   // for new bounds: the lengths before and after
         for (const ManualScoring::Edit &e : ManualScoringRepository::editsForSession(ManualScoring::keyOf(s))) {
             QString text;
             qint64 at = e.endMs + c;
@@ -165,7 +168,15 @@ QList<ScoringMenus::EditRow> ScoringMenus::editRows(Day *day)
             case Kind::Add: text = tr("added: %1").arg(typeName(e.channel)); break;
             case Kind::Remove: text = tr("removed: %1").arg(typeName(e.channel)); break;
             case Kind::Retype: text = tr("%1 → %2").arg(typeName(e.channel), typeName(e.newChannel)); break;
-            case Kind::Resize: continue;   // listed with Task 4
+            case Kind::Resize: {
+                if (!result) result.reset(new ManualScoring::Result(ManualScoring::resultFor(s)));
+                QString before = QStringLiteral("?"), after = QLocale().toString((e.endMs - e.startMs) / 1000.0, 'f', 1);
+                for (const ManualScoring::EffectiveEvent &ev : result->events) {
+                    if (ev.resizeEditId == e.id) before = QLocale().toString(ev.originalDurationSec, 'f', 1);
+                }
+                text = tr("%1: %2 → %3 s").arg(schema::channel[e.channel].label(), before, after);
+                break;
+            }
             case Kind::Exclude: {
                 const QPair<qint64, qint64> span(e.startMs, e.endMs);
                 if (stretches.contains(span)) continue;

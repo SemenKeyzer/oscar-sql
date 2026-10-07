@@ -10,6 +10,9 @@
 #ifndef GGRAPHVIEW_H
 #define GGRAPHVIEW_H
 
+#include <functional>
+#include <QSharedPointer>
+#include "Graphs/scoringresize.h"
 #include <QByteArray>
 #include <QMainWindow>
 #include <QScrollBar>
@@ -598,8 +601,18 @@ class gGraphView
     //! \brief Manual scoring mode: a drag on the flow graph selects a stretch to score
     //!        (scoringRangeSelected) and a right click on the flow or event flags graph asks for
     //!        the event's menu (scoringContextRequested); Esc asks to leave the mode.
-    void setScoringMode(bool on) { m_scoringMode = on; m_scoringEscPressed = false; }
+    void setScoringMode(bool on) { m_scoringMode = on; m_scoringEscPressed = false; m_scoringDragging = false; }
     bool scoringMode() const { return m_scoringMode; }
+    //! \brief In scoring mode the edges of the event boxes and excluded stretches of the flow
+    //!        graph can be dragged (scoringResized at the end; Esc cancels): the scored night, and
+    //!        where an edge may go (the event's session, or the day's sessions for a stretch).
+    void setScoringResult(QSharedPointer<ManualScoring::Result> result) { m_scoringResult = result; }
+    void setScoringLimits(std::function<QPair<qint64, qint64>(const ScoringResize::Target &)> limits) { m_scoringLimits = limits; }
+    //! Whether an edge is being dragged; false cancels the drag.
+    void setScoringDrag(bool on) { m_scoringDragging = on; }
+    bool scoringDrag() const { return m_scoringDragging; }
+    //! The edge being dragged and its bounds now; false when there is no drag.
+    bool scoringDragPreview(ScoringResize::Target *target, QPair<qint64, qint64> *live) const;
     //! \brief Shows \a text next to the mouse pointer (used while an alignment drag is in progress).
     void showAlignLabel(const QString& text);
     //! \brief Decides for which graphs the context menu offers "Align device time...".
@@ -738,6 +751,16 @@ class gGraphView
     bool m_alignMode = false;
     bool m_scoringMode = false;
     bool m_scoringEscPressed = false;   //!< Esc went down on this view (not in a dialog)
+    QSharedPointer<ManualScoring::Result> m_scoringResult;
+    std::function<QPair<qint64, qint64>(const ScoringResize::Target &)> m_scoringLimits;
+    bool m_scoringDragging = false;
+    bool m_scoringCursor = false;        //!< the resize cursor was set for an edge under the mouse
+    ScoringResize::Target m_scoringTarget;
+    QPair<qint64, qint64> m_scoringLive;
+    QPair<qint64, qint64> m_scoringBounds;   //!< where the dragged edge may go
+    gGraph *m_scoringGraph = nullptr;
+    //! The edge of the flow graph under \a pos, in scoring mode; \a graph gets the graph.
+    ScoringResize::Target scoringEdgeAt(const QPoint &pos, gGraph **graph);
     QSet<QString> m_alignTargets;
     QList<QPair<gGraph *, QRect>> m_alignPainted;   //!< plot rects of target graphs painted in the last frame
     int m_alignPinnedHeight = 0;                     //!< height of the pinned area in the last frame
@@ -817,6 +840,8 @@ class gGraphView
     void scoringRangeSelected(gGraph *graph, qint64 startMs, qint64 endMs, QPoint globalPos);
     void scoringContextRequested(gGraph *graph, qint64 timeMs, QPoint globalPos);
     void scoringModeExitRequested();
+    //! An edge was dragged: \a target got the bounds \a startMs–\a endMs (graph time).
+    void scoringResized(const ScoringResize::Target &target, qint64 startMs, qint64 endMs);
     void alignRequestedForGraph(gGraph *graph);
 
   public slots:

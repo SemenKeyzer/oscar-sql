@@ -711,6 +711,8 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
         const bool markers = it.key() == STR_GRAPH_FlowRate || it.key() == STR_GRAPH_SleepFlags;
         it.value()->AddLayer(new gManualScoringLayer(m_scoringDrawn, markers, it.key() == STR_GRAPH_FlowRate));
     }
+    GraphView->setScoringResult(m_scoringDrawn);
+    GraphView->setScoringLimits([this](const ScoringResize::Target &t) { return scoringLimits(t); });
 
     GraphView->resetLayout();
     GraphView->SaveDefaultSettings();
@@ -755,7 +757,7 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     {
         auto *row = new QHBoxLayout(m_scoringBanner);
         row->setContentsMargins(6, 2, 6, 2);
-        auto *hint = new QLabel(tr("Scoring mode: drag across the flow graph to mark a stretch, or right-click an event · Esc to leave"), m_scoringBanner);
+        auto *hint = new QLabel(tr("Scoring mode: drag across the flow graph to mark a stretch, drag an edge to change it, or right-click an event · Esc to leave"), m_scoringBanner);
         hint->setWordWrap(true);
         row->addWidget(hint, 1);
         m_scoringType = new QComboBox(m_scoringBanner);
@@ -804,6 +806,7 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     });
     connect(GraphView, &gGraphView::scoringRangeSelected, this, &Daily::onScoringRange);
     connect(GraphView, &gGraphView::scoringContextRequested, this, &Daily::onScoringContext);
+    connect(GraphView, &gGraphView::scoringResized, this, &Daily::onScoringResized);
     connect(GraphView, &gGraphView::scoringModeExitRequested, this, [this]() { scoringButton->setChecked(false); });
 
     connect(m_alignSession, &TimeAlignSession::offsetChanged, this, &Daily::onAlignOffsetChanged);
@@ -4450,7 +4453,7 @@ QString Daily::getManualScoring(Day *day)
 {
     if (!day || !day->hasManualScoring()) return QString();
     using ManualScoring::Kind;
-    int added = 0, removed = 0, retyped = 0, notFound = 0;
+    int added = 0, removed = 0, retyped = 0, resized = 0, notFound = 0;
     qint64 excludedMs = 0;
     QSet<QPair<qint64, qint64>> stretches;
     for (Session *s : day->sessions) {
@@ -4463,7 +4466,7 @@ QString Daily::getManualScoring(Day *day)
             case Kind::Remove: ++removed; break;
             case Kind::Retype: ++retyped; break;
             case Kind::Exclude: stretches.insert({ e.startMs, e.endMs }); break;
-            case Kind::Resize: break;   // counted with Task 4
+            case Kind::Resize: ++resized; break;
             }
         }
     }
@@ -4475,8 +4478,9 @@ QString Daily::getManualScoring(Day *day)
     QString html = QStringLiteral("<table cellspacing=0 cellpadding=1 border=0 width='100%'>\n");
     html += QStringLiteral("<tr><td colspan=5 align=center><b>%1</b></td></tr>\n").arg(HelpTips::term(tr("Manual scoring"), QStringLiteral("manual_scoring")));
     html += QStringLiteral("<tr><td colspan=5>%1</td></tr>\n")
-                .arg(tr("added %1, removed %2, type changed %3, %4 (%5 stretches)")
-                         .arg(added).arg(removed).arg(retyped).arg(ScoringMenus::excludedText(excludedMs)).arg(stretches.size()).toHtmlEscaped());
+                .arg(tr("added %1, removed %2, type changed %3, bounds changed %4, %5 (%6 stretches)")
+                         .arg(added).arg(removed).arg(retyped).arg(resized).arg(ScoringMenus::excludedText(excludedMs)).arg(stretches.size())
+                         .toHtmlEscaped());
     if (notFound > 0) {
         html += QStringLiteral("<tr><td colspan=5><font color='#c0392b'>%1</font></td></tr>\n")
                     .arg(tr("%n change(s) refer to an event that is no longer there", nullptr, notFound).toHtmlEscaped());
@@ -4485,6 +4489,46 @@ QString Daily::getManualScoring(Day *day)
     html += QStringLiteral("<tr><td colspan=5 align=center><a href='scoring=clear'>%1</a></td></tr>\n").arg(tr("Undo all scoring of this night").toHtmlEscaped());
     html += QStringLiteral("</table>\n");
     return html;
+}
+
+QPair<qint64, qint64> Daily::scoringLimits(const ScoringResize::Target &t)
+{
+    Day *day = p_profile ? p_profile->GetDay(previous_date, MT_CPAP) : nullptr;
+    QPair<qint64, qint64> out(std::numeric_limits<qint64>::min() / 2, std::numeric_limits<qint64>::max() / 2);
+    if (!day || !m_scoringDrawn) return out;
+    // on the graphs' clock: the device time plus its correction
+    auto span = [](Session *s) { return qMakePair(s->first() + s->correctionMs(), s->last() + s->correctionMs()); };
+    if (t.kind == ScoringResize::Target::Event && t.eventIndex >= 0 && t.eventIndex < m_scoringDrawn->events.size()) {
+        if (Session *s = scoringSessionAt(day, m_scoringDrawn->events.at(t.eventIndex).originalEndMs)) return span(s);
+        return out;
+    }
+    bool any = false;
+    for (Session *s : day->sessions) {   // a stretch: within the night's sessions
+        if (s->type() != MT_CPAP || !s->enabled()) continue;
+        const auto sp = span(s);
+        out = any ? qMakePair(qMin(out.first, sp.first), qMax(out.second, sp.second)) : sp;
+        any = true;
+    }
+    return out;
+}
+
+void Daily::onScoringResized(const ScoringResize::Target &t, qint64 startMs, qint64 endMs)
+{
+    Day *day = p_profile ? p_profile->GetDay(previous_date, MT_CPAP) : nullptr;
+    if (!day || !m_scoringDrawn) return;
+    if (t.kind == ScoringResize::Target::Excluded) {
+        ManualScoring::updateEdit(day, t.editId, startMs, endMs);
+    } else if (t.kind == ScoringResize::Target::Event && t.eventIndex >= 0 && t.eventIndex < m_scoringDrawn->events.size()) {
+        const ManualScoring::EffectiveEvent ev = m_scoringDrawn->events.at(t.eventIndex);
+        if (ev.origin == ManualScoring::Origin::Added) {
+            ManualScoring::updateEdit(day, ev.editId, startMs, endMs);
+        } else if (Session *s = scoringSessionAt(day, ev.originalEndMs)) {
+            ManualScoring::resizeEvent(s, ev, startMs, endMs);
+        }
+    } else {
+        return;
+    }
+    scoringChanged();
 }
 
 void Daily::updateScoringLayer(Day *day)
@@ -4498,6 +4542,7 @@ void Daily::updateScoringLayer(Day *day)
         const ManualScoring::Result r = ManualScoring::resultFor(s);
         m_scoringDrawn->events += r.events;
         m_scoringDrawn->excludedSpans += r.excludedSpans;
+        m_scoringDrawn->excludeEdits += r.excludeEdits;
     }
     updateScoringTypes();
 }

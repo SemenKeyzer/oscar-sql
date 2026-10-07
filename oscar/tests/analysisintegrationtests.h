@@ -77,6 +77,9 @@ private slots:
     void testResizeEventCorrection();
     void testUpdateExcludeAcrossSessions();
     void testUpdateAdded();
+    void testEditRowResize();
+    void testScoringDragEsc();
+    void testScoringDragClearedOnModeOff();
     void testFlagsGraphsSplitDeviceAndAnalysis();
     void testAnalysisReportQuery();
     void testSettingsPeriodCountsCpapHoursOnly();

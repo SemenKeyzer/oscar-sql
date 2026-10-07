@@ -113,19 +113,21 @@ void ScoringModeTests::testEventBoxesWhenZoomed()
                  { CPAP_Obstructive, CPAP_ClearAirway, 300000, 15, Origin::Retyped, 2, false },
                  { CPAP_ClearAirway, CPAP_ClearAirway, 400000, 11, Origin::Device, 0, true } };   // excluded: no box
     const QString s = gManualScoringLayer::tr("s");
-    auto label = [&](ChannelID c, double sec) {
-        return QStringLiteral("%1 %2 %3").arg(schema::channel[c].label(), QLocale().toString(sec, 'f', 1), s);
-    };
+    // the type at top left, the length at top right, as the doctor's other program shows them
+    auto duration = [&](double sec) { return QStringLiteral("%1 %2").arg(QLocale().toString(sec, 'f', 1), s); };
 
     const QList<Item> boxes = gManualScoringLayer::items(r, 0, 10 * 60000, true, true);
     QCOMPARE(boxes.size(), 3);
     QCOMPARE(int(boxes[0].kind), int(Item::Event));
     QCOMPARE(boxes[0].start, qint64(88000));
-    QCOMPARE(boxes[0].label, label(CPAP_Obstructive, 12));
+    QCOMPARE(boxes[0].label, schema::channel[CPAP_Obstructive].label());
+    QCOMPARE(boxes[0].duration, duration(12));
     QCOMPARE(int(boxes[1].kind), int(Item::Added));
-    QVERIFY(boxes[1].label.startsWith(label(CPAP_Hypopnea, 20)));
-    QVERIFY(boxes[2].label.startsWith(label(CPAP_Obstructive, 15)));
+    QCOMPARE(boxes[1].label, schema::channel[CPAP_Hypopnea].label() + QStringLiteral(" · ") + gManualScoringLayer::tr("manual"));
+    QCOMPARE(boxes[1].duration, duration(20));
+    QVERIFY(boxes[2].label.startsWith(schema::channel[CPAP_Obstructive].label()));
     QVERIFY(boxes[2].label.contains(QStringLiteral("was %1").arg(schema::channel[CPAP_ClearAirway].label())));
+    QCOMPARE(boxes[2].duration, duration(15));
 
     // the whole night, or a graph without boxes: no box for the device's own events
     QCOMPARE(gManualScoringLayer::items(r, 0, 9 * 3600000, true, true).size(), 2);
@@ -200,3 +202,4 @@ void ScoringModeTests::testResizeDragClamp()
     QCOMPARE(ScoringResize::dragTo(left, -50000, 0, 3600000), qMakePair(qint64(0), qint64(600000)));
     QCOMPARE(ScoringResize::dragTo(left, 605000, 0, 3600000), qMakePair(qint64(599000), qint64(600000)));
 }
+

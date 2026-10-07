@@ -9,6 +9,8 @@
 #include "analysisintegrationtests.h"
 
 #include <QScopeGuard>
+#include <QKeyEvent>
+#include "Graphs/gGraphView.h"
 
 #include <QApplication>
 #include <QCoreApplication>
@@ -2256,4 +2258,58 @@ void AnalysisIntegrationTests::testUpdateAdded()
     QCOMPARE(e.endMs, synth::kStart + 505000);
     QCOMPARE(day.count(CPAP_Hypopnea), before);
     ManualScoring::clearDay(&day);
+}
+
+// new bounds of an event in the list of edits: the type, the length before and after
+void AnalysisIntegrationTests::testEditRowResize()
+{
+    Machine cpap(p_profile, 94);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    Session *s = scoredSession(&cpap, 941, m_machineRow);
+    day.addSession(s);
+    const qint64 t0 = synth::kStart;
+    const ManualScoring::Result r = ManualScoring::resultFor(s);
+    QVERIFY(ManualScoring::resizeEvent(s, *oaAt(r, t0 + 100000), t0 + 90000, t0 + 106000));
+    const QList<ScoringMenus::EditRow> rows = ScoringMenus::editRows(&day);
+    QCOMPARE(rows.size(), 1);
+    QCOMPARE(rows[0].text, QStringLiteral("%1: %2 → %3 s").arg(schema::channel[CPAP_Obstructive].label(),
+                                                                QLocale().toString(12.0, 'f', 1), QLocale().toString(16.0, 'f', 1)));
+    QCOMPARE(rows[0].timeMs, t0 + 106000);
+    ManualScoring::clearDay(&day);
+}
+
+// (a graph view needs the preferences this class sets up)
+namespace {
+void scoringEscape(gGraphView &view)
+{
+    QKeyEvent press(QEvent::KeyPress, Qt::Key_Escape, Qt::NoModifier);
+    QApplication::sendEvent(&view, &press);
+    QKeyEvent release(QEvent::KeyRelease, Qt::Key_Escape, Qt::NoModifier);
+    QApplication::sendEvent(&view, &release);
+}
+} // namespace
+
+// Esc during a drag cancels the drag; the next Esc leaves the mode
+void AnalysisIntegrationTests::testScoringDragEsc()
+{
+    gGraphView view;
+    view.setScoringMode(true);
+    view.setScoringDrag(true);
+    QSignalSpy exit(&view, &gGraphView::scoringModeExitRequested);
+    scoringEscape(view);
+    QVERIFY(!view.scoringDrag());
+    QCOMPARE(exit.count(), 0);
+    scoringEscape(view);
+    QCOMPARE(exit.count(), 1);
+}
+
+void AnalysisIntegrationTests::testScoringDragClearedOnModeOff()
+{
+    gGraphView view;
+    view.setScoringMode(true);
+    view.setScoringDrag(true);
+    view.setScoringMode(false);
+    QVERIFY(!view.scoringDrag());
 }

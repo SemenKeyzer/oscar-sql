@@ -28,6 +28,9 @@
 #include <QMessageBox>
 #include <QFile>
 #include "Graphs/gGraphView.h"
+#include "Graphs/gManualScoringLayer.h"
+#include <limits>
+#include "common_gui.h"
 
 #include <QTextDocumentFragment>
 
@@ -1908,6 +1911,28 @@ void gGraphView::mouseMoveEvent(QMouseEvent *event)
 
     m_mouse = QPoint(x, y);
 
+    if (m_scoringDragging && m_scoringGraph) {
+        gGraph *g = m_scoringGraph;
+        const int plotWidth = qMax(1, g->m_rect.width() - g->left - g->right);
+        const double msPerPx = double(g->max_x - g->min_x) / plotWidth;
+        const qint64 t = g->min_x + qint64((x - g->m_rect.left() - g->left) * msPerPx);
+        m_scoringLive = ScoringResize::dragTo(m_scoringTarget, t, m_scoringBounds.first, m_scoringBounds.second);
+        timedRedraw(0);
+        return;
+    }
+    if (m_scoringMode && !(event->buttons() & Qt::LeftButton)) {
+        // the resize cursor over a draggable edge
+        if (scoringEdgeAt(QPoint(x, y), nullptr).kind != ScoringResize::Target::None) {
+            setCursor(Qt::SizeHorCursor);
+            m_scoringCursor = true;
+            return;
+        }
+        if (m_scoringCursor) {
+            m_scoringCursor = false;
+            setCursor(Qt::ArrowCursor);
+        }
+    }
+
     if (m_alignDragging) {
         emit alignDragMoved(double(x - m_alignDragStartX) * m_alignMsPerPx, m_alignMsPerPx);
         return;
@@ -2894,6 +2919,29 @@ void gGraphView::onLinesClicked(QAction *action)
 }
 
 
+bool gGraphView::scoringDragPreview(ScoringResize::Target *target, QPair<qint64, qint64> *live) const
+{
+    if (!m_scoringDragging) return false;
+    if (target) *target = m_scoringTarget;
+    if (live) *live = m_scoringLive;
+    return true;
+}
+
+ScoringResize::Target gGraphView::scoringEdgeAt(const QPoint &pos, gGraph **graph)
+{
+    if (!m_scoringMode || !m_scoringResult) return {};
+    for (const auto &g : m_graphs) {
+        if (!g || !g->visible() || g->name() != STR_GRAPH_FlowRate || !g->m_rect.contains(pos)) continue;
+        const int plotLeft = g->m_rect.left() + g->left;
+        const int plotWidth = qMax(1, g->m_rect.width() - g->left - g->right);
+        const bool boxes = gManualScoringLayer::showsBoxes(true, true, g->blockZoom())
+                           && (g->max_x - g->min_x) <= gManualScoringLayer::kBoxRangeMs;
+        if (graph) *graph = g;
+        return ScoringResize::hit(*m_scoringResult, g->min_x, g->max_x, plotWidth, pos.x() - plotLeft, boxes);
+    }
+    return {};
+}
+
 void gGraphView::mousePressEvent(QMouseEvent *event)
 {
     #if QT_VERSION < QT_VERSION_CHECK(6,0,0)
@@ -2903,6 +2951,23 @@ void gGraphView::mousePressEvent(QMouseEvent *event)
         int x = event->position().x();
         int y = event->position().y();
     #endif
+
+    // manual scoring: an edge of an event box or excluded stretch is dragged, not zoomed into
+    if (m_scoringMode && (event->button() == Qt::LeftButton)) {
+        gGraph *g = nullptr;
+        const ScoringResize::Target t = scoringEdgeAt(QPoint(x, y), &g);
+        if (t.kind != ScoringResize::Target::None && g) {
+            m_scoringTarget = t;
+            m_scoringLive = { t.startMs, t.endMs };
+            m_scoringBounds = m_scoringLimits ? m_scoringLimits(t)
+                                              : qMakePair(std::numeric_limits<qint64>::min() / 2, std::numeric_limits<qint64>::max() / 2);
+            m_scoringGraph = g;
+            m_scoringDragging = true;
+            m_tooltip->cancel();
+            setCursor(Qt::SizeHorCursor);
+            return;
+        }
+    }
 
     if (m_alignMode && (event->button() == Qt::LeftButton)) {
         if (gGraph *g = alignGraphAt(QPoint(x, y))) {
@@ -3112,6 +3177,18 @@ void gGraphView::mouseReleaseEvent(QMouseEvent *event)
         m_tooltip->cancel();
         emit alignDragFinished();
         timedRedraw(0);
+        return;
+    }
+    if (m_scoringGraph) {   // a drag of an edge ends (or was cancelled with Esc)
+        const bool finished = m_scoringDragging;
+        m_scoringDragging = false;
+        m_scoringGraph = nullptr;
+        m_button_down = false;
+        setCursor(Qt::ArrowCursor);
+        timedRedraw(0);
+        if (finished && m_scoringLive != qMakePair(m_scoringTarget.startMs, m_scoringTarget.endMs)) {
+            emit scoringResized(m_scoringTarget, m_scoringLive.first, m_scoringLive.second);
+        }
         return;
     }
 
@@ -3581,7 +3658,12 @@ void gGraphView::getSelectionTimes(qint64 & start, qint64 & end)
 void gGraphView::keyPressEvent(QKeyEvent *event)
 {
     if (m_scoringMode && (event->key() == Qt::Key_Escape)) {
-        m_scoringEscPressed = true;   // acted on in keyReleaseEvent
+        if (m_scoringDragging) {   // cancels the drag, and only the drag
+            m_scoringDragging = false;
+            timedRedraw(0);
+        } else {
+            m_scoringEscPressed = true;   // acted on in keyReleaseEvent
+        }
         event->accept();
         return;
     }

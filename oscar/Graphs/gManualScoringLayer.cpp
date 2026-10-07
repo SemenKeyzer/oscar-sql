@@ -8,6 +8,8 @@
 
 #include "Graphs/gManualScoringLayer.h"
 
+#include <algorithm>
+
 #include <QLocale>
 #include <QPainter>
 
@@ -32,26 +34,27 @@ QList<gManualScoringLayer::Item> gManualScoringLayer::items(const ManualScoring:
         for (const EffectiveEvent &e : result.events) {
             const qint64 start = e.endMs - qint64(e.durationSec * 1000);
             if (e.endMs < minX || start > maxX) continue;
-            // zoomed in: the type and length, as a sleep lab marks it ("OA 11.8 s")
-            const QString what = zoomed ? QStringLiteral("%1 %2 %3")
-                                              .arg(schema::channel[e.channel].label(), QLocale().toString(e.durationSec, 'f', 1), tr("s"))
-                                        : QString();
+            // zoomed in: the type at the top left and the length at the top right, as a sleep lab marks them
+            const QString type = zoomed ? schema::channel[e.channel].label() : QString();
+            const QString length = zoomed ? QStringLiteral("%1 %2").arg(QLocale().toString(e.durationSec, 'f', 1), tr("s")) : QString();
             switch (e.origin) {
             case Origin::Device:
-                if (zoomed && !e.excluded) out.append({ Item::Event, start, e.endMs, e.channel, what });
+                if (zoomed && !e.excluded) out.append({ Item::Event, start, e.endMs, e.channel, type, length });
                 break;
-            case Origin::Added: out.append({ Item::Added, start, e.endMs, e.channel, zoomed ? what + QStringLiteral(" · ") + tr("manual") : tr("manual") }); break;
-            case Origin::Removed: out.append({ Item::Removed, start, e.endMs, e.channel, QString() }); break;
+            case Origin::Added:
+                out.append({ Item::Added, start, e.endMs, e.channel, zoomed ? type + QStringLiteral(" · ") + tr("manual") : tr("manual"), length });
+                break;
+            case Origin::Removed: out.append({ Item::Removed, start, e.endMs, e.channel, QString(), QString() }); break;
             case Origin::Retyped: {
                 const QString was = tr("was %1").arg(schema::channel[e.originalChannel].label());
-                out.append({ Item::Retyped, start, e.endMs, e.channel, zoomed ? what + QStringLiteral(" · ") + was : was });
+                out.append({ Item::Retyped, start, e.endMs, e.channel, zoomed ? type + QStringLiteral(" · ") + was : was, length });
                 break;
             }
             }
         }
     }
     for (const auto &span : result.excludedSpans) {
-        if (span.second >= minX && span.first <= maxX) out.append({ Item::Excluded, span.first, span.second, 0, QString() });
+        if (span.second >= minX && span.first <= maxX) out.append({ Item::Excluded, span.first, span.second, 0, QString(), QString() });
     }
     return out;
 }
@@ -70,9 +73,25 @@ void gManualScoringLayer::paint(QPainter &painter, gGraph &w, const QRegion &reg
     if (span <= 0 || r.width() <= 0) return;
     auto px = [&](qint64 t) { return r.left() + (t - range.first) / span * r.width(); };
 
+    // an edge being dragged: drawn where it is now
+    const ManualScoring::Result shown = w.graphView() ? withDrag(*m_result, *w.graphView()) : *m_result;
+    // the type at the top left, the length at the top right; a box too narrow for both has them in a row
+    auto labels = [&painter, &r](const QRectF &box, const QString &label, const QString &duration, double inset, double down) {
+        const QFontMetrics fm = painter.fontMetrics();
+        const double y = r.top() + fm.ascent() + down;
+        if (duration.isEmpty()) {
+            painter.drawText(QPointF(box.left() + inset, y), label);
+        } else if (fm.horizontalAdvance(label) + fm.horizontalAdvance(duration) + 3 * inset <= box.width()) {
+            painter.drawText(QPointF(box.left() + inset, y), label);
+            painter.drawText(QPointF(box.right() - inset - fm.horizontalAdvance(duration), y), duration);
+        } else {
+            painter.drawText(QPointF(box.left() + inset, y), label + QStringLiteral("  ") + duration);
+        }
+    };
+
     painter.save();
     painter.setClipRect(r);
-    for (const Item &it : items(*m_result, range.first, range.second, m_markers, showsBoxes(m_boxes, w.graphView() && w.graphView()->scoringMode(), w.blockZoom()))) {
+    for (const Item &it : items(shown, range.first, range.second, m_markers, showsBoxes(m_boxes, w.graphView() && w.graphView()->scoringMode(), w.blockZoom()))) {
         // at least 4 px, so a short stretch still shows on a whole night
         double x1 = px(it.start), x2 = px(it.end);
         if (x2 - x1 < 4) {
@@ -97,14 +116,14 @@ void gManualScoringLayer::paint(QPainter &painter, gGraph &w, const QRegion &reg
             painter.setBrush(Qt::NoBrush);
             painter.drawRect(box.adjusted(0.5, 0.5, -0.5, -0.5));
             painter.setPen(QColor(40, 40, 40));
-            painter.drawText(QPointF(x1 + 3, r.top() + painter.fontMetrics().ascent() + 2), it.label);
+            labels(box, it.label, it.duration, 3, 2);
             break;
         case Item::Added:
             painter.setPen(QPen(color, 2, Qt::DashLine));
             painter.setBrush(Qt::NoBrush);
             painter.drawRect(box.adjusted(1, 1, -1, -1));
             painter.setPen(color);
-            painter.drawText(QPointF(x1 + 2, r.top() + painter.fontMetrics().ascent() + 1), it.label);
+            labels(box, it.label, it.duration, 2, 1);
             break;
         case Item::Removed:
             painter.fillRect(box, QColor(255, 255, 255, 150));
@@ -114,7 +133,8 @@ void gManualScoringLayer::paint(QPainter &painter, gGraph &w, const QRegion &reg
         case Item::Retyped:
             painter.setPen(QPen(color, 2));
             painter.drawLine(QPointF(x2, r.top()), QPointF(x2, r.bottom()));
-            painter.drawText(QPointF(x2 + 2, r.top() + painter.fontMetrics().ascent() + 1), it.label);
+            painter.drawText(QPointF(x2 + 2, r.top() + painter.fontMetrics().ascent() + 1),
+                             it.duration.isEmpty() ? it.label : it.label + QStringLiteral("  ") + it.duration);
             break;
         }
     }
@@ -124,4 +144,33 @@ void gManualScoringLayer::paint(QPainter &painter, gGraph &w, const QRegion &reg
 bool gManualScoringLayer::showsBoxes(bool drawsBoxes, bool scoringMode, bool blockZoom)
 {
     return drawsBoxes && scoringMode && !blockZoom;   // a scoring tool: the flow graph looks as before otherwise
+}
+
+ManualScoring::Result gManualScoringLayer::withDrag(const ManualScoring::Result &result, const gGraphView &view)
+{
+    ScoringResize::Target t;
+    QPair<qint64, qint64> live;
+    if (!view.scoringDragPreview(&t, &live)) return result;
+    ManualScoring::Result out = result;
+    if (t.kind == ScoringResize::Target::Event && t.eventIndex >= 0 && t.eventIndex < out.events.size()) {
+        out.events[t.eventIndex].endMs = live.second;
+        out.events[t.eventIndex].durationSec = (live.second - live.first) / 1000.0;
+    } else if (t.kind == ScoringResize::Target::Excluded) {
+        // the stretches again, with the dragged one where it is now
+        QList<QPair<qint64, qint64>> spans;
+        for (const ManualScoring::ExcludeEdit &x : out.excludeEdits) {
+            const bool dragged = x.editId == t.editId || (x.startMs == t.startMs && x.endMs == t.endMs);
+            spans.append(dragged ? live : qMakePair(x.startMs, x.endMs));
+        }
+        std::sort(spans.begin(), spans.end());
+        out.excludedSpans.clear();
+        for (const auto &s : spans) {
+            if (!out.excludedSpans.isEmpty() && s.first <= out.excludedSpans.last().second) {
+                out.excludedSpans.last().second = qMax(out.excludedSpans.last().second, s.second);
+            } else {
+                out.excludedSpans.append(s);
+            }
+        }
+    }
+    return out;
 }

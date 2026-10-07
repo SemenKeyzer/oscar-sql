@@ -15,6 +15,8 @@
 #include "Graphs/layer.h"
 #include "SleepLib/manual_scoring.h"
 
+class gGraphView;
+
 /*! \class gManualScoringLayer
     \brief Shows the manual scoring of the night: every graph hatches the excluded stretches;
            the flow and event flags graphs also mark the added (dashed), removed (pale, struck
@@ -29,7 +31,8 @@ class gManualScoringLayer : public Layer
         Kind kind;
         qint64 start, end;
         ChannelID channel;
-        QString label;
+        QString label;      //!< the type (and "manual" / "was CA"), drawn at the top left
+        QString duration;   //!< zoomed in: the length ("16.0 s"), drawn at the top right
     };
 
     //! \a result is shared by the layers of all graphs of the day.
@@ -47,6 +50,8 @@ class gManualScoringLayer : public Layer
     //! The time range a graph draws: the whole night for a block-zoomed graph (event and analysis
     //! flags), else the zoomed range.
     static QPair<qint64, qint64> drawnRange(bool blockZoom, qint64 minX, qint64 maxX, qint64 rMinX, qint64 rMaxX);
+    //! \a result with the edge \a view is dragging where it is now.
+    static ManualScoring::Result withDrag(const ManualScoring::Result &result, const gGraphView &view);
 
   private:
     QSharedPointer<ManualScoring::Result> m_result;

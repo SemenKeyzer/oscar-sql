@@ -212,6 +212,8 @@ private slots:
     void onScoringButtonToggled(bool on);
     void onScoringRange(gGraph *graph, qint64 startMs, qint64 endMs, QPoint globalPos);
     void onScoringContext(gGraph *graph, qint64 timeMs, QPoint globalPos);
+    //! An edge was dragged on the flow graph: new bounds of an event or an excluded stretch.
+    void onScoringResized(const ScoringResize::Target &t, qint64 startMs, qint64 endMs);
     void onAlignRequestedForGraph(gGraph *graph);
     void onAlignDeviceChosen(Machine *mach);
     void onAlignOffsetChanged(qint64 ms);
@@ -471,6 +473,8 @@ private:
     //! Applies a choice from a scoring menu to the day shown; the stretch is for "add"/"exclude".
     void applyScoring(const QVariantMap &choice, qint64 startMs, qint64 endMs);
     void scoringChanged();
+    //! Where a dragged edge may go: the event's session, or the night's sessions for a stretch.
+    QPair<qint64, qint64> scoringLimits(const ScoringResize::Target &t);
     TimeAlignBar *m_alignBar = nullptr;
     TimeAlignSession *m_alignSession = nullptr;
     qint64 m_alignDragBaseMs = 0;
