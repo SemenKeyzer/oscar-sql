@@ -88,3 +88,15 @@ void ScoringModeTests::testLayerItems()
     QCOMPARE(hatch.size(), 1);
     QCOMPARE(int(hatch[0].kind), int(Item::Excluded));
 }
+
+// the event flags and analysis flags graphs always show the whole night (block zoom): the
+// layer places the stretch on that range, not on the zoomed one
+void ScoringModeTests::testWholeNightGraphsUseWholeRange()
+{
+    const QPair<qint64, qint64> whole = gManualScoringLayer::drawnRange(true, 1000, 2000, 0, 10000);
+    QCOMPARE(whole.first, qint64(0));
+    QCOMPARE(whole.second, qint64(10000));
+    const QPair<qint64, qint64> zoomed = gManualScoringLayer::drawnRange(false, 1000, 2000, 0, 10000);
+    QCOMPARE(zoomed.first, qint64(1000));
+    QCOMPARE(zoomed.second, qint64(2000));
+}

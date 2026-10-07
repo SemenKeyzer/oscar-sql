@@ -45,17 +45,23 @@ QList<gManualScoringLayer::Item> gManualScoringLayer::items(const ManualScoring:
     return out;
 }
 
+QPair<qint64, qint64> gManualScoringLayer::drawnRange(bool blockZoom, qint64 minX, qint64 maxX, qint64 rMinX, qint64 rMaxX)
+{
+    return blockZoom ? qMakePair(rMinX, rMaxX) : qMakePair(minX, maxX);
+}
+
 void gManualScoringLayer::paint(QPainter &painter, gGraph &w, const QRegion &region)
 {
     if (!m_visible || !m_result) return;
     const QRect r = region.boundingRect();
-    const double span = double(w.max_x - w.min_x);
+    const QPair<qint64, qint64> range = drawnRange(w.blockZoom(), w.min_x, w.max_x, w.rmin_x, w.rmax_x);
+    const double span = double(range.second - range.first);
     if (span <= 0 || r.width() <= 0) return;
-    auto px = [&](qint64 t) { return r.left() + (t - w.min_x) / span * r.width(); };
+    auto px = [&](qint64 t) { return r.left() + (t - range.first) / span * r.width(); };
 
     painter.save();
     painter.setClipRect(r);
-    for (const Item &it : items(*m_result, w.min_x, w.max_x, m_markers)) {
+    for (const Item &it : items(*m_result, range.first, range.second, m_markers)) {
         // at least 4 px, so a short stretch still shows on a whole night
         double x1 = px(it.start), x2 = px(it.end);
         if (x2 - x1 < 4) {

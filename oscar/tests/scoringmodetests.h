@@ -22,6 +22,7 @@ private slots:
     void testOtherGraphsUnaffected();
     void testRangeFromPixels();
     void testLayerItems();
+    void testWholeNightGraphsUseWholeRange();
     void initTestCase();
 };
 DECLARE_TEST(ScoringModeTests)
