@@ -1144,10 +1144,7 @@ void Daily::UpdateEventsTree(QTreeWidget *tree,Day *day)
 //                    qDebug() << "UpdateEventsTree session" << ++sessnum << sess->session() << "type" << sess->machine()->type() << "starts"//                           << QDateTime::fromSecsSinceEpoch(sess->first()/1000).toString("yyyy-MM-dd HH:mm:ss");
 //                }
                 if (!cnt) continue; // If no events than don't bother showing..
-                QString st=schema::channel[code].fullname();
-                if (st.isEmpty())  {
-                    st=QString("Fixme %1").arg(code);
-                }
+                QString st=eventTreeName(code);
                 st+=" ";
                 if (cnt==1) st+=tr("%1 event").arg(cnt);
                 else st+=tr("%1 events").arg(cnt);
@@ -2506,6 +2503,12 @@ QVariant MyTextBrowser::loadResource(int type, const QUrl &url)
     return QTextBrowser::loadResource(type, url);
 }
 
+
+QString Daily::eventTreeName(ChannelID code)
+{
+    schema::Channel &chan = schema::channel[code];
+    return chan.isNull() || chan.fullname().isEmpty() ? tr("Channel %1").arg(code) : chan.fullname();
+}
 
 void Daily::Load(QDate date)
 {

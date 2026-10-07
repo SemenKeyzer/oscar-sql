@@ -113,7 +113,7 @@ void init()
 
     schema_initialized = true;
 
-    EmptyChannel = Channel(0, DATA, MT_UNKNOWN, DAY, "Empty", "Empty", "Empty Channel", "", "");
+    EmptyChannel = Channel(0, DATA, MT_UNKNOWN, DAY, "Empty", QObject::tr("Empty"), QObject::tr("Empty Channel"), "", "");
     #if 0 // SessionEnabledChannel is not used
     SessionEnabledChannel = new Channel(1, DATA, MT_UNKNOWN, DAY, "Enabled", "Enabled", "Session Enabled", "", "");
 

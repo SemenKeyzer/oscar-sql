@@ -718,6 +718,7 @@ QString STR_UNIT_Unknown;
 QString STR_UNIT_Ratio;
 QString STR_UNIT_Severity;
 QString STR_UNIT_Degrees;
+QString STR_UNIT_Celsius;
 
 QString STR_MessageBox_Question;
 QString STR_MessageBox_Error;
@@ -934,6 +935,7 @@ void initializeStrings()
     STR_UNIT_Ratio = QObject::tr("ratio");
     STR_UNIT_Severity = QObject::tr("Severity (0-1)");
     STR_UNIT_Degrees = QObject::tr("Degrees");
+    STR_UNIT_Celsius = QObject::tr("ºC");
 
     STR_MessageBox_Question = QObject::tr("Question");
     STR_MessageBox_Error = QObject::tr("Error");

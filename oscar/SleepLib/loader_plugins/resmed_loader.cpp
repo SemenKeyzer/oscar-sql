@@ -207,7 +207,7 @@ void ResmedLoader::initChannels()
 //  chan->addOption(8, "8");
 
     channel.add(GRP_CPAP, chan = new Channel(RMS9_Temp = 0xe207, SETTING, MT_CPAP, SESSION,
-        "RMS9_Temp", QObject::tr("Temperature"), QObject::tr("ClimateLine Temperature"), QObject::tr("Temperature"), "ºC", INTEGER, Qt::black));
+        "RMS9_Temp", QObject::tr("Temperature"), QObject::tr("ClimateLine Temperature"), QObject::tr("Temperature"), STR_UNIT_Celsius, INTEGER, Qt::black));
 
 
     channel.add(GRP_CPAP, chan = new Channel(RMS9_TempEnable = 0xe208, SETTING, MT_CPAP, SESSION,
@@ -319,7 +319,7 @@ void ResmedLoader::initChannels()
     // ResMed iVAPS target settings (shown in Device Settings; valid in iVAPS/AVAPS mode)
     channel.add(GRP_CPAP, new Channel(RMVENT_iHeight = 0xe22c, SETTING, MT_CPAP, SESSION,
         "RMVENT_iHeight", QObject::tr("iVAPS Height"), QObject::tr("Patient Height (iVAPS)"),
-        QObject::tr("Height"), "cm", DOUBLE, Qt::black));
+        QObject::tr("Height"), STR_UNIT_CM.trimmed(), DOUBLE, Qt::black));
 
     channel.add(GRP_CPAP, new Channel(RMVENT_iAlvMinVent = 0xe22d, SETTING, MT_CPAP, SESSION,
         "RMVENT_iAlvMinVent", QObject::tr("iVAPS Target Va"), QObject::tr("Target Alveolar Ventilation (iVAPS)"),

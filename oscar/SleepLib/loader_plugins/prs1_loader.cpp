@@ -3093,7 +3093,7 @@ void PRS1Loader::initChannels()
         "PRS1_VariableBreathing",
         QObject::tr("Variable Breathing"),
         QObject::tr("UNCONFIRMED: Possibly variable breathing, which are periods of high deviation from the peak inspiratory flow trend"),
-        "VB",
+        QObject::tr("VB"),
         STR_UNIT_Seconds,
         DEFAULT,    QColor("#ffe8f0")));
     chan->setEnabled(false);  // disable by default

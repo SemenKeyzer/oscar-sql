@@ -117,6 +117,8 @@ public:
     static QStringList standardGraphNames();
     //! The glossary entry explaining the graph \a name; empty when its channel's description does.
     static QString helpKeyForGraph(const QString &name);
+    //! The name of an event type in the Events tab; "Channel N" for one without a name.
+    static QString eventTreeName(ChannelID code);
 
     /*! \fn getDate()
         \brief Returns the most recently loaded Date

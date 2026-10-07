@@ -187,9 +187,11 @@ QString AnalysisPanel::sidebarHtml(Day *day, const DayResult &r, const QString &
         }
         html += glasgowHtml(r);
 
-        html += QStringLiteral("<p>%1: AASM 3 % %2 &middot; CMS 4 % %3 &middot; %4 %5</p>")
-                    .arg(HelpTips::term(tr("Hypopnea index by rule"), QStringLiteral("hypopnea_rule")), perHour(r.hypopneasAasm3, analysisHours),
-                         perHour(r.hypopneasCms4, analysisHours), tr("Flow only"), perHour(r.hypopneasFlowOnly, analysisHours));
+        html += QStringLiteral("<p>%1: %2 %3 &middot; %4 %5 &middot; %6 %7</p>")
+                    .arg(HelpTips::term(tr("Hypopnea index by rule"), QStringLiteral("hypopnea_rule")),
+                         tr("AASM 3 %").toHtmlEscaped(), perHour(r.hypopneasAasm3, analysisHours),
+                         tr("CMS 4 %").toHtmlEscaped(), perHour(r.hypopneasCms4, analysisHours),
+                         tr("Flow only"), perHour(r.hypopneasFlowOnly, analysisHours));
 
         if (r.hasComparison) {
             const MatchResult &m = r.match;

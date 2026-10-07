@@ -172,3 +172,11 @@ void HelpLinksTests::testSelectInsideTermDoesNotOpen()
     QTest::mouseRelease(browser.viewport(), Qt::LeftButton, Qt::NoModifier, end);
     QCOMPARE(opened.count(), 0);
 }
+
+// The Events tab names an event by its channel; a channel without a name still reads as one.
+void HelpLinksTests::testEventTreeName()
+{
+    QCOMPARE(Daily::eventTreeName(CPAP_Obstructive), schema::channel[CPAP_Obstructive].fullname());
+    const ChannelID unnamed = 0x7ff0;   // no such channel: schema::channel gives the empty one
+    QCOMPARE(Daily::eventTreeName(unnamed), QStringLiteral("Channel %1").arg(unnamed));
+}
