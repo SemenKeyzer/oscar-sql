@@ -22,6 +22,7 @@
 #include <QTextBlock>
 #include <QTextDocument>
 #include <QToolTip>
+#include <QTranslator>
 
 #include "SleepLib/schema.h"
 #include "glossary.h"
@@ -258,4 +259,31 @@ void HelpTipsTests::testHoverSilentWhenOff()
     HelpTips::instance()->setEnabled(true);
     HelpTips::instance()->hover(QStringLiteral("ahi"));
     QCOMPARE(hovered.count(), 1);
+}
+
+namespace {
+//! Gives the AHI tooltip a "%1" of its own, as a translation could.
+class PercentTranslator : public QTranslator
+{
+  public:
+    explicit PercentTranslator(const QString &source) : m_source(source) {}
+    bool isEmpty() const override { return false; }
+    QString translate(const char *context, const char *source, const char *, int) const override
+    {
+        return qstrcmp(context, "Glossary") == 0 && m_source == QLatin1String(source) ? QStringLiteral("about %1 per hour") : QString();
+    }
+  private:
+    QString m_source;
+};
+} // namespace
+
+// A term's text may still take .arg(): the tooltip inside the link is never filled in.
+void HelpTipsTests::testTermKeepsTooltipOutOfArg()
+{
+    PercentTranslator translator(Glossary::find(QStringLiteral("ahi"))->summary);
+    QCoreApplication::installTranslator(&translator);
+    const QString html = HelpTips::term(QStringLiteral("AHI %1"), QStringLiteral("ahi")).arg(QStringLiteral("5.2"));
+    QCoreApplication::removeTranslator(&translator);
+    QVERIFY2(html.contains(QStringLiteral("AHI 5.2")), qPrintable(html));
+    QVERIFY2(!html.contains(QStringLiteral("about 5.2")), qPrintable(html));
 }

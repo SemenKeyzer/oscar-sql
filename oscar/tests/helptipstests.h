@@ -33,6 +33,7 @@ private slots:
     void testSubmenuHoverExplainsMenu();
     void testMenuTooltipUsesActiveAction();
     void testHoverSilentWhenOff();
+    void testTermKeepsTooltipOutOfArg();
 private:
     QApplication *m_app = nullptr;
 };

@@ -2295,7 +2295,7 @@ QString Statistics::GenerateCPAPUsage()
             headerWidth = 22;
         }
         QString bgColor = alternatingColor(alternatingColorCounter);
-        line += QString("<tr class=datarow bgcolor='%3'><td width='%1%'>%2</td>").arg(headerWidth).arg(s_override.active ? name : HelpTips::term(name, helpKey(row))).arg(bgColor);   // no links in the PDF
+        line += QString("<tr class=datarow bgcolor='%3'><td width='%1%'>%2</td>").arg(QString::number(headerWidth), s_override.active ? name : HelpTips::term(name, helpKey(row)), bgColor);   // no links in the PDF
 
         for (int j=0; j < np; j++) {
             width = j < np-1 ? dataWidth : 100 - (headerWidth + dataWidth*(np-1));

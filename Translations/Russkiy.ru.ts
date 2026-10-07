@@ -5277,7 +5277,7 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
     <message>
         <location filename="../oscar/glossary.cpp" line="178"/>
         <source>95–100% awake; in sleep mostly above 90–92%.</source>
-        <translation>95–100% днём; во сне в основном выше 90–92%.</translation>
+        <translation>95–100% в бодрствовании; во сне в основном выше 90–92%.</translation>
     </message>
     <message>
         <location filename="../oscar/glossary.cpp" line="179"/>

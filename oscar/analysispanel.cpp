@@ -194,9 +194,10 @@ QString AnalysisPanel::sidebarHtml(Day *day, const DayResult &r, const QString &
         if (r.hasComparison) {
             const MatchResult &m = r.match;
             html += QStringLiteral("<p>%1</p>").arg(
-                HelpTips::term(tr("Agreement with the device: %1% (matched %2, device only %3, analysis only %4, different type %5)."), QStringLiteral("agreement"))
-                    .arg(number(100.0 * m.agreement(), 0)).arg(m.matched.size()).arg(m.deviceOnly.size())
-                    .arg(m.analysisOnly.size()).arg(m.typeMismatch)
+                HelpTips::term(tr("Agreement with the device: %1% (matched %2, device only %3, analysis only %4, different type %5).")
+                                   .arg(number(100.0 * m.agreement(), 0)).arg(m.matched.size()).arg(m.deviceOnly.size())
+                                   .arg(m.analysisOnly.size()).arg(m.typeMismatch),
+                               QStringLiteral("agreement"))
                 + QStringLiteral(" <a href='analysis=differences'>%1</a>").arg(tr("Show differences")));
         }
     }

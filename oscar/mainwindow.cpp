@@ -185,12 +185,12 @@ MainWindow::MainWindow(QWidget *parent) :
     // Initialise oscar app registry stuff
     QSettings settings;
 
-    // Load previous Window geometry (stored per database folder)
     // the help panel, on the right and hidden until opened; its place is part of the window state
     m_helpPanel = new HelpPanel(this);
     addDockWidget(Qt::RightDockWidgetArea, m_helpPanel);
     m_helpPanel->hide();
 
+    // Load previous Window geometry (stored per database folder)
     settings.beginGroup(QFileInfo(GetAppData()).fileName());
     restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
     restoreState(settings.value("MainWindow/state").toByteArray());

@@ -8,7 +8,9 @@
 
 #include "glossarytests.h"
 
+#include <QCoreApplication>
 #include <QSet>
+#include <QTranslator>
 
 #include "SleepLib/schema.h"
 #include "glossary.h"
@@ -173,4 +175,35 @@ void GlossaryTests::testExplanationsMatchCode()
     // schema::resetChannels() applies at once, before OK or Cancel
     QVERIFY(e("ui.prefs.resetChannelDefaults").caution.contains(QStringLiteral("Cancel")));
     QVERIFY(e("ui.prefs.resetWaveformChannels").caution.contains(QStringLiteral("Cancel")));
+}
+
+namespace {
+//! Translates one glossary text only; "Usage" stays as it is.
+class OneTextTranslator : public QTranslator
+{
+  public:
+    explicit OneTextTranslator(const QString &source) : m_source(source) {}
+    bool isEmpty() const override { return false; }
+    QString translate(const char *context, const char *source, const char *, int) const override
+    {
+        return qstrcmp(context, "Glossary") == 0 && m_source == QLatin1String(source) ? QStringLiteral("TRANSLATED") : QString();
+    }
+  private:
+    QString m_source;
+};
+} // namespace
+
+// A new language rebuilds the cached texts, whatever words it translates.
+void GlossaryTests::testRebuildsOnLanguageChange()
+{
+    int argc = 1;
+    char name[] = "test";
+    char *argv[] = { name, nullptr };
+    QScopedPointer<QCoreApplication> app(QCoreApplication::instance() ? nullptr : new QCoreApplication(argc, argv));
+    const QString original = Glossary::find(QStringLiteral("ahi"))->summary;
+    OneTextTranslator translator(original);
+    QCoreApplication::installTranslator(&translator);
+    QCOMPARE(Glossary::find(QStringLiteral("ahi"))->summary, QStringLiteral("TRANSLATED"));
+    QCoreApplication::removeTranslator(&translator);
+    QCOMPARE(Glossary::find(QStringLiteral("ahi"))->summary, original);
 }

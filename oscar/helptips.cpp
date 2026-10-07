@@ -152,8 +152,9 @@ QString HelpTips::keyFor(QWidget *w)
 QString HelpTips::term(const QString &text, const QString &key)
 {
     if (!instance()->enabled() || !Glossary::find(key)) return text;
-    return QStringLiteral("<a href='help:%1' title=\"%2\" style='color:inherit;text-decoration:none'>%3</a>")
-        .arg(key, Glossary::tooltip(key).toHtmlEscaped(), text);
+    // "%" as an entity: callers may still .arg() the term, which must not fill the tooltip
+    const QString title = Glossary::tooltip(key).toHtmlEscaped().replace(QLatin1Char('%'), QLatin1String("&#37;"));
+    return QStringLiteral("<a href='help:%1' title=\"%2\" style='color:inherit;text-decoration:none'>%3</a>").arg(key, title, text);
 }
 
 QString HelpTips::keyOf(const QUrl &url)

@@ -9,7 +9,9 @@
 #include "glossary.h"
 
 #include <QCoreApplication>
+#include <QEvent>
 #include <QHash>
+#include <QPointer>
 
 #include "SleepLib/schema.h"
 #include "uiglossary.h"
@@ -309,6 +311,31 @@ QString folded(const QString &s)
 
 QString caveat() { return QCoreApplication::translate("Glossary", "Experimental measure of OSCAR's analysis, not a medical norm."); }
 
+//! Counts the language changes of the application in use, so the cached texts know when to rebuild.
+class LanguageWatch : public QObject
+{
+  public:
+    int generation = 0;
+    QPointer<QCoreApplication> app;
+    bool eventFilter(QObject *o, QEvent *e) override
+    {
+        if (e->type() == QEvent::LanguageChange && o == app) ++generation;
+        return false;
+    }
+};
+
+int languageGeneration()
+{
+    static LanguageWatch *watch = new LanguageWatch;
+    QCoreApplication *app = QCoreApplication::instance();
+    if (app && watch->app != app) {   // tests make a new application per test class
+        app->installEventFilter(watch);
+        watch->app = app;
+        ++watch->generation;
+    }
+    return watch->generation;
+}
+
 } // namespace
 
 namespace Glossary {
@@ -317,8 +344,8 @@ const GlossaryEntry *find(const QString &key)
 {
     // rebuilt when the language changes: the translated texts are cached per language
     static QHash<QString, GlossaryEntry> cache;
-    static QString cachedFor;
-    const QString lang = QCoreApplication::translate("Glossary", "Usage");
+    static int cachedFor = -1;
+    const int lang = languageGeneration();
     if (cachedFor != lang) {
         cache.clear();
         for (const Raw &r : kEntries) cache.insert(QString::fromLatin1(r.key), entry(r));
