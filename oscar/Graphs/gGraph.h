@@ -342,6 +342,9 @@ class gGraph : public QObject
 
     void mouseDoubleClickYAxis(QMouseEvent *event);
 
+    //! \brief Zooms by \a mult (above 1 zooms out) about the moment \a timeMs, as a click there does
+    void zoomAround(double mult, qint64 timeMs);
+
   protected:
     //! \brief Mouse Wheel events
     virtual void wheelEvent(QWheelEvent *event);

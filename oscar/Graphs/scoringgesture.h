@@ -26,9 +26,6 @@ Action actionFor(bool scoringMode, const QString &graphName, Qt::MouseButton but
 //! [\a minX, \a maxX] ms; positions outside the plot are clipped to it.
 QPair<qint64, qint64> rangeFor(qint64 minX, qint64 maxX, int plotWidth, int x1, int x2);
 
-//! The x position (0..\a plotWidth) of \a timeMs in a plot showing [\a minX, \a maxX] ms, clipped to the plot.
-int pixelFor(qint64 minX, qint64 maxX, int plotWidth, qint64 timeMs);
-
 } // namespace ScoringGesture
 
 #endif // SCORINGGESTURE_H

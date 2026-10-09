@@ -4477,7 +4477,7 @@ void Daily::onScoringContext(gGraph *graph, qint64 timeMs, QPoint globalPos)
         }
     }
     if (!menu) {   // nothing to edit here: the right click zooms out, as outside scoring mode
-        graph->ZoomX(1.33, graph->left + ScoringGesture::pixelFor(graph->min_x, graph->max_x, plotWidth, timeMs));
+        graph->zoomAround(1.33, timeMs);
         return;
     }
     if (QAction *chosen = menu->exec(globalPos)) applyScoring(chosen->data().toMap(), 0, 0);

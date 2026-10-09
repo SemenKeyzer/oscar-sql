@@ -1308,6 +1308,14 @@ void gGraph::keyReleaseEvent(QKeyEvent *event)
 }
 
 
+void gGraph::zoomAround(double mult, qint64 timeMs)
+{
+    const int width = qMax(1, m_rect.width() - left - right);
+    const double span = double(max_x - min_x);
+    const int px = span > 0 ? qBound(0, int((timeMs - min_x) / span * width + 0.5), width) : width / 2;
+    ZoomX(mult, left + px);
+}
+
 void gGraph::ZoomX(double mult, int origin_px)
 {
 
