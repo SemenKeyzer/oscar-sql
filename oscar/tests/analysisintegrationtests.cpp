@@ -9,6 +9,10 @@
 #include "analysisintegrationtests.h"
 
 #include <QScopeGuard>
+#include "daily.h"
+#include "overviewpresets.h"
+#include "Graphs/gLineChart.h"
+#include "Graphs/gGraph.h"
 #include <QKeyEvent>
 #include "Graphs/gGraphView.h"
 
@@ -2389,4 +2393,37 @@ void AnalysisIntegrationTests::testHiddenAnalysisLeavesPages()
 
     p_profile->analysis->setShown(true);
     QVERIFY(service.row(date).id > 0);
+}
+
+// A hidden analysis graph counts as empty, so the view skips it; the user's own choice to show it
+// stays as it was.
+void AnalysisIntegrationTests::testSuppressedGraphIsEmpty()
+{
+    gGraph graph(QStringLiteral("SuppressTest"), nullptr, QStringLiteral("t"), QString(), 50, 0);
+    graph.AddLayer(new gLineChart(CPAP_FlowRate));
+    graph.setVisible(true);
+    const bool emptyBefore = graph.isEmpty();
+    graph.setSuppressed(true);
+    QVERIFY(graph.isEmpty());
+    QVERIFY(graph.visible());
+    graph.setSuppressed(false);
+    QCOMPARE(graph.isEmpty(), emptyBefore);
+}
+
+void AnalysisIntegrationTests::testChannelShown()
+{
+    QVERIFY(Daily::channelShown(CPAP_Obstructive, false));
+    QVERIFY(Daily::channelShown(CPAP_Obstructive, true));
+    QVERIFY(schema::channel[AN_Hypopnea].isComputed());
+    QVERIFY(!Daily::channelShown(AN_Hypopnea, false));
+    QVERIFY(Daily::channelShown(AN_Hypopnea, true));
+}
+
+void AnalysisIntegrationTests::testPresetsWithoutAnalysis()
+{
+    QVERIFY(!OverviewPresets::presets(false).contains(OverviewPresets::Analysis));
+    QVERIFY(OverviewPresets::presets(true).contains(OverviewPresets::Analysis));
+    QCOMPARE(OverviewPresets::shownPreset(OverviewPresets::Analysis, false), OverviewPresets::All);
+    QCOMPARE(OverviewPresets::shownPreset(OverviewPresets::Analysis, true), OverviewPresets::Analysis);
+    QCOMPARE(OverviewPresets::shownPreset(OverviewPresets::Oxygen, false), OverviewPresets::Oxygen);
 }

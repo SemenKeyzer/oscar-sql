@@ -308,6 +308,7 @@ bool gGraph::isSelected()
 
 bool gGraph::isEmpty()
 {
+    if (m_suppressed) return true;
     bool empty = true;
 
     for (const auto & layer : m_layers) {

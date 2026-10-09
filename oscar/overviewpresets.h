@@ -30,6 +30,10 @@ typedef QHash<QString, bool> Visibility;
 
 //! Every preset, in button order.
 QList<Preset> presets();
+//! The sets offered: without Analysis while the analysis is hidden.
+QList<Preset> presets(bool analysisShown);
+//! \a preset as it can be shown: All instead of Analysis while the analysis is hidden.
+Preset shownPreset(Preset preset, bool analysisShown);
 //! The preset's button text.
 QString title(Preset preset);
 //! The look of a set's button: lit in blue while its set is the one in use (also used by the PDF dialog).

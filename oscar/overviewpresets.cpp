@@ -126,3 +126,15 @@ QString OverviewPresets::buttonStyle(const QString &c)
                           "%1:hover { background: #e6edf8; }"
                           "%1:checked { background: #2f6fd0; border-color: #2f6fd0; color: white; }").arg(c);
 }
+
+QList<OverviewPresets::Preset> OverviewPresets::presets(bool analysisShown)
+{
+    QList<Preset> out = presets();
+    if (!analysisShown) out.removeAll(Analysis);
+    return out;
+}
+
+OverviewPresets::Preset OverviewPresets::shownPreset(Preset preset, bool analysisShown)
+{
+    return preset == Analysis && !analysisShown ? All : preset;
+}

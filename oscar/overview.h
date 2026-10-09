@@ -83,6 +83,8 @@ class Overview : public QWidget
 
     //! \brief Recalculates Overview chart info
     void ReloadGraphs();
+    //! Hides OSCAR's analysis graphs and the Analysis set while the analysis is hidden (analysisShown()).
+    void applyAnalysisShown();
     //! Shows how many days' sleep analysis is outdated, with a link to recalculate them.
     void updateAnalysisNotice();
 

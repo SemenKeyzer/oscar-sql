@@ -342,10 +342,16 @@ class gGraph : public QObject
 
     void mouseDoubleClickYAxis(QMouseEvent *event);
 
+    //! \brief A suppressed graph counts as empty, so the view skips it; visible() (the user's own
+    //!        choice) is left as it is. Used for the analysis graphs while the analysis is hidden.
+    void setSuppressed(bool on) { m_suppressed = on; }
+    bool suppressed() const { return m_suppressed; }
+
     //! \brief Zooms by \a mult (above 1 zooms out) about the moment \a timeMs, as a click there does
     void zoomAround(double mult, qint64 timeMs);
 
   protected:
+    bool m_suppressed = false;
     //! \brief Mouse Wheel events
     virtual void wheelEvent(QWheelEvent *event);
 

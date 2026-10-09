@@ -119,6 +119,10 @@ public:
     static QString helpKeyForGraph(const QString &name);
     //! The name of an event type in the Events tab; "Channel N" for one without a name.
     static QString eventTreeName(ChannelID code);
+    //! Whether channel \a code is listed: OSCAR's own analysis channels only while the analysis is shown.
+    static bool channelShown(ChannelID code, bool analysisShown);
+    //! Hides the analysis graphs and the Analysis tab while the analysis is hidden (analysisShown()).
+    void applyAnalysisShown();
     //! A link of the manual scoring list: \a what ("jump", "undo") of the edit \a id.
     static QString scoringLink(const QString &what, qint64 id);
     //! The parts of a scoringLink(); false for another link.

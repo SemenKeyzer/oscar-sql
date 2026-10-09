@@ -215,7 +215,9 @@ Overview::Overview(QWidget *parent, gGraphView *shared) :
     GraphView->resetLayout();
     GraphView->SaveDefaultSettings();
     GraphView->LoadSettings("Overview"); //no trans
-    showPreset(OverviewPresets::fromKey(p_profile->general->lastOverviewPreset()));
+    showPreset(OverviewPresets::shownPreset(OverviewPresets::fromKey(p_profile->general->lastOverviewPreset()),
+                                            analysis::analysisShown()));
+    applyAnalysisShown();
 
     GraphView->setEmptyImage(QPixmap(":/icons/logo-md.png"));
 	dateErrorDisplay = new DateErrorDisplay(this);
@@ -577,8 +579,26 @@ void Overview::updateAnalysisNotice()
     }
 }
 
+void Overview::applyAnalysisShown()
+{
+    const bool shown = analysis::analysisShown();
+    QSet<QString> analysisGraphs;
+    for (gAnalysisChart::Kind kind : gAnalysisChart::kinds()) analysisGraphs.insert(gAnalysisChart::code(kind));
+    for (int i = 0; i < GraphView->size(); i++) {
+        gGraph *g = (*GraphView)[i];
+        if (!g) continue;
+        const bool analysisGraph = analysisGraphs.contains(g->name()) || schema::channel[g->name()].isComputed();
+        g->setSuppressed(!shown && analysisGraph);
+    }
+    if (QAbstractButton *button = m_presetButtons->button(OverviewPresets::Analysis)) button->setVisible(shown);
+    if (!shown && m_presetButtons->checkedId() == OverviewPresets::Analysis) showPreset(OverviewPresets::All);
+    GraphView->updateScale();
+    GraphView->redraw();
+}
+
 void Overview::ReloadGraphs()
 {
+    applyAnalysisShown();
     updateAnalysisNotice();
     GraphView->setDay(nullptr);
     updateCube();

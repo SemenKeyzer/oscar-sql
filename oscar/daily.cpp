@@ -1117,6 +1117,8 @@ void Daily::UpdateEventsTree(QTreeWidget *tree,Day *day)
     quint32 chantype = schema::FLAG | schema::SPAN | schema::MINOR_FLAG;
     if (p_profile->general->showUnknownFlags()) chantype |= schema::UNKNOWN;
     QList<ChannelID> chans = day->getSortedMachineChannels(chantype);
+    const bool shown = analysis::analysisShown();
+    chans.removeIf([shown](ChannelID c) { return !channelShown(c, shown); });
 
     int sessnum = 0;
     // Go through all the enabled sessions of the day
@@ -1482,6 +1484,7 @@ void Daily::on_ReloadDay()
     load_time=time.restart();
 
     //GraphView->fadeIn(fadedir);
+    applyAnalysisShown();   // the analysis graphs and tab follow the "OSCAR analysis" switch
     // a scoring change reloaded the same night: the graphs stay where they were
     if (m_keepRange.second > m_keepRange.first && previous_date == m_keepRangeDate) {
         GraphView->SetXBounds(m_keepRange.first, m_keepRange.second);
@@ -2168,6 +2171,8 @@ QString Daily::getIndices(Day * day, QHash<ChannelID, EventDataType>& values ) {
 
     if (show_minors) zchans |= schema::MINOR_FLAG;
     QList<ChannelID> available = day->getSortedMachineChannels(zchans);
+    const bool analysisOn = analysis::analysisShown();
+    available.removeIf([analysisOn](ChannelID c) { return !channelShown(c, analysisOn); });
 
     EventDataType val;
     for (int i=0; i < available.size(); ++i) {
@@ -2531,6 +2536,23 @@ bool Daily::parseScoringLink(const QUrl &url, QString *what, qint64 *id)
     if (what) *what = data.section(QLatin1Char('/'), 0, 0);
     if (id) *id = n;
     return true;
+}
+
+void Daily::applyAnalysisShown()
+{
+    const bool shown = analysis::analysisShown();
+    for (auto it = graphlist.cbegin(); it != graphlist.cend(); ++it) {
+        const bool analysisGraph = it.key() == STR_GRAPH_AnalysisFlags || schema::channel[it.key()].isComputed();
+        if (it.value()) it.value()->setSuppressed(!shown && analysisGraph);
+    }
+    if (m_analysisTab) ui->tabWidget->setTabVisible(ui->tabWidget->indexOf(m_analysisTab), shown);
+    GraphView->updateScale();
+    GraphView->redraw();
+}
+
+bool Daily::channelShown(ChannelID code, bool analysisShown)
+{
+    return analysisShown || !schema::channel[code].isComputed();
 }
 
 QString Daily::eventTreeName(ChannelID code)
@@ -3906,6 +3928,8 @@ void Daily::updateEventsCombo(Day* day) {
 
     QList<ChannelID> available;
     if (day) available.append(day->getSortedMachineChannels(chans));
+    const bool analysisOn = analysis::analysisShown();
+    available.removeIf([analysisOn](ChannelID c) { return !channelShown(c, analysisOn); });
 
     ui->eventsCombo->clear();
     ui->eventsCombo->addItem(*icon_up_down, "", 0);   // text updated in setflagText
