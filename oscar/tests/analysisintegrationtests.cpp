@@ -2391,6 +2391,16 @@ void AnalysisIntegrationTests::testHiddenAnalysisLeavesPages()
     QVERIFY(!buildNightSummaryFor(p_profile, &service, date, date, false).hasAnalysisAhi);
     QCOMPARE(service.outdatedCount(), 0);   // the computation is not touched
 
+    // nights waiting for the analysis are not offered while it is hidden
+    AnalysisParams strict;
+    strict.flow.minEventSec = 20;
+    p_profile->analysis->setParams(strict);
+    service.reloadSettings();
+    QVERIFY(service.outdatedCount() > 0);
+    QCOMPARE(buildNightSummaryFor(p_profile, &service, date, date, true).outdatedAnalysis, 0);
+    p_profile->analysis->resetToDefaults();
+    service.reloadSettings();
+
     p_profile->analysis->setShown(true);
     QVERIFY(service.row(date).id > 0);
 }
@@ -2417,6 +2427,12 @@ void AnalysisIntegrationTests::testChannelShown()
     QVERIFY(schema::channel[AN_Hypopnea].isComputed());
     QVERIFY(!Daily::channelShown(AN_Hypopnea, false));
     QVERIFY(Daily::channelShown(AN_Hypopnea, true));
+    // the same, for the open profile's switch (graph flags, search, Time at Pressure)
+    p_profile->analysis->setShown(false);
+    QVERIFY(!analysis::channelShown(AN_Desaturation));
+    QVERIFY(analysis::channelShown(OXI_SPO2Drop));
+    p_profile->analysis->setShown(true);
+    QVERIFY(analysis::channelShown(AN_Desaturation));
 }
 
 void AnalysisIntegrationTests::testPresetsWithoutAnalysis()
@@ -2426,4 +2442,35 @@ void AnalysisIntegrationTests::testPresetsWithoutAnalysis()
     QCOMPARE(OverviewPresets::shownPreset(OverviewPresets::Analysis, false), OverviewPresets::All);
     QCOMPARE(OverviewPresets::shownPreset(OverviewPresets::Analysis, true), OverviewPresets::Analysis);
     QCOMPARE(OverviewPresets::shownPreset(OverviewPresets::Oxygen, false), OverviewPresets::Oxygen);
+}
+
+// The doctor's report with the analysis hidden: no analysis, and the oximeter nights counted from
+// the oximeter's own data (they came from the analysis rows).
+void AnalysisIntegrationTests::testDoctorReportHiddenAnalysis()
+{
+    const qint64 oxiRow = insertRow(QStringLiteral("INSERT INTO machines (profile_id, machine_id, loader_name, machine_type, serial_number) "
+                                                   "VALUES (?, 3005, 'TestOxi', ?, 'OX4')"), { m_profileId, int(MT_OXIMETER) });
+    Machine cpap(p_profile, 66);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Machine oxi(p_profile, 67);
+    oxi.info.type = MT_OXIMETER;
+    oxi.setDatabaseId(oxiRow);
+    const QDate date = kNightDate.addDays(70);
+    Day *day = new Day();
+    day->setDate(date);
+    day->addSession(hypopneaSession(&cpap, 94, m_machineRow));
+    day->addSession(oximetrySession(&oxi, 95, oxiRow));
+    p_profile->daylist.insert(date, day);
+    const auto cleanup = qScopeGuard([date, day]() {
+        p_profile->analysis->setShown(true);
+        p_profile->daylist.remove(date);
+        delete day;
+    });
+    p_profile->analysis->setShown(false);
+    Statistics stats;
+    const DoctorReport r = stats.doctorReport(date, date);
+    QVERIFY(!r.analysisShown);
+    QCOMPARE(r.oximetryNights, 1);
+    QCOMPARE(r.analysisMissing, 0);
 }

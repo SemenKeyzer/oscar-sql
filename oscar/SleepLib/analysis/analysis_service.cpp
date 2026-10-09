@@ -7,6 +7,7 @@
  * for more details. */
 
 #include "analysis_service.h"
+#include "SleepLib/schema.h"
 
 #include <QDebug>
 
@@ -74,6 +75,11 @@ void AnalysisService::refreshRow(const QDate &date)
 bool analysisShown()
 {
     return p_profile && p_profile->analysis && p_profile->analysis->shown();
+}
+
+bool channelShown(ChannelID code)
+{
+    return analysisShown() || !schema::channel[code].isComputed();
 }
 
 AnalysisDailyData AnalysisService::row(const QDate &date)

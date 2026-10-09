@@ -74,6 +74,7 @@ struct DoctorReport {
     double odi3 = kNoValue;
     double below90 = kNoValue;
     int analysisMissing = 0;        //!< CPAP nights without an up-to-date analysis
+    bool analysisShown = true;      //!< false: the "OSCAR analysis" switch is off, the page leaves it out
 
     QVector<Night> nightList;       //!< every date of the period, oldest first
     QList<QDate> settingsChanges;   //!< nights a new settings period started on

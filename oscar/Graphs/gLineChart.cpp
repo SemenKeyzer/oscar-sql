@@ -10,6 +10,7 @@
 
 #define TEST_MACROS_ENABLEDoff
 #include "test_macros.h"
+#include "SleepLib/analysis/analysis_service.h"
 
 #include "Graphs/gLineChart.h"
 
@@ -1153,6 +1154,7 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
         for (auto fit=flags.begin(), end=flags.end(); fit != end; ++fit) {
             code = fit.key();
             if ((!m_flags_enabled[code]) || (!m_day->channelExists(code))) continue;
+            if (!analysis::channelShown(code)) continue;   // OSCAR's analysis flags, while it is hidden
             gLineOverlayBar * lob = fit.value();
             lob->setBlockHover(blockhover);
             lob->paint(painter, w, region);

@@ -9,6 +9,7 @@
 
 #define TEST_MACROS_ENABLEDoff
 #include "test_macros.h"
+#include "SleepLib/analysis/analysis_service.h"
 
 
 
@@ -2587,6 +2588,7 @@ void gGraphView::populateMenu(gGraph * graph)
         quint32 showflags = schema::FLAG | schema::MINOR_FLAG | schema::SPAN;
         if (p_profile->general->showUnknownFlags()) showflags |= schema::UNKNOWN;
         QList<ChannelID> chans = lc->m_day->getSortedMachineChannels(showflags);
+        chans.removeIf([](ChannelID c) { return !analysis::channelShown(c); });
 
         QHash<MachineType, int> Vis;
 

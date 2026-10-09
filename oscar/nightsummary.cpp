@@ -311,7 +311,7 @@ NightSummary buildNightSummaryFor(Profile *profile, analysis::AnalysisService *s
             s.ahiTrend.append(h > 0 ? dd->calcAHI() : std::numeric_limits<double>::quiet_NaN());
         }
     }
-    s.outdatedAnalysis = withTrends && analysisOn ? service->outdatedCount() : 0;
+    s.outdatedAnalysis = withTrends && analysisOn && analysis::analysisShown() ? service->outdatedCount() : 0;
     return s;
 }
 

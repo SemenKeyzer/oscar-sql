@@ -86,6 +86,7 @@ private slots:
     void testSuppressedGraphIsEmpty();
     void testChannelShown();
     void testPresetsWithoutAnalysis();
+    void testDoctorReportHiddenAnalysis();
     void testFlagsGraphsSplitDeviceAndAnalysis();
     void testAnalysisReportQuery();
     void testSettingsPeriodCountsCpapHoursOnly();

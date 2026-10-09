@@ -1900,6 +1900,16 @@ DoctorReport Statistics::doctorReport(const QDate &from, const QDate &to, const 
         if (!stale.contains(d.date)) current.insert(d.date);
     }
     r.analysisMissing = int(cpapNights.size() - current.size());
+    r.analysisShown = analysis::analysisShown();
+    if (!r.analysisShown) {
+        // the analysis rows are hidden: the oximeter's own nights, and nothing missing
+        r.analysisMissing = 0;
+        r.oximetryNights = 0;
+        for (const QDate &night : std::as_const(cpapNights)) {
+            Day *oxiDay = p_profile ? p_profile->GetDay(night, MT_OXIMETER) : nullptr;
+            if (oxiDay && oxiDay->hours(MT_OXIMETER) > 0) ++r.oximetryNights;
+        }
+    }
     if (r.analysisMissing == 0) {
         r.analysisAhi = analysisFigureValue(QStringLiteral("ahi"), own);
         r.flowLimitation = analysisFigureValue(QStringLiteral("fl"), own);
@@ -1974,10 +1984,11 @@ QString Statistics::GenerateSettingsComparison()
     int counter = 0;
     for (int i = 0; i < rows.size(); ++i) options.rowColors << alternatingColor(counter);
 
+    options.analysis = analysis::analysisShown();
     QString html = QStringLiteral("<div align=center><br>");
-    html += QString("<p><i>%1</i></p>").arg(AnalysisPanel::disclaimer().toHtmlEscaped());
+    if (options.analysis) html += QString("<p><i>%1</i></p>").arg(AnalysisPanel::disclaimer().toHtmlEscaped());
     analysis::AnalysisService *service = mainwin ? mainwin->analysisService() : nullptr;
-    const int outdated = service ? service->outdatedCount() : 0;
+    const int outdated = service && options.analysis ? service->outdatedCount() : 0;
     if (outdated > 0) {
         html += QString("<p>%1 <a href='analysis=recalculate'>%2</a></p>")
                     .arg(tr("Analysis is outdated for %n day(s).", "", outdated), tr("Recalculate"));

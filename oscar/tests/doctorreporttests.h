@@ -34,6 +34,7 @@ private slots:
     void testHtmlAnalysisMissing();
     void testWritePdfRussian();
     void testHtmlFlowLimitation();
+    void testHtmlAnalysisHidden();
 
 private:
     class QApplication *m_app = nullptr;

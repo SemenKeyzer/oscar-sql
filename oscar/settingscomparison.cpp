@@ -204,10 +204,15 @@ QString settingsText(const Group &g)
 QString html(const QList<Row> &rows, const Options &options)
 {
     const QLocale locale;
+    // without OSCAR's analysis (its switch off), only the device's columns
+    QList<Column> columns = kTableColumns;
+    if (!options.analysis) {
+        for (Column c : { AnalysisAhi, FlowLimitation, Glasgow, Odi3, Below90 }) columns.removeAll(c);
+    }
     QVector<QSet<int>> winners(ColumnCount);
-    for (Column c : kTableColumns) winners[c] = best(rows, c);
+    for (Column c : columns) winners[c] = best(rows, c);
 
-    const int span = 1 + (options.showDevice ? 1 : 0) + kTableColumns.size();
+    const int span = 1 + (options.showDevice ? 1 : 0) + columns.size();
     QString html = QStringLiteral("<table class=curved width='100%' cellpadding=2>");
     html += QStringLiteral("<tr bgcolor='%1'><th colspan=%2 align=center><font size='+2'>%3</font></th></tr>")
                 .arg(options.headingColor).arg(span)
@@ -221,7 +226,7 @@ QString html(const QList<Row> &rows, const Options &options)
         html += QStringLiteral("<th align=left>%1</th>")
                     .arg(QCoreApplication::translate("SettingsComparison", "Device").toHtmlEscaped());
     }
-    for (Column c : kTableColumns) {
+    for (Column c : columns) {
         QString head = columnTitle(c, options).toHtmlEscaped();
         if (options.helpLinks) head = HelpTips::term(head, columnHelpKey(c));
         if (c == Pressure) {
@@ -246,7 +251,7 @@ QString html(const QList<Row> &rows, const Options &options)
         html += QStringLiteral("<td><span title=\"%1\">%2</span></td>")
                     .arg(dateList(r.group.dates).toHtmlEscaped(), look(settingsText(r.group).toHtmlEscaped()));
         if (options.showDevice) html += QStringLiteral("<td>%1</td>").arg(look(r.group.deviceLabel.toHtmlEscaped()));
-        for (Column c : kTableColumns) {
+        for (Column c : columns) {
             QString text = formatValue(r.values[c], c);
             if (c == Nights && few) {
                 text = QCoreApplication::translate("SettingsComparison", "%1 (few nights)").arg(r.nights());

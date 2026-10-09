@@ -31,6 +31,7 @@
 #include <QElapsedTimer>
 #include <QTimer>
 #include "dailySearchTab.h"
+#include "SleepLib/analysis/analysis_service.h"
 #include "SleepLib/day.h"
 #include "SleepLib/profiles.h"
 #include "SleepLib/journal.h"
@@ -546,6 +547,7 @@ void DailySearchTab::populateControl() {
         if (p_profile->general->showUnknownFlags()) chans |= schema::UNKNOWN;
         QList<ChannelID> available;
         available.append(day->getSortedMachineChannels(chans));
+        available.removeIf([](ChannelID c) { return !analysis::channelShown(c); });
 
         for (int i=0; i < available.size(); ++i) {
             ChannelID id = available.at(i);

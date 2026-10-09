@@ -89,6 +89,7 @@ struct Options {
     QStringList rowColors;              //!< background per row, cycled; white when empty
     QString settingsWidth;              //!< width of the settings column, e.g. "34%"; empty: as wide as it needs
     bool helpLinks = false;             //!< column heads and the note link their explanations (not in the PDF)
+    bool analysis = true;               //!< the columns of OSCAR's analysis (off while it is hidden)
 };
 
 //! The whole comparison table: title, column heads, one row per group and the note.

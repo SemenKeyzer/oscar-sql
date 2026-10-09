@@ -91,6 +91,7 @@ some messages from Apnea Board.
 #include <QMutexLocker>
 
 #include "MinutesAtPressure.h"
+#include "SleepLib/analysis/analysis_service.h"
 #include "Graphs/gGraph.h"
 #include "Graphs/gGraphView.h"
 #include "SleepLib/profiles.h"
@@ -571,6 +572,7 @@ void RecalcMAP::run()
     // Get the channels for specified Channel types
     QList<ChannelID> chans;
     chans = day->getSortedMachineChannels(schema::FLAG);
+    chans.removeIf([](ChannelID c) { return !analysis::channelShown(c); });
     chans.removeAll(CPAP_VSnore);
     chans.removeAll(CPAP_VSnore2);
     chans.removeAll(CPAP_FlowLimit);

@@ -2563,6 +2563,7 @@ void Daily::applyAnalysisShown()
         if (it.value()) it.value()->setSuppressed(!shown && analysisGraph);
     }
     if (m_analysisTab) ui->tabWidget->setTabVisible(ui->tabWidget->indexOf(m_analysisTab), shown);
+    updateGraphCombo();   // the list and the "N graphs" count leave out the hidden ones
     GraphView->updateScale();
     GraphView->redraw();
 }

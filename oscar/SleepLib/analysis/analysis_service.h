@@ -25,6 +25,8 @@ namespace analysis {
 
 //! The "OSCAR analysis" switch of the open profile: false without a profile.
 bool analysisShown();
+//! Whether channel \a code is shown: OSCAR's own analysis channels only while analysisShown().
+bool channelShown(ChannelID code);
 
 /*!
  * \class AnalysisService

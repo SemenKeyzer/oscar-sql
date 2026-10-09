@@ -420,3 +420,14 @@ void DoctorReportTests::testHtmlFlowLimitation()
     QVERIFY(dashes.contains(QStringLiteral("Glasgow Index")));
     QVERIFY(!dashes.contains(QStringLiteral("nan")));
 }
+
+// With OSCAR's analysis hidden the doctor's page says nothing about it.
+void DoctorReportTests::testHtmlAnalysisHidden()
+{
+    DoctorReport r = fullReport();
+    r.analysisShown = false;
+    r.analysisMissing = r.nights;
+    const QString html = DoctorReportPage::html(r, QStringLiteral("chart.png"), kChart);
+    QVERIFY2(!html.contains(QStringLiteral("OSCAR's analysis")), qPrintable(html));
+    QVERIFY(!html.contains(QStringLiteral("Analysis AHI")));
+}

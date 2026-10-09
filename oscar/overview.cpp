@@ -571,7 +571,7 @@ void Overview::on_RangeUpdate(double minx, double /* maxx */)
 void Overview::updateAnalysisNotice()
 {
     analysis::AnalysisService *service = mainwin ? mainwin->analysisService() : nullptr;
-    const int outdated = service && p_profile ? service->outdatedCount() : 0;
+    const int outdated = service && p_profile && analysis::analysisShown() ? service->outdatedCount() : 0;
     m_analysisNotice->setVisible(outdated > 0);
     if (outdated > 0) {
         m_analysisNotice->setText(tr("Analysis is outdated for %n day(s).", "", outdated)

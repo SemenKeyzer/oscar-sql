@@ -29,6 +29,7 @@ private slots:
     void testHtmlSettingsWidth();
     void testGlasgowColumn();
     void testHelpLinksOnlyWhenAsked();
+    void testHtmlWithoutAnalysis();
 };
 DECLARE_TEST(SettingsComparisonTests)
 

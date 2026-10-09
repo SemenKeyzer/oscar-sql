@@ -234,9 +234,11 @@ QString html(const DoctorReport &r, const QString &chartUrl, const QSizeF &chart
                   ? DoctorReport::tr("corrected by hand on %n night(s), by the device %1", nullptr, r.correctedNights)
                             .arg(number(r.deviceAhiUncorrected, 1)) + QStringLiteral(" · ")
                   : QString())
-                 + DoctorReport::tr("OSCAR's analysis: %1 · flow limitation %2% (%3 min per night, %4% of breaths) · Glasgow Index %5 / %6 (adapted)")
-                 .arg(number(r.analysisAhi, 1), number(r.flowLimitation, 0), number(r.flowLimitationMinutes, 0),
-                      number(r.flowLimitedBreaths, 0), number(r.glasgow, 1), number(r.glasgowAdapted, 1)),
+                 + (r.analysisShown
+                        ? DoctorReport::tr("OSCAR's analysis: %1 · flow limitation %2% (%3 min per night, %4% of breaths) · Glasgow Index %5 / %6 (adapted)")
+                              .arg(number(r.analysisAhi, 1), number(r.flowLimitation, 0), number(r.flowLimitationMinutes, 0),
+                                   number(r.flowLimitedBreaths, 0), number(r.glasgow, 1), number(r.glasgowAdapted, 1))
+                        : QString()),
              r.ahiLevel()),
         tile(DoctorReport::tr("Leak"), withUnits(r.leak, 1, r.leakUnits),
              r.leakRedline > 0 ? DoctorReport::tr("red line %1").arg(locale.toString(r.leakRedline)) : DoctorReport::tr("no red line set"),
@@ -255,7 +257,7 @@ QString html(const DoctorReport &r, const QString &chartUrl, const QSizeF &chart
         html += QStringLiteral("<td width='33%'>%1</td>").arg(tiles[i]);
     }
     html += QStringLiteral("</tr></table>");
-    if (r.analysisMissing > 0) {
+    if (r.analysisShown && r.analysisMissing > 0) {
         html += QStringLiteral("<p><font size='-1' color='#606060'>%1</font></p>")
                     .arg(DoctorReport::tr("OSCAR's analysis is missing or out of date for %1 of %2 nights, so its figures are left out.")
                              .arg(r.analysisMissing).arg(r.nights).toHtmlEscaped());
@@ -271,6 +273,7 @@ QString html(const DoctorReport &r, const QString &chartUrl, const QSizeF &chart
     // the settings over the period
     if (!r.comparison.isEmpty()) {
         SettingsComparison::Options options;
+        options.analysis = r.analysisShown;
         options.showDevice = r.showDevice;
         options.ahiName = r.ahiName;
         options.percentile = r.percentile;

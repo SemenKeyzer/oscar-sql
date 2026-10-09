@@ -255,3 +255,19 @@ void SettingsComparisonTests::testHelpLinksOnlyWhenAsked()
     QVERIFY(page.contains(QStringLiteral("help:glasgow")));
     QVERIFY(page.contains(QStringLiteral("help:best_value")));
 }
+
+// With OSCAR's analysis hidden the table has no analysis columns.
+void SettingsComparisonTests::testHtmlWithoutAnalysis()
+{
+    const Row r = tableRow(QStringLiteral("9-16"), 4, 3.0);
+    Options on;
+    const QString shown = SettingsComparison::html({ r }, on);
+    QVERIFY(shown.contains(QStringLiteral("Analysis AHI")) && shown.contains(QStringLiteral("Glasgow Index")));
+    Options off;
+    off.analysis = false;
+    const QString hidden = SettingsComparison::html({ r }, off);
+    for (const char *head : { "Analysis AHI", "Flow limitation", "Glasgow Index", "ODI 3%", "SpO2 &lt; 90%" }) {
+        QVERIFY2(!hidden.contains(QLatin1String(head)), head);
+    }
+    QVERIFY(hidden.contains(QStringLiteral("Usage, h")));
+}
