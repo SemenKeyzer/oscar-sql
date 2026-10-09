@@ -229,3 +229,11 @@ void ScoringModeTests::testStaleTargetIgnored()
     r.events.clear();
     QVERIFY(!ScoringResize::stillTargets(r, t));
 }
+
+// A right click with no event under it zooms out about the click, as outside scoring mode.
+void ScoringModeTests::testPixelForTime()
+{
+    QCOMPARE(ScoringGesture::pixelFor(0, 600000, 600, 300000), 300);
+    QCOMPARE(ScoringGesture::pixelFor(0, 600000, 600, -5000), 0);
+    QCOMPARE(ScoringGesture::pixelFor(0, 600000, 600, 700000), 600);
+}

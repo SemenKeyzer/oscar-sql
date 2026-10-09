@@ -51,6 +51,9 @@ class PreferencesDialog : public QDialog
     Q_OBJECT
 
   public:
+    //! Ticks (\a on) or clears column \a column of every channel row of \a model (rows under the
+    //! group rows); cells that are not check boxes are left alone.
+    static void setColumnChecked(QStandardItemModel *model, int column, bool on);
     explicit PreferencesDialog(QWidget *parent, Profile *_profile);
     ~PreferencesDialog();
 

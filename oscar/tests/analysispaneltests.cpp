@@ -109,6 +109,10 @@ void AnalysisPanelTests::testSidebarForCpapNight()
     QVERIFY(html.contains(AnalysisPanel::disclaimer().toHtmlEscaped()));
     QVERIFY(html.contains(QStringLiteral("AHI")));
     QVERIFY(html.contains(QStringLiteral("Hypopnea index by rule")));
+    // the doctor's layout: the rule line in bold, the three values on the next line, "3%" with no space
+    QVERIFY2(html.contains(QStringLiteral("<b>")), qPrintable(html));
+    QVERIFY2(html.contains(QStringLiteral("AASM 3% = ")) && html.contains(QStringLiteral(" | CMS 4% = ")), qPrintable(html));
+    QVERIFY(!html.contains(QStringLiteral("AASM 3 %")));
     QVERIFY(html.contains(QStringLiteral("href='analysis=differences'")));
     QVERIFY(html.contains(QStringLiteral("below 94 %")));
     QVERIFY(html.contains(QStringLiteral("below 90 %")));

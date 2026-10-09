@@ -31,4 +31,11 @@ QPair<qint64, qint64> rangeFor(qint64 minX, qint64 maxX, int plotWidth, int x1, 
     return { qMin(a, b), qMax(a, b) };
 }
 
+int pixelFor(qint64 minX, qint64 maxX, int plotWidth, qint64 timeMs)
+{
+    if (maxX <= minX || plotWidth <= 0) return 0;
+    const double x = double(timeMs - minX) / double(maxX - minX) * plotWidth;
+    return qBound(0, int(x + 0.5), plotWidth);
+}
+
 } // namespace ScoringGesture

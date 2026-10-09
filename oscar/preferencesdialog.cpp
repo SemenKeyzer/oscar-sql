@@ -475,6 +475,25 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
     else
         ui->baseSpO2Option->setCurrentIndex(100-baseoption_data);
 
+    // "all" / "none" for the two check box columns of the Events and Signals tables
+    auto addCheckButtons = [this](QHBoxLayout *row, QStandardItemModel *model, const QString &prefix) {
+        const struct { const char *name; int column; bool on; QString text; } buttons[] = {
+            { "ShowAll", 0, true, tr("Show all") }, { "ShowNone", 0, false, tr("Show none") },
+            { "OverviewAll", 2, true, tr("Overview: all") }, { "OverviewNone", 2, false, tr("Overview: none") },
+        };
+        int at = 1;   // after the reset button
+        for (const auto &b : buttons) {
+            auto *button = new QPushButton(b.text, this);
+            button->setObjectName(prefix + QLatin1String(b.name));
+            const int column = b.column;
+            const bool on = b.on;
+            connect(button, &QPushButton::clicked, this, [model, column, on]() { setColumnChecked(model, column, on); });
+            row->insertWidget(at++, button);
+        }
+    };
+    addCheckButtons(ui->horizontalLayout_20, chanModel, QStringLiteral("channels"));
+    addCheckButtons(ui->horizontalLayout_22, waveModel, QStringLiteral("waveforms"));
+
     // hover explanations: the strip at the bottom shows what the setting under the mouse does
     // the OK/Cancel row leaves the scrolled page, so the strip can sit between the page and the buttons
     auto *buttonRow = new QHBoxLayout;
@@ -591,6 +610,18 @@ void ComboBoxDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionV
     editor->setGeometry(option.rect);
 }
 
+
+void PreferencesDialog::setColumnChecked(QStandardItemModel *model, int column, bool on)
+{
+    if (!model) return;
+    for (int g = 0; g < model->rowCount(); ++g) {
+        QStandardItem *group = model->item(g);
+        for (int r = 0; group && r < group->rowCount(); ++r) {
+            QStandardItem *it = group->child(r, column);
+            if (it && it->isCheckable()) it->setCheckState(on ? Qt::Checked : Qt::Unchecked);
+        }
+    }
+}
 
 void PreferencesDialog::InitChanInfo()
 {

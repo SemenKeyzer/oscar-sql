@@ -30,6 +30,7 @@ private slots:
     void testResizeDragClamp();
     void testResizedIntoStretchStaysGrabbable();
     void testStaleTargetIgnored();
+    void testPixelForTime();
     void initTestCase();
 };
 DECLARE_TEST(ScoringModeTests)

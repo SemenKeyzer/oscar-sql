@@ -22,6 +22,7 @@ private slots:
     void testEstimatePages();
     void testMapRoundTrip();
     void testClampedToData();
+    void testMatchesPreset();
 };
 DECLARE_TEST(PdfReportOptionsTests)
 

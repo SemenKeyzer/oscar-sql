@@ -8,6 +8,9 @@
 
 #include "preferencessearchtests.h"
 
+#include <QStandardItemModel>
+#include "preferencesdialog.h"
+
 #include <QApplication>
 #include <QCheckBox>
 #include <QGroupBox>
@@ -154,4 +157,36 @@ void PreferencesSearchTests::testReveal()
     reveal(&d.tabs, find(entries, QStringLiteral("красную")).first());
     QCOMPARE(d.tabs.currentIndex(), 0);
     QVERIFY(d.redline->styleSheet().contains(highlightStyle()));
+}
+
+// "All" and "None" under the Events and Signals tables tick or clear one column of every channel.
+void PreferencesSearchTests::testSetColumnChecked()
+{
+    QStandardItemModel model;
+    for (int g = 0; g < 2; ++g) {
+        auto *group = new QStandardItem(QStringLiteral("group"));
+        for (int i = 0; i < 3; ++i) {
+            QList<QStandardItem *> row;
+            for (int c = 0; c < 3; ++c) {
+                auto *it = new QStandardItem(QStringLiteral("x"));
+                it->setCheckable(c != 1);   // column 1 is a colour, not a box
+                it->setCheckState(Qt::Unchecked);
+                row << it;
+            }
+            group->appendRow(row);
+        }
+        model.appendRow(group);
+    }
+    PreferencesDialog::setColumnChecked(&model, 2, true);
+    for (int g = 0; g < 2; ++g) {
+        for (int i = 0; i < 3; ++i) {
+            QCOMPARE(model.item(g)->child(i, 2)->checkState(), Qt::Checked);
+            QCOMPARE(model.item(g)->child(i, 0)->checkState(), Qt::Unchecked);   // the other column stays
+        }
+    }
+    PreferencesDialog::setColumnChecked(&model, 2, false);
+    QCOMPARE(model.item(1)->child(2, 2)->checkState(), Qt::Unchecked);
+    PreferencesDialog::setColumnChecked(&model, 1, true);   // not checkable: left alone
+    QVERIFY(!model.item(0)->child(0, 1)->isCheckable());
+    QCOMPARE(model.item(0)->child(0, 1)->checkState(), Qt::Unchecked);
 }

@@ -98,11 +98,7 @@ Overview::Overview(QWidget *parent, gGraphView *shared) :
         button->setObjectName(QStringLiteral("presetButton_%1").arg(int(preset)));
         button->setText(OverviewPresets::title(preset));
         button->setCheckable(true);
-        button->setStyleSheet(QStringLiteral(
-            "QToolButton { border: 1px solid #b8b8b8; border-radius: 4px; padding: 1px 7px;"
-            " background: #f6f6f6; color: black; }"
-            "QToolButton:hover { background: #e6edf8; }"
-            "QToolButton:checked { background: #2f6fd0; border-color: #2f6fd0; color: white; }"));
+        button->setStyleSheet(OverviewPresets::buttonStyle());
         button->setToolTip(preset == OverviewPresets::All
                            ? tr("Your own choice of graphs from the graph list")
                            : tr("Only the graphs on this topic; \"All\" brings your own choice back"));

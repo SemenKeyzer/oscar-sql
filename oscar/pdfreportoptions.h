@@ -35,6 +35,8 @@ struct PdfReportOptions {
 
     //! Ticks the sections of \a preset; the personal-data choices stay as they are.
     void apply(Preset preset);
+    //! Whether the sections are those of \a preset (applying it would change nothing).
+    bool matches(Preset preset) const;
     //! The report's dates: the last 7, 30 or 90 nights up to \a lastNight, or from and to.
     QPair<QDate, QDate> range(const QDate &lastNight) const;
     //! \a range cut to the days that have data, \a first to \a last (left as is when unknown).

@@ -32,6 +32,13 @@ void PdfReportOptions::apply(Preset preset)
     }
 }
 
+bool PdfReportOptions::matches(Preset preset) const
+{
+    PdfReportOptions set = *this;
+    set.apply(preset);
+    return set.toMap() == toMap();
+}
+
 QPair<QDate, QDate> PdfReportOptions::range(const QDate &lastNight) const
 {
     switch (period) {

@@ -21,6 +21,7 @@ private slots:
     void testNormalized();
     void testFind();
     void testReveal();
+    void testSetColumnChecked();
 
 private:
     class QApplication *m_app = nullptr;

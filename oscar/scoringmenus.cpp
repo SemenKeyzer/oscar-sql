@@ -97,6 +97,7 @@ QString ScoringMenus::typeName(ChannelID channel)
 QMenu *ScoringMenus::forRange(qint64 durationMs, QWidget *parent)
 {
     auto *menu = new QMenu(parent);
+    menu->setAttribute(Qt::WA_NoMouseReplay);   // the click that closes it must not zoom the graph (Windows)
     menu->setObjectName(QStringLiteral("scoringRangeMenu"));
     menu->setTitle(tr("Selected: %1 s").arg(QLocale().toString(durationMs / 1000.0, 'g', 3)));
     const bool shortEvent = durationMs < qint64(ManualScoring::kShortEventSec * 1000);
@@ -113,6 +114,7 @@ QMenu *ScoringMenus::forRange(qint64 durationMs, QWidget *parent)
 QMenu *ScoringMenus::forEvent(const EffectiveEvent &e, QWidget *parent, int countOfType)
 {
     auto *menu = new QMenu(parent);
+    menu->setAttribute(Qt::WA_NoMouseReplay);   // the click that closes it must not zoom the graph (Windows)
     menu->setObjectName(QStringLiteral("scoringEventMenu"));
     // a device event is named by its own type and end, whatever it was changed to
     const ChannelID own = e.originalChannel;
@@ -146,6 +148,7 @@ QMenu *ScoringMenus::forEvent(const EffectiveEvent &e, QWidget *parent, int coun
 QMenu *ScoringMenus::forExcluded(qint64 editId, QWidget *parent)
 {
     auto *menu = new QMenu(parent);
+    menu->setAttribute(Qt::WA_NoMouseReplay);   // the click that closes it must not zoom the graph (Windows)
     menu->setObjectName(QStringLiteral("scoringExcludedMenu"));
     keyed(menu, tr("Cancel exclusion"), QLatin1Char('U'))->setData(data("undo", 0, 0, 0, editId));
     installLetterKeys(menu);

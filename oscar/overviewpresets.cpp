@@ -119,3 +119,10 @@ Visibility State::own(const Visibility &current) const
 }
 
 } // namespace OverviewPresets
+
+QString OverviewPresets::buttonStyle(const QString &c)
+{
+    return QStringLiteral("%1 { border: 1px solid #b8b8b8; border-radius: 4px; padding: 1px 7px; background: #f6f6f6; color: black; }"
+                          "%1:hover { background: #e6edf8; }"
+                          "%1:checked { background: #2f6fd0; border-color: #2f6fd0; color: white; }").arg(c);
+}

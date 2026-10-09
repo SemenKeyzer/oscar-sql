@@ -13,6 +13,7 @@
 #include <QDialog>
 #include <QList>
 
+#include <QMap>
 #include "pdfreportoptions.h"
 
 class Daily;
@@ -70,6 +71,7 @@ class PdfReportDialog : public QDialog
     QCheckBox *m_serial = nullptr;
     QLabel *m_pages = nullptr;
     QPushButton *m_create = nullptr;
+    QMap<PdfReportOptions::Preset, QPushButton *> m_presetButtons;   //!< lit while the options are that set
 };
 
 #endif // PDFREPORTDIALOG_H

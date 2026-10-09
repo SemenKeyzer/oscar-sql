@@ -114,3 +114,21 @@ void PdfReportOptionsTests::testClampedToData()
     const auto noData = PdfReportOptions::clamped({ QDate(2026, 9, 20), QDate(2026, 9, 30) }, QDate(), QDate());
     QCOMPARE(noData.first, QDate(2026, 9, 20));   // nothing to clamp to: the range as asked
 }
+
+// The ready-made set the options are now is lit in the dialog; a hand change turns it off.
+void PdfReportOptionsTests::testMatchesPreset()
+{
+    PdfReportOptions o;
+    o.apply(PdfReportOptions::Brief);
+    QVERIFY(o.matches(PdfReportOptions::Brief));
+    QVERIFY(!o.matches(PdfReportOptions::Detailed));
+    o.apply(PdfReportOptions::Detailed);
+    QVERIFY(o.matches(PdfReportOptions::Detailed));
+    QVERIFY(!o.matches(PdfReportOptions::Brief));
+    QVERIFY(!o.matches(PdfReportOptions::Everything));
+    o.nights = PdfReportOptions::Last3;   // changed by hand
+    QVERIFY(!o.matches(PdfReportOptions::Detailed));
+    o.apply(PdfReportOptions::Everything);
+    o.personalData = false;   // not part of a set
+    QVERIFY(o.matches(PdfReportOptions::Everything));
+}

@@ -57,8 +57,8 @@ AnalysisPreferencesPage::AnalysisPreferencesPage(QWidget *parent)
     m_rule = new QComboBox(ruleBox);
     m_rule->setObjectName(QStringLiteral("hypopneaRule"));
     m_rule->addItem(tr("Auto (recommended)"), int(HypopneaRule::Auto));
-    m_rule->addItem(tr("AASM 3 %"), int(HypopneaRule::Aasm3));
-    m_rule->addItem(tr("CMS 4 %"), int(HypopneaRule::Cms4));
+    m_rule->addItem(tr("AASM 3%"), int(HypopneaRule::Aasm3));
+    m_rule->addItem(tr("CMS 4%"), int(HypopneaRule::Cms4));
     m_rule->addItem(tr("Flow only"), int(HypopneaRule::FlowOnly));
     for (int i = 0; i < m_rule->count(); ++i) {
         m_rule->setItemData(i, ruleDescription(HypopneaRule(m_rule->itemData(i).toInt())), Qt::ToolTipRole);
@@ -205,7 +205,7 @@ QString AnalysisPreferencesPage::ruleDescription(HypopneaRule rule)
 {
     switch (rule) {
     case HypopneaRule::Auto:
-        return tr("AASM 3 % where the oximeter covers the event, Flow only elsewhere. Good when you wear an "
+        return tr("AASM 3% where the oximeter covers the event, Flow only elsewhere. Good when you wear an "
                   "oximeter only on some nights.");
     case HypopneaRule::Aasm3:
         return tr("Current sleep-lab standard (AASM 2012, rule 1A). A >= 30 % drop in flow for >= 10 s counts as "
@@ -214,7 +214,7 @@ QString AnalysisPreferencesPage::ruleDescription(HypopneaRule rule)
                   "without one, events are scored as Flow only.");
     case HypopneaRule::Cms4:
         return tr("Stricter rule used by US Medicare (AASM rule 1B). Same flow drop, but SpO2 must fall by >= 4 %. "
-                  "Gives fewer hypopneas and a lower AHI than AASM 3 % for the same night; use it to compare with "
+                  "Gives fewer hypopneas and a lower AHI than AASM 3% for the same night; use it to compare with "
                   "studies or reports scored this way.");
     case HypopneaRule::FlowOnly:
         break;

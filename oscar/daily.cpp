@@ -59,6 +59,7 @@
 #include "scoringmenus.h"
 #include "statistics.h"
 #include "Graphs/gManualScoringLayer.h"
+#include "Graphs/scoringgesture.h"
 #include "SleepLib/manual_scoring.h"
 #include "database/manual_scoring_repository.h"
 #include "nightsummary.h"
@@ -4475,7 +4476,10 @@ void Daily::onScoringContext(gGraph *graph, qint64 timeMs, QPoint globalPos)
             }
         }
     }
-    if (!menu) return;
+    if (!menu) {   // nothing to edit here: the right click zooms out, as outside scoring mode
+        graph->ZoomX(1.33, graph->left + ScoringGesture::pixelFor(graph->min_x, graph->max_x, plotWidth, timeMs));
+        return;
+    }
     if (QAction *chosen = menu->exec(globalPos)) applyScoring(chosen->data().toMap(), 0, 0);
 }
 

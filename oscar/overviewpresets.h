@@ -32,6 +32,8 @@ typedef QHash<QString, bool> Visibility;
 QList<Preset> presets();
 //! The preset's button text.
 QString title(Preset preset);
+//! The look of a set's button: lit in blue while its set is the one in use (also used by the PDF dialog).
+QString buttonStyle(const QString &buttonClass = QStringLiteral("QToolButton"));
 //! The name the profile stores the preset under.
 QString key(Preset preset);
 //! The preset stored as \a key; All for anything unknown.

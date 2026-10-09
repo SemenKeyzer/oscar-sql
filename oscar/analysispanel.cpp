@@ -187,15 +187,16 @@ QString AnalysisPanel::sidebarHtml(Day *day, const DayResult &r, const QString &
         }
         html += glasgowHtml(r);
 
-        html += QStringLiteral("<p>%1: %2 %3 &middot; %4 %5 &middot; %6 %7</p>")
+        // the rule line in bold, the three values on the next one
+        html += QStringLiteral("<p><b>%1</b><br>%2 = %3 | %4 = %5 | %6 = %7</p>")
                     .arg(HelpTips::term(tr("Hypopnea index by rule"), QStringLiteral("hypopnea_rule")),
-                         tr("AASM 3 %").toHtmlEscaped(), perHour(r.hypopneasAasm3, analysisHours),
-                         tr("CMS 4 %").toHtmlEscaped(), perHour(r.hypopneasCms4, analysisHours),
+                         tr("AASM 3%").toHtmlEscaped(), perHour(r.hypopneasAasm3, analysisHours),
+                         tr("CMS 4%").toHtmlEscaped(), perHour(r.hypopneasCms4, analysisHours),
                          tr("Flow only"), perHour(r.hypopneasFlowOnly, analysisHours));
 
         if (r.hasComparison) {
             const MatchResult &m = r.match;
-            html += QStringLiteral("<p>%1</p>").arg(
+            html += QStringLiteral("<p><b>%1</b></p>").arg(
                 HelpTips::term(tr("Agreement with the device: %1% (matched %2, device only %3, analysis only %4, different type %5).")
                                    .arg(number(100.0 * m.agreement(), 0)).arg(m.matched.size()).arg(m.deviceOnly.size())
                                    .arg(m.analysisOnly.size()).arg(m.typeMismatch),
@@ -282,13 +283,13 @@ QString AnalysisPanel::sidebarHtml(Day *day, const DayResult &r, const QString &
     if (r.hasFlow) {
         switch (r.rule) {
         case HypopneaRule::Auto:
-            notes << tr("Hypopneas: AASM 3 % where the oximeter covers the event, flow only elsewhere (Auto).");
+            notes << tr("Hypopneas: AASM 3% where the oximeter covers the event, flow only elsewhere (Auto).");
             break;
         case HypopneaRule::Aasm3:
-            notes << tr("Hypopneas: AASM 3 %.");
+            notes << tr("Hypopneas: AASM 3%.");
             break;
         case HypopneaRule::Cms4:
-            notes << tr("Hypopneas: CMS 4 %.");
+            notes << tr("Hypopneas: CMS 4%.");
             break;
         case HypopneaRule::FlowOnly:
             notes << tr("Hypopneas: flow only.");

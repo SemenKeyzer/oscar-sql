@@ -29,6 +29,7 @@ private slots:
     void testLetterKeys();
     void testBulkItems();
     void testResizedEventNamedByOwnEnd();
+    void testMenusDoNotReplayClick();
     void testExcludedText();
 private:
     QApplication *m_app = nullptr;

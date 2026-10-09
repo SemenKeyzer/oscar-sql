@@ -88,7 +88,10 @@ PdfReportDialog::PdfReportDialog(Daily *daily, Overview *overview, QWidget *pare
     for (const auto &p : presetButtons) {
         auto *b = new QPushButton(p.first);
         b->setAutoDefault(false);   // Return creates the report, not a preset
+        b->setCheckable(true);      // lit while the options are this set (update())
+        b->setStyleSheet(OverviewPresets::buttonStyle(QStringLiteral("QPushButton")));
         const PdfReportOptions::Preset preset = p.second;
+        m_presetButtons.insert(preset, b);
         connect(b, &QPushButton::clicked, this, [this, preset]() {
             PdfReportOptions o = options();
             o.apply(preset);
@@ -235,6 +238,7 @@ void PdfReportDialog::update()
 {
     if (m_loading) return;
     const PdfReportOptions o = options();
+    for (auto it = m_presetButtons.cbegin(); it != m_presetButtons.cend(); ++it) it.value()->setChecked(o.matches(it.key()));
     const bool custom = o.period == PdfReportOptions::Custom;
     m_from->setEnabled(custom);
     m_to->setEnabled(custom);

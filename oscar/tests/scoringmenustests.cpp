@@ -219,3 +219,13 @@ void ScoringMenusTests::testResizedEventNamedByOwnEnd()
     QVERIFY(toH);
     QCOMPARE(toH->data().toMap().value(QStringLiteral("timeMs")).toLongLong(), qint64(300000));
 }
+
+// The click that closes a scoring menu must not reach the graph (on Windows Qt replays it: the
+// graph zoomed in); a left click beside the menu only closes it.
+void ScoringMenusTests::testMenusDoNotReplayClick()
+{
+    QScopedPointer<QMenu> range(ScoringMenus::forRange(20000, nullptr));
+    QScopedPointer<QMenu> event(ScoringMenus::forEvent(scoredEvent(Origin::Device, CPAP_Obstructive, CPAP_Obstructive, 0), nullptr));
+    QScopedPointer<QMenu> stretch(ScoringMenus::forExcluded(3, nullptr));
+    for (QMenu *m : { range.data(), event.data(), stretch.data() }) QVERIFY(m->testAttribute(Qt::WA_NoMouseReplay));
+}
