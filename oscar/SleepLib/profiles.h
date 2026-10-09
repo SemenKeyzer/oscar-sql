@@ -460,6 +460,7 @@ const QString STR_OS_baseSpO2Option = "baseSpO2Option";
 // AnalysisSettings Strings: the switches, then every parameter of analysis::AnalysisParams
 const QString STR_AN_Enabled = "AnEnabled";
 const QString STR_AN_ShowFlowDifferences = "AnShowFlowDifferences";
+const QString STR_AN_Shown = "AnShown";
 const QString STR_AN_HypopneaRule = "AnHypopneaRule";
 const QString STR_AN_LimitOxiToCpap = "AnLimitOxiToCpap";
 const QString STR_AN_PulseRiseAsArousal = "AnPulseRiseAsArousal";
@@ -688,6 +689,11 @@ class AnalysisSettings : public PrefSettings
     //! not a parameter: resetToDefaults() leaves it).
     bool showFlowDifferences() const { return getPref(STR_AN_ShowFlowDifferences).toBool(); }
     void setShowFlowDifferences(bool show) { setPref(STR_AN_ShowFlowDifferences, show); }
+
+    //! The "OSCAR analysis" switch: whether the pages show the analysis at all (a display choice,
+    //! off until switched on; the analysis is computed or not as enabled() says).
+    bool shown() const { return getPref(STR_AN_Shown).toBool(); }
+    void setShown(bool shown) { setPref(STR_AN_Shown, shown); }
 
     //! Up to six SpO2 thresholds (%), highest first; 94, 90, 88, 85, 80 by default.
     QList<double> spo2Thresholds() const;

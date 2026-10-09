@@ -81,6 +81,8 @@ private slots:
     void testUpdateExcludeIntoNextSession();
     void testScoringDragEsc();
     void testScoringDragClearedOnModeOff();
+    void testAnalysisShownDefaultOff();
+    void testHiddenAnalysisLeavesPages();
     void testFlagsGraphsSplitDeviceAndAnalysis();
     void testAnalysisReportQuery();
     void testSettingsPeriodCountsCpapHoursOnly();

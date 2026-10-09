@@ -143,6 +143,7 @@ void AnalysisIntegrationTests::initTestCase()
     m_profileId = ProfileRepository().findByUsername(kProfileName).id;
     QVERIFY(m_profileId > 0);
     p_profile->setDatabaseId(m_profileId);
+    p_profile->analysis->setShown(true);   // these tests read the analysis as the pages show it
     m_machineRow = insertRow(QStringLiteral("INSERT INTO machines (profile_id, machine_id, loader_name, machine_type, serial_number) "
                                             "VALUES (?, 3001, 'Test', ?, 'AN1')"), { m_profileId, int(MT_CPAP) });
     QVERIFY(m_machineRow > 0);
@@ -2336,4 +2337,56 @@ void AnalysisIntegrationTests::testUpdateExcludeIntoNextSession()
     QVERIFY(ManualScoringRepository::editsForSession(ManualScoring::keyOf(b)).isEmpty());
     QCOMPARE(a->manualExcludedMs(), qint64(400000));
     ManualScoring::clearDay(&day);
+}
+
+// The "OSCAR analysis" switch: off for a profile that never set it.
+void AnalysisIntegrationTests::testAnalysisShownDefaultOff()
+{
+    const bool before = p_profile->analysis->shown();
+    p_profile->analysis->setShown(false);
+    QVERIFY(!analysis::analysisShown());
+    p_profile->analysis->setShown(true);
+    QVERIFY(p_profile->analysis->shown());
+    QVERIFY(analysis::analysisShown());
+    // a profile without the key: the settings start with it off
+    p_profile->p_preferences.remove(STR_AN_Shown);
+    AnalysisSettings fresh(p_profile);
+    QVERIFY(!fresh.shown());
+    p_profile->analysis->setShown(before);
+}
+
+// Hidden, the stored analysis reaches no page: the service gives no rows, the night summary no
+// analysis figures; shown again, they are back.
+void AnalysisIntegrationTests::testHiddenAnalysisLeavesPages()
+{
+    Machine cpap(p_profile, 46);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    const QDate date = kNightDate.addDays(7);
+    Day *day = p_profile->addDay(date);
+    day->OpenSummary();
+    Session *cs = hypopneaSession(&cpap, 65, m_machineRow);
+    analyzeSession(cs, AnalysisParams());
+    day->addSession(cs);
+    const auto cleanup = qScopeGuard([date, day]() {
+        p_profile->analysis->setShown(true);
+        p_profile->daylist.remove(date);
+        delete day;
+    });
+    p_profile->analysis->resetToDefaults();
+    p_profile->analysis->setShown(true);
+    AnalysisService service;
+    service.reloadSettings();
+    service.updateDays(service.outdatedDays());
+    QVERIFY(service.row(date).id > 0);
+    QVERIFY(buildNightSummaryFor(p_profile, &service, date, date, false).hasAnalysisAhi);
+
+    p_profile->analysis->setShown(false);
+    QCOMPARE(service.row(date).id, qint64(0));
+    QVERIFY(service.rows(date, date).isEmpty());
+    QVERIFY(!buildNightSummaryFor(p_profile, &service, date, date, false).hasAnalysisAhi);
+    QCOMPARE(service.outdatedCount(), 0);   // the computation is not touched
+
+    p_profile->analysis->setShown(true);
+    QVERIFY(service.row(date).id > 0);
 }

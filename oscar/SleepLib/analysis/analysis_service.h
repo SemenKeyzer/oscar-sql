@@ -23,6 +23,9 @@ class Day;
 
 namespace analysis {
 
+//! The "OSCAR analysis" switch of the open profile: false without a profile.
+bool analysisShown();
+
 /*!
  * \class AnalysisService
  * \brief Keeps the open profile's sleep analysis current (spec §4.4).
@@ -77,9 +80,10 @@ class AnalysisService : public QObject
     //! The day brought up to date and scored, for display.
     DayResult dayResult(Day *day, QString *oxiSource = nullptr);
 
-    //! The stored row of a day, or one with id 0.
+    //! The stored row of a day, or one with id 0; none while the analysis is hidden (analysisShown()),
+    //! so no page shows it.
     AnalysisDailyData row(const QDate &date);
-    //! The stored rows from \a from to \a to, in date order.
+    //! The stored rows from \a from to \a to, in date order; none while the analysis is hidden.
     QList<AnalysisDailyData> rows(const QDate &from, const QDate &to);
     //! Rereads the rows from the database (after something else changed them).
     void reloadCache();

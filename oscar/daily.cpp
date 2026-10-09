@@ -4273,7 +4273,7 @@ void Daily::loadAnalysis(Day *day)
     m_analysisSource.clear();
     m_analysisShown = false;
     analysis::AnalysisService *service = mainwin ? mainwin->analysisService() : nullptr;
-    if (day && service && service->params().enabled && !analysis::analysableSessions(day).isEmpty()) {
+    if (day && service && service->params().enabled && analysis::analysisShown() && !analysis::analysableSessions(day).isEmpty()) {
         m_loadingAnalysis = true;   // its own daysChanged() is no reason to reload
         m_analysisResult = service->dayResult(day, &m_analysisSource);
         m_loadingAnalysis = false;

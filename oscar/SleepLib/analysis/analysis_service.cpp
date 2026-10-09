@@ -71,14 +71,21 @@ void AnalysisService::refreshRow(const QDate &date)
     else m_rows.remove(date);
 }
 
+bool analysisShown()
+{
+    return p_profile && p_profile->analysis && p_profile->analysis->shown();
+}
+
 AnalysisDailyData AnalysisService::row(const QDate &date)
 {
+    if (!analysisShown()) return AnalysisDailyData();
     ensureCache();
     return m_rows.value(date);
 }
 
 QList<AnalysisDailyData> AnalysisService::rows(const QDate &from, const QDate &to)
 {
+    if (!analysisShown()) return {};
     ensureCache();
     QList<AnalysisDailyData> out;
     for (auto it = m_rows.lowerBound(from); it != m_rows.end() && it.key() <= to; ++it) out.append(it.value());
