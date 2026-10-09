@@ -1652,8 +1652,8 @@ void    DailySearchTab::on_activated(GPushButton* item ) {
         item->setIcon (*m_icon_selected);
         if (match->searchTopic == ST_DAYS_SKIPPED) return;
         daily->LoadDate( item->date() );
-        if ((col!=0) &&  match->nextTab>=0 && match->nextTab < dailyTabWidget->count())  {
-            dailyTabWidget->setCurrentIndex(match->nextTab);    // 0 = details ; 1=events =2 notes ; 3=bookarks;
+        if (col != 0) {
+            if (QWidget *target = page(dailyTabWidget, match->nextTab)) dailyTabWidget->setCurrentWidget(target);
         }
 }
 
@@ -1946,3 +1946,13 @@ Match*   Matches::addMatch() {
     return empty();
 }
 
+
+QWidget *DailySearchTab::page(QTabWidget *tabs, int tw)
+{
+    static const char *const names[] = { "details", "events", "notes", "bookmarkTab", "searchTab" };   // TW_DETAILED..TW_SEARCH
+    if (!tabs || tw < 0 || tw >= int(sizeof(names) / sizeof(names[0]))) return nullptr;
+    for (int i = 0; i < tabs->count(); ++i) {
+        if (tabs->widget(i)->objectName() == QLatin1String(names[tw])) return tabs->widget(i);
+    }
+    return nullptr;
+}

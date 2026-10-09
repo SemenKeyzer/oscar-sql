@@ -22,6 +22,7 @@ private slots:
     void cleanupTestCase();
     void testButtonsFollowPages();
     void testHidePage();
+    void testInstallInSplitter();
 private:
     QApplication *m_app = nullptr;
 };

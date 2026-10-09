@@ -30,6 +30,7 @@ private slots:
     void testAhiFigures();
     void testManualAnalysisHtml();
     void testManualPageLinks();
+    void testSearchOpensPageByName();
 private:
     QApplication *m_app = nullptr;
 };

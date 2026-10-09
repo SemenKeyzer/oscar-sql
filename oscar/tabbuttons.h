@@ -28,6 +28,9 @@ class TabButtons : public QWidget
 
     //! Shows or hides \a page with its button; hiding the current page selects the first one shown.
     void setPageVisible(QWidget *page, bool visible);
+    //! Puts the buttons above \a tabs: both go into a box that takes \a tabs' place in its splitter
+    //! (and its size policy). Returns the buttons; null when \a tabs is not in a splitter.
+    static TabButtons *installAbove(QTabWidget *tabs, const QList<QList<QWidget *>> &rows);
     QAbstractButton *button(QWidget *page) const { return m_buttons.value(page); }
 
   private:

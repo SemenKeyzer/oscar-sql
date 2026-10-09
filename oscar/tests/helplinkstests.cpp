@@ -24,6 +24,8 @@
 #include "helptips.h"
 #include "overview.h"
 #include "mytextbrowser.h"
+#include "dailySearchTab.h"
+#include <QTabWidget>
 
 namespace {
 
@@ -222,12 +224,20 @@ void HelpLinksTests::testAhiFigures()
     html = Daily::ahiFiguresHtml(QStringLiteral("AHI"), 3.71, 3.0, false, 3.86);
     QVERIFY(!html.contains(QStringLiteral("OSCAR analysis")));
     QVERIFY(html.contains(QStringLiteral("manual scoring — 3.86")));
+    // hovering explains the figures
+    html = Daily::ahiFiguresHtml(QStringLiteral("AHI"), 3.71, 3.0, true, 3.86, QStringLiteral("Apnea Hypopnea Index"));
+    QVERIFY(html.contains(QStringLiteral("title='Apnea Hypopnea Index'")));
+    QVERIFY(html.contains(QStringLiteral("help:manual_scoring")));
+    QVERIFY(html.contains(QStringLiteral("help:an_ahi")));
 }
 
 // The Manual analysis page: the AHI after scoring and the edits, or how to start.
 void HelpLinksTests::testManualAnalysisHtml()
 {
     QVERIFY(Daily::manualAnalysisHtml(QString(), 3.71, 3.71, QStringLiteral("AHI")).contains(QStringLiteral("switch Scoring on below")));
+    // a night without CPAP data: nothing to score, no "switch Scoring on"
+    const QString none = Daily::manualAnalysisHtml(QString(), 0, 0, QStringLiteral("AHI"), false);
+    QVERIFY(none.contains(QStringLiteral("No CPAP data")) && !none.contains(QStringLiteral("Scoring")));
     const QString html = Daily::manualAnalysisHtml(QStringLiteral("<p>THE EDITS</p>"), 3.86, 3.71, QStringLiteral("AHI"));
     QVERIFY2(html.contains(QStringLiteral("AHI after manual scoring: 3.86 (device 3.71)")), qPrintable(html));
     QVERIFY(html.contains(QStringLiteral("THE EDITS")));
@@ -251,4 +261,20 @@ void HelpLinksTests::testManualPageLinks()
     QVERIFY(Daily::parseScoringLink(clicked.first().first().toUrl(), &what, &id));
     QCOMPARE(what, QStringLiteral("undo"));
     QCOMPARE(id, qint64(7));
+}
+
+// A search result opens its page by name, whatever the order of the Daily pages.
+void HelpLinksTests::testSearchOpensPageByName()
+{
+    QTabWidget tabs;
+    for (const char *name : { "details", "events", "analysisTab", "manualAnalysis", "notes", "bookmarkTab", "searchTab" }) {
+        auto *w = new QWidget(&tabs);
+        w->setObjectName(QLatin1String(name));
+        tabs.addTab(w, QLatin1String(name));
+    }
+    QCOMPARE(DailySearchTab::page(&tabs, 2)->objectName(), QStringLiteral("notes"));       // TW_NOTES
+    QCOMPARE(DailySearchTab::page(&tabs, 3)->objectName(), QStringLiteral("bookmarkTab")); // TW_BOOKMARK
+    QCOMPARE(DailySearchTab::page(&tabs, 1)->objectName(), QStringLiteral("events"));
+    QCOMPARE(DailySearchTab::page(&tabs, 0)->objectName(), QStringLiteral("details"));
+    QVERIFY(!DailySearchTab::page(&tabs, -1));
 }

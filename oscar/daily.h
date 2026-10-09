@@ -123,10 +123,12 @@ public:
     static bool channelShown(ChannelID code, bool analysisShown);
     //! The AHI frame's figures: \a name with the device's AHI large, then "OSCAR analysis — X |
     //! manual scoring — Y" ("—" for NaN; no analysis part unless \a analysisShown).
-    static QString ahiFiguresHtml(const QString &name, double deviceAhi, double analysisAhi, bool analysisShown, double manualAhi);
+    static QString ahiFiguresHtml(const QString &name, double deviceAhi, double analysisAhi, bool analysisShown, double manualAhi,
+                                  const QString &title = QString());
     //! The Manual analysis page: the AHI after manual scoring and \a scoringBlock (the edits), or a
     //! hint how to start when there are none.
-    static QString manualAnalysisHtml(const QString &scoringBlock, double correctedAhi, double deviceAhi, const QString &name);
+    static QString manualAnalysisHtml(const QString &scoringBlock, double correctedAhi, double deviceAhi, const QString &name,
+                                      bool cpapData = true);
     //! Hides the analysis graphs and the Analysis tab while the analysis is hidden (analysisShown()).
     void applyAnalysisShown();
     //! Sets the "OSCAR analysis" button without emitting analysisToggled().

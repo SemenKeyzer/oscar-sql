@@ -155,6 +155,10 @@ private:
     const int          TW_NOTES      =  2;
     const int          TW_BOOKMARK   =  3;
     const int          TW_SEARCH     =  4;
+  public:
+    //! The Daily page a result opens (TW_*), found by its name: the pages' order may change.
+    static QWidget *page(QTabWidget *tabs, int tw);
+  private:
 
     const int     dateRole = Qt::UserRole;
     const int     valueRole = 1+Qt::UserRole;

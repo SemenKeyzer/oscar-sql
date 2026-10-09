@@ -280,18 +280,8 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     connect(m_manualView, SIGNAL(anchorClicked(QUrl)), this, SLOT(Link_clicked(QUrl)));
 
     // the pages as two rows of buttons above them, in place of the tab bar
-    {
-        auto *box = new QWidget(ui->splitter);
-        auto *boxLayout = new QVBoxLayout(box);
-        boxLayout->setContentsMargins(0, 0, 0, 0);
-        boxLayout->setSpacing(2);
-        const int at = ui->splitter->indexOf(ui->tabWidget);
-        ui->splitter->replaceWidget(at, box);
-        m_tabButtons = new TabButtons(ui->tabWidget, { { widget, ui->events, m_analysisTab, m_manualView },
-                                                       { ui->notes, ui->bookmarkTab, ui->searchTab } }, box);
-        boxLayout->addWidget(m_tabButtons);
-        boxLayout->addWidget(ui->tabWidget, 1);
-    }
+    m_tabButtons = TabButtons::installAbove(ui->tabWidget, { { widget, ui->events, m_analysisTab, m_manualView },
+                                                             { ui->notes, ui->bookmarkTab, ui->searchTab } });
     connect(m_analysisTab, &AnalysisTab::showRange, this, [this](qint64 from, qint64 to) {
         GraphView->SetXBounds(from, to);
     });
@@ -2127,22 +2117,26 @@ QString Daily::getSleepTime(Day * day)
 }
 
 
-QString Daily::ahiFiguresHtml(const QString &name, double deviceAhi, double analysisAhi, bool analysisShown, double manualAhi)
+QString Daily::ahiFiguresHtml(const QString &name, double deviceAhi, double analysisAhi, bool analysisShown, double manualAhi,
+                              const QString &title)
 {
     auto figure = [](double v, int decimals) { return std::isnan(v) ? QStringLiteral("—") : QString::number(v, 'f', decimals); };
-    QString html = QString("<tr><td colspan=5 bgcolor='%1' align=center><div style='white-space: nowrap;'><font size=+3 color='%2'><b>%3</b></font>"
+    QString html = QString("<tr><td colspan=5 bgcolor='%1' align=center><div title='%5' style='white-space: nowrap;'><font size=+3 color='%2'><b>%3</b></font>"
                            "&nbsp;&nbsp;&nbsp;&nbsp; <font size=+3 color='%2'><b>%4</b></font></div></td></tr>\n")
-                       .arg("#F88017", COLOR_Text.name(), name.toHtmlEscaped(), figure(deviceAhi, 2));
+                       .arg("#F88017", COLOR_Text.name(), name.toHtmlEscaped(), figure(deviceAhi, 2), title.toHtmlEscaped());
+    // each part explains itself on hover
     QStringList parts;
-    if (analysisShown) parts << tr("OSCAR analysis — %1").arg(figure(analysisAhi, 1));
-    parts << tr("manual scoring — %1").arg(figure(manualAhi, 2));
+    if (analysisShown) parts << HelpTips::term(tr("OSCAR analysis — %1").arg(figure(analysisAhi, 1)).toHtmlEscaped(), QStringLiteral("an_ahi"));
+    parts << HelpTips::term(tr("manual scoring — %1").arg(figure(manualAhi, 2)).toHtmlEscaped(), QStringLiteral("manual_scoring"));
     html += QString("<tr><td colspan=5 bgcolor='%1' align=center><font color='%2'>%3</font></td></tr>\n")
-                .arg("#F88017", COLOR_Text.name(), parts.join(QStringLiteral(" | ")).toHtmlEscaped());
+                .arg("#F88017", COLOR_Text.name(), parts.join(QStringLiteral(" | ")));
     return html;
 }
 
-QString Daily::manualAnalysisHtml(const QString &scoringBlock, double correctedAhi, double deviceAhi, const QString &name)
+QString Daily::manualAnalysisHtml(const QString &scoringBlock, double correctedAhi, double deviceAhi, const QString &name,
+                                  bool cpapData)
 {
+    if (!cpapData) return QStringLiteral("<p><i>%1</i></p>").arg(tr("No CPAP data this night.").toHtmlEscaped());
     if (scoringBlock.isEmpty()) {
         return QStringLiteral("<p><i>%1</i></p>").arg(tr("No manual scoring this night: switch Scoring on below to correct the events.").toHtmlEscaped());
     }
@@ -2180,7 +2174,7 @@ void Daily::updateManualPage(Day *day)
     if (!m_manualView) return;
     const QString name = p_profile && p_profile->general->calculateRDI() ? STR_TR_RDI : STR_TR_AHI;
     if (!day || day->hours(MT_CPAP) <= 0) {
-        m_manualView->setHtml(manualAnalysisHtml(QString(), 0, 0, name));
+        m_manualView->setHtml(manualAnalysisHtml(QString(), 0, 0, name, false));
         return;
     }
     double corrected = 0, device = 0;
@@ -2207,7 +2201,7 @@ QString Daily::getAHI(Day * day, bool isBrick, double analysisAhi) {
         const double manual = day->hasManualScoring() ? ahi : std::numeric_limits<double>::quiet_NaN();
         html += ahiFiguresHtml(rdi ? STR_TR_RDI : STR_TR_AHI, deviceAhi,
                                analysisAhi >= 0 ? analysisAhi : std::numeric_limits<double>::quiet_NaN(),
-                               analysis::analysisShown(), manual);
+                               analysis::analysisShown(), manual, schema::channel[rdi ? CPAP_RDI : CPAP_AHI].fullname());
     } else {
         html +=QString("<tr><td colspan=5 bgcolor='%1' align=center><font size=+3 color='yellow'><b>%2</b></font></td></tr>\n")
                 .arg("#F88017").arg(tr("This CPAP device does NOT record detailed data"));

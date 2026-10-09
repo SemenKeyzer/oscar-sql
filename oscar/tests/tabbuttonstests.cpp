@@ -10,6 +10,10 @@
 
 #include <QAbstractButton>
 #include <QApplication>
+#include <QTest>
+#include <QRegularExpression>
+#include <QSplitter>
+#include <QLabel>
 #include <QTabBar>
 #include <QTabWidget>
 
@@ -69,4 +73,26 @@ void TabButtonsTests::testHidePage()
     QVERIFY(buttons.button(a)->isChecked());
     buttons.setPageVisible(b, true);
     QVERIFY(!buttons.button(b)->isHidden());
+}
+
+// In a splitter the buttons and the pages take the pages' place, size policy included, with no
+// pane added or moved.
+void TabButtonsTests::testInstallInSplitter()
+{
+    QSplitter splitter(Qt::Vertical);
+    auto *above = new QLabel(QStringLiteral("calendar"), &splitter);
+    auto *tabs = new QTabWidget(&splitter);
+    QSizePolicy grow(QSizePolicy::Preferred, QSizePolicy::Expanding);
+    grow.setVerticalStretch(1);
+    tabs->setSizePolicy(grow);
+    QWidget *a = page(*tabs, QStringLiteral("a"));
+    QTest::failOnWarning(QRegularExpression(QStringLiteral(".*")));
+    TabButtons *buttons = TabButtons::installAbove(tabs, { { a } });
+    QVERIFY(buttons);
+    QCOMPARE(splitter.count(), 2);
+    QCOMPARE(splitter.widget(0), above);
+    QWidget *box = splitter.widget(1);
+    QVERIFY(box->isAncestorOf(tabs) && box->isAncestorOf(buttons));
+    QCOMPARE(box->sizePolicy().verticalStretch(), 1);
+    QCOMPARE(box->sizePolicy().verticalPolicy(), QSizePolicy::Expanding);
 }

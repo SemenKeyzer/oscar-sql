@@ -10,6 +10,7 @@
 
 #include <QButtonGroup>
 #include <QHBoxLayout>
+#include <QSplitter>
 #include <QTabBar>
 #include <QTabWidget>
 #include <QToolButton>
@@ -68,4 +69,21 @@ void TabButtons::setPageVisible(QWidget *page, bool visible)
         }
     }
     follow(m_tabs->currentIndex());
+}
+
+TabButtons *TabButtons::installAbove(QTabWidget *tabs, const QList<QList<QWidget *>> &rows)
+{
+    auto *splitter = qobject_cast<QSplitter *>(tabs ? tabs->parentWidget() : nullptr);
+    if (!splitter) return nullptr;
+    // a box with no parent yet: QSplitter only replaces a pane with a widget that is not already one
+    auto *box = new QWidget;
+    box->setSizePolicy(tabs->sizePolicy());
+    splitter->replaceWidget(splitter->indexOf(tabs), box);
+    auto *layout = new QVBoxLayout(box);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(2);
+    auto *buttons = new TabButtons(tabs, rows, box);
+    layout->addWidget(buttons);
+    layout->addWidget(tabs, 1);
+    return buttons;
 }
