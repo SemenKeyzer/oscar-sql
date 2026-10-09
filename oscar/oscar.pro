@@ -370,6 +370,7 @@ SOURCES += \
     SleepLib/manual_scoring.cpp \
     Graphs/scoringgesture.cpp \
     Graphs/scoringresize.cpp \
+    tabbuttons.cpp \
     Graphs/gManualScoringLayer.cpp \
     database/manual_scoring_repository.cpp \
     helpstrip.cpp \
@@ -706,6 +707,7 @@ HEADERS  += \
     SleepLib/manual_scoring.h \
     Graphs/scoringgesture.h \
     Graphs/scoringresize.h \
+    tabbuttons.h \
     Graphs/gManualScoringLayer.h \
     database/manual_scoring_repository.h \
     helpstrip.h \
@@ -931,6 +933,7 @@ test {
         tests/scoringmodetests.cpp \
         tests/scoringmenustests.cpp \
         tests/helplinkstests.cpp \
+        tests/tabbuttonstests.cpp \
         tests/htmlpagestests.cpp \
         tests/channelstoretests.cpp \
         tests/machinetests.cpp \
@@ -985,6 +988,7 @@ test {
         tests/scoringmodetests.h \
         tests/scoringmenustests.h \
         tests/helplinkstests.h \
+        tests/tabbuttonstests.h \
         tests/htmlpagestests.h \
         tests/channelstoretests.h \
         tests/machinetests.h \
