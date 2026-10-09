@@ -9,6 +9,7 @@
 #include "helplinkstests.h"
 
 #include <QApplication>
+#include <limits>
 #include <QMouseEvent>
 #include <QSignalSpy>
 #include <QTest>
@@ -204,4 +205,30 @@ void HelpLinksTests::testScoringLinkClicked()
     QVERIFY(Daily::parseScoringLink(clicked.last().first().toUrl(), &what, &id));
     QCOMPARE(what, QStringLiteral("undo"));
     QCOMPARE(id, qint64(12));
+}
+
+// The AHI frame: the device's AHI large, OSCAR's analysis and manual scoring beneath ("—" where
+// there is none; no analysis part while it is hidden).
+void HelpLinksTests::testAhiFigures()
+{
+    const double none = std::numeric_limits<double>::quiet_NaN();
+    QString html = Daily::ahiFiguresHtml(QStringLiteral("AHI"), 3.71, 3.0, true, 3.86);
+    QVERIFY2(html.contains(QStringLiteral("3.71")), qPrintable(html));
+    QVERIFY(html.contains(QStringLiteral("OSCAR analysis — 3.0")));
+    QVERIFY(html.contains(QStringLiteral("manual scoring — 3.86")));
+    html = Daily::ahiFiguresHtml(QStringLiteral("AHI"), 3.71, none, true, none);
+    QVERIFY(html.contains(QStringLiteral("OSCAR analysis — —")));
+    QVERIFY(html.contains(QStringLiteral("manual scoring — —")));
+    html = Daily::ahiFiguresHtml(QStringLiteral("AHI"), 3.71, 3.0, false, 3.86);
+    QVERIFY(!html.contains(QStringLiteral("OSCAR analysis")));
+    QVERIFY(html.contains(QStringLiteral("manual scoring — 3.86")));
+}
+
+// The Manual analysis page: the AHI after scoring and the edits, or how to start.
+void HelpLinksTests::testManualAnalysisHtml()
+{
+    QVERIFY(Daily::manualAnalysisHtml(QString(), 3.71, 3.71, QStringLiteral("AHI")).contains(QStringLiteral("switch Scoring on below")));
+    const QString html = Daily::manualAnalysisHtml(QStringLiteral("<p>THE EDITS</p>"), 3.86, 3.71, QStringLiteral("AHI"));
+    QVERIFY2(html.contains(QStringLiteral("AHI after manual scoring: 3.86 (device 3.71)")), qPrintable(html));
+    QVERIFY(html.contains(QStringLiteral("THE EDITS")));
 }

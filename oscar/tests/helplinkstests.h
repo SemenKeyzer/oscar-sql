@@ -27,6 +27,8 @@ private slots:
     void testSelectInsideTermDoesNotOpen();
     void testEventTreeName();
     void testScoringLinkClicked();
+    void testAhiFigures();
+    void testManualAnalysisHtml();
 private:
     QApplication *m_app = nullptr;
 };

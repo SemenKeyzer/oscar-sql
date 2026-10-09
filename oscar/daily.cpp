@@ -2103,6 +2103,31 @@ QString Daily::getSleepTime(Day * day)
 }
 
 
+QString Daily::ahiFiguresHtml(const QString &name, double deviceAhi, double analysisAhi, bool analysisShown, double manualAhi)
+{
+    auto figure = [](double v, int decimals) { return std::isnan(v) ? QStringLiteral("—") : QString::number(v, 'f', decimals); };
+    QString html = QString("<tr><td colspan=5 bgcolor='%1' align=center><div style='white-space: nowrap;'><font size=+3 color='%2'><b>%3</b></font>"
+                           "&nbsp;&nbsp;&nbsp;&nbsp; <font size=+3 color='%2'><b>%4</b></font></div></td></tr>\n")
+                       .arg("#F88017", COLOR_Text.name(), name.toHtmlEscaped(), figure(deviceAhi, 2));
+    QStringList parts;
+    if (analysisShown) parts << tr("OSCAR analysis — %1").arg(figure(analysisAhi, 1));
+    parts << tr("manual scoring — %1").arg(figure(manualAhi, 2));
+    html += QString("<tr><td colspan=5 bgcolor='%1' align=center><font color='%2'>%3</font></td></tr>\n")
+                .arg("#F88017", COLOR_Text.name(), parts.join(QStringLiteral(" | ")).toHtmlEscaped());
+    return html;
+}
+
+QString Daily::manualAnalysisHtml(const QString &scoringBlock, double correctedAhi, double deviceAhi, const QString &name)
+{
+    if (scoringBlock.isEmpty()) {
+        return QStringLiteral("<p><i>%1</i></p>").arg(tr("No manual scoring this night: switch Scoring on below to correct the events.").toHtmlEscaped());
+    }
+    return QStringLiteral("<p align=center><b>%1</b></p>")
+               .arg(tr("%1 after manual scoring: %2 (device %3)").arg(name, QString::number(correctedAhi, 'f', 2), QString::number(deviceAhi, 'f', 2))
+                        .toHtmlEscaped())
+        + scoringBlock;
+}
+
 QString Daily::getAHI(Day * day, bool isBrick, double analysisAhi) {
     QString html;
 
@@ -2117,27 +2142,29 @@ QString Daily::getAHI(Day * day, bool isBrick, double analysisAhi) {
     // QString appFont = QApplication::font().toString();
     // html +=QString("<tr><td colspan=5 align=center>%1</td></tr>").arg(appFont);
 
-    html +="<tr>";
     if (!isBrick) {
-        ChannelID ahichan=CPAP_AHI;
-        QString ahiname=STR_TR_AHI;
-        if (p_profile->general->calculateRDI()) {
-            ahichan=CPAP_RDI;
-            ahiname=STR_TR_RDI;
+        const bool rdi = p_profile->general->calculateRDI();
+        // the device's own figure large; OSCAR's analysis and manual scoring beneath it
+        double device = ahi;
+        double manual = std::numeric_limits<double>::quiet_NaN();
+        if (day->hasManualScoring()) {
+            manual = ahi;
+            device = day->deviceAHI();
+            if (rdi) {   // the device's RERA, before any stretch was left out
+                double rera = 0;
+                for (Session *s : day->sessions) {
+                    if (s->type() == MT_CPAP && s->enabled() && s->m_cnt.contains(CPAP_RERA)) rera += s->count(CPAP_RERA);
+                }
+                const double h = day->hours(MT_CPAP);
+                if (h > 0) device += rera / h;
+            }
         }
-        html +=QString("<td colspan=5 bgcolor='%1' align=center><div title='  %4 \t  ' style='white-space: nowrap;'><font size=+3 color='%2'><b>%3</b></font>&nbsp;&nbsp;&nbsp;&nbsp; <font size=+3 color='%2'><b>%5</b></font></div></td>\n")
-                .arg("#F88017").arg(COLOR_Text.name()).arg(ahiname).arg(schema::channel[ahichan].fullname()).arg(ahi,0,'f',2);
+        html += ahiFiguresHtml(rdi ? STR_TR_RDI : STR_TR_AHI, device,
+                               analysisAhi >= 0 ? analysisAhi : std::numeric_limits<double>::quiet_NaN(),
+                               analysis::analysisShown(), manual);
     } else {
-        html +=QString("<td colspan=5 bgcolor='%1' align=center><font size=+3 color='yellow'><b>%2</b></font></td>\n")
+        html +=QString("<tr><td colspan=5 bgcolor='%1' align=center><font size=+3 color='yellow'><b>%2</b></font></td></tr>\n")
                 .arg("#F88017").arg(tr("This CPAP device does NOT record detailed data"));
-    }
-    html +="</tr>\n";
-
-    // corrected by hand: the device's own figure next to it
-    if (!isBrick && day->hasManualScoring()) {
-        html += QString("<tr><td colspan=5 bgcolor='%1' align=center><font color='%2'>%3</font></td></tr>\n")
-                    .arg("#F88017", COLOR_Text.name(),
-                         HelpTips::term(tr("device %1 · corrected by hand").arg(day->deviceAHI(), 0, 'f', 2), QStringLiteral("manual_scoring")));
     }
 
     // Obstructive and central breakdown of the same index, shown only for a device that
@@ -2158,12 +2185,6 @@ QString Daily::getAHI(Day * day, bool isBrick, double analysisAhi) {
                 .arg(STR_TR_CAHI).arg(cahi,0,'f',2);
         html +="</tr>\n";
     }
-    // The analysis' AHI under the device's, so the two read side by side.
-    if (!isBrick && analysisAhi >= 0) {
-        html += QString("<tr><td colspan=5 bgcolor='%1' align=center><font color='%2'>%3</font></td></tr>\n")
-                    .arg("#F88017", COLOR_Text.name(), tr("OSCAR's analysis: %1").arg(analysisAhi, 0, 'f', 1));
-    }
-
     html +="</table>\n";
 
     return html;
