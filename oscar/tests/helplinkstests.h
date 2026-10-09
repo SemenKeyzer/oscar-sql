@@ -29,6 +29,7 @@ private slots:
     void testScoringLinkClicked();
     void testAhiFigures();
     void testManualAnalysisHtml();
+    void testManualPageLinks();
 private:
     QApplication *m_app = nullptr;
 };

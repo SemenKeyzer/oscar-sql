@@ -60,6 +60,7 @@
 #include "statistics.h"
 #include "Graphs/gManualScoringLayer.h"
 #include "Graphs/scoringgesture.h"
+#include "tabbuttons.h"
 #include "SleepLib/manual_scoring.h"
 #include "database/manual_scoring_repository.h"
 #include "nightsummary.h"
@@ -263,11 +264,34 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     layout2->insertWidget(1,sessionbar,0);
     // add the sessionbar after it.
 
+    widget->setObjectName(QStringLiteral("details"));
     ui->tabWidget->insertTab(0, widget, QIcon(), tr("Details"));
 
     // OSCAR's own analysis: where it and the device differ, problem zones, ...
     m_analysisTab = new AnalysisTab(ui->tabWidget);
-    ui->tabWidget->insertTab(ui->tabWidget->indexOf(ui->events) + 1, m_analysisTab, tr("Analysis"));
+    m_analysisTab->setObjectName(QStringLiteral("analysisTab"));
+    ui->tabWidget->insertTab(ui->tabWidget->indexOf(ui->events) + 1, m_analysisTab, tr("OSCAR analysis"));
+
+    // manual scoring: its AHI and the edits, on a page of its own
+    m_manualView = new MyTextBrowser(ui->tabWidget);
+    m_manualView->setObjectName(QStringLiteral("manualAnalysis"));
+    m_manualView->setOpenLinks(false);
+    ui->tabWidget->insertTab(ui->tabWidget->indexOf(m_analysisTab) + 1, m_manualView, tr("Manual analysis"));
+    connect(m_manualView, SIGNAL(anchorClicked(QUrl)), this, SLOT(Link_clicked(QUrl)));
+
+    // the pages as two rows of buttons above them, in place of the tab bar
+    {
+        auto *box = new QWidget(ui->splitter);
+        auto *boxLayout = new QVBoxLayout(box);
+        boxLayout->setContentsMargins(0, 0, 0, 0);
+        boxLayout->setSpacing(2);
+        const int at = ui->splitter->indexOf(ui->tabWidget);
+        ui->splitter->replaceWidget(at, box);
+        m_tabButtons = new TabButtons(ui->tabWidget, { { widget, ui->events, m_analysisTab, m_manualView },
+                                                       { ui->notes, ui->bookmarkTab, ui->searchTab } }, box);
+        boxLayout->addWidget(m_tabButtons);
+        boxLayout->addWidget(ui->tabWidget, 1);
+    }
     connect(m_analysisTab, &AnalysisTab::showRange, this, [this](qint64 from, qint64 to) {
         GraphView->SetXBounds(from, to);
     });
@@ -2128,13 +2152,48 @@ QString Daily::manualAnalysisHtml(const QString &scoringBlock, double correctedA
         + scoringBlock;
 }
 
+void Daily::ahiValues(Day *day, double *corrected, double *device)
+{
+    const bool rdi = p_profile->general->calculateRDI();
+    const float hours = day->ahiHours();   // less the stretches excluded by manual scoring
+    EventDataType ahi = day->count(AllAhiChannels);
+    if (rdi) ahi += day->count(CPAP_RERA);
+    ahi = hours > 0 ? ahi / hours : 0;
+    double own = ahi;
+    if (day->hasManualScoring()) {
+        own = day->deviceAHI();
+        if (rdi) {   // the device's RERA, before any stretch was left out
+            double rera = 0;
+            for (Session *s : day->sessions) {
+                if (s->type() == MT_CPAP && s->enabled() && s->m_cnt.contains(CPAP_RERA)) rera += s->count(CPAP_RERA);
+            }
+            const double h = day->hours(MT_CPAP);
+            if (h > 0) own += rera / h;
+        }
+    }
+    if (corrected) *corrected = ahi;
+    if (device) *device = own;
+}
+
+void Daily::updateManualPage(Day *day)
+{
+    if (!m_manualView) return;
+    const QString name = p_profile && p_profile->general->calculateRDI() ? STR_TR_RDI : STR_TR_AHI;
+    if (!day || day->hours(MT_CPAP) <= 0) {
+        m_manualView->setHtml(manualAnalysisHtml(QString(), 0, 0, name));
+        return;
+    }
+    double corrected = 0, device = 0;
+    ahiValues(day, &corrected, &device);
+    m_manualView->setHtml(manualAnalysisHtml(getManualScoring(day), corrected, device, name));
+}
+
 QString Daily::getAHI(Day * day, bool isBrick, double analysisAhi) {
     QString html;
 
     float hours=day->ahiHours();   // less the stretches excluded by manual scoring
-    EventDataType ahi=day->count(AllAhiChannels);
-    if (p_profile->general->calculateRDI()) ahi+=day->count(CPAP_RERA);
-    ahi = hours > 0 ? ahi / hours : 0;
+    double ahi = 0, deviceAhi = 0;
+    ahiValues(day, &ahi, &deviceAhi);
 
     html ="<table cellspacing=0 cellpadding=0 border=0 width='100%'>\n";
 
@@ -2145,21 +2204,8 @@ QString Daily::getAHI(Day * day, bool isBrick, double analysisAhi) {
     if (!isBrick) {
         const bool rdi = p_profile->general->calculateRDI();
         // the device's own figure large; OSCAR's analysis and manual scoring beneath it
-        double device = ahi;
-        double manual = std::numeric_limits<double>::quiet_NaN();
-        if (day->hasManualScoring()) {
-            manual = ahi;
-            device = day->deviceAHI();
-            if (rdi) {   // the device's RERA, before any stretch was left out
-                double rera = 0;
-                for (Session *s : day->sessions) {
-                    if (s->type() == MT_CPAP && s->enabled() && s->m_cnt.contains(CPAP_RERA)) rera += s->count(CPAP_RERA);
-                }
-                const double h = day->hours(MT_CPAP);
-                if (h > 0) device += rera / h;
-            }
-        }
-        html += ahiFiguresHtml(rdi ? STR_TR_RDI : STR_TR_AHI, device,
+        const double manual = day->hasManualScoring() ? ahi : std::numeric_limits<double>::quiet_NaN();
+        html += ahiFiguresHtml(rdi ? STR_TR_RDI : STR_TR_AHI, deviceAhi,
                                analysisAhi >= 0 ? analysisAhi : std::numeric_limits<double>::quiet_NaN(),
                                analysis::analysisShown(), manual);
     } else {
@@ -2583,7 +2629,7 @@ void Daily::applyAnalysisShown()
         const bool analysisGraph = it.key() == STR_GRAPH_AnalysisFlags || schema::channel[it.key()].isComputed();
         if (it.value()) it.value()->setSuppressed(!shown && analysisGraph);
     }
-    if (m_analysisTab) ui->tabWidget->setTabVisible(ui->tabWidget->indexOf(m_analysisTab), shown);
+    if (m_analysisTab && m_tabButtons) m_tabButtons->setPageVisible(m_analysisTab, shown);
     updateGraphCombo();   // the list and the "N graphs" count leave out the hidden ones
     GraphView->updateScale();
     GraphView->redraw();
@@ -2603,6 +2649,7 @@ QString Daily::eventTreeName(ChannelID code)
 void Daily::Load(QDate date)
 {
     updateScoringLayer(nullptr);   // a night without CPAP hours draws no scoring
+    updateManualPage(nullptr);
     PERF_TIMER_SCOPE("Daily::Load()");
 
     qDebug() << "Daily::Load(): Called for" << date.toString() << "using" << QApplication::font().toString();
@@ -2734,8 +2781,9 @@ void Daily::Load(QDate date)
         PERF_TIMER_START("Daily::Load::LeftPanel");
         modestr=schema::channel[CPAP_Mode].m_options[mode];
         if (hours>0) {
-            htmlLeftAHI= getAHI(day,isBrick, figures.hasAnalysisAhi ? figures.analysisAhi : -1) + getManualScoring(day);
+            htmlLeftAHI= getAHI(day,isBrick, figures.hasAnalysisAhi ? figures.analysisAhi : -1);
             updateScoringLayer(day);
+            updateManualPage(day);
 
             htmlLeftMachineInfo = getCPAPInformation(day);
 

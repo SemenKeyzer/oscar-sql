@@ -453,6 +453,10 @@ private:
 
     //! \a analysisAhi: OSCAR's analysis of that night, shown under the device's; < 0 for none.
     QString getAHI (Day * day, bool isBrick, double analysisAhi = -1);
+    //! The night's AHI (RDI) as corrected by manual scoring and as the device counted it.
+    static void ahiValues(Day *day, double *corrected, double *device);
+    //! Fills the Manual analysis page for \a day (the hint without CPAP data or edits).
+    void updateManualPage(Day *day);
     //! The sidebar block listing the night's manual scoring, empty without it.
     QString getManualScoring(Day *day);
     QString getSessionInformation(Day *);
@@ -480,6 +484,8 @@ private:
     // Manual scoring (SleepLib/manual_scoring)
     QPushButton *scoringButton = nullptr;
     QPushButton *analysisButton = nullptr;   //!< the "OSCAR analysis" switch
+    class MyTextBrowser *m_manualView = nullptr;   //!< the Manual analysis page
+    class TabButtons *m_tabButtons = nullptr;      //!< the left panel's pages as buttons
     QWidget *m_scoringBanner = nullptr;   //!< the hint and the navigation through the events
     QComboBox *m_scoringType = nullptr;   //!< which events ◀ ▶ step through
     QComboBox *m_scoringWindow = nullptr; //!< how much of the night a step shows

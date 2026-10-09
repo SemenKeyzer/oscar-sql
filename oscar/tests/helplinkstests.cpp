@@ -232,3 +232,23 @@ void HelpLinksTests::testManualAnalysisHtml()
     QVERIFY2(html.contains(QStringLiteral("AHI after manual scoring: 3.86 (device 3.71)")), qPrintable(html));
     QVERIFY(html.contains(QStringLiteral("THE EDITS")));
 }
+
+// The Manual analysis page keeps the working link format: undo reaches the page as written.
+void HelpLinksTests::testManualPageLinks()
+{
+    MyTextBrowser browser(nullptr);
+    browser.setOpenLinks(false);
+    browser.resize(400, 300);
+    const QString undo = Daily::scoringLink(QStringLiteral("undo"), 7);
+    browser.setHtml(Daily::manualAnalysisHtml(QStringLiteral("<p><a href='%1'>X</a></p>").arg(undo), 3.86, 3.71, QStringLiteral("AHI")));
+    browser.show();
+    QVERIFY(QTest::qWaitForWindowExposed(&browser));
+    QSignalSpy clicked(&browser, &QTextBrowser::anchorClicked);
+    QTest::mouseClick(browser.viewport(), Qt::LeftButton, Qt::NoModifier, anchorPoint(browser, undo));
+    QCOMPARE(clicked.count(), 1);
+    QString what;
+    qint64 id = 0;
+    QVERIFY(Daily::parseScoringLink(clicked.first().first().toUrl(), &what, &id));
+    QCOMPARE(what, QStringLiteral("undo"));
+    QCOMPARE(id, qint64(7));
+}
