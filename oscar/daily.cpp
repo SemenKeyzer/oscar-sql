@@ -905,8 +905,9 @@ void Daily::Link_clicked(const QUrl &url)
     if (code == "scoring") {   // the manual scoring block: jump to, undo one, or clear all
         Day *sday = p_profile->GetDay(previous_date, MT_CPAP);
         if (!sday) return;
-        const QString what = data.section(':', 0, 0);
-        const qint64 id = data.section(':', 1).toLongLong();
+        QString what = data;   // "clear", or an edit's link
+        qint64 id = 0;
+        parseScoringLink(url, &what, &id);
         if (what == QLatin1String("clear")) {
             if (QMessageBox::question(this, tr("Manual scoring"), tr("Undo all manual scoring of this night?"),
                                       QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes) return;
@@ -2511,6 +2512,25 @@ QVariant MyTextBrowser::loadResource(int type, const QUrl &url)
     return QTextBrowser::loadResource(type, url);
 }
 
+
+QString Daily::scoringLink(const QString &what, qint64 id)
+{
+    // no colon: in a link's first part it makes the link invalid, and Qt hands on an empty one
+    return QStringLiteral("scoring=%1/%2").arg(what).arg(id);
+}
+
+bool Daily::parseScoringLink(const QUrl &url, QString *what, qint64 *id)
+{
+    const QString link = url.toString();
+    if (!link.startsWith(QLatin1String("scoring="))) return false;
+    const QString data = link.mid(8);
+    bool ok = false;
+    const qint64 n = data.section(QLatin1Char('/'), 1).toLongLong(&ok);
+    if (!ok) return false;
+    if (what) *what = data.section(QLatin1Char('/'), 0, 0);
+    if (id) *id = n;
+    return true;
+}
 
 QString Daily::eventTreeName(ChannelID code)
 {
@@ -4482,8 +4502,9 @@ QString Daily::getManualScoring(Day *day)
     }
     QString rows;
     for (const ScoringMenus::EditRow &r : ScoringMenus::editRows(day)) {
-        rows += QStringLiteral("<tr><td colspan=4><a href='scoring=jump:%1'>%2</a> %3</td><td align=right><a href='scoring=undo:%1' title='%4'>&#x2715;</a></td></tr>\n")
-                    .arg(r.editId).arg(scoringTime(r.timeMs), r.text.toHtmlEscaped(), tr("Undo this change").toHtmlEscaped());
+        rows += QStringLiteral("<tr><td colspan=4><a href='%1'>%2</a> %3</td><td align=right><a href='%4' title='%5'>&#x2715;</a></td></tr>\n")
+                    .arg(scoringLink(QStringLiteral("jump"), r.editId), scoringTime(r.timeMs), r.text.toHtmlEscaped(),
+                         scoringLink(QStringLiteral("undo"), r.editId), tr("Undo this change").toHtmlEscaped());
     }
     QString html = QStringLiteral("<table cellspacing=0 cellpadding=1 border=0 width='100%'>\n");
     html += QStringLiteral("<tr><td colspan=5 align=center><b>%1</b></td></tr>\n").arg(HelpTips::term(tr("Manual scoring"), QStringLiteral("manual_scoring")));

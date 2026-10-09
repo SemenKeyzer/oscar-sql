@@ -119,6 +119,10 @@ public:
     static QString helpKeyForGraph(const QString &name);
     //! The name of an event type in the Events tab; "Channel N" for one without a name.
     static QString eventTreeName(ChannelID code);
+    //! A link of the manual scoring list: \a what ("jump", "undo") of the edit \a id.
+    static QString scoringLink(const QString &what, qint64 id);
+    //! The parts of a scoringLink(); false for another link.
+    static bool parseScoringLink(const QUrl &url, QString *what, qint64 *id);
 
     /*! \fn getDate()
         \brief Returns the most recently loaded Date

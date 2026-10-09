@@ -180,3 +180,28 @@ void HelpLinksTests::testEventTreeName()
     const ChannelID unnamed = 0x7ff0;   // no such channel: schema::channel gives the empty one
     QCOMPARE(Daily::eventTreeName(unnamed), QStringLiteral("Channel %1").arg(unnamed));
 }
+
+// The manual scoring list's links reach the page intact: a colon in a link's first part (as in
+// "scoring=jump:12") makes Qt drop it, so jump and undo did nothing.
+void HelpLinksTests::testScoringLinkClicked()
+{
+    MyTextBrowser browser(nullptr);
+    browser.setOpenLinks(false);
+    browser.resize(400, 200);
+    const QString jump = Daily::scoringLink(QStringLiteral("jump"), 12), undo = Daily::scoringLink(QStringLiteral("undo"), 12);
+    browser.setHtml(QStringLiteral("<table><tr><td><a href='%1'>02:38:02</a> added</td><td><a href='%2'>X</a></td></tr></table>").arg(jump, undo));
+    browser.show();
+    QVERIFY(QTest::qWaitForWindowExposed(&browser));
+    QSignalSpy clicked(&browser, &QTextBrowser::anchorClicked);
+    QTest::mouseClick(browser.viewport(), Qt::LeftButton, Qt::NoModifier, anchorPoint(browser, jump));
+    QTest::mouseClick(browser.viewport(), Qt::LeftButton, Qt::NoModifier, anchorPoint(browser, undo));
+    QCOMPARE(clicked.count(), 2);
+    QString what;
+    qint64 id = 0;
+    QVERIFY(Daily::parseScoringLink(clicked.first().first().toUrl(), &what, &id));
+    QCOMPARE(what, QStringLiteral("jump"));
+    QCOMPARE(id, qint64(12));
+    QVERIFY(Daily::parseScoringLink(clicked.last().first().toUrl(), &what, &id));
+    QCOMPARE(what, QStringLiteral("undo"));
+    QCOMPARE(id, qint64(12));
+}

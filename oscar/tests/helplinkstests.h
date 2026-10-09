@@ -26,6 +26,7 @@ private slots:
     void testKeyboardOpensHelpLink();
     void testSelectInsideTermDoesNotOpen();
     void testEventTreeName();
+    void testScoringLinkClicked();
 private:
     QApplication *m_app = nullptr;
 };
