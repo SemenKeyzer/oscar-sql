@@ -511,3 +511,11 @@ void AnalysisPanelTests::testSidebarTerms()
         QVERIFY2(html.contains(QStringLiteral("help:%1'").arg(QLatin1String(key))), key);
     }
 }
+
+// Shown but not computed: the Daily analysis section says where to switch the computation on.
+void AnalysisPanelTests::testNotComputedHint()
+{
+    const QString html = AnalysisPanel::notComputedHtml();
+    QVERIFY2(html.contains(QStringLiteral("not computed")), qPrintable(html));
+    QVERIFY2(html.contains(QStringLiteral("Preferences → Analysis")), qPrintable(html));
+}

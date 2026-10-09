@@ -2161,6 +2161,7 @@ p, li { white-space: pre-wrap; }
     <addaction name="separator"/>
     <addaction name="actionLine_Cursor"/>
     <addaction name="actionPie_Chart"/>
+    <addaction name="actionShowAnalysis"/>
     <addaction name="actionLeft_Daily_Sidebar"/>
     <addaction name="actionDaily_Calendar"/>
     <addaction name="action_Sidebar_Toggle"/>
@@ -2722,6 +2723,17 @@ p, li { white-space: pre-wrap; }
   <action name="actionSystem_Information">
    <property name="text">
     <string>System Information</string>
+   </property>
+  </action>
+  <action name="actionShowAnalysis">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>OSCAR Analysis</string>
+   </property>
+   <property name="toolTip">
+    <string>Show or hide OSCAR's own analysis on every page</string>
    </property>
   </action>
   <action name="actionPie_Chart">

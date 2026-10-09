@@ -192,6 +192,11 @@ void GlossaryTests::testExplanationsMatchCode()
     // SpO2 thresholds only redraw (analysisSettingsChanged(false)); the split lock warns in its own tooltip
     QVERIFY(e("ui.prefs.spo2Thresholds").advice.contains(QStringLiteral("no recalculation")));
     QVERIFY(!e("ui.prefs.LockSummarySessionSplitting").caution.isEmpty());
+    // the "OSCAR analysis" switch: the Daily button and the View menu item; the modes are not it
+    QVERIFY(e("ui.daily.analysisButton").summary.contains(QStringLiteral("every page")));
+    QVERIFY(e("ui.menu.actionShowAnalysis").summary.contains(QStringLiteral("every page")));
+    QVERIFY(e("ui.prefs.clinicalMode").advice.contains(QStringLiteral("OSCAR analysis")));
+    QVERIFY(e("ui.prefs.permissiveMode").advice.contains(QStringLiteral("OSCAR analysis")));
 }
 
 namespace {

@@ -262,6 +262,11 @@
         <translation>Гипопноэ: CMS 4%.</translation>
     </message>
     <message>
+        <location filename="../oscar/analysispanel.cpp" line="516"/>
+        <source>OSCAR&apos;s analysis is not computed: switch it on in Preferences → Analysis.</source>
+        <translation>Анализ OSCAR не вычисляется — включите его в Настройки → Анализ.</translation>
+    </message>
+    <message>
         <source>AASM 3 %</source>
         <translation type="vanished">AASM 3 %</translation>
     </message>
@@ -1915,12 +1920,12 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
         <translation>Совместить оксиметр или другое устройство с данными CPAP за эту ночь</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="747"/>
+        <location filename="../oscar/daily.cpp" line="757"/>
         <source>Scoring</source>
         <translation>Разметка</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="750"/>
+        <location filename="../oscar/daily.cpp" line="760"/>
         <source>Correct the device&apos;s apneas and hypopneas by hand</source>
         <translation>Исправить апноэ и гипопноэ аппарата вручную</translation>
     </message>
@@ -1929,196 +1934,201 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
         <translation type="vanished">Режим разметки: протяните мышью по графику потока, чтобы отметить участок, или щёлкните событие правой кнопкой · Esc — выход</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="882"/>
+        <location filename="../oscar/daily.cpp" line="892"/>
         <source>Clinical Mode</source>
         <translation>Клинический режим</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="882"/>
+        <location filename="../oscar/daily.cpp" line="892"/>
         <source> Disabling Sessions requires Permissive Mode be set in OSCAR Preferences in the Clinical tab.</source>
         <translation> Для отключения сеансов необходимо установить разрешительный режим в настройках OSCAR на вкладке «Клинический».</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="800"/>
-        <location filename="../oscar/daily.cpp" line="913"/>
-        <location filename="../oscar/daily.cpp" line="4407"/>
-        <location filename="../oscar/daily.cpp" line="4514"/>
+        <location filename="../oscar/daily.cpp" line="810"/>
+        <location filename="../oscar/daily.cpp" line="923"/>
+        <location filename="../oscar/daily.cpp" line="4454"/>
+        <location filename="../oscar/daily.cpp" line="4561"/>
         <source>Manual scoring</source>
         <translation>Ручная разметка</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="761"/>
+        <location filename="../oscar/daily.cpp" line="747"/>
+        <source>OSCAR analysis</source>
+        <translation>Анализ OSCAR</translation>
+    </message>
+    <message>
+        <location filename="../oscar/daily.cpp" line="771"/>
         <source>Scoring mode: drag across the flow graph to mark a stretch, drag an edge to change it, or right-click an event · Esc to leave</source>
         <translation>Режим разметки: протяните мышью по графику потока, чтобы отметить участок, потяните за край, чтобы его изменить, или щёлкните событие правой кнопкой · Esc — выход</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="770"/>
+        <location filename="../oscar/daily.cpp" line="780"/>
         <source>Previous event of this type</source>
         <translation>Предыдущее событие этого типа</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="775"/>
+        <location filename="../oscar/daily.cpp" line="785"/>
         <source>Next event of this type</source>
         <translation>Следующее событие этого типа</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="779"/>
+        <location filename="../oscar/daily.cpp" line="789"/>
         <source>%1 min</source>
         <translation>%1 мин</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="800"/>
-        <location filename="../oscar/daily.cpp" line="913"/>
+        <location filename="../oscar/daily.cpp" line="810"/>
+        <location filename="../oscar/daily.cpp" line="923"/>
         <source>Undo all manual scoring of this night?</source>
         <translation>Отменить всю ручную разметку этой ночи?</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="996"/>
+        <location filename="../oscar/daily.cpp" line="1006"/>
         <source>No %1 events are recorded this day</source>
         <translation>В этот день не было зарегистрировано событий &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1154"/>
+        <location filename="../oscar/daily.cpp" line="1166"/>
         <source>%1 event</source>
         <translation>%1 cобытие</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1155"/>
+        <location filename="../oscar/daily.cpp" line="1167"/>
         <source>%1 events</source>
         <translation>%1 cобытий</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1228"/>
+        <location filename="../oscar/daily.cpp" line="1240"/>
         <source>Session Start Times</source>
         <translation>Начало сеанса</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1229"/>
+        <location filename="../oscar/daily.cpp" line="1241"/>
         <source>Session End Times</source>
         <translation>Конец сеанса</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1260"/>
+        <location filename="../oscar/daily.cpp" line="1272"/>
         <source>All</source>
         <translation>Все</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1549"/>
+        <location filename="../oscar/daily.cpp" line="1562"/>
         <source>Session Information</source>
         <translation>Информация о сеансе</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1574"/>
+        <location filename="../oscar/daily.cpp" line="1587"/>
         <source>Oximetry Sessions</source>
         <translation>Сеансы оксиметрии</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1594"/>
+        <location filename="../oscar/daily.cpp" line="1607"/>
         <source>Duration</source>
         <translation>Длительность</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1664"/>
+        <location filename="../oscar/daily.cpp" line="1677"/>
         <source>DEVICE SETTINGS ERROR</source>
         <translation>ОШИБКА НАСТРОЕК АППАРАТА</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1782"/>
+        <location filename="../oscar/daily.cpp" line="1795"/>
         <source>Not known for this night: the device reports it only for nights since its settings were last changed.</source>
         <translation>Для этой ночи неизвестно: аппарат сообщает это значение только для ночей после последнего изменения его настроек.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1824"/>
+        <location filename="../oscar/daily.cpp" line="1837"/>
         <source>SpO2 spot checks</source>
         <translation>Точечные измерения SpO2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1825"/>
+        <location filename="../oscar/daily.cpp" line="1838"/>
         <source>Pulse readings</source>
         <translation>Показания пульса</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1826"/>
+        <location filename="../oscar/daily.cpp" line="1839"/>
         <source>Spot-check data; desaturation detection is not applicable</source>
         <translation>Данные точечных измерений; обнаружение десатурации неприменимо</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1831"/>
+        <location filename="../oscar/daily.cpp" line="1844"/>
         <source>SpO2 drops (classic, %1% for %2 s)</source>
         <translation>Падения SpO2 (классич., на %1% от %2 с)</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1868"/>
+        <location filename="../oscar/daily.cpp" line="1881"/>
         <source>(Mode and Pressure settings missing; yesterday&apos;s shown.)</source>
         <translation>(Нет настроек режима и давления; показаны вчерашние)</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2064"/>
+        <location filename="../oscar/daily.cpp" line="2077"/>
         <source>General</source>
         <translation>Общие</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2127"/>
+        <location filename="../oscar/daily.cpp" line="2140"/>
         <source>device %1 · corrected by hand</source>
         <translation>по аппарату %1 · исправлено вручную</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2142"/>
+        <location filename="../oscar/daily.cpp" line="2155"/>
         <source>Obstructive and Central shares of the %1</source>
         <translation>Доли обструктивных и центральных событий в %1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2151"/>
+        <location filename="../oscar/daily.cpp" line="2164"/>
         <source>OSCAR&apos;s analysis: %1</source>
         <translation>анализ OSCAR: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2228"/>
+        <location filename="../oscar/daily.cpp" line="2243"/>
         <source>Breathing Disturbances (Apple)</source>
         <translation>Нарушения дыхания (Apple)</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2240"/>
+        <location filename="../oscar/daily.cpp" line="2255"/>
         <source>Wrist Temperature</source>
         <translation>Температура запястья</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2321"/>
+        <location filename="../oscar/daily.cpp" line="2336"/>
         <source>Time within the watch&apos;s sleep session spent without the CPAP mask on, and its share of that session</source>
         <translation>Время сеанса сна по данным часов, проведённое без маски CPAP, и его доля в этом сеансе</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2326"/>
+        <location filename="../oscar/daily.cpp" line="2341"/>
         <source>Unmasked Sleep</source>
         <translation>Сон без маски</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2539"/>
+        <location filename="../oscar/daily.cpp" line="2578"/>
         <source>Channel %1</source>
         <translation>Канал %1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2708"/>
+        <location filename="../oscar/daily.cpp" line="2747"/>
         <source>no data :(</source>
         <translation>Нет данных</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2709"/>
+        <location filename="../oscar/daily.cpp" line="2748"/>
         <source>Sorry, this device only provides compliance data.</source>
         <translation>К сожалению, этот аппарат предоставляет только общие данные.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2732"/>
+        <location filename="../oscar/daily.cpp" line="2771"/>
         <source>No CPAP data is available for this day</source>
         <translation>Данные CPAP за этот день отсутствуют</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3479"/>
+        <location filename="../oscar/daily.cpp" line="3518"/>
         <source>This bookmark is in a currently disabled area..</source>
         <translation>Закладка в недоступной сейчас области.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4516"/>
+        <location filename="../oscar/daily.cpp" line="4563"/>
         <source>added %1, removed %2, type changed %3, bounds changed %4, %5 (%6 stretches)</source>
         <translation>добавлено %1, убрано %2, сменён тип %3, границы изменены %4, %5 (участков: %6)</translation>
     </message>
@@ -2127,7 +2137,7 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
         <translation type="vanished">добавлено %1, убрано %2, сменён тип %3, %4 (участков: %5)</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4594"/>
+        <location filename="../oscar/daily.cpp" line="4641"/>
         <source>All events [%1]</source>
         <translation>Все события [%1]</translation>
     </message>
@@ -2148,18 +2158,18 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
         <translation type="vanished">исключено %1 мин</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="797"/>
-        <location filename="../oscar/daily.cpp" line="4511"/>
+        <location filename="../oscar/daily.cpp" line="807"/>
+        <location filename="../oscar/daily.cpp" line="4558"/>
         <source>Undo this change</source>
         <translation>Отменить эту правку</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4405"/>
+        <location filename="../oscar/daily.cpp" line="4452"/>
         <source>Change all %1 events of type &quot;%2&quot; to &quot;%3&quot;?</source>
         <translation>Сменить тип всех событий «%2» (%1) на «%3»?</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4406"/>
+        <location filename="../oscar/daily.cpp" line="4453"/>
         <source>Remove all %1 events of type &quot;%2&quot;? They will no longer count.</source>
         <translation>Убрать все события «%2» (%1)? Они перестанут учитываться.</translation>
     </message>
@@ -2168,7 +2178,7 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
         <translation type="vanished">добавлено %1, убрано %2, сменён тип %3, исключено %4 мин (участков: %5)</translation>
     </message>
     <message numerus="yes">
-        <location filename="../oscar/daily.cpp" line="4521"/>
+        <location filename="../oscar/daily.cpp" line="4568"/>
         <source>%n change(s) refer to an event that is no longer there</source>
         <translation>
             <numerusform>%n правка ссылается на событие, которого больше нет</numerusform>
@@ -2177,13 +2187,13 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
         </translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="797"/>
-        <location filename="../oscar/daily.cpp" line="4524"/>
+        <location filename="../oscar/daily.cpp" line="807"/>
+        <location filename="../oscar/daily.cpp" line="4571"/>
         <source>Undo all scoring of this night</source>
         <translation>Отменить всю разметку ночи</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1571"/>
+        <location filename="../oscar/daily.cpp" line="1584"/>
         <source>CPAP Sessions</source>
         <translation>Сеансы CPAP</translation>
     </message>
@@ -2193,107 +2203,107 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
         <translation>Подробности</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1577"/>
+        <location filename="../oscar/daily.cpp" line="1590"/>
         <source>Sleep Stage Sessions</source>
         <translation>Сеансы стадий сна</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1580"/>
+        <location filename="../oscar/daily.cpp" line="1593"/>
         <source>Position Sensor Sessions</source>
         <translation>Сеансы датчика положения</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1585"/>
+        <location filename="../oscar/daily.cpp" line="1598"/>
         <source>Unknown Session</source>
         <translation>Неизвестный сеанс</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1859"/>
+        <location filename="../oscar/daily.cpp" line="1872"/>
         <source>Model %1 - %2</source>
         <translation>Модель %1 - %2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1864"/>
+        <location filename="../oscar/daily.cpp" line="1877"/>
         <source>PAP Mode: %1</source>
         <translation>Режим PAP: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1993"/>
+        <location filename="../oscar/daily.cpp" line="2006"/>
         <source>This day just contains summary data, only limited information is available.</source>
         <translation>Этот день содержит только общие данные, информация ограничена.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2019"/>
+        <location filename="../oscar/daily.cpp" line="2032"/>
         <source>Total ramp time</source>
         <translation>Время разгона</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2023"/>
+        <location filename="../oscar/daily.cpp" line="2036"/>
         <source>Time outside of ramp</source>
         <translation>Время вне разгона</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2073"/>
+        <location filename="../oscar/daily.cpp" line="2086"/>
         <source>Start</source>
         <translation>Начало</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2073"/>
+        <location filename="../oscar/daily.cpp" line="2086"/>
         <source>End</source>
         <translation>Конец</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2418"/>
+        <location filename="../oscar/daily.cpp" line="2433"/>
         <source>Unable to display Pie Chart on this system</source>
         <translation>В этой системе невозможно отобразить круговую диаграмму</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2748"/>
+        <location filename="../oscar/daily.cpp" line="2787"/>
         <source>&quot;Nothing&apos;s here!&quot;</source>
         <translation>&quot;Здесь ничего нет!&quot;</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2751"/>
+        <location filename="../oscar/daily.cpp" line="2790"/>
         <source>No data is available for this day.</source>
         <translation>Данных за этот день нет.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1808"/>
+        <location filename="../oscar/daily.cpp" line="1821"/>
         <source>Oximeter Information</source>
         <translation>Информация об оксиметре</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1614"/>
+        <location filename="../oscar/daily.cpp" line="1627"/>
         <source>Click to %1 this session.</source>
         <translation>Нажмите, чтобы %1 этот сеанс.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1614"/>
+        <location filename="../oscar/daily.cpp" line="1627"/>
         <source>disable</source>
         <translation>отключить</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1614"/>
+        <location filename="../oscar/daily.cpp" line="1627"/>
         <source>enable</source>
         <translation>включить</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1630"/>
+        <location filename="../oscar/daily.cpp" line="1643"/>
         <source>%1 Session #%2</source>
         <translation>%1: сеанс #%2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1631"/>
+        <location filename="../oscar/daily.cpp" line="1644"/>
         <source>%1h %2m %3s</source>
         <translation>%1ч %2м %3с</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1667"/>
+        <location filename="../oscar/daily.cpp" line="1680"/>
         <source>Device Settings</source>
         <translation>Настройки аппарата</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1673"/>
+        <location filename="../oscar/daily.cpp" line="1686"/>
         <source>&lt;b&gt;Please Note:&lt;/b&gt; All settings shown below are based on assumptions that nothing has changed since previous days.</source>
         <translation>&lt;b&gt;Обратите внимание:&lt;/b&gt; Все настройки ниже основаны на предположении, что в предыдущие дни не произошло изменений.</translation>
     </message>
@@ -2302,92 +2312,92 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
         <translation type="vanished">Десатурации SpO2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1834"/>
+        <location filename="../oscar/daily.cpp" line="1847"/>
         <source>Pulse Change events</source>
         <translation>Изменения пульса</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1835"/>
+        <location filename="../oscar/daily.cpp" line="1848"/>
         <source>SpO2 Baseline Used</source>
         <translation>Базовое значение SpO2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1904"/>
+        <location filename="../oscar/daily.cpp" line="1917"/>
         <source>Statistics</source>
         <translation>Статистика</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2003"/>
+        <location filename="../oscar/daily.cpp" line="2016"/>
         <source>Total time in apnea</source>
         <translation>Общее время апноэ</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2013"/>
+        <location filename="../oscar/daily.cpp" line="2026"/>
         <source>Time over leak redline</source>
         <translation>Время избыточных утечек</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2388"/>
+        <location filename="../oscar/daily.cpp" line="2403"/>
         <source>Event Breakdown</source>
         <translation>Разбор событий</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2119"/>
+        <location filename="../oscar/daily.cpp" line="2132"/>
         <source>This CPAP device does NOT record detailed data</source>
         <translation>Этот аппарат не записывает подробные данные</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2699"/>
+        <location filename="../oscar/daily.cpp" line="2738"/>
         <source>Sessions all off!</source>
         <translation>Все сеансы отключены!</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2701"/>
+        <location filename="../oscar/daily.cpp" line="2740"/>
         <source>Sessions exist for this day but are switched off.</source>
         <translation>В этот день есть сеансы, но они отключены.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2704"/>
+        <location filename="../oscar/daily.cpp" line="2743"/>
         <source>Impossibly short session</source>
         <translation>Недопустимо короткий сеанс</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2705"/>
+        <location filename="../oscar/daily.cpp" line="2744"/>
         <source>Zero hours??</source>
         <translation>Ноль часов??</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2710"/>
+        <location filename="../oscar/daily.cpp" line="2749"/>
         <source>Complain to your Equipment Provider!</source>
         <translation>Обратитесь к поставщику вашего аппарата!</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3125"/>
+        <location filename="../oscar/daily.cpp" line="3164"/>
         <source>Pick a Colour</source>
         <translation>Выберите цвет</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3430"/>
+        <location filename="../oscar/daily.cpp" line="3469"/>
         <source>Bookmark at %1</source>
         <translation>Закладка на %1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.h" line="199"/>
+        <location filename="../oscar/daily.h" line="205"/>
         <source>Hide All Events</source>
         <translation>Скрыть все события</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.h" line="200"/>
+        <location filename="../oscar/daily.h" line="206"/>
         <source>Show All Events</source>
         <translation>Показать все события</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.h" line="201"/>
+        <location filename="../oscar/daily.h" line="207"/>
         <source>Hide All Graphs</source>
         <translation>Скрыть все графики</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.h" line="202"/>
+        <location filename="../oscar/daily.h" line="208"/>
         <source>Show All Graphs</source>
         <translation>Показать все графики</translation>
     </message>
@@ -2407,56 +2417,57 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
         <translation>События, найденные собственным анализом OSCAR (экспериментально)</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4065"/>
-        <location filename="../oscar/daily.cpp" line="4120"/>
-        <location filename="../oscar/daily.cpp" line="4131"/>
-        <location filename="../oscar/daily.cpp" line="4258"/>
+        <location filename="../oscar/daily.cpp" line="4106"/>
+        <location filename="../oscar/daily.cpp" line="4161"/>
+        <location filename="../oscar/daily.cpp" line="4172"/>
+        <location filename="../oscar/daily.cpp" line="4299"/>
         <source>Align Device Time</source>
         <translation>Выравнивание времени устройства</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4066"/>
+        <location filename="../oscar/daily.cpp" line="4107"/>
         <source>Save or cancel the change in the Time Corrections window first.</source>
         <translation>Сначала сохраните или отмените изменение в окне «Коррекция времени».</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4121"/>
+        <location filename="../oscar/daily.cpp" line="4162"/>
         <source>Save the time shift of %1 for %2?</source>
         <translation>Сохранить сдвиг времени %1 для %2?</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4131"/>
-        <location filename="../oscar/daily.cpp" line="4258"/>
+        <location filename="../oscar/daily.cpp" line="4172"/>
+        <location filename="../oscar/daily.cpp" line="4299"/>
         <source>Couldn&apos;t save the time correction.</source>
         <translation>Не удалось сохранить коррекцию времени.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4147"/>
+        <location filename="../oscar/daily.cpp" line="4188"/>
         <source>No CPAP data this night to align against.</source>
         <translation>За эту ночь нет данных CPAP для выравнивания.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4151"/>
+        <location filename="../oscar/daily.cpp" line="4192"/>
         <source>Other corrections also apply: %1</source>
         <translation>Также действуют другие коррекции: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4154"/>
+        <location filename="../oscar/daily.cpp" line="4195"/>
         <source>Large offset - check the device clock or use a date-range correction.</source>
         <translation>Большой сдвиг — проверьте часы устройства или используйте коррекцию для диапазона дат.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4158"/>
+        <location filename="../oscar/daily.cpp" line="4199"/>
         <source>Drag the framed graphs or use the buttons. Arrow keys: 10 s, Shift+arrow: 1 min.</source>
         <translation>Перетаскивайте графики в рамке или используйте кнопки. Стрелки: 10 с, Shift+стрелка: 1 мин.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4229"/>
+        <location filename="../oscar/daily.cpp" line="4270"/>
         <source>%1  (Δ %2)</source>
         <translation>%1  (Δ %2)</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4299"/>
+        <location filename="../oscar/daily.cpp" line="4341"/>
+        <location filename="../oscar/daily.cpp" line="4346"/>
         <source>Analysis (second opinion)</source>
         <translation>Анализ (второе мнение)</translation>
     </message>
@@ -3211,36 +3222,36 @@ Recommended actions:
 <context>
     <name>DateErrorDisplay</name>
     <message>
-        <location filename="../oscar/overview.cpp" line="956"/>
+        <location filename="../oscar/overview.cpp" line="976"/>
         <source>ERROR
 The start date MUST be before the end date</source>
         <translation>ОШИБКА
 Дата начала должна быть раньше конечной даты</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="959"/>
+        <location filename="../oscar/overview.cpp" line="979"/>
         <source>The entered start date %1 is after the end date %2</source>
         <translation>Выбранная дата начала %1 позже конечной даты %2</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="960"/>
+        <location filename="../oscar/overview.cpp" line="980"/>
         <source>
 Hint: Change the end date first</source>
         <translation>
 Совет: сначала выберите конечную дату</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="962"/>
+        <location filename="../oscar/overview.cpp" line="982"/>
         <source>The entered end date %1 </source>
         <translation>Выбранная конечная дата %1 </translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="963"/>
+        <location filename="../oscar/overview.cpp" line="983"/>
         <source>is before the start date %1</source>
         <translation>раньше даты начала %1</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="964"/>
+        <location filename="../oscar/overview.cpp" line="984"/>
         <source>
 Hint: Change the start date first</source>
         <translation>
@@ -4731,7 +4742,7 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
     </message>
     <message>
         <location filename="../oscar/glossary.cpp" line="109"/>
-        <location filename="../oscar/uiglossary.cpp" line="956"/>
+        <location filename="../oscar/uiglossary.cpp" line="966"/>
         <source>Leak red line</source>
         <translation>Красная линия утечки</translation>
     </message>
@@ -5238,7 +5249,7 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
     </message>
     <message>
         <location filename="../oscar/glossary.cpp" line="166"/>
-        <location filename="../oscar/uiglossary.cpp" line="981"/>
+        <location filename="../oscar/uiglossary.cpp" line="991"/>
         <source>Maximum</source>
         <translation>Максимум</translation>
     </message>
@@ -5324,7 +5335,7 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
     </message>
     <message>
         <location filename="../oscar/glossary.cpp" line="174"/>
-        <location filename="../oscar/uiglossary.cpp" line="778"/>
+        <location filename="../oscar/uiglossary.cpp" line="788"/>
         <source>Period</source>
         <translation>Период</translation>
     </message>
@@ -5492,7 +5503,7 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
     </message>
     <message>
         <location filename="../oscar/glossary.cpp" line="191"/>
-        <location filename="../oscar/uiglossary.cpp" line="1111"/>
+        <location filename="../oscar/uiglossary.cpp" line="1121"/>
         <source>Pulse change</source>
         <translation>Изменение пульса</translation>
     </message>
@@ -5553,7 +5564,7 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
     </message>
     <message>
         <location filename="../oscar/glossary.cpp" line="197"/>
-        <location filename="../oscar/uiglossary.cpp" line="1101"/>
+        <location filename="../oscar/uiglossary.cpp" line="1111"/>
         <source>SpO2 drop</source>
         <translation>Падение SpO2</translation>
     </message>
@@ -5614,7 +5625,7 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
     </message>
     <message>
         <location filename="../oscar/glossary.cpp" line="207"/>
-        <location filename="../oscar/uiglossary.cpp" line="1456"/>
+        <location filename="../oscar/uiglossary.cpp" line="1466"/>
         <source>Hypopnea rule</source>
         <translation>Правило гипопноэ</translation>
     </message>
@@ -6192,7 +6203,7 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <location filename="../oscar/uiglossary.cpp" line="22"/>
         <location filename="../oscar/uiglossary.cpp" line="27"/>
         <location filename="../oscar/uiglossary.cpp" line="32"/>
-        <location filename="../oscar/uiglossary.cpp" line="373"/>
+        <location filename="../oscar/uiglossary.cpp" line="378"/>
         <source>File menu → Database</source>
         <translation>Меню «Файл» → База данных</translation>
     </message>
@@ -6263,10 +6274,10 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <location filename="../oscar/uiglossary.cpp" line="52"/>
         <location filename="../oscar/uiglossary.cpp" line="57"/>
         <location filename="../oscar/uiglossary.cpp" line="107"/>
-        <location filename="../oscar/uiglossary.cpp" line="368"/>
-        <location filename="../oscar/uiglossary.cpp" line="378"/>
+        <location filename="../oscar/uiglossary.cpp" line="373"/>
         <location filename="../oscar/uiglossary.cpp" line="383"/>
         <location filename="../oscar/uiglossary.cpp" line="388"/>
+        <location filename="../oscar/uiglossary.cpp" line="393"/>
         <source>File menu</source>
         <translation>Меню «Файл»</translation>
     </message>
@@ -6282,7 +6293,7 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
     </message>
     <message>
         <location filename="../oscar/uiglossary.cpp" line="41"/>
-        <location filename="../oscar/uiglossary.cpp" line="867"/>
+        <location filename="../oscar/uiglossary.cpp" line="877"/>
         <source>Preferences</source>
         <translation>Настройки</translation>
     </message>
@@ -6499,7 +6510,7 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
     </message>
     <message>
         <location filename="../oscar/uiglossary.cpp" line="111"/>
-        <location filename="../oscar/uiglossary.cpp" line="848"/>
+        <location filename="../oscar/uiglossary.cpp" line="858"/>
         <source>Daily view</source>
         <translation>День</translation>
     </message>
@@ -6518,7 +6529,8 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <location filename="../oscar/uiglossary.cpp" line="177"/>
         <location filename="../oscar/uiglossary.cpp" line="182"/>
         <location filename="../oscar/uiglossary.cpp" line="187"/>
-        <location filename="../oscar/uiglossary.cpp" line="393"/>
+        <location filename="../oscar/uiglossary.cpp" line="192"/>
+        <location filename="../oscar/uiglossary.cpp" line="398"/>
         <source>View menu</source>
         <translation>Меню «Вид»</translation>
     </message>
@@ -6529,8 +6541,8 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
     </message>
     <message>
         <location filename="../oscar/uiglossary.cpp" line="116"/>
-        <location filename="../oscar/uiglossary.cpp" line="442"/>
-        <location filename="../oscar/uiglossary.cpp" line="853"/>
+        <location filename="../oscar/uiglossary.cpp" line="447"/>
+        <location filename="../oscar/uiglossary.cpp" line="863"/>
         <source>Overview</source>
         <translation>Сводка</translation>
     </message>
@@ -6541,12 +6553,12 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
     </message>
     <message>
         <location filename="../oscar/uiglossary.cpp" line="121"/>
-        <location filename="../oscar/uiglossary.cpp" line="432"/>
-        <location filename="../oscar/uiglossary.cpp" line="473"/>
+        <location filename="../oscar/uiglossary.cpp" line="437"/>
         <location filename="../oscar/uiglossary.cpp" line="478"/>
         <location filename="../oscar/uiglossary.cpp" line="483"/>
         <location filename="../oscar/uiglossary.cpp" line="488"/>
-        <location filename="../oscar/uiglossary.cpp" line="858"/>
+        <location filename="../oscar/uiglossary.cpp" line="493"/>
+        <location filename="../oscar/uiglossary.cpp" line="868"/>
         <source>Statistics</source>
         <translation>Статистика</translation>
     </message>
@@ -6648,103 +6660,102 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <translation>Помогает увидеть, что делали все каналы в один момент, например во время апноэ.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="156"/>
+        <location filename="../oscar/uiglossary.cpp" line="161"/>
         <source>Pie chart</source>
         <translation>Круговая диаграмма</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="158"/>
+        <location filename="../oscar/uiglossary.cpp" line="163"/>
         <source>Shows a pie of the event types on the Daily page.</source>
         <translation>Показывает круговую диаграмму типов событий на странице «День».</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="161"/>
+        <location filename="../oscar/uiglossary.cpp" line="166"/>
         <source>Daily sidebar</source>
         <translation>Боковая панель «Дня»</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="163"/>
+        <location filename="../oscar/uiglossary.cpp" line="168"/>
         <source>Shows or hides the left panel of the Daily page with the night&apos;s details.</source>
         <translation>Показывает или скрывает левую панель «Дня» со сведениями о ночи.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="166"/>
+        <location filename="../oscar/uiglossary.cpp" line="171"/>
         <source>Daily calendar</source>
         <translation>Календарь «Дня»</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="168"/>
+        <location filename="../oscar/uiglossary.cpp" line="173"/>
         <source>Shows or hides the calendar on the Daily page.</source>
         <translation>Показывает или скрывает календарь на странице «День».</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="171"/>
+        <location filename="../oscar/uiglossary.cpp" line="176"/>
         <source>Right sidebar</source>
         <translation>Правая боковая панель</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="173"/>
+        <location filename="../oscar/uiglossary.cpp" line="178"/>
         <source>Shows or hides the right sidebar with the profile and bookmarks.</source>
         <translation>Показывает или скрывает правую панель с профилем и закладками.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="176"/>
+        <location filename="../oscar/uiglossary.cpp" line="181"/>
         <source>Show personal data</source>
         <translation>Показывать личные данные</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="178"/>
+        <location filename="../oscar/uiglossary.cpp" line="183"/>
         <source>Shows or hides the name and other personal details on the pages and reports.</source>
         <translation>Показывает или скрывает имя и другие личные данные на страницах и в отчётах.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="179"/>
+        <location filename="../oscar/uiglossary.cpp" line="184"/>
         <source>Turn it off before taking screenshots for a forum.</source>
         <translation>Выключите перед снимками экрана для форума.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="181"/>
+        <location filename="../oscar/uiglossary.cpp" line="186"/>
         <source>Hover explanations</source>
         <translation>Пояснения при наведении</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="183"/>
+        <location filename="../oscar/uiglossary.cpp" line="188"/>
         <source>Turns on or off these explanations when the mouse rests on a figure, a term, a menu item or a setting.</source>
         <translation>Включает или выключает эти пояснения, когда мышь задерживается на цифре, термине, пункте меню или настройке.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="184"/>
+        <location filename="../oscar/uiglossary.cpp" line="189"/>
         <source>If the pop-ups get in the way, turn them off here; the old short tooltips stay.</source>
         <translation>Если всплывающие пояснения мешают, выключите их здесь; старые короткие подсказки останутся.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="186"/>
-        <location filename="../oscar/uiglossary.cpp" line="774"/>
+        <location filename="../oscar/uiglossary.cpp" line="191"/>
+        <location filename="../oscar/uiglossary.cpp" line="784"/>
         <source>Help panel</source>
         <translation>Панель справки</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="188"/>
+        <location filename="../oscar/uiglossary.cpp" line="193"/>
         <source>Shows or hides the panel on the right with the full explanation of the last thing hovered and a search of all explanations.</source>
         <translation>Показывает или скрывает панель справа с полным пояснением последнего наведённого элемента и поиском по всем пояснениям.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="191"/>
-        <location filename="../oscar/uiglossary.cpp" line="843"/>
-        <location filename="../oscar/uiglossary.cpp" line="1625"/>
-        <location filename="../oscar/uiglossary.cpp" line="1630"/>
-        <location filename="../oscar/uiglossary.cpp" line="1680"/>
-        <location filename="../oscar/uiglossary.cpp" line="1715"/>
-        <location filename="../oscar/uiglossary.cpp" line="1720"/>
+        <location filename="../oscar/uiglossary.cpp" line="196"/>
+        <location filename="../oscar/uiglossary.cpp" line="853"/>
+        <location filename="../oscar/uiglossary.cpp" line="1635"/>
+        <location filename="../oscar/uiglossary.cpp" line="1640"/>
+        <location filename="../oscar/uiglossary.cpp" line="1690"/>
         <location filename="../oscar/uiglossary.cpp" line="1725"/>
         <location filename="../oscar/uiglossary.cpp" line="1730"/>
         <location filename="../oscar/uiglossary.cpp" line="1735"/>
         <location filename="../oscar/uiglossary.cpp" line="1740"/>
+        <location filename="../oscar/uiglossary.cpp" line="1745"/>
+        <location filename="../oscar/uiglossary.cpp" line="1750"/>
         <source>Oximetry wizard</source>
         <translation>Мастер оксиметрии</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="192"/>
         <location filename="../oscar/uiglossary.cpp" line="197"/>
         <location filename="../oscar/uiglossary.cpp" line="202"/>
         <location filename="../oscar/uiglossary.cpp" line="207"/>
@@ -6755,108 +6766,109 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <location filename="../oscar/uiglossary.cpp" line="232"/>
         <location filename="../oscar/uiglossary.cpp" line="237"/>
         <location filename="../oscar/uiglossary.cpp" line="242"/>
-        <location filename="../oscar/uiglossary.cpp" line="403"/>
-        <location filename="../oscar/uiglossary.cpp" line="423"/>
+        <location filename="../oscar/uiglossary.cpp" line="247"/>
+        <location filename="../oscar/uiglossary.cpp" line="408"/>
+        <location filename="../oscar/uiglossary.cpp" line="428"/>
         <source>Data menu</source>
         <translation>Меню «Данные»</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="193"/>
+        <location filename="../oscar/uiglossary.cpp" line="198"/>
         <source>Imports the recording of a pulse oximeter: over Bluetooth, by cable or from a file.</source>
         <translation>Импортирует запись пульсоксиметра: по Bluetooth, по кабелю или из файла.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="194"/>
+        <location filename="../oscar/uiglossary.cpp" line="199"/>
         <source>Contec CMS50 over Bluetooth: close the phone app and turn on Bluetooth in the oximeter&apos;s menu first.</source>
         <translation>Contec CMS50 по Bluetooth: сначала закройте приложение на телефоне и включите Bluetooth в меню оксиметра.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="196"/>
+        <location filename="../oscar/uiglossary.cpp" line="201"/>
         <source>Import ZEO data</source>
         <translation>Импорт данных ZEO</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="198"/>
+        <location filename="../oscar/uiglossary.cpp" line="203"/>
         <source>Imports sleep stages from a ZEO sleep monitor&apos;s CSV file.</source>
         <translation>Импортирует стадии сна из CSV-файла монитора сна ZEO.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="201"/>
+        <location filename="../oscar/uiglossary.cpp" line="206"/>
         <source>Import Dreem data</source>
         <translation>Импорт данных Dreem</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="203"/>
+        <location filename="../oscar/uiglossary.cpp" line="208"/>
         <source>Imports sleep data from a Dreem headband&apos;s export file.</source>
         <translation>Импортирует данные сна из файла экспорта повязки Dreem.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="206"/>
+        <location filename="../oscar/uiglossary.cpp" line="211"/>
         <source>Import Apple Health data</source>
         <translation>Импорт данных Apple Health</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="208"/>
+        <location filename="../oscar/uiglossary.cpp" line="213"/>
         <source>Imports oxygen, pulse and sleep from an Apple Health export, for example from an Apple Watch.</source>
         <translation>Импортирует кислород, пульс и сон из экспорта Apple Health, например с Apple Watch.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="211"/>
+        <location filename="../oscar/uiglossary.cpp" line="216"/>
         <source>Import Somnopose data</source>
         <translation>Импорт данных Somnopose</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="213"/>
+        <location filename="../oscar/uiglossary.cpp" line="218"/>
         <source>Imports sleeping position from the Somnopose phone app&apos;s file.</source>
         <translation>Импортирует положение тела во сне из файла приложения Somnopose.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="216"/>
+        <location filename="../oscar/uiglossary.cpp" line="221"/>
         <source>Import Viatom/Wellue data</source>
         <translation>Импорт данных Viatom/Wellue</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="218"/>
+        <location filename="../oscar/uiglossary.cpp" line="223"/>
         <source>Imports the recordings of Viatom or Wellue oximeters (O2Ring and others) from their files.</source>
         <translation>Импортирует записи оксиметров Viatom или Wellue (O2Ring и другие) из их файлов.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="221"/>
+        <location filename="../oscar/uiglossary.cpp" line="226"/>
         <source>Import RemStar M-Series data</source>
         <translation>Импорт данных RemStar M-Series</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="223"/>
+        <location filename="../oscar/uiglossary.cpp" line="228"/>
         <source>Imports data of the old Philips RemStar M-Series devices.</source>
         <translation>Импортирует данные старых аппаратов Philips RemStar M-Series.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="226"/>
+        <location filename="../oscar/uiglossary.cpp" line="231"/>
         <source>Time corrections</source>
         <translation>Коррекция времени</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="228"/>
+        <location filename="../oscar/uiglossary.cpp" line="233"/>
         <source>Fixes the time of nights recorded with a wrong device clock: time zone, travel, summer time or a clock reset.</source>
         <translation>Исправляет время ночей, записанных с неверными часами аппарата: часовой пояс, поездка, летнее время или сброс часов.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="229"/>
+        <location filename="../oscar/uiglossary.cpp" line="234"/>
         <source>Use it when nights show up at the wrong hour or on the wrong day.</source>
         <translation>Нужна, когда ночи оказываются не в тот час или не в тот день.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="231"/>
+        <location filename="../oscar/uiglossary.cpp" line="236"/>
         <source>Drift analysis</source>
         <translation>Анализ дрейфа</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="233"/>
+        <location filename="../oscar/uiglossary.cpp" line="238"/>
         <source>Measures how the device clock drifted over time and suggests a correction.</source>
         <translation>Измеряет, как уходили часы аппарата со временем, и предлагает поправку.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="236"/>
+        <location filename="../oscar/uiglossary.cpp" line="241"/>
         <source>Automatic oximetry cleanup</source>
         <translation>Автоматическая очистка оксиметрии</translation>
     </message>
@@ -6865,267 +6877,266 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <translation type="vanished">Проходит по записям оксиметрии и убирает явно неверные значения в их начале и конце.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="240"/>
+        <location filename="../oscar/uiglossary.cpp" line="245"/>
         <source>It changes the stored oximetry of every night it cleans.</source>
         <translation>Меняет сохранённую оксиметрию каждой очищенной ночи.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="241"/>
+        <location filename="../oscar/uiglossary.cpp" line="246"/>
         <source>Recalculate analysis</source>
         <translation>Пересчитать анализ</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="243"/>
+        <location filename="../oscar/uiglossary.cpp" line="248"/>
         <source>Runs OSCAR&apos;s own analysis of all nights again, for example after changing its settings.</source>
         <translation>Заново выполняет собственный анализ OSCAR для всех ночей, например после смены его настроек.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="244"/>
+        <location filename="../oscar/uiglossary.cpp" line="249"/>
         <source>Needed only after changing the analysis settings; new nights are analysed on import.</source>
         <translation>Нужно только после смены настроек анализа; новые ночи анализируются при импорте.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="245"/>
+        <location filename="../oscar/uiglossary.cpp" line="250"/>
         <source>It takes a while and replaces the earlier analysis results.</source>
         <translation>Это занимает время и заменяет прежние результаты анализа.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="246"/>
+        <location filename="../oscar/uiglossary.cpp" line="251"/>
         <source>Purge CPAP of this day</source>
         <translation>Очистить CPAP за этот день</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="247"/>
         <location filename="../oscar/uiglossary.cpp" line="252"/>
         <location filename="../oscar/uiglossary.cpp" line="257"/>
         <location filename="../oscar/uiglossary.cpp" line="262"/>
         <location filename="../oscar/uiglossary.cpp" line="267"/>
         <location filename="../oscar/uiglossary.cpp" line="272"/>
+        <location filename="../oscar/uiglossary.cpp" line="277"/>
         <source>Data menu → Advanced → Purge Current Selected Day</source>
         <translation>Меню «Данные» → Дополнительно → Очистить выбранный день</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="248"/>
+        <location filename="../oscar/uiglossary.cpp" line="253"/>
         <source>Removes the device data of the selected day; notes and oximetry stay.</source>
         <translation>Удаляет данные аппарата за выбранный день; заметки и оксиметрия остаются.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="249"/>
+        <location filename="../oscar/uiglossary.cpp" line="254"/>
         <source>Use it to load a night again after a faulty import.</source>
         <translation>Чтобы заново загрузить ночь после неудачного импорта.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="250"/>
-        <location filename="../oscar/uiglossary.cpp" line="270"/>
-        <location filename="../oscar/uiglossary.cpp" line="280"/>
+        <location filename="../oscar/uiglossary.cpp" line="255"/>
+        <location filename="../oscar/uiglossary.cpp" line="275"/>
+        <location filename="../oscar/uiglossary.cpp" line="285"/>
         <source>Comes back only by importing the card again, if the card still holds that night.</source>
         <translation>Вернуть можно только повторным импортом карты, если ночь ещё есть на карте.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="251"/>
+        <location filename="../oscar/uiglossary.cpp" line="256"/>
         <source>Purge oximetry of this day</source>
         <translation>Очистить оксиметрию за этот день</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="253"/>
+        <location filename="../oscar/uiglossary.cpp" line="258"/>
         <source>Removes the oximetry of the selected day.</source>
         <translation>Удаляет оксиметрию за выбранный день.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="255"/>
+        <location filename="../oscar/uiglossary.cpp" line="260"/>
         <source>Comes back only by importing the oximeter recording again.</source>
         <translation>Вернуть можно только повторным импортом записи оксиметра.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="256"/>
+        <location filename="../oscar/uiglossary.cpp" line="261"/>
         <source>Purge sleep stages of this day</source>
         <translation>Очистить стадии сна за этот день</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="258"/>
+        <location filename="../oscar/uiglossary.cpp" line="263"/>
         <source>Removes the sleep stage data of the selected day.</source>
         <translation>Удаляет данные стадий сна за выбранный день.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="260"/>
         <location filename="../oscar/uiglossary.cpp" line="265"/>
+        <location filename="../oscar/uiglossary.cpp" line="270"/>
         <source>Comes back only by importing it again.</source>
         <translation>Вернуть можно только повторным импортом.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="261"/>
+        <location filename="../oscar/uiglossary.cpp" line="266"/>
         <source>Purge position of this day</source>
         <translation>Очистить положение тела за этот день</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="263"/>
+        <location filename="../oscar/uiglossary.cpp" line="268"/>
         <source>Removes the sleeping position data of the selected day.</source>
         <translation>Удаляет данные о положении тела за выбранный день.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="266"/>
+        <location filename="../oscar/uiglossary.cpp" line="271"/>
         <source>Purge all but notes</source>
         <translation>Очистить всё, кроме заметок</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="268"/>
+        <location filename="../oscar/uiglossary.cpp" line="273"/>
         <source>Removes all data of the selected day except the notes and bookmarks.</source>
         <translation>Удаляет все данные выбранного дня, кроме заметок и закладок.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="271"/>
+        <location filename="../oscar/uiglossary.cpp" line="276"/>
         <source>Purge all including notes</source>
         <translation>Очистить всё, включая заметки</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="273"/>
+        <location filename="../oscar/uiglossary.cpp" line="278"/>
         <source>Removes everything recorded for the selected day: device data, oximetry, notes and bookmarks.</source>
         <translation>Удаляет всё, что записано за выбранный день: данные аппарата, оксиметрию, заметки и закладки.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="274"/>
+        <location filename="../oscar/uiglossary.cpp" line="279"/>
         <source>To load a night again, choose &quot;CPAP&quot; in the same menu instead: it keeps the notes.</source>
         <translation>Чтобы заново загрузить ночь, выберите в этом же меню «CPAP»: заметки сохранятся.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="275"/>
+        <location filename="../oscar/uiglossary.cpp" line="280"/>
         <source>Notes and bookmarks are lost for good; device data comes back only by importing the card again.</source>
         <translation>Заметки и закладки пропадут безвозвратно; данные аппарата вернутся только повторным импортом карты.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="276"/>
+        <location filename="../oscar/uiglossary.cpp" line="281"/>
         <source>Purge range of days</source>
         <translation>Очистить диапазон дней</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="277"/>
-        <location filename="../oscar/uiglossary.cpp" line="287"/>
-        <location filename="../oscar/uiglossary.cpp" line="408"/>
+        <location filename="../oscar/uiglossary.cpp" line="282"/>
+        <location filename="../oscar/uiglossary.cpp" line="292"/>
         <location filename="../oscar/uiglossary.cpp" line="413"/>
         <location filename="../oscar/uiglossary.cpp" line="418"/>
+        <location filename="../oscar/uiglossary.cpp" line="423"/>
         <source>Data menu → Advanced</source>
         <translation>Меню «Данные» → Дополнительно</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="278"/>
+        <location filename="../oscar/uiglossary.cpp" line="283"/>
         <source>Removes the data of several days at once; you choose the dates and the kinds of data.</source>
         <translation>Удаляет данные нескольких дней сразу; даты и виды данных вы выбираете сами.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="281"/>
+        <location filename="../oscar/uiglossary.cpp" line="286"/>
         <source>Purge oximetry of the shown days</source>
         <translation>Очистить оксиметрию показанных дней</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="282"/>
+        <location filename="../oscar/uiglossary.cpp" line="287"/>
         <source>Data menu → Advanced → Purge Oximetry Data</source>
         <translation>Меню «Данные» → Дополнительно → Очистить данные оксиметрии</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="283"/>
+        <location filename="../oscar/uiglossary.cpp" line="288"/>
         <source>Removes the oximetry of the days now shown.</source>
         <translation>Удаляет оксиметрию дней, показанных сейчас.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="285"/>
-        <location filename="../oscar/uiglossary.cpp" line="416"/>
+        <location filename="../oscar/uiglossary.cpp" line="290"/>
+        <location filename="../oscar/uiglossary.cpp" line="421"/>
         <source>Comes back only by importing the oximeter recordings again.</source>
         <translation>Вернуть можно только повторным импортом записей оксиметра.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="286"/>
+        <location filename="../oscar/uiglossary.cpp" line="291"/>
         <source>Purge all time corrections</source>
         <translation>Очистить все коррекции времени</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="288"/>
+        <location filename="../oscar/uiglossary.cpp" line="293"/>
         <source>Removes every time correction made in &quot;Time Corrections&quot;; the nights return to the device&apos;s own clock.</source>
         <translation>Удаляет все поправки из «Коррекции времени»; ночи возвращаются к собственным часам аппарата.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="290"/>
+        <location filename="../oscar/uiglossary.cpp" line="295"/>
         <source>The corrections cannot be brought back; you would have to make them again.</source>
         <translation>Поправки не вернуть: их придётся сделать заново.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="291"/>
-        <location filename="../oscar/uiglossary.cpp" line="1431"/>
+        <location filename="../oscar/uiglossary.cpp" line="296"/>
+        <location filename="../oscar/uiglossary.cpp" line="1441"/>
         <source>Check for updates</source>
         <translation>Проверить обновления</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="292"/>
         <location filename="../oscar/uiglossary.cpp" line="297"/>
         <location filename="../oscar/uiglossary.cpp" line="302"/>
         <location filename="../oscar/uiglossary.cpp" line="307"/>
         <location filename="../oscar/uiglossary.cpp" line="312"/>
-        <location filename="../oscar/uiglossary.cpp" line="362"/>
-        <location filename="../oscar/uiglossary.cpp" line="398"/>
+        <location filename="../oscar/uiglossary.cpp" line="317"/>
+        <location filename="../oscar/uiglossary.cpp" line="367"/>
+        <location filename="../oscar/uiglossary.cpp" line="403"/>
         <source>Help menu</source>
         <translation>Меню «Помощь»</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="293"/>
+        <location filename="../oscar/uiglossary.cpp" line="298"/>
         <source>Looks for a newer OSCAR version on the internet.</source>
         <translation>Ищет в интернете более новую версию OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="296"/>
+        <location filename="../oscar/uiglossary.cpp" line="301"/>
         <source>Online user&apos;s guide</source>
         <translation>Руководство пользователя</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="298"/>
+        <location filename="../oscar/uiglossary.cpp" line="303"/>
         <source>Opens the OSCAR guide in the web browser.</source>
         <translation>Открывает руководство OSCAR в браузере.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="301"/>
+        <location filename="../oscar/uiglossary.cpp" line="306"/>
         <source>Frequently asked questions</source>
         <translation>Частые вопросы</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="303"/>
+        <location filename="../oscar/uiglossary.cpp" line="308"/>
         <source>Opens the OSCAR FAQ in the web browser.</source>
         <translation>Открывает ответы на частые вопросы об OSCAR в браузере.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="306"/>
+        <location filename="../oscar/uiglossary.cpp" line="311"/>
         <source>Sleep disorder terms glossary</source>
         <translation>Словарь терминов о нарушениях сна</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="308"/>
+        <location filename="../oscar/uiglossary.cpp" line="313"/>
         <source>Opens a list of sleep and CPAP terms in the web browser.</source>
         <translation>Открывает в браузере список терминов о сне и CPAP.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="309"/>
+        <location filename="../oscar/uiglossary.cpp" line="314"/>
         <source>The help panel (View menu) explains OSCAR&apos;s own figures in place.</source>
         <translation>Собственные цифры OSCAR поясняет на месте панель справки (меню «Вид»).</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="311"/>
+        <location filename="../oscar/uiglossary.cpp" line="316"/>
         <source>Change language</source>
         <translation>Сменить язык</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="313"/>
+        <location filename="../oscar/uiglossary.cpp" line="318"/>
         <source>Chooses the language of OSCAR&apos;s menus and pages.</source>
         <translation>Выбирает язык меню и страниц OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="314"/>
+        <location filename="../oscar/uiglossary.cpp" line="319"/>
         <source>OSCAR restarts to apply it.</source>
         <translation>Для применения OSCAR перезапускается.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="316"/>
+        <location filename="../oscar/uiglossary.cpp" line="321"/>
         <source>Debug pane</source>
         <translation>Панель отладки</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="317"/>
         <location filename="../oscar/uiglossary.cpp" line="322"/>
         <location filename="../oscar/uiglossary.cpp" line="327"/>
         <location filename="../oscar/uiglossary.cpp" line="332"/>
@@ -7134,202 +7145,203 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <location filename="../oscar/uiglossary.cpp" line="347"/>
         <location filename="../oscar/uiglossary.cpp" line="352"/>
         <location filename="../oscar/uiglossary.cpp" line="357"/>
+        <location filename="../oscar/uiglossary.cpp" line="362"/>
         <source>Help menu → Troubleshooting</source>
         <translation>Меню «Помощь» → Решение проблем</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="318"/>
+        <location filename="../oscar/uiglossary.cpp" line="323"/>
         <source>Shows a panel with OSCAR&apos;s technical messages.</source>
         <translation>Показывает панель с техническими сообщениями OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="319"/>
+        <location filename="../oscar/uiglossary.cpp" line="324"/>
         <source>Useful only when reporting a problem.</source>
         <translation>Нужна только при сообщении о проблеме.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="321"/>
+        <location filename="../oscar/uiglossary.cpp" line="326"/>
         <source>Performance information</source>
         <translation>Сведения о быстродействии</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="323"/>
+        <location filename="../oscar/uiglossary.cpp" line="328"/>
         <source>Shows how long OSCAR spent loading and drawing.</source>
         <translation>Показывает, сколько времени OSCAR тратил на загрузку и рисование.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="324"/>
+        <location filename="../oscar/uiglossary.cpp" line="329"/>
         <source>Only for troubleshooting slowness.</source>
         <translation>Только для поиска причин медленной работы.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="326"/>
+        <location filename="../oscar/uiglossary.cpp" line="331"/>
         <source>Check database integrity</source>
         <translation>Проверить целостность базы</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="328"/>
+        <location filename="../oscar/uiglossary.cpp" line="333"/>
         <source>Checks the OSCAR database file for damage.</source>
         <translation>Проверяет файл базы данных OSCAR на повреждения.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="329"/>
+        <location filename="../oscar/uiglossary.cpp" line="334"/>
         <source>Run it if OSCAR behaves oddly after a crash or a power cut.</source>
         <translation>Запустите, если OSCAR ведёт себя странно после сбоя или отключения питания.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="331"/>
+        <location filename="../oscar/uiglossary.cpp" line="336"/>
         <source>Compress database</source>
         <translation>Сжать базу данных</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="333"/>
+        <location filename="../oscar/uiglossary.cpp" line="338"/>
         <source>Rewrites the database file to free unused space.</source>
         <translation>Перезаписывает файл базы, освобождая неиспользуемое место.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="334"/>
+        <location filename="../oscar/uiglossary.cpp" line="339"/>
         <source>Rarely needed: only after deleting a lot of data.</source>
         <translation>Нужно редко: только после удаления большого объёма данных.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="335"/>
+        <location filename="../oscar/uiglossary.cpp" line="340"/>
         <source>It can take several minutes; do not close OSCAR meanwhile.</source>
         <translation>Это может занять несколько минут; не закрывайте OSCAR, пока идёт сжатие.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="336"/>
+        <location filename="../oscar/uiglossary.cpp" line="341"/>
         <source>Zip of the CPAP card</source>
         <translation>Архив карты CPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="338"/>
+        <location filename="../oscar/uiglossary.cpp" line="343"/>
         <source>Packs the contents of the device card into one zip file.</source>
         <translation>Упаковывает содержимое карты аппарата в один zip-файл.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="339"/>
+        <location filename="../oscar/uiglossary.cpp" line="344"/>
         <source>Helps developers when a device&apos;s data does not import correctly.</source>
         <translation>Помогает разработчикам, когда данные аппарата импортируются неправильно.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="341"/>
+        <location filename="../oscar/uiglossary.cpp" line="346"/>
         <source>Zip of diagnostic logs</source>
         <translation>Архив журналов диагностики</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="343"/>
+        <location filename="../oscar/uiglossary.cpp" line="348"/>
         <source>Packs OSCAR&apos;s log files into one zip file to attach to a problem report.</source>
         <translation>Упаковывает журналы OSCAR в один zip-файл, чтобы приложить к сообщению о проблеме.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="346"/>
+        <location filename="../oscar/uiglossary.cpp" line="351"/>
         <source>Zip of the database</source>
         <translation>Архив базы данных</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="348"/>
+        <location filename="../oscar/uiglossary.cpp" line="353"/>
         <source>Packs the whole OSCAR database into one zip file.</source>
         <translation>Упаковывает всю базу данных OSCAR в один zip-файл.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="349"/>
+        <location filename="../oscar/uiglossary.cpp" line="354"/>
         <source>For a full copy of everything; a profile backup is smaller and usually enough.</source>
         <translation>Полная копия всего; резервная копия профиля меньше и обычно её достаточно.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="351"/>
+        <location filename="../oscar/uiglossary.cpp" line="356"/>
         <source>Report an issue</source>
         <translation>Сообщить о проблеме</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="353"/>
+        <location filename="../oscar/uiglossary.cpp" line="358"/>
         <source>Opens the page for reporting a problem with OSCAR.</source>
         <translation>Открывает страницу для сообщения о проблеме в OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="356"/>
+        <location filename="../oscar/uiglossary.cpp" line="361"/>
         <source>System information</source>
         <translation>Сведения о системе</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="358"/>
+        <location filename="../oscar/uiglossary.cpp" line="363"/>
         <source>Shows the OSCAR version and computer details to copy into a problem report.</source>
         <translation>Показывает версию OSCAR и сведения о компьютере для сообщения о проблеме.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="361"/>
+        <location filename="../oscar/uiglossary.cpp" line="366"/>
         <source>About OSCAR</source>
         <translation>О программе OSCAR</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="363"/>
+        <location filename="../oscar/uiglossary.cpp" line="368"/>
         <source>Shows the version, the authors and the licence.</source>
         <translation>Показывает версию, авторов и лицензию.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="367"/>
+        <location filename="../oscar/uiglossary.cpp" line="372"/>
         <source>Database</source>
         <translation>База данных</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="369"/>
+        <location filename="../oscar/uiglossary.cpp" line="374"/>
         <source>Commands for whole OSCAR databases: create, open, recent and delete.</source>
         <translation>Команды для целых баз данных OSCAR: создать, открыть, недавние и удалить.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="370"/>
+        <location filename="../oscar/uiglossary.cpp" line="375"/>
         <source>Shown only when &quot;Add database menu items&quot; is on in the settings.</source>
         <translation>Видно, только если в настройках включено «Добавить пункты меню базы данных».</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="372"/>
+        <location filename="../oscar/uiglossary.cpp" line="377"/>
         <source>Recent databases</source>
         <translation>Недавние базы данных</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="374"/>
+        <location filename="../oscar/uiglossary.cpp" line="379"/>
         <source>Opens one of the database folders used recently.</source>
         <translation>Открывает одну из недавно использованных папок баз данных.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="376"/>
+        <location filename="../oscar/uiglossary.cpp" line="381"/>
         <source>OSCAR switches to the chosen database.</source>
         <translation>OSCAR переключается на выбранную базу данных.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="377"/>
+        <location filename="../oscar/uiglossary.cpp" line="382"/>
         <source>Export data</source>
         <translation>Экспортировать данные</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="379"/>
+        <location filename="../oscar/uiglossary.cpp" line="384"/>
         <source>Saves data to files for other programs: CSV tables or journal notes.</source>
         <translation>Сохраняет данные в файлы для других программ: таблицы CSV или заметки дневника.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="382"/>
-        <location filename="../oscar/uiglossary.cpp" line="427"/>
+        <location filename="../oscar/uiglossary.cpp" line="387"/>
+        <location filename="../oscar/uiglossary.cpp" line="432"/>
         <source>Profiles</source>
         <translation>Профили</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="384"/>
+        <location filename="../oscar/uiglossary.cpp" line="389"/>
         <source>Backs up, restores, shares and imports whole profiles.</source>
         <translation>Резервное копирование, восстановление, передача и импорт целых профилей.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="387"/>
+        <location filename="../oscar/uiglossary.cpp" line="392"/>
         <source>Journals</source>
         <translation>Дневник</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="389"/>
+        <location filename="../oscar/uiglossary.cpp" line="394"/>
         <source>Saves the journal to a file or loads it back.</source>
         <translation>Сохраняет дневник в файл или загружает его обратно.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="392"/>
+        <location filename="../oscar/uiglossary.cpp" line="397"/>
         <source>Reset graphs</source>
         <translation>Сбросить графики</translation>
     </message>
@@ -7338,72 +7350,72 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <translation type="vanished">Ставит графики «Дня» в стандартный порядок для вашего типа аппарата.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="397"/>
+        <location filename="../oscar/uiglossary.cpp" line="402"/>
         <source>Troubleshooting</source>
         <translation>Решение проблем</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="399"/>
+        <location filename="../oscar/uiglossary.cpp" line="404"/>
         <source>Tools for finding and reporting problems: logs, checks and zip files for the developers.</source>
         <translation>Средства для поиска проблем и сообщений о них: журналы, проверки и архивы для разработчиков.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="402"/>
+        <location filename="../oscar/uiglossary.cpp" line="407"/>
         <source>Advanced</source>
         <translation>Дополнительно</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="404"/>
+        <location filename="../oscar/uiglossary.cpp" line="409"/>
         <source>Commands that remove data: one day, a range of days, a device or the time corrections.</source>
         <translation>Команды, удаляющие данные: один день, диапазон дней, аппарат или коррекции времени.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="405"/>
+        <location filename="../oscar/uiglossary.cpp" line="410"/>
         <source>Make a profile backup before using them.</source>
         <translation>Перед их использованием сделайте резервную копию профиля.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="406"/>
+        <location filename="../oscar/uiglossary.cpp" line="411"/>
         <source>Everything in this menu deletes data.</source>
         <translation>Всё в этом меню удаляет данные.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="407"/>
+        <location filename="../oscar/uiglossary.cpp" line="412"/>
         <source>Purge current selected day</source>
         <translation>Очистить выбранный день</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="409"/>
+        <location filename="../oscar/uiglossary.cpp" line="414"/>
         <source>Removes the chosen kind of data of the day shown on the Daily page.</source>
         <translation>Удаляет выбранный вид данных за день, открытый на странице «День».</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="410"/>
+        <location filename="../oscar/uiglossary.cpp" line="415"/>
         <source>Choose &quot;CPAP&quot; to load a faulty night again: it keeps the notes.</source>
         <translation>Чтобы заново загрузить неудачную ночь, выберите «CPAP»: заметки сохранятся.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="411"/>
+        <location filename="../oscar/uiglossary.cpp" line="416"/>
         <source>The removed data comes back only by importing it again.</source>
         <translation>Удалённые данные вернутся только повторным импортом.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="412"/>
+        <location filename="../oscar/uiglossary.cpp" line="417"/>
         <source>Purge oximetry data</source>
         <translation>Очистить данные оксиметрии</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="414"/>
+        <location filename="../oscar/uiglossary.cpp" line="419"/>
         <source>Removes oximetry recordings.</source>
         <translation>Удаляет записи оксиметрии.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="417"/>
+        <location filename="../oscar/uiglossary.cpp" line="422"/>
         <source>Purge all device data</source>
         <translation>Очистить все данные аппарата</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="419"/>
+        <location filename="../oscar/uiglossary.cpp" line="424"/>
         <source>Removes all nights of the device you choose from the profile.</source>
         <translation>Удаляет из профиля все ночи выбранного аппарата.</translation>
     </message>
@@ -7441,383 +7453,405 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <translation>Возвращает графикам открытой страницы («День» или «Сводка») стандартную высоту.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="238"/>
+        <location filename="../oscar/uiglossary.cpp" line="156"/>
+        <location filename="../oscar/uiglossary.cpp" line="562"/>
+        <source>OSCAR analysis</source>
+        <translation>Анализ OSCAR</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uiglossary.cpp" line="158"/>
+        <source>Shows or hides OSCAR&apos;s own analysis (the second opinion) on every page, like the button on the Daily page.</source>
+        <translation>Показывает или прячет собственный анализ OSCAR (второе мнение) на всех страницах, как кнопка на странице «День».</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uiglossary.cpp" line="243"/>
         <source>Throws away oximetry pieces shorter than the &quot;Discard short pieces&quot; setting (Preferences → Oximetry) and removes the SpO2 drop and pulse change flags of every oximetry session.</source>
         <translation>Отбрасывает куски оксиметрии короче настройки «Отбрасывать короткие куски» (Настройки → Оксиметрия) и удаляет отметки падений SpO2 и изменений пульса во всех сеансах оксиметрии.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="394"/>
+        <location filename="../oscar/uiglossary.cpp" line="399"/>
         <source>Puts the graphs of the open page (Daily or Overview) in a standard order for your kind of device.</source>
         <translation>Ставит графики открытой страницы («День» или «Сводка») в стандартный порядок для вашего типа аппарата.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="420"/>
+        <location filename="../oscar/uiglossary.cpp" line="425"/>
         <source>Only to start that device over.</source>
         <translation>Только чтобы начать этот аппарат заново.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="421"/>
+        <location filename="../oscar/uiglossary.cpp" line="426"/>
         <source>The nights are lost for good unless the card or OSCAR&apos;s card backup still holds them; oximeters and other devices have no backup.</source>
         <translation>Ночи пропадут безвозвратно, если их нет на карте или в резервной копии карты OSCAR; у оксиметров и других приборов резервной копии нет.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="422"/>
+        <location filename="../oscar/uiglossary.cpp" line="427"/>
         <source>Rebuild CPAP data</source>
         <translation>Перестроить данные CPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="424"/>
+        <location filename="../oscar/uiglossary.cpp" line="429"/>
         <source>Removes the nights of the chosen device and imports them again from OSCAR&apos;s card backups.</source>
         <translation>Удаляет ночи выбранного аппарата и заново импортирует их из резервных копий карты OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="425"/>
+        <location filename="../oscar/uiglossary.cpp" line="430"/>
         <source>Use it after an OSCAR update that reads the device better, or when nights look wrong.</source>
         <translation>После обновления OSCAR, которое лучше читает аппарат, или когда ночи выглядят неправильно.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="426"/>
+        <location filename="../oscar/uiglossary.cpp" line="431"/>
         <source>Nights the backups do not hold are lost; it takes a while.</source>
         <translation>Ночи, которых нет в резервных копиях, пропадут; это занимает время.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="428"/>
         <location filename="../oscar/uiglossary.cpp" line="433"/>
         <location filename="../oscar/uiglossary.cpp" line="438"/>
         <location filename="../oscar/uiglossary.cpp" line="443"/>
         <location filename="../oscar/uiglossary.cpp" line="448"/>
         <location filename="../oscar/uiglossary.cpp" line="453"/>
         <location filename="../oscar/uiglossary.cpp" line="458"/>
+        <location filename="../oscar/uiglossary.cpp" line="463"/>
         <source>Left toolbar</source>
         <translation>Левая панель инструментов</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="429"/>
+        <location filename="../oscar/uiglossary.cpp" line="434"/>
         <source>Shows the list of profiles to switch between people or devices.</source>
         <translation>Показывает список профилей, чтобы переключаться между людьми или аппаратами.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="434"/>
+        <location filename="../oscar/uiglossary.cpp" line="439"/>
         <source>Opens the Statistics page: tables of the figures for several periods.</source>
         <translation>Открывает «Статистику»: таблицы цифр за несколько периодов.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="437"/>
-        <location filename="../oscar/uiglossary.cpp" line="523"/>
+        <location filename="../oscar/uiglossary.cpp" line="442"/>
+        <location filename="../oscar/uiglossary.cpp" line="528"/>
         <source>Daily</source>
         <translation>День</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="439"/>
-        <location filename="../oscar/uiglossary.cpp" line="850"/>
+        <location filename="../oscar/uiglossary.cpp" line="444"/>
+        <location filename="../oscar/uiglossary.cpp" line="860"/>
         <source>Opens the Daily page: one night in detail.</source>
         <translation>Открывает страницу «День»: одна ночь подробно.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="444"/>
-        <location filename="../oscar/uiglossary.cpp" line="855"/>
+        <location filename="../oscar/uiglossary.cpp" line="449"/>
+        <location filename="../oscar/uiglossary.cpp" line="865"/>
         <source>Opens the Overview page: one bar per night.</source>
         <translation>Открывает «Сводку»: по столбику на каждую ночь.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="447"/>
+        <location filename="../oscar/uiglossary.cpp" line="452"/>
         <source>Oximetry</source>
         <translation>Оксиметрия</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="449"/>
+        <location filename="../oscar/uiglossary.cpp" line="454"/>
         <source>Opens the oximetry import wizard.</source>
         <translation>Открывает мастер импорта оксиметрии.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="452"/>
+        <location filename="../oscar/uiglossary.cpp" line="457"/>
         <source>Import</source>
         <translation>Импорт</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="454"/>
-        <location filename="../oscar/uiglossary.cpp" line="840"/>
+        <location filename="../oscar/uiglossary.cpp" line="459"/>
+        <location filename="../oscar/uiglossary.cpp" line="850"/>
         <source>Imports new nights from the device&apos;s SD card.</source>
         <translation>Импортирует новые ночи с SD-карты аппарата.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="455"/>
+        <location filename="../oscar/uiglossary.cpp" line="460"/>
         <source>Nights already in OSCAR are skipped.</source>
         <translation>Ночи, которые уже есть в OSCAR, пропускаются.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="457"/>
+        <location filename="../oscar/uiglossary.cpp" line="462"/>
         <source>Help</source>
         <translation>Помощь</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="459"/>
+        <location filename="../oscar/uiglossary.cpp" line="464"/>
         <source>Opens OSCAR&apos;s help pages.</source>
         <translation>Открывает страницы справки OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="462"/>
+        <location filename="../oscar/uiglossary.cpp" line="467"/>
         <source>Bookmark filter</source>
         <translation>Фильтр закладок</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="463"/>
         <location filename="../oscar/uiglossary.cpp" line="468"/>
+        <location filename="../oscar/uiglossary.cpp" line="473"/>
         <source>Right sidebar → Bookmarks</source>
         <translation>Правая панель → Закладки</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="464"/>
+        <location filename="../oscar/uiglossary.cpp" line="469"/>
         <source>Shows only the bookmarks whose text contains what you type.</source>
         <translation>Показывает только закладки, в тексте которых есть набранное.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="467"/>
+        <location filename="../oscar/uiglossary.cpp" line="472"/>
         <source>Clear filter</source>
         <translation>Сбросить фильтр</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="469"/>
+        <location filename="../oscar/uiglossary.cpp" line="474"/>
         <source>Clears the bookmark filter and shows all bookmarks.</source>
         <translation>Очищает фильтр закладок и показывает все закладки.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="472"/>
+        <location filename="../oscar/uiglossary.cpp" line="477"/>
         <source>Standard report</source>
         <translation>Стандартный отчёт</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="474"/>
+        <location filename="../oscar/uiglossary.cpp" line="479"/>
         <source>Shows the figures for the last night, week, month, six months and year side by side.</source>
         <translation>Показывает рядом цифры за последнюю ночь, неделю, месяц, полгода и год.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="475"/>
+        <location filename="../oscar/uiglossary.cpp" line="480"/>
         <source>The usual choice to see how therapy goes.</source>
         <translation>Обычный выбор, чтобы видеть, как идёт терапия.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="477"/>
+        <location filename="../oscar/uiglossary.cpp" line="482"/>
         <source>Monthly report</source>
         <translation>Месячный отчёт</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="479"/>
+        <location filename="../oscar/uiglossary.cpp" line="484"/>
         <source>Shows one column per calendar month.</source>
         <translation>Показывает по столбцу на каждый календарный месяц.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="480"/>
+        <location filename="../oscar/uiglossary.cpp" line="485"/>
         <source>Good for seeing slow changes over a year.</source>
         <translation>Хорош, чтобы видеть медленные изменения за год.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="482"/>
+        <location filename="../oscar/uiglossary.cpp" line="487"/>
         <source>Date range report</source>
         <translation>Отчёт за период</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="484"/>
+        <location filename="../oscar/uiglossary.cpp" line="489"/>
         <source>Shows the figures for the dates you choose below.</source>
         <translation>Показывает цифры за даты, выбранные ниже.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="485"/>
+        <location filename="../oscar/uiglossary.cpp" line="490"/>
         <source>Use it to compare the time before and after a change of mask or settings.</source>
         <translation>Чтобы сравнить время до и после смены маски или настроек.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="487"/>
+        <location filename="../oscar/uiglossary.cpp" line="492"/>
         <source>Settings comparison</source>
         <translation>Сравнение настроек</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="489"/>
+        <location filename="../oscar/uiglossary.cpp" line="494"/>
         <source>Groups the nights by device settings and compares how each set of settings worked.</source>
         <translation>Группирует ночи по настройкам аппарата и сравнивает, как работал каждый набор настроек.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="490"/>
+        <location filename="../oscar/uiglossary.cpp" line="495"/>
         <source>Look at the column with more nights first: a few nights say little.</source>
         <translation>Сначала смотрите на столбец, где больше ночей: несколько ночей говорят мало.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="492"/>
-        <location filename="../oscar/uiglossary.cpp" line="783"/>
+        <location filename="../oscar/uiglossary.cpp" line="497"/>
+        <location filename="../oscar/uiglossary.cpp" line="793"/>
         <source>Start date</source>
         <translation>Начальная дата</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="493"/>
         <location filename="../oscar/uiglossary.cpp" line="498"/>
+        <location filename="../oscar/uiglossary.cpp" line="503"/>
         <source>Statistics → Date Range</source>
         <translation>Статистика → Период</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="494"/>
+        <location filename="../oscar/uiglossary.cpp" line="499"/>
         <source>The first day of the date range report.</source>
         <translation>Первый день отчёта за период.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="497"/>
-        <location filename="../oscar/uiglossary.cpp" line="788"/>
+        <location filename="../oscar/uiglossary.cpp" line="502"/>
+        <location filename="../oscar/uiglossary.cpp" line="798"/>
         <source>End date</source>
         <translation>Конечная дата</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="499"/>
+        <location filename="../oscar/uiglossary.cpp" line="504"/>
         <source>The last day of the date range report.</source>
         <translation>Последний день отчёта за период.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="502"/>
+        <location filename="../oscar/uiglossary.cpp" line="507"/>
         <source>Previous day</source>
         <translation>Предыдущий день</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="503"/>
         <location filename="../oscar/uiglossary.cpp" line="508"/>
         <location filename="../oscar/uiglossary.cpp" line="513"/>
         <location filename="../oscar/uiglossary.cpp" line="518"/>
+        <location filename="../oscar/uiglossary.cpp" line="523"/>
         <source>Daily → top bar</source>
         <translation>День → верхняя панель</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="504"/>
+        <location filename="../oscar/uiglossary.cpp" line="509"/>
         <source>Goes to the day before.</source>
         <translation>Переходит к предыдущему дню.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="507"/>
-        <location filename="../oscar/uiglossary.cpp" line="522"/>
+        <location filename="../oscar/uiglossary.cpp" line="512"/>
+        <location filename="../oscar/uiglossary.cpp" line="527"/>
         <source>Calendar</source>
         <translation>Календарь</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="509"/>
+        <location filename="../oscar/uiglossary.cpp" line="514"/>
         <source>Shows or hides the calendar.</source>
         <translation>Показывает или скрывает календарь.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="512"/>
+        <location filename="../oscar/uiglossary.cpp" line="517"/>
         <source>Next day</source>
         <translation>Следующий день</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="514"/>
+        <location filename="../oscar/uiglossary.cpp" line="519"/>
         <source>Goes to the day after.</source>
         <translation>Переходит к следующему дню.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="517"/>
+        <location filename="../oscar/uiglossary.cpp" line="522"/>
         <source>Last day with data</source>
         <translation>Последний день с данными</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="519"/>
+        <location filename="../oscar/uiglossary.cpp" line="524"/>
         <source>Goes to the most recent day that has data.</source>
         <translation>Переходит к самому свежему дню, где есть данные.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="524"/>
+        <location filename="../oscar/uiglossary.cpp" line="529"/>
         <source>Picks the day to show. Days with data are marked; the colour shows whether the night met the usage target.</source>
         <translation>Выбирает день для показа. Дни с данными отмечены; цвет показывает, выполнена ли норма использования.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="527"/>
+        <location filename="../oscar/uiglossary.cpp" line="532"/>
         <source>Event view window</source>
         <translation>Окно просмотра события</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="528"/>
+        <location filename="../oscar/uiglossary.cpp" line="533"/>
         <source>Daily → Events</source>
         <translation>День → События</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="529"/>
+        <location filename="../oscar/uiglossary.cpp" line="534"/>
         <source>How many minutes around an event the graphs show when you click it in the event list.</source>
         <translation>Сколько минут вокруг события показывают графики, когда вы щёлкаете его в списке событий.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="530"/>
+        <location filename="../oscar/uiglossary.cpp" line="535"/>
         <source>A few minutes show the breathing before and after the event.</source>
         <translation>Несколько минут показывают дыхание до и после события.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="532"/>
+        <location filename="../oscar/uiglossary.cpp" line="537"/>
         <source>Event types</source>
         <translation>Типы событий</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="533"/>
         <location filename="../oscar/uiglossary.cpp" line="538"/>
         <location filename="../oscar/uiglossary.cpp" line="543"/>
         <location filename="../oscar/uiglossary.cpp" line="548"/>
         <location filename="../oscar/uiglossary.cpp" line="553"/>
         <location filename="../oscar/uiglossary.cpp" line="558"/>
+        <location filename="../oscar/uiglossary.cpp" line="563"/>
+        <location filename="../oscar/uiglossary.cpp" line="568"/>
         <source>Daily → bottom bar</source>
         <translation>День → нижняя панель</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="534"/>
+        <location filename="../oscar/uiglossary.cpp" line="539"/>
         <source>Chooses which event flags the Daily graphs show.</source>
         <translation>Выбирает, какие отметки событий показывают графики «Дня».</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="535"/>
+        <location filename="../oscar/uiglossary.cpp" line="540"/>
         <source>Hide the rare types to make the busy ones easier to see.</source>
         <translation>Скройте редкие типы, чтобы частые было легче разглядеть.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="537"/>
-        <location filename="../oscar/uiglossary.cpp" line="798"/>
+        <location filename="../oscar/uiglossary.cpp" line="542"/>
+        <location filename="../oscar/uiglossary.cpp" line="808"/>
         <source>Graphs</source>
         <translation>Графики</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="539"/>
+        <location filename="../oscar/uiglossary.cpp" line="544"/>
         <source>Chooses which graphs the Daily page shows.</source>
         <translation>Выбирает, какие графики показывает страница «День».</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="542"/>
-        <location filename="../oscar/uiglossary.cpp" line="803"/>
+        <location filename="../oscar/uiglossary.cpp" line="547"/>
+        <location filename="../oscar/uiglossary.cpp" line="813"/>
         <source>Graph hints</source>
         <translation>Подсказки по графикам</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="544"/>
+        <location filename="../oscar/uiglossary.cpp" line="549"/>
         <source>Shows how to zoom, scroll and resize the graphs with the mouse and keys.</source>
         <translation>Показывает, как увеличивать, прокручивать и менять размер графиков мышью и клавишами.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="547"/>
-        <location filename="../oscar/uiglossary.cpp" line="808"/>
+        <location filename="../oscar/uiglossary.cpp" line="552"/>
+        <location filename="../oscar/uiglossary.cpp" line="818"/>
         <source>Layout</source>
         <translation>Раскладка</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="549"/>
+        <location filename="../oscar/uiglossary.cpp" line="554"/>
         <source>Saves the current set, order and heights of the graphs under a name, or restores a saved one.</source>
         <translation>Сохраняет текущий набор, порядок и высоту графиков под именем или восстанавливает сохранённый.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="552"/>
+        <location filename="../oscar/uiglossary.cpp" line="557"/>
         <source>Align</source>
         <translation>Выровнять</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="554"/>
+        <location filename="../oscar/uiglossary.cpp" line="559"/>
         <source>Lines up an oximeter or another device with the CPAP data of this night when their clocks differ.</source>
         <translation>Совмещает оксиметр или другой прибор с данными CPAP этой ночи, когда их часы расходятся.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="555"/>
+        <location filename="../oscar/uiglossary.cpp" line="560"/>
         <source>Use it when desaturations clearly lag or lead the apneas.</source>
         <translation>Нужно, когда десатурации явно отстают от апноэ или опережают их.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="557"/>
+        <location filename="../oscar/uiglossary.cpp" line="564"/>
+        <source>Shows or hides OSCAR&apos;s own analysis (the second opinion) on every page: flags, graphs, rows and figures.</source>
+        <translation>Показывает или прячет собственный анализ OSCAR (второе мнение) на всех страницах: флаги, графики, строки и цифры.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uiglossary.cpp" line="565"/>
+        <source>Off, OSCAR shows only what the device recorded. The analysis is computed or not as set in Preferences → Analysis.</source>
+        <translation>Когда выключено, OSCAR показывает только то, что записал аппарат. Вычислять ли анализ, задаётся в Настройки → Анализ.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uiglossary.cpp" line="567"/>
         <source>Scoring</source>
         <translation>Разметка</translation>
     </message>
@@ -7826,107 +7860,105 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <translation type="vanished">Включает ручную разметку: протяните мышью по графику потока, чтобы добавить событие или исключить участок; щёлкните событие правой кнопкой, чтобы убрать его или сменить тип.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="560"/>
+        <location filename="../oscar/uiglossary.cpp" line="570"/>
         <source>Esc or the button again leaves the mode. Every change is listed in the sidebar and can be undone.</source>
         <translation>Esc или повторное нажатие кнопки выключают режим. Каждая правка видна в боковой панели и отменяется.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="562"/>
+        <location filename="../oscar/uiglossary.cpp" line="572"/>
         <source>Events to step through</source>
         <translation>События для перехода</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="563"/>
-        <location filename="../oscar/uiglossary.cpp" line="568"/>
         <location filename="../oscar/uiglossary.cpp" line="573"/>
         <location filename="../oscar/uiglossary.cpp" line="578"/>
+        <location filename="../oscar/uiglossary.cpp" line="583"/>
+        <location filename="../oscar/uiglossary.cpp" line="588"/>
         <source>Daily → scoring mode</source>
         <translation>День → режим разметки</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="564"/>
+        <location filename="../oscar/uiglossary.cpp" line="574"/>
         <source>Which events the back and forward buttons step through: all scored events or one type, with how many the night has.</source>
         <translation>По каким событиям идут кнопки «назад» и «вперёд»: все размечаемые события или один тип, с их числом за ночь.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="565"/>
+        <location filename="../oscar/uiglossary.cpp" line="575"/>
         <source>Review one type at a time, for example every central apnea, to check the device&apos;s scoring.</source>
         <translation>Просматривайте по одному типу, например все центральные апноэ, чтобы проверить разметку аппарата.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="567"/>
+        <location filename="../oscar/uiglossary.cpp" line="577"/>
         <source>Previous event</source>
         <translation>Предыдущее событие</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="569"/>
+        <location filename="../oscar/uiglossary.cpp" line="579"/>
         <source>Shows the previous event of the chosen type, centred in the window.</source>
         <translation>Показывает предыдущее событие выбранного типа по центру окна.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="572"/>
+        <location filename="../oscar/uiglossary.cpp" line="582"/>
         <source>Next event</source>
         <translation>Следующее событие</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="574"/>
+        <location filename="../oscar/uiglossary.cpp" line="584"/>
         <source>Shows the next event of the chosen type, centred in the window.</source>
         <translation>Показывает следующее событие выбранного типа по центру окна.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="575"/>
+        <location filename="../oscar/uiglossary.cpp" line="585"/>
         <source>Removed events are stepped through too, so they can be checked again or restored.</source>
         <translation>Убранные события тоже попадаются, чтобы их можно было перепроверить или вернуть.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="577"/>
+        <location filename="../oscar/uiglossary.cpp" line="587"/>
         <source>Window</source>
         <translation>Окно</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="579"/>
+        <location filename="../oscar/uiglossary.cpp" line="589"/>
         <source>How much of the night each step shows around the event.</source>
         <translation>Сколько ночи показывает каждый шаг вокруг события.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="580"/>
+        <location filename="../oscar/uiglossary.cpp" line="590"/>
         <source>3 minutes (six 30-second epochs) is usual for scoring breathing events.</source>
         <translation>3 минуты (шесть эпох по 30 секунд) — обычное окно для разметки дыхательных событий.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="582"/>
+        <location filename="../oscar/uiglossary.cpp" line="592"/>
         <source>Add bookmark</source>
         <translation>Добавить закладку</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="583"/>
-        <location filename="../oscar/uiglossary.cpp" line="588"/>
+        <location filename="../oscar/uiglossary.cpp" line="593"/>
+        <location filename="../oscar/uiglossary.cpp" line="598"/>
         <source>Daily → Bookmarks</source>
         <translation>День → Закладки</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="584"/>
+        <location filename="../oscar/uiglossary.cpp" line="594"/>
         <source>Marks the part of the night shown in the graphs, with a note, to come back to it later.</source>
         <translation>Отмечает часть ночи, показанную на графиках, с заметкой, чтобы вернуться к ней позже.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="587"/>
+        <location filename="../oscar/uiglossary.cpp" line="597"/>
         <source>Remove bookmark</source>
         <translation>Удалить закладку</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="589"/>
+        <location filename="../oscar/uiglossary.cpp" line="599"/>
         <source>Removes the selected bookmark.</source>
         <translation>Удаляет выбранную закладку.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="592"/>
+        <location filename="../oscar/uiglossary.cpp" line="602"/>
         <source>Italic</source>
         <translation>Курсив</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="593"/>
-        <location filename="../oscar/uiglossary.cpp" line="598"/>
         <location filename="../oscar/uiglossary.cpp" line="603"/>
         <location filename="../oscar/uiglossary.cpp" line="608"/>
         <location filename="../oscar/uiglossary.cpp" line="613"/>
@@ -7934,108 +7966,108 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <location filename="../oscar/uiglossary.cpp" line="623"/>
         <location filename="../oscar/uiglossary.cpp" line="628"/>
         <location filename="../oscar/uiglossary.cpp" line="633"/>
+        <location filename="../oscar/uiglossary.cpp" line="638"/>
+        <location filename="../oscar/uiglossary.cpp" line="643"/>
         <source>Daily → Notes</source>
         <translation>День → Заметки</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="594"/>
+        <location filename="../oscar/uiglossary.cpp" line="604"/>
         <source>Makes the selected note text italic.</source>
         <translation>Делает выделенный текст заметки курсивом.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="597"/>
+        <location filename="../oscar/uiglossary.cpp" line="607"/>
         <source>Bold</source>
         <translation>Жирный</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="599"/>
+        <location filename="../oscar/uiglossary.cpp" line="609"/>
         <source>Makes the selected note text bold.</source>
         <translation>Делает выделенный текст заметки жирным.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="602"/>
+        <location filename="../oscar/uiglossary.cpp" line="612"/>
         <source>Underline</source>
         <translation>Подчёркнутый</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="604"/>
+        <location filename="../oscar/uiglossary.cpp" line="614"/>
         <source>Underlines the selected note text.</source>
         <translation>Подчёркивает выделенный текст заметки.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="607"/>
+        <location filename="../oscar/uiglossary.cpp" line="617"/>
         <source>Colour</source>
         <translation>Цвет</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="609"/>
+        <location filename="../oscar/uiglossary.cpp" line="619"/>
         <source>Colours the selected note text.</source>
         <translation>Окрашивает выделенный текст заметки.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="612"/>
+        <location filename="../oscar/uiglossary.cpp" line="622"/>
         <source>Font size</source>
         <translation>Размер шрифта</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="614"/>
+        <location filename="../oscar/uiglossary.cpp" line="624"/>
         <source>Changes the size of the selected note text.</source>
         <translation>Меняет размер выделенного текста заметки.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="617"/>
-        <location filename="../oscar/uiglossary.cpp" line="622"/>
+        <location filename="../oscar/uiglossary.cpp" line="627"/>
+        <location filename="../oscar/uiglossary.cpp" line="632"/>
         <source>Feeling</source>
         <translation>Самочувствие</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="619"/>
+        <location filename="../oscar/uiglossary.cpp" line="629"/>
         <source>How you felt after the night, as a number; a dash means not set.</source>
         <translation>Как вы себя чувствовали после ночи, числом; прочерк — не задано.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="620"/>
+        <location filename="../oscar/uiglossary.cpp" line="630"/>
         <source>Fill it in regularly to compare with AHI and usage over time.</source>
         <translation>Заполняйте регулярно, чтобы сравнивать с AHI и использованием со временем.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="624"/>
+        <location filename="../oscar/uiglossary.cpp" line="634"/>
         <source>How you felt after the night, set with a slider.</source>
         <translation>Как вы себя чувствовали после ночи, ползунком.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="627"/>
+        <location filename="../oscar/uiglossary.cpp" line="637"/>
         <source>Feeling range</source>
         <translation>Шкала самочувствия</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="629"/>
+        <location filename="../oscar/uiglossary.cpp" line="639"/>
         <source>Switches the feeling scale between 0–10 and 0–100.</source>
         <translation>Переключает шкалу самочувствия между 0–10 и 0–100.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="632"/>
+        <location filename="../oscar/uiglossary.cpp" line="642"/>
         <source>Weight</source>
         <translation>Вес</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="634"/>
+        <location filename="../oscar/uiglossary.cpp" line="644"/>
         <source>Your weight on this day. With a height in the profile, OSCAR shows the BMI.</source>
         <translation>Ваш вес в этот день. Если в профиле указан рост, OSCAR показывает ИМТ.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="635"/>
+        <location filename="../oscar/uiglossary.cpp" line="645"/>
         <source>Weight changes can change the pressure needed, so it is worth noting.</source>
         <translation>От изменения веса может меняться нужное давление, поэтому его стоит записывать.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="637"/>
+        <location filename="../oscar/uiglossary.cpp" line="647"/>
         <source>Search help</source>
         <translation>Справка по поиску</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="638"/>
-        <location filename="../oscar/uiglossary.cpp" line="643"/>
         <location filename="../oscar/uiglossary.cpp" line="648"/>
         <location filename="../oscar/uiglossary.cpp" line="653"/>
         <location filename="../oscar/uiglossary.cpp" line="658"/>
@@ -8048,144 +8080,144 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <location filename="../oscar/uiglossary.cpp" line="693"/>
         <location filename="../oscar/uiglossary.cpp" line="698"/>
         <location filename="../oscar/uiglossary.cpp" line="703"/>
+        <location filename="../oscar/uiglossary.cpp" line="708"/>
+        <location filename="../oscar/uiglossary.cpp" line="713"/>
         <source>Daily → Search</source>
         <translation>День → Поиск</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="639"/>
+        <location filename="../oscar/uiglossary.cpp" line="649"/>
         <source>Explains how to search the nights for a condition.</source>
         <translation>Объясняет, как искать ночи по условию.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="642"/>
+        <location filename="../oscar/uiglossary.cpp" line="652"/>
         <source>Condition</source>
         <translation>Условие</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="644"/>
+        <location filename="../oscar/uiglossary.cpp" line="654"/>
         <source>Chooses what to search for: an event type, a figure such as AHI or leak, notes, bookmarks and more.</source>
         <translation>Выбирает, что искать: тип события, цифру вроде AHI или утечки, заметки, закладки и другое.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="647"/>
+        <location filename="../oscar/uiglossary.cpp" line="657"/>
         <source>Add condition</source>
         <translation>Добавить условие</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="649"/>
+        <location filename="../oscar/uiglossary.cpp" line="659"/>
         <source>Adds the condition to the search.</source>
         <translation>Добавляет условие в поиск.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="652"/>
+        <location filename="../oscar/uiglossary.cpp" line="662"/>
         <source>Clear</source>
         <translation>Очистить</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="654"/>
+        <location filename="../oscar/uiglossary.cpp" line="664"/>
         <source>Clears the search and its results.</source>
         <translation>Очищает поиск и его результаты.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="657"/>
+        <location filename="../oscar/uiglossary.cpp" line="667"/>
         <source>Start search</source>
         <translation>Начать поиск</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="659"/>
+        <location filename="../oscar/uiglossary.cpp" line="669"/>
         <source>Searches the nights for the condition; click a result to open that day.</source>
         <translation>Ищет ночи по условию; щёлкните результат, чтобы открыть тот день.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="662"/>
+        <location filename="../oscar/uiglossary.cpp" line="672"/>
         <source>Search for</source>
         <translation>Искать</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="664"/>
+        <location filename="../oscar/uiglossary.cpp" line="674"/>
         <source>Shows the list of things you can search for.</source>
         <translation>Показывает список того, что можно искать.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="667"/>
-        <location filename="../oscar/uiglossary.cpp" line="672"/>
+        <location filename="../oscar/uiglossary.cpp" line="677"/>
+        <location filename="../oscar/uiglossary.cpp" line="682"/>
         <source>Comparison</source>
         <translation>Сравнение</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="669"/>
+        <location filename="../oscar/uiglossary.cpp" line="679"/>
         <source>How to compare: greater than, less than, equal and so on.</source>
         <translation>Как сравнивать: больше, меньше, равно и так далее.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="674"/>
+        <location filename="../oscar/uiglossary.cpp" line="684"/>
         <source>Changes how the value is compared.</source>
         <translation>Меняет способ сравнения значения.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="677"/>
-        <location filename="../oscar/uiglossary.cpp" line="682"/>
+        <location filename="../oscar/uiglossary.cpp" line="687"/>
+        <location filename="../oscar/uiglossary.cpp" line="692"/>
         <source>Value</source>
         <translation>Значение</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="679"/>
+        <location filename="../oscar/uiglossary.cpp" line="689"/>
         <source>The number to compare with.</source>
         <translation>Число для сравнения.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="684"/>
+        <location filename="../oscar/uiglossary.cpp" line="694"/>
         <source>The whole number to compare with.</source>
         <translation>Целое число для сравнения.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="687"/>
+        <location filename="../oscar/uiglossary.cpp" line="697"/>
         <source>Text</source>
         <translation>Текст</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="689"/>
+        <location filename="../oscar/uiglossary.cpp" line="699"/>
         <source>The text to look for in notes or bookmarks.</source>
         <translation>Текст, который искать в заметках или закладках.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="692"/>
+        <location filename="../oscar/uiglossary.cpp" line="702"/>
         <source>Progress</source>
         <translation>Ход поиска</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="694"/>
+        <location filename="../oscar/uiglossary.cpp" line="704"/>
         <source>How far the search has gone through the nights.</source>
         <translation>Сколько ночей поиск уже просмотрел.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="697"/>
+        <location filename="../oscar/uiglossary.cpp" line="707"/>
         <source>Found</source>
         <translation>Найдено</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="699"/>
+        <location filename="../oscar/uiglossary.cpp" line="709"/>
         <source>How many days matched.</source>
         <translation>Сколько дней подошло.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="702"/>
+        <location filename="../oscar/uiglossary.cpp" line="712"/>
         <source>Smallest and largest</source>
         <translation>Наименьшее и наибольшее</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="704"/>
+        <location filename="../oscar/uiglossary.cpp" line="714"/>
         <source>The smallest and largest value among the days found.</source>
         <translation>Наименьшее и наибольшее значение среди найденных дней.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="708"/>
+        <location filename="../oscar/uiglossary.cpp" line="718"/>
         <source>Device to align</source>
         <translation>Выравниваемый прибор</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="709"/>
-        <location filename="../oscar/uiglossary.cpp" line="714"/>
         <location filename="../oscar/uiglossary.cpp" line="719"/>
         <location filename="../oscar/uiglossary.cpp" line="724"/>
         <location filename="../oscar/uiglossary.cpp" line="729"/>
@@ -8197,266 +8229,278 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <location filename="../oscar/uiglossary.cpp" line="759"/>
         <location filename="../oscar/uiglossary.cpp" line="764"/>
         <location filename="../oscar/uiglossary.cpp" line="769"/>
+        <location filename="../oscar/uiglossary.cpp" line="774"/>
+        <location filename="../oscar/uiglossary.cpp" line="779"/>
         <source>Daily → Align bar</source>
         <translation>День → панель выравнивания</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="710"/>
+        <location filename="../oscar/uiglossary.cpp" line="720"/>
         <source>The oximeter or other device whose time is shifted to match the CPAP data of this night.</source>
         <translation>Оксиметр или другой прибор, время которого сдвигается под данные CPAP этой ночи.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="713"/>
+        <location filename="../oscar/uiglossary.cpp" line="723"/>
         <source>Shift -1h</source>
         <translation>Сдвиг -1 ч</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="715"/>
+        <location filename="../oscar/uiglossary.cpp" line="725"/>
         <source>Moves the device&apos;s data 1 hour earlier against the CPAP data; watch the desaturations line up with the events.</source>
         <translation>Сдвигает данные прибора на 1 час раньше относительно данных CPAP; следите, чтобы десатурации совпали с событиями.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="718"/>
+        <location filename="../oscar/uiglossary.cpp" line="728"/>
         <source>Shift -10m</source>
         <translation>Сдвиг -10 мин</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="720"/>
+        <location filename="../oscar/uiglossary.cpp" line="730"/>
         <source>Moves the device&apos;s data 10 minutes earlier against the CPAP data; watch the desaturations line up with the events.</source>
         <translation>Сдвигает данные прибора на 10 минут раньше относительно данных CPAP; следите, чтобы десатурации совпали с событиями.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="723"/>
+        <location filename="../oscar/uiglossary.cpp" line="733"/>
         <source>Shift -1m</source>
         <translation>Сдвиг -1 мин</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="725"/>
+        <location filename="../oscar/uiglossary.cpp" line="735"/>
         <source>Moves the device&apos;s data 1 minute earlier against the CPAP data; watch the desaturations line up with the events.</source>
         <translation>Сдвигает данные прибора на 1 минуту раньше относительно данных CPAP; следите, чтобы десатурации совпали с событиями.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="728"/>
+        <location filename="../oscar/uiglossary.cpp" line="738"/>
         <source>Shift -10s</source>
         <translation>Сдвиг -10 с</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="730"/>
+        <location filename="../oscar/uiglossary.cpp" line="740"/>
         <source>Moves the device&apos;s data 10 seconds earlier against the CPAP data; watch the desaturations line up with the events.</source>
         <translation>Сдвигает данные прибора на 10 секунд раньше относительно данных CPAP; следите, чтобы десатурации совпали с событиями.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="733"/>
+        <location filename="../oscar/uiglossary.cpp" line="743"/>
         <source>Shift +10s</source>
         <translation>Сдвиг +10 с</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="735"/>
+        <location filename="../oscar/uiglossary.cpp" line="745"/>
         <source>Moves the device&apos;s data 10 seconds later against the CPAP data; watch the desaturations line up with the events.</source>
         <translation>Сдвигает данные прибора на 10 секунд позже относительно данных CPAP; следите, чтобы десатурации совпали с событиями.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="738"/>
+        <location filename="../oscar/uiglossary.cpp" line="748"/>
         <source>Shift +1m</source>
         <translation>Сдвиг +1 мин</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="740"/>
+        <location filename="../oscar/uiglossary.cpp" line="750"/>
         <source>Moves the device&apos;s data 1 minute later against the CPAP data; watch the desaturations line up with the events.</source>
         <translation>Сдвигает данные прибора на 1 минуту позже относительно данных CPAP; следите, чтобы десатурации совпали с событиями.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="743"/>
+        <location filename="../oscar/uiglossary.cpp" line="753"/>
         <source>Shift +10m</source>
         <translation>Сдвиг +10 мин</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="745"/>
+        <location filename="../oscar/uiglossary.cpp" line="755"/>
         <source>Moves the device&apos;s data 10 minutes later against the CPAP data; watch the desaturations line up with the events.</source>
         <translation>Сдвигает данные прибора на 10 минут позже относительно данных CPAP; следите, чтобы десатурации совпали с событиями.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="748"/>
+        <location filename="../oscar/uiglossary.cpp" line="758"/>
         <source>Shift +1h</source>
         <translation>Сдвиг +1 ч</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="750"/>
+        <location filename="../oscar/uiglossary.cpp" line="760"/>
         <source>Moves the device&apos;s data 1 hour later against the CPAP data; watch the desaturations line up with the events.</source>
         <translation>Сдвигает данные прибора на 1 час позже относительно данных CPAP; следите, чтобы десатурации совпали с событиями.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="753"/>
+        <location filename="../oscar/uiglossary.cpp" line="763"/>
         <source>Cancel alignment</source>
         <translation>Отменить выравнивание</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="755"/>
+        <location filename="../oscar/uiglossary.cpp" line="765"/>
         <source>Discards the shift and closes the bar (Esc).</source>
         <translation>Отменяет сдвиг и закрывает панель (Esc).</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="758"/>
+        <location filename="../oscar/uiglossary.cpp" line="768"/>
         <source>Save alignment</source>
         <translation>Сохранить выравнивание</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="760"/>
+        <location filename="../oscar/uiglossary.cpp" line="770"/>
         <source>Saves the shift for this night (Enter); the device&apos;s data is shown shifted from now on.</source>
         <translation>Сохраняет сдвиг для этой ночи (Enter); дальше данные прибора показываются со сдвигом.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="761"/>
+        <location filename="../oscar/uiglossary.cpp" line="771"/>
         <source>Saved shifts can be changed later in Data → Time Corrections.</source>
         <translation>Сохранённые сдвиги можно потом изменить в «Данные → Коррекция времени».</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="763"/>
+        <location filename="../oscar/uiglossary.cpp" line="773"/>
         <source>Same as last night</source>
         <translation>Как в прошлую ночь</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="765"/>
+        <location filename="../oscar/uiglossary.cpp" line="775"/>
         <source>Uses the shift saved for the nearest earlier night.</source>
         <translation>Берёт сдвиг, сохранённый для ближайшей предыдущей ночи.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="766"/>
+        <location filename="../oscar/uiglossary.cpp" line="776"/>
         <source>Handy when the device clock is off by the same amount every night.</source>
         <translation>Удобно, когда часы прибора каждую ночь врут на одну и ту же величину.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="768"/>
+        <location filename="../oscar/uiglossary.cpp" line="778"/>
         <source>More options</source>
         <translation>Другие варианты</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="770"/>
+        <location filename="../oscar/uiglossary.cpp" line="780"/>
         <source>Opens Time Corrections for date ranges and other kinds of correction.</source>
         <translation>Открывает «Коррекцию времени» для диапазонов дат и других видов поправок.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="773"/>
+        <location filename="../oscar/uiglossary.cpp" line="783"/>
         <source>Search the explanations</source>
         <translation>Поиск по пояснениям</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="775"/>
+        <location filename="../oscar/uiglossary.cpp" line="785"/>
         <source>Finds explanations of figures, terms, menus and settings by a word; pick one from the list to read it.</source>
         <translation>Находит пояснения цифр, терминов, меню и настроек по слову; выберите в списке, чтобы прочитать.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="779"/>
-        <location filename="../oscar/uiglossary.cpp" line="784"/>
         <location filename="../oscar/uiglossary.cpp" line="789"/>
         <location filename="../oscar/uiglossary.cpp" line="794"/>
-        <location filename="../oscar/uiglossary.cpp" line="814"/>
-        <location filename="../oscar/uiglossary.cpp" line="819"/>
+        <location filename="../oscar/uiglossary.cpp" line="799"/>
+        <location filename="../oscar/uiglossary.cpp" line="804"/>
         <location filename="../oscar/uiglossary.cpp" line="824"/>
         <location filename="../oscar/uiglossary.cpp" line="829"/>
         <location filename="../oscar/uiglossary.cpp" line="834"/>
+        <location filename="../oscar/uiglossary.cpp" line="839"/>
+        <location filename="../oscar/uiglossary.cpp" line="844"/>
         <source>Overview → top bar</source>
         <translation>Сводка → верхняя панель</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="780"/>
+        <location filename="../oscar/uiglossary.cpp" line="790"/>
         <source>Chooses the period shown: last week, month, several months, everything or your own dates.</source>
         <translation>Выбирает показываемый период: последняя неделя, месяц, несколько месяцев, всё время или свои даты.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="781"/>
+        <location filename="../oscar/uiglossary.cpp" line="791"/>
         <source>A month is a good start; longer periods show slow trends.</source>
         <translation>Для начала хорош месяц; более длинные периоды показывают медленные тенденции.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="785"/>
+        <location filename="../oscar/uiglossary.cpp" line="795"/>
         <source>The first day shown.</source>
         <translation>Первый показываемый день.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="790"/>
+        <location filename="../oscar/uiglossary.cpp" line="800"/>
         <source>The last day shown.</source>
         <translation>Последний показываемый день.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="793"/>
+        <location filename="../oscar/uiglossary.cpp" line="803"/>
         <source>Reset view</source>
         <translation>Сбросить вид</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="795"/>
+        <location filename="../oscar/uiglossary.cpp" line="805"/>
         <source>Shows the whole chosen period again after zooming in.</source>
         <translation>Снова показывает весь выбранный период после увеличения.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="799"/>
-        <location filename="../oscar/uiglossary.cpp" line="804"/>
         <location filename="../oscar/uiglossary.cpp" line="809"/>
+        <location filename="../oscar/uiglossary.cpp" line="814"/>
+        <location filename="../oscar/uiglossary.cpp" line="819"/>
         <source>Overview → bottom bar</source>
         <translation>Сводка → нижняя панель</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="800"/>
+        <location filename="../oscar/uiglossary.cpp" line="810"/>
         <source>Chooses which graphs the Overview shows.</source>
         <translation>Выбирает, какие графики показывает «Сводка».</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="805"/>
+        <location filename="../oscar/uiglossary.cpp" line="815"/>
         <source>Shows how to zoom and scroll the graphs with the mouse and keys.</source>
         <translation>Показывает, как увеличивать и прокручивать графики мышью и клавишами.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="810"/>
+        <location filename="../oscar/uiglossary.cpp" line="820"/>
         <source>Saves the current set and heights of the graphs under a name, or restores a saved one.</source>
         <translation>Сохраняет текущий набор и высоту графиков под именем или восстанавливает сохранённый.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="813"/>
+        <location filename="../oscar/uiglossary.cpp" line="823"/>
         <source>All</source>
         <translation>Все</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="815"/>
+        <location filename="../oscar/uiglossary.cpp" line="825"/>
         <source>Shows your own choice of graphs from the graph list.</source>
         <translation>Показывает ваш собственный выбор графиков из списка графиков.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="818"/>
+        <location filename="../oscar/uiglossary.cpp" line="828"/>
         <source>Therapy</source>
         <translation>Терапия</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="820"/>
+        <location filename="../oscar/uiglossary.cpp" line="830"/>
         <source>Shows the main therapy graphs: usage, AHI, pressure and leak.</source>
         <translation>Показывает главные графики терапии: использование, AHI, давление и утечку.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="821"/>
+        <location filename="../oscar/uiglossary.cpp" line="831"/>
         <source>Start here to see whether therapy works.</source>
         <translation>Начните отсюда, чтобы понять, работает ли терапия.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="823"/>
+        <location filename="../oscar/uiglossary.cpp" line="833"/>
         <source>Mask &amp; Leaks</source>
         <translation>Маска и утечки</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="825"/>
+        <location filename="../oscar/uiglossary.cpp" line="835"/>
         <source>Shows the graphs that tell how well the mask fits: leaks and large leaks.</source>
         <translation>Показывает графики о том, как сидит маска: утечки и большие утечки.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="828"/>
+        <location filename="../oscar/uiglossary.cpp" line="838"/>
         <source>Oxygen</source>
         <translation>Кислород</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="830"/>
+        <location filename="../oscar/uiglossary.cpp" line="840"/>
         <source>Shows the oximetry graphs: SpO2, its drops and time below the thresholds, ODI, problem zones, hypoxic burden and pulse.</source>
         <translation>Показывает графики оксиметрии: SpO2, его падения и время ниже порогов, ODI, зоны проблем, гипоксическую нагрузку и пульс.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1143"/>
+        <location filename="../oscar/uiglossary.cpp" line="1139"/>
+        <source>Use it when the figures go to a doctor. It does not show or hide OSCAR analysis: that is the button on the Daily page.</source>
+        <translation>Используйте, когда цифры идут врачу. Анализ OSCAR этот режим не показывает и не прячет: для этого кнопка на странице «День».</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uiglossary.cpp" line="1144"/>
+        <source>It does not show or hide OSCAR analysis: that is the button on the Daily page.</source>
+        <translation>Анализ OSCAR этот режим не показывает и не прячет: для этого кнопка на странице «День».</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uiglossary.cpp" line="1153"/>
         <source>Would put the clinical settings back to OSCAR&apos;s defaults; not available yet, the button is greyed out.</source>
         <translation>Должна возвращать клинические настройки к значениям OSCAR по умолчанию; пока недоступна, кнопка серая.</translation>
     </message>
@@ -8465,72 +8509,70 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <translation type="vanished">Показывает графики оксиметрии: SpO2, время ниже 90 % и пульс.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="559"/>
+        <location filename="../oscar/uiglossary.cpp" line="569"/>
         <source>Turns on manual scoring: drag across the flow graph to add an event or leave out a stretch, drag the edge of an event box or stretch to change its bounds, right-click an event to remove it or change its type.</source>
         <translation>Включает ручную разметку: протяните мышью по графику потока, чтобы добавить событие или исключить участок; потяните за край рамки события или участка, чтобы изменить его границы; щёлкните событие правой кнопкой, чтобы убрать его или сменить тип.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="831"/>
+        <location filename="../oscar/uiglossary.cpp" line="841"/>
         <source>Useful only on nights with an oximeter.</source>
         <translation>Полезно только в ночи с оксиметром.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="833"/>
+        <location filename="../oscar/uiglossary.cpp" line="843"/>
         <source>Analysis</source>
         <translation>Анализ</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="835"/>
+        <location filename="../oscar/uiglossary.cpp" line="845"/>
         <source>Shows the graphs of OSCAR&apos;s own analysis: its AHI, flow limitation and Glasgow Index.</source>
         <translation>Показывает графики собственного анализа OSCAR: его AHI, ограничение потока и Glasgow Index.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="838"/>
+        <location filename="../oscar/uiglossary.cpp" line="848"/>
         <source>CPAP importer</source>
         <translation>Импорт CPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="839"/>
-        <location filename="../oscar/uiglossary.cpp" line="844"/>
         <location filename="../oscar/uiglossary.cpp" line="849"/>
         <location filename="../oscar/uiglossary.cpp" line="854"/>
         <location filename="../oscar/uiglossary.cpp" line="859"/>
+        <location filename="../oscar/uiglossary.cpp" line="864"/>
+        <location filename="../oscar/uiglossary.cpp" line="869"/>
         <source>Home page</source>
         <translation>Стартовая страница</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="841"/>
+        <location filename="../oscar/uiglossary.cpp" line="851"/>
         <source>Nights already in OSCAR are skipped, so importing the same card again is safe.</source>
         <translation>Ночи, которые уже есть в OSCAR, пропускаются, поэтому повторный импорт той же карты безопасен.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="845"/>
+        <location filename="../oscar/uiglossary.cpp" line="855"/>
         <source>Imports a pulse oximeter&apos;s recording.</source>
         <translation>Импортирует запись пульсоксиметра.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="860"/>
+        <location filename="../oscar/uiglossary.cpp" line="870"/>
         <source>Opens the Statistics page.</source>
         <translation>Открывает «Статистику».</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="866"/>
+        <location filename="../oscar/uiglossary.cpp" line="876"/>
         <source>Search settings</source>
         <translation>Поиск настроек</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="868"/>
+        <location filename="../oscar/uiglossary.cpp" line="878"/>
         <source>Finds a setting on any tab by a word from its name; pick it from the list to jump to it.</source>
         <translation>Находит настройку на любой вкладке по слову из её названия; выберите её в списке, чтобы перейти к ней.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="871"/>
+        <location filename="../oscar/uiglossary.cpp" line="881"/>
         <source>Day split time</source>
         <translation>Время завершения дня</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="872"/>
-        <location filename="../oscar/uiglossary.cpp" line="877"/>
         <location filename="../oscar/uiglossary.cpp" line="882"/>
         <location filename="../oscar/uiglossary.cpp" line="887"/>
         <location filename="../oscar/uiglossary.cpp" line="892"/>
@@ -8546,262 +8588,262 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <location filename="../oscar/uiglossary.cpp" line="942"/>
         <location filename="../oscar/uiglossary.cpp" line="947"/>
         <location filename="../oscar/uiglossary.cpp" line="952"/>
+        <location filename="../oscar/uiglossary.cpp" line="957"/>
+        <location filename="../oscar/uiglossary.cpp" line="962"/>
         <source>Preferences → Import</source>
         <translation>Настройки → Импорт</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="873"/>
+        <location filename="../oscar/uiglossary.cpp" line="883"/>
         <source>Sessions that start before this time are counted for the previous day.</source>
         <translation>Сеансы, начавшиеся раньше этого времени, относятся к предыдущему дню.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="874"/>
+        <location filename="../oscar/uiglossary.cpp" line="884"/>
         <source>Midday (12:00) suits most people. Move it only if you sleep during the day.</source>
         <translation>Полдень (12:00) подходит большинству. Меняйте, только если спите днём.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="876"/>
+        <location filename="../oscar/uiglossary.cpp" line="886"/>
         <source>Combine close sessions</source>
         <translation>Объединять близкие сеансы</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="878"/>
+        <location filename="../oscar/uiglossary.cpp" line="888"/>
         <source>Sessions closer together than this many minutes are kept on the same day.</source>
         <translation>Сеансы, между которыми меньше стольких минут, остаются в одном дне.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="879"/>
+        <location filename="../oscar/uiglossary.cpp" line="889"/>
         <source>Usually leave it as it is. It matters only when a night is split across the day boundary.</source>
         <translation>Обычно оставьте как есть. Это важно, только когда ночь разрезается границей дня.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="881"/>
+        <location filename="../oscar/uiglossary.cpp" line="891"/>
         <source>Ignore short sessions</source>
         <translation>Пропускать короткие сеансы</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="883"/>
+        <location filename="../oscar/uiglossary.cpp" line="893"/>
         <source>Sessions shorter than this many minutes are not shown or counted.</source>
         <translation>Сеансы короче стольких минут не показываются и не учитываются.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="884"/>
+        <location filename="../oscar/uiglossary.cpp" line="894"/>
         <source>A few minutes hide mask fitting at bedtime; 0 shows everything.</source>
         <translation>Несколько минут скрывают примерку маски перед сном; 0 показывает всё.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="886"/>
+        <location filename="../oscar/uiglossary.cpp" line="896"/>
         <source>Don&apos;t split summary days</source>
         <translation>Не делить дни только со сводкой</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="888"/>
+        <location filename="../oscar/uiglossary.cpp" line="898"/>
         <source>Keeps days that have only summary data (no detailed graphs) together as the device recorded them.</source>
         <translation>Оставляет дни, где есть только сводные данные (без подробных графиков), такими, как записал аппарат.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="889"/>
+        <location filename="../oscar/uiglossary.cpp" line="899"/>
         <source>Leave it on unless you know why to change it: summary-only days cannot be split correctly.</source>
         <translation>Оставьте включённым, если не знаете, зачем менять: дни только со сводкой нельзя разделить правильно.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="890"/>
+        <location filename="../oscar/uiglossary.cpp" line="900"/>
         <source>Switched off, figures of summary-only days become less accurate, especially for ResMed.</source>
         <translation>Если выключить, цифры дней только со сводными данными становятся менее точными, особенно у ResMed.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="891"/>
+        <location filename="../oscar/uiglossary.cpp" line="901"/>
         <source>SD card backups</source>
         <translation>Резервные копии SD-карты</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="893"/>
+        <location filename="../oscar/uiglossary.cpp" line="903"/>
         <source>Keeps a copy of the card&apos;s files in the OSCAR data folder at every import.</source>
         <translation>При каждом импорте сохраняет копию файлов карты в папке данных OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="894"/>
+        <location filename="../oscar/uiglossary.cpp" line="904"/>
         <source>Leave it on: some devices delete old detailed data from the card, and the copy lets OSCAR import it again.</source>
         <translation>Оставьте включённым: некоторые аппараты стирают старые подробные данные с карты, а копия позволяет импортировать их снова.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="895"/>
+        <location filename="../oscar/uiglossary.cpp" line="905"/>
         <source>Turned off, data the device has already deleted from the card cannot be imported again.</source>
         <translation>Если выключить, данные, которые аппарат уже стёр с карты, импортировать заново будет нельзя.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="896"/>
+        <location filename="../oscar/uiglossary.cpp" line="906"/>
         <source>Compress SD card backups</source>
         <translation>Сжимать копии SD-карты</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="898"/>
+        <location filename="../oscar/uiglossary.cpp" line="908"/>
         <source>Packs the card backups to take less disk space; the first import gets slower.</source>
         <translation>Упаковывает копии карты, чтобы они занимали меньше места; первый импорт медленнее.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="899"/>
+        <location filename="../oscar/uiglossary.cpp" line="909"/>
         <source>Worth it with a small disk; otherwise it makes no difference.</source>
         <translation>Имеет смысл при маленьком диске; иначе разницы нет.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="901"/>
+        <location filename="../oscar/uiglossary.cpp" line="911"/>
         <source>Compress session data</source>
         <translation>Сжимать данные сеансов</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="903"/>
+        <location filename="../oscar/uiglossary.cpp" line="913"/>
         <source>Stores OSCAR&apos;s own data packed, about half the size, but opening a day gets slower.</source>
         <translation>Хранит собственные данные OSCAR упакованными, примерно вдвое меньше, но день открывается медленнее.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="904"/>
+        <location filename="../oscar/uiglossary.cpp" line="914"/>
         <source>Only for a small disk.</source>
         <translation>Только для маленького диска.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="905"/>
+        <location filename="../oscar/uiglossary.cpp" line="915"/>
         <source>Changing it repacks all stored nights when you press OK; that takes a while.</source>
         <translation>При изменении все сохранённые ночи перепаковываются после нажатия OK; это занимает время.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="906"/>
+        <location filename="../oscar/uiglossary.cpp" line="916"/>
         <source>Skip old sessions</source>
         <translation>Пропускать старые сеансы</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="908"/>
+        <location filename="../oscar/uiglossary.cpp" line="918"/>
         <source>Imports only sessions newer than the date beside it.</source>
         <translation>Импортирует только сеансы новее даты рядом.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="909"/>
+        <location filename="../oscar/uiglossary.cpp" line="919"/>
         <source>Useful when the card holds years of data you do not need.</source>
         <translation>Полезно, когда на карте годы ненужных данных.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="911"/>
+        <location filename="../oscar/uiglossary.cpp" line="921"/>
         <source>Oldest date to import</source>
         <translation>Самая ранняя дата импорта</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="913"/>
+        <location filename="../oscar/uiglossary.cpp" line="923"/>
         <source>Sessions before this date are not imported while the box beside it is ticked.</source>
         <translation>Сеансы до этой даты не импортируются, пока отмечен флажок рядом.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="916"/>
+        <location filename="../oscar/uiglossary.cpp" line="926"/>
         <source>Import on opening a profile</source>
         <translation>Импорт при открытии профиля</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="918"/>
+        <location filename="../oscar/uiglossary.cpp" line="928"/>
         <source>Starts the card import right after the profile opens.</source>
         <translation>Запускает импорт с карты сразу после открытия профиля.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="919"/>
+        <location filename="../oscar/uiglossary.cpp" line="929"/>
         <source>Handy when you open OSCAR mainly to load the new nights.</source>
         <translation>Удобно, если OSCAR открывают в основном, чтобы загрузить новые ночи.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="921"/>
+        <location filename="../oscar/uiglossary.cpp" line="931"/>
         <source>Keep graphs in memory</source>
         <translation>Хранить графики в памяти</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="923"/>
+        <location filename="../oscar/uiglossary.cpp" line="933"/>
         <source>Keeps the graphs of days you have opened in memory to show them faster next time.</source>
         <translation>Держит графики открытых дней в памяти, чтобы показать их быстрее в следующий раз.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="924"/>
+        <location filename="../oscar/uiglossary.cpp" line="934"/>
         <source>Not needed on most computers.</source>
         <translation>На большинстве компьютеров не нужно.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="926"/>
+        <location filename="../oscar/uiglossary.cpp" line="936"/>
         <source>Pre-load summaries</source>
         <translation>Загружать сводки заранее</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="928"/>
+        <location filename="../oscar/uiglossary.cpp" line="938"/>
         <source>Loads the summaries of all nights when OSCAR starts, so the Overview opens faster later.</source>
         <translation>Загружает сводки всех ночей при запуске OSCAR, чтобы потом «Сводка» открывалась быстрее.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="931"/>
+        <location filename="../oscar/uiglossary.cpp" line="941"/>
         <source>Open the last profile</source>
         <translation>Открывать последний профиль</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="933"/>
+        <location filename="../oscar/uiglossary.cpp" line="943"/>
         <source>Opens the profile used last time when OSCAR starts, without asking.</source>
         <translation>При запуске OSCAR открывает последний профиль без вопроса.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="934"/>
+        <location filename="../oscar/uiglossary.cpp" line="944"/>
         <source>Turn it off if several people use OSCAR on this computer.</source>
         <translation>Выключите, если OSCAR на этом компьютере пользуются несколько человек.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="936"/>
+        <location filename="../oscar/uiglossary.cpp" line="946"/>
         <source>Import without confirmation</source>
         <translation>Импорт без подтверждения</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="938"/>
+        <location filename="../oscar/uiglossary.cpp" line="948"/>
         <source>Skips the questions OSCAR asks during an import.</source>
         <translation>Пропускает вопросы, которые OSCAR задаёт при импорте.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="941"/>
+        <location filename="../oscar/uiglossary.cpp" line="951"/>
         <source>Warn about untested devices</source>
         <translation>Предупреждать о непроверенных аппаратах</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="943"/>
+        <location filename="../oscar/uiglossary.cpp" line="953"/>
         <source>Warns when the device model has not been tested by OSCAR&apos;s developers.</source>
         <translation>Предупреждает, если модель аппарата не проверена разработчиками OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="944"/>
+        <location filename="../oscar/uiglossary.cpp" line="954"/>
         <source>Keep it on: the warning tells you the figures may be less reliable.</source>
         <translation>Оставьте включённым: предупреждение говорит, что цифры могут быть менее надёжны.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="946"/>
+        <location filename="../oscar/uiglossary.cpp" line="956"/>
         <source>Warn about unseen data</source>
         <translation>Предупреждать о незнакомых данных</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="948"/>
+        <location filename="../oscar/uiglossary.cpp" line="958"/>
         <source>Warns when the card holds data OSCAR has not seen before.</source>
         <translation>Предупреждает, если на карте есть данные, которых OSCAR раньше не встречал.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="949"/>
+        <location filename="../oscar/uiglossary.cpp" line="959"/>
         <source>Keep it on and report such data so OSCAR can learn it.</source>
         <translation>Оставьте включённым и сообщайте о таких данных, чтобы OSCAR их выучил.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="951"/>
+        <location filename="../oscar/uiglossary.cpp" line="961"/>
         <source>Warn about another device&apos;s card</source>
         <translation>Предупреждать о карте другого аппарата</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="953"/>
+        <location filename="../oscar/uiglossary.cpp" line="963"/>
         <source>Warns when the card belongs to another device than the one imported into this profile before.</source>
         <translation>Предупреждает, если карта от другого аппарата, чем тот, что импортировался в этот профиль раньше.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="954"/>
+        <location filename="../oscar/uiglossary.cpp" line="964"/>
         <source>Keep it on: it stops the nights of two people getting mixed. Turn it off only if one person uses two devices.</source>
         <translation>Оставьте включённым: это не даёт смешать ночи двух людей. Выключайте, только если один человек пользуется двумя аппаратами.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="957"/>
-        <location filename="../oscar/uiglossary.cpp" line="962"/>
         <location filename="../oscar/uiglossary.cpp" line="967"/>
         <location filename="../oscar/uiglossary.cpp" line="972"/>
         <location filename="../oscar/uiglossary.cpp" line="977"/>
@@ -8824,128 +8866,128 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <location filename="../oscar/uiglossary.cpp" line="1062"/>
         <location filename="../oscar/uiglossary.cpp" line="1067"/>
         <location filename="../oscar/uiglossary.cpp" line="1072"/>
+        <location filename="../oscar/uiglossary.cpp" line="1077"/>
+        <location filename="../oscar/uiglossary.cpp" line="1082"/>
         <source>Preferences → CPAP</source>
         <translation>Настройки → CPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="958"/>
+        <location filename="../oscar/uiglossary.cpp" line="968"/>
         <source>Draws a red line on the leak graph at the threshold beside it.</source>
         <translation>Рисует красную линию на графике утечки на уровне порога рядом.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="961"/>
+        <location filename="../oscar/uiglossary.cpp" line="971"/>
         <source>Leak threshold</source>
         <translation>Порог утечки</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="963"/>
+        <location filename="../oscar/uiglossary.cpp" line="973"/>
         <source>The leak level drawn as the red line and counted as too high.</source>
         <translation>Уровень утечки, на котором рисуется красная линия и который считается слишком высоким.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="964"/>
+        <location filename="../oscar/uiglossary.cpp" line="974"/>
         <source>24 L/min is OSCAR&apos;s usual value for ResMed. Prisma and Resvent report leak differently: compare it with the leak of your good nights.</source>
         <translation>24 л/мин — обычное значение OSCAR для ResMed. Prisma и Resvent считают утечку по-своему: сравните с утечкой ваших хороших ночей.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="966"/>
+        <location filename="../oscar/uiglossary.cpp" line="976"/>
         <source>Main event index</source>
         <translation>Главный индекс событий</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="968"/>
+        <location filename="../oscar/uiglossary.cpp" line="978"/>
         <source>Whether OSCAR shows AHI or RDI as the main index.</source>
         <translation>Показывает ли OSCAR главным индексом AHI или RDI.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="969"/>
+        <location filename="../oscar/uiglossary.cpp" line="979"/>
         <source>AHI is what doctors usually ask for.</source>
         <translation>Врачи обычно спрашивают AHI.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="971"/>
+        <location filename="../oscar/uiglossary.cpp" line="981"/>
         <source>Upper percentile</source>
         <translation>Верхний перцентиль</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="973"/>
+        <location filename="../oscar/uiglossary.cpp" line="983"/>
         <source>Which percentile OSCAR shows as the &quot;high&quot; value of pressure, leak and other figures.</source>
         <translation>Какой перцентиль OSCAR показывает как «высокое» значение давления, утечки и других цифр.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="974"/>
+        <location filename="../oscar/uiglossary.cpp" line="984"/>
         <source>95 % is the usual value and matches what most devices report.</source>
         <translation>95 % — обычное значение, оно совпадает с тем, что сообщает большинство аппаратов.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="976"/>
+        <location filename="../oscar/uiglossary.cpp" line="986"/>
         <source>Middle value</source>
         <translation>Среднее значение</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="978"/>
+        <location filename="../oscar/uiglossary.cpp" line="988"/>
         <source>How OSCAR shows the typical value: median, weighted average or plain average.</source>
         <translation>Как OSCAR показывает типичное значение: медиана, взвешенное среднее или простое среднее.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="979"/>
+        <location filename="../oscar/uiglossary.cpp" line="989"/>
         <source>Median is recommended: it is not pulled by short spikes.</source>
         <translation>Рекомендуется медиана: короткие всплески её не сдвигают.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="983"/>
+        <location filename="../oscar/uiglossary.cpp" line="993"/>
         <source>Whether the maximum is the very highest value or the 99th percentile, which ignores rare spikes.</source>
         <translation>Максимум — это самое большое значение или 99-й перцентиль, который не учитывает редкие всплески.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="986"/>
+        <location filename="../oscar/uiglossary.cpp" line="996"/>
         <source>Combining indices</source>
         <translation>Объединение индексов</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="988"/>
+        <location filename="../oscar/uiglossary.cpp" line="998"/>
         <source>How an index such as AHI is combined over several nights.</source>
         <translation>Как индекс вроде AHI объединяется за несколько ночей.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="989"/>
+        <location filename="../oscar/uiglossary.cpp" line="999"/>
         <source>&quot;Combined count divided by total hours&quot; is the standard way and the default.</source>
         <translation>«Общее число, делённое на общее время» — стандартный способ и значение по умолчанию.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="991"/>
+        <location filename="../oscar/uiglossary.cpp" line="1001"/>
         <source>AHI graph window</source>
         <translation>Окно графика AHI</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="993"/>
+        <location filename="../oscar/uiglossary.cpp" line="1003"/>
         <source>How many minutes of events each point of the AHI-per-hour graph covers.</source>
         <translation>Сколько минут событий охватывает каждая точка графика AHI по часам.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="994"/>
+        <location filename="../oscar/uiglossary.cpp" line="1004"/>
         <source>60 minutes is strongly recommended.</source>
         <translation>Очень рекомендуется 60 минут.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="996"/>
+        <location filename="../oscar/uiglossary.cpp" line="1006"/>
         <source>AHI graph zero reset</source>
         <translation>Обнуление графика AHI</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="998"/>
+        <location filename="../oscar/uiglossary.cpp" line="1008"/>
         <source>Starts the count from zero at the beginning of each window of the AHI graph.</source>
         <translation>Начинает счёт с нуля в начале каждого окна графика AHI.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="999"/>
-        <location filename="../oscar/uiglossary.cpp" line="1099"/>
+        <location filename="../oscar/uiglossary.cpp" line="1009"/>
+        <location filename="../oscar/uiglossary.cpp" line="1109"/>
         <source>Usually leave it as it is.</source>
         <translation>Обычно оставьте как есть.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1000"/>
-        <location filename="../oscar/uiglossary.cpp" line="1005"/>
         <location filename="../oscar/uiglossary.cpp" line="1010"/>
         <location filename="../oscar/uiglossary.cpp" line="1015"/>
         <location filename="../oscar/uiglossary.cpp" line="1020"/>
@@ -8954,192 +8996,192 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <location filename="../oscar/uiglossary.cpp" line="1035"/>
         <location filename="../oscar/uiglossary.cpp" line="1040"/>
         <location filename="../oscar/uiglossary.cpp" line="1045"/>
+        <location filename="../oscar/uiglossary.cpp" line="1050"/>
+        <location filename="../oscar/uiglossary.cpp" line="1055"/>
         <source>Changing it makes OSCAR recalculate the events of all nights when you press OK; that takes a while.</source>
         <translation>После изменения и нажатия OK OSCAR пересчитает события всех ночей; это занимает время.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1001"/>
+        <location filename="../oscar/uiglossary.cpp" line="1011"/>
         <source>Calculate unintentional leak</source>
         <translation>Рассчитывать непреднамеренную утечку</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1003"/>
+        <location filename="../oscar/uiglossary.cpp" line="1013"/>
         <source>Works out the unintentional leak from the total leak and your mask&apos;s vent rate, for devices that record only the total.</source>
         <translation>Вычисляет непреднамеренную утечку из общей утечки и сброса вашей маски — для аппаратов, которые пишут только общую утечку.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1004"/>
+        <location filename="../oscar/uiglossary.cpp" line="1014"/>
         <source>Not needed for devices that report the leak themselves.</source>
         <translation>Не нужно для аппаратов, которые сами сообщают утечку.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1006"/>
+        <location filename="../oscar/uiglossary.cpp" line="1016"/>
         <source>Mask vent at 4 cmH2O</source>
         <translation>Сброс маски при 4 смH2O</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1008"/>
+        <location filename="../oscar/uiglossary.cpp" line="1018"/>
         <source>Your mask&apos;s vent flow at 4 cmH2O, from the mask&apos;s manual.</source>
         <translation>Поток через клапан выдоха вашей маски при 4 смH2O, из инструкции к маске.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1011"/>
+        <location filename="../oscar/uiglossary.cpp" line="1021"/>
         <source>Mask vent at 20 cmH2O</source>
         <translation>Сброс маски при 20 смH2O</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1013"/>
+        <location filename="../oscar/uiglossary.cpp" line="1023"/>
         <source>Your mask&apos;s vent flow at 20 cmH2O, from the mask&apos;s manual.</source>
         <translation>Поток через клапан выдоха вашей маски при 20 смH2O, из инструкции к маске.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1016"/>
+        <location filename="../oscar/uiglossary.cpp" line="1026"/>
         <source>Custom event flagging</source>
         <translation>Собственная разметка событий</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1018"/>
+        <location filename="../oscar/uiglossary.cpp" line="1028"/>
         <source>Lets OSCAR mark extra flow reductions the device may have missed, with the rules below.</source>
         <translation>Позволяет OSCAR отмечать дополнительные снижения потока, которые аппарат мог пропустить, по правилам ниже.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1019"/>
+        <location filename="../oscar/uiglossary.cpp" line="1029"/>
         <source>Experimental; OSCAR&apos;s own analysis (Analysis tab) does this more thoroughly.</source>
         <translation>Экспериментально; собственный анализ OSCAR (вкладка «Анализ») делает это тщательнее.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1021"/>
+        <location filename="../oscar/uiglossary.cpp" line="1031"/>
         <source>Flow restriction</source>
         <translation>Снижение потока</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1023"/>
+        <location filename="../oscar/uiglossary.cpp" line="1033"/>
         <source>How far the flow must fall below its median to be flagged.</source>
         <translation>Насколько поток должен упасть ниже своей медианы, чтобы его отметить.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1024"/>
+        <location filename="../oscar/uiglossary.cpp" line="1034"/>
         <source>20 % works well.</source>
         <translation>20 % работает хорошо.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1026"/>
+        <location filename="../oscar/uiglossary.cpp" line="1036"/>
         <source>Duration</source>
         <translation>Длительность</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1028"/>
+        <location filename="../oscar/uiglossary.cpp" line="1038"/>
         <source>How long the flow must stay reduced to be flagged.</source>
         <translation>Сколько поток должен оставаться сниженным, чтобы его отметить.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1031"/>
+        <location filename="../oscar/uiglossary.cpp" line="1041"/>
         <source>Second flow restriction</source>
         <translation>Второе снижение потока</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1033"/>
+        <location filename="../oscar/uiglossary.cpp" line="1043"/>
         <source>A second, separate rule: how far the flow must fall.</source>
         <translation>Второе, отдельное правило: насколько должен упасть поток.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1036"/>
+        <location filename="../oscar/uiglossary.cpp" line="1046"/>
         <source>Second duration</source>
         <translation>Вторая длительность</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1038"/>
+        <location filename="../oscar/uiglossary.cpp" line="1048"/>
         <source>A second, separate rule: how long the flow must stay reduced.</source>
         <translation>Второе, отдельное правило: сколько поток должен оставаться сниженным.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1041"/>
+        <location filename="../oscar/uiglossary.cpp" line="1051"/>
         <source>Allow duplicates</source>
         <translation>Разрешить повторы</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1043"/>
+        <location filename="../oscar/uiglossary.cpp" line="1053"/>
         <source>Also flags reductions next to events the device already flagged.</source>
         <translation>Отмечает снижения и рядом с событиями, которые аппарат уже отметил.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1046"/>
+        <location filename="../oscar/uiglossary.cpp" line="1056"/>
         <source>Custom flags in the pie chart</source>
         <translation>Свои отметки в круговой диаграмме</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1048"/>
+        <location filename="../oscar/uiglossary.cpp" line="1058"/>
         <source>Includes the custom flags in the event pie chart.</source>
         <translation>Включает собственные отметки в круговую диаграмму событий.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1051"/>
+        <location filename="../oscar/uiglossary.cpp" line="1061"/>
         <source>Resync device events</source>
         <translation>Пересинхронизировать события аппарата</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1053"/>
+        <location filename="../oscar/uiglossary.cpp" line="1063"/>
         <source>Experimental: moves the device&apos;s event marks to where the flow shows them.</source>
         <translation>Экспериментально: сдвигает отметки событий аппарата туда, где их показывает поток.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1054"/>
+        <location filename="../oscar/uiglossary.cpp" line="1064"/>
         <source>Leave it off unless the device&apos;s marks clearly sit beside their events.</source>
         <translation>Оставьте выключенным, если только отметки аппарата явно не стоят рядом со своими событиями.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1056"/>
+        <location filename="../oscar/uiglossary.cpp" line="1066"/>
         <source>Unknown event channels</source>
         <translation>Неизвестные каналы событий</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1058"/>
+        <location filename="../oscar/uiglossary.cpp" line="1068"/>
         <source>Shows events the device records but OSCAR does not understand yet.</source>
         <translation>Показывает события, которые аппарат записывает, но OSCAR пока не понимает.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1059"/>
+        <location filename="../oscar/uiglossary.cpp" line="1069"/>
         <source>Only for curiosity or reporting.</source>
         <translation>Только из любопытства или для сообщений разработчикам.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1061"/>
+        <location filename="../oscar/uiglossary.cpp" line="1071"/>
         <source>Steady breathing</source>
         <translation>Ровное дыхание</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1063"/>
+        <location filename="../oscar/uiglossary.cpp" line="1073"/>
         <source>Marks stretches of steady, even breathing; needs Permissive Mode on the Clinical tab.</source>
         <translation>Отмечает участки ровного, спокойного дыхания; нужен разрешительный режим на вкладке «Клинический».</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1066"/>
+        <location filename="../oscar/uiglossary.cpp" line="1076"/>
         <source>Event context</source>
         <translation>Контекст события</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1068"/>
+        <location filename="../oscar/uiglossary.cpp" line="1078"/>
         <source>How many seconds after an event the Events tab shows.</source>
         <translation>Сколько секунд после события показывает вкладка «События».</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1071"/>
+        <location filename="../oscar/uiglossary.cpp" line="1081"/>
         <source>Consolidate event types</source>
         <translation>Объединять типы событий</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1073"/>
+        <location filename="../oscar/uiglossary.cpp" line="1083"/>
         <source>Groups similar event types together in the Events tab tree.</source>
         <translation>Группирует похожие типы событий в дереве вкладки «События».</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1076"/>
+        <location filename="../oscar/uiglossary.cpp" line="1086"/>
         <source>Baseline SpO2</source>
         <translation>Базовый SpO2</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1077"/>
-        <location filename="../oscar/uiglossary.cpp" line="1082"/>
         <location filename="../oscar/uiglossary.cpp" line="1087"/>
         <location filename="../oscar/uiglossary.cpp" line="1092"/>
         <location filename="../oscar/uiglossary.cpp" line="1097"/>
@@ -9148,161 +9190,162 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <location filename="../oscar/uiglossary.cpp" line="1112"/>
         <location filename="../oscar/uiglossary.cpp" line="1117"/>
         <location filename="../oscar/uiglossary.cpp" line="1122"/>
+        <location filename="../oscar/uiglossary.cpp" line="1127"/>
+        <location filename="../oscar/uiglossary.cpp" line="1132"/>
         <source>Preferences → Oximetry</source>
         <translation>Настройки → Оксиметрия</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1078"/>
+        <location filename="../oscar/uiglossary.cpp" line="1088"/>
         <source>The normal SpO2 level that drops are measured from: worked out from the first hour or a fixed value.</source>
         <translation>Обычный уровень SpO2, от которого отсчитываются падения: вычисляется по первому часу или задаётся числом.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1079"/>
+        <location filename="../oscar/uiglossary.cpp" line="1089"/>
         <source>Choose a fixed value if the first hour is not typical, for example when you were awake.</source>
         <translation>Задайте число, если первый час нетипичен, например вы ещё не спали.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1081"/>
+        <location filename="../oscar/uiglossary.cpp" line="1091"/>
         <source>Desaturation threshold</source>
         <translation>Порог десатурации</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1083"/>
+        <location filename="../oscar/uiglossary.cpp" line="1093"/>
         <source>The SpO2 level under which time is counted as low.</source>
         <translation>Уровень SpO2, ниже которого время считается низким.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1086"/>
-        <location filename="../oscar/uiglossary.cpp" line="1556"/>
+        <location filename="../oscar/uiglossary.cpp" line="1096"/>
+        <location filename="../oscar/uiglossary.cpp" line="1566"/>
         <source>Low pulse</source>
         <translation>Низкий пульс</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1088"/>
+        <location filename="../oscar/uiglossary.cpp" line="1098"/>
         <source>A pulse below this is flagged.</source>
         <translation>Пульс ниже этого отмечается.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1091"/>
-        <location filename="../oscar/uiglossary.cpp" line="1561"/>
+        <location filename="../oscar/uiglossary.cpp" line="1101"/>
+        <location filename="../oscar/uiglossary.cpp" line="1571"/>
         <source>High pulse</source>
         <translation>Высокий пульс</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1093"/>
+        <location filename="../oscar/uiglossary.cpp" line="1103"/>
         <source>A pulse above this is flagged.</source>
         <translation>Пульс выше этого отмечается.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1096"/>
+        <location filename="../oscar/uiglossary.cpp" line="1106"/>
         <source>Discard short pieces</source>
         <translation>Отбрасывать короткие куски</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1098"/>
+        <location filename="../oscar/uiglossary.cpp" line="1108"/>
         <source>Pieces of oximetry shorter than this are thrown away as noise.</source>
         <translation>Куски оксиметрии короче этого отбрасываются как помехи.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1103"/>
+        <location filename="../oscar/uiglossary.cpp" line="1113"/>
         <source>How many percent SpO2 must fall to be flagged as a drop.</source>
         <translation>На сколько процентов должен упасть SpO2, чтобы отметить падение.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1104"/>
+        <location filename="../oscar/uiglossary.cpp" line="1114"/>
         <source>3 % matches the usual ODI rule.</source>
         <translation>3 % соответствует обычному правилу ODI.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1106"/>
+        <location filename="../oscar/uiglossary.cpp" line="1116"/>
         <source>SpO2 drop duration</source>
         <translation>Длительность падения SpO2</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1108"/>
+        <location filename="../oscar/uiglossary.cpp" line="1118"/>
         <source>How long the drop must last to be flagged.</source>
         <translation>Сколько должно длиться падение, чтобы его отметить.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1113"/>
+        <location filename="../oscar/uiglossary.cpp" line="1123"/>
         <source>How much the pulse must change suddenly to be flagged.</source>
         <translation>Насколько резко должен измениться пульс, чтобы это отметить.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1116"/>
+        <location filename="../oscar/uiglossary.cpp" line="1126"/>
         <source>Pulse change duration</source>
         <translation>Длительность изменения пульса</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1118"/>
+        <location filename="../oscar/uiglossary.cpp" line="1128"/>
         <source>Within how many seconds the pulse change must happen.</source>
         <translation>За сколько секунд должно произойти изменение пульса.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1121"/>
+        <location filename="../oscar/uiglossary.cpp" line="1131"/>
         <source>Reset oximetry defaults</source>
         <translation>Сбросить настройки оксиметрии</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1123"/>
+        <location filename="../oscar/uiglossary.cpp" line="1133"/>
         <source>Puts the oximetry settings back to OSCAR&apos;s defaults.</source>
         <translation>Возвращает настройки оксиметрии к значениям OSCAR по умолчанию.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1125"/>
+        <location filename="../oscar/uiglossary.cpp" line="1135"/>
         <source>Your own changes on this tab are replaced by the defaults.</source>
         <translation>Ваши изменения на этой вкладке заменятся значениями по умолчанию.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1126"/>
+        <location filename="../oscar/uiglossary.cpp" line="1136"/>
         <source>Clinical mode</source>
         <translation>Клинический режим</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1127"/>
-        <location filename="../oscar/uiglossary.cpp" line="1132"/>
         <location filename="../oscar/uiglossary.cpp" line="1137"/>
         <location filename="../oscar/uiglossary.cpp" line="1142"/>
+        <location filename="../oscar/uiglossary.cpp" line="1147"/>
+        <location filename="../oscar/uiglossary.cpp" line="1152"/>
         <source>Preferences → Clinical</source>
         <translation>Настройки → Клинический</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1128"/>
+        <location filename="../oscar/uiglossary.cpp" line="1138"/>
         <source>Every session counts; you cannot switch sessions off. Figures match what a clinic would see.</source>
         <translation>Учитываются все сеансы, отключать сеансы нельзя. Цифры совпадают с тем, что увидела бы клиника.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1129"/>
         <source>Use it when the figures go to a doctor.</source>
-        <translation>Используйте, когда цифры идут врачу.</translation>
+        <translation type="vanished">Используйте, когда цифры идут врачу.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1131"/>
+        <location filename="../oscar/uiglossary.cpp" line="1141"/>
         <source>Permissive mode</source>
         <translation>Разрешительный режим</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1133"/>
+        <location filename="../oscar/uiglossary.cpp" line="1143"/>
         <source>Lets you switch off sessions (for example mask fitting) so they are left out of graphs and statistics.</source>
         <translation>Позволяет отключать сеансы (например, примерку маски), чтобы они не попадали в графики и статистику.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1136"/>
+        <location filename="../oscar/uiglossary.cpp" line="1146"/>
         <source>Compliance hours</source>
         <translation>Часы для соблюдения режима</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1138"/>
+        <location filename="../oscar/uiglossary.cpp" line="1148"/>
         <source>How many hours of use a night needs to count as compliant.</source>
         <translation>Сколько часов использования нужно за ночь, чтобы она считалась выполненной.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1139"/>
+        <location filename="../oscar/uiglossary.cpp" line="1149"/>
         <source>4 hours is the usual requirement.</source>
         <translation>Обычное требование — 4 часа.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1141"/>
+        <location filename="../oscar/uiglossary.cpp" line="1151"/>
         <source>Reset clinical defaults</source>
         <translation>Сбросить клинические настройки</translation>
     </message>
@@ -9311,147 +9354,145 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <translation type="vanished">Возвращает клинические настройки к значениям OSCAR по умолчанию.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1146"/>
+        <location filename="../oscar/uiglossary.cpp" line="1156"/>
         <source>Search waveforms</source>
         <translation>Поиск сигналов</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1147"/>
-        <location filename="../oscar/uiglossary.cpp" line="1152"/>
+        <location filename="../oscar/uiglossary.cpp" line="1157"/>
+        <location filename="../oscar/uiglossary.cpp" line="1162"/>
         <source>Preferences → Waveforms</source>
         <translation>Настройки → Сигналы</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1148"/>
+        <location filename="../oscar/uiglossary.cpp" line="1158"/>
         <source>Filters the list of waveform channels by name.</source>
         <translation>Фильтрует список каналов сигналов по названию.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1151"/>
+        <location filename="../oscar/uiglossary.cpp" line="1161"/>
         <source>Reset waveform defaults</source>
         <translation>Сбросить настройки сигналов</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1153"/>
+        <location filename="../oscar/uiglossary.cpp" line="1163"/>
         <source>Puts the colours and settings of all waveform channels back to OSCAR&apos;s defaults.</source>
         <translation>Возвращает цвета и настройки всех каналов сигналов к значениям OSCAR по умолчанию.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1155"/>
-        <location filename="../oscar/uiglossary.cpp" line="1205"/>
+        <location filename="../oscar/uiglossary.cpp" line="1165"/>
+        <location filename="../oscar/uiglossary.cpp" line="1215"/>
         <source>Resetting all channels takes effect at once; Cancel does not bring your colours and settings back.</source>
         <translation>Сброс всех каналов срабатывает сразу; «Отмена» не вернёт ваши цвета и настройки.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1156"/>
+        <location filename="../oscar/uiglossary.cpp" line="1166"/>
         <source>Search events</source>
         <translation>Поиск событий</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1157"/>
-        <location filename="../oscar/uiglossary.cpp" line="1162"/>
         <location filename="../oscar/uiglossary.cpp" line="1167"/>
         <location filename="../oscar/uiglossary.cpp" line="1172"/>
         <location filename="../oscar/uiglossary.cpp" line="1177"/>
-        <location filename="../oscar/uiglossary.cpp" line="1202"/>
+        <location filename="../oscar/uiglossary.cpp" line="1182"/>
+        <location filename="../oscar/uiglossary.cpp" line="1187"/>
+        <location filename="../oscar/uiglossary.cpp" line="1212"/>
         <source>Preferences → Events</source>
         <translation>Настройки → События</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1158"/>
+        <location filename="../oscar/uiglossary.cpp" line="1168"/>
         <source>Filters the list of event channels by name.</source>
         <translation>Фильтрует список каналов событий по названию.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1161"/>
-        <location filename="../oscar/uiglossary.cpp" line="1181"/>
+        <location filename="../oscar/uiglossary.cpp" line="1171"/>
+        <location filename="../oscar/uiglossary.cpp" line="1191"/>
         <source>Show all</source>
         <translation>Показывать все</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1163"/>
+        <location filename="../oscar/uiglossary.cpp" line="1173"/>
         <source>Ticks every event in the Name column: all of them are shown.</source>
         <translation>Отмечает все события в колонке «Название»: показываются все.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1166"/>
-        <location filename="../oscar/uiglossary.cpp" line="1186"/>
+        <location filename="../oscar/uiglossary.cpp" line="1176"/>
+        <location filename="../oscar/uiglossary.cpp" line="1196"/>
         <source>Show none</source>
         <translation>Скрыть все</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1168"/>
+        <location filename="../oscar/uiglossary.cpp" line="1178"/>
         <source>Clears every event in the Name column, to tick only the ones you want.</source>
         <translation>Снимает отметки со всех событий в колонке «Название», чтобы отметить только нужные.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1171"/>
-        <location filename="../oscar/uiglossary.cpp" line="1191"/>
+        <location filename="../oscar/uiglossary.cpp" line="1181"/>
+        <location filename="../oscar/uiglossary.cpp" line="1201"/>
         <source>Overview: all</source>
         <translation>Сводка: все</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1173"/>
+        <location filename="../oscar/uiglossary.cpp" line="1183"/>
         <source>Ticks every event in the Overview column: each gets its own chart in Overview.</source>
         <translation>Отмечает все события в колонке «Сводка»: у каждого будет свой график в «Сводке».</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1176"/>
-        <location filename="../oscar/uiglossary.cpp" line="1196"/>
+        <location filename="../oscar/uiglossary.cpp" line="1186"/>
+        <location filename="../oscar/uiglossary.cpp" line="1206"/>
         <source>Overview: none</source>
         <translation>Сводка: ни одного</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1178"/>
+        <location filename="../oscar/uiglossary.cpp" line="1188"/>
         <source>Clears every event in the Overview column.</source>
         <translation>Снимает отметки со всех событий в колонке «Сводка».</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1182"/>
-        <location filename="../oscar/uiglossary.cpp" line="1187"/>
         <location filename="../oscar/uiglossary.cpp" line="1192"/>
         <location filename="../oscar/uiglossary.cpp" line="1197"/>
+        <location filename="../oscar/uiglossary.cpp" line="1202"/>
+        <location filename="../oscar/uiglossary.cpp" line="1207"/>
         <source>Preferences → Signals</source>
         <translation>Настройки → Сигналы</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1183"/>
+        <location filename="../oscar/uiglossary.cpp" line="1193"/>
         <source>Ticks every signal in the Name column: all of them are shown.</source>
         <translation>Отмечает все сигналы в колонке «Название»: показываются все.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1188"/>
+        <location filename="../oscar/uiglossary.cpp" line="1198"/>
         <source>Clears every signal in the Name column, to tick only the ones you want.</source>
         <translation>Снимает отметки со всех сигналов в колонке «Название», чтобы отметить только нужные.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1193"/>
+        <location filename="../oscar/uiglossary.cpp" line="1203"/>
         <source>Ticks every signal in the Overview column: each gets its own chart in Overview.</source>
         <translation>Отмечает все сигналы в колонке «Сводка»: у каждого будет свой график в «Сводке».</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1198"/>
+        <location filename="../oscar/uiglossary.cpp" line="1208"/>
         <source>Clears every signal in the Overview column.</source>
         <translation>Снимает отметки со всех сигналов в колонке «Сводка».</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1201"/>
+        <location filename="../oscar/uiglossary.cpp" line="1211"/>
         <source>Reset event defaults</source>
         <translation>Сбросить настройки событий</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1203"/>
+        <location filename="../oscar/uiglossary.cpp" line="1213"/>
         <source>Puts the colours and settings of all event channels back to OSCAR&apos;s defaults.</source>
         <translation>Возвращает цвета и настройки всех каналов событий к значениям OSCAR по умолчанию.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1206"/>
+        <location filename="../oscar/uiglossary.cpp" line="1216"/>
         <source>Opening tab</source>
         <translation>Вкладка при открытии</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1207"/>
-        <location filename="../oscar/uiglossary.cpp" line="1212"/>
         <location filename="../oscar/uiglossary.cpp" line="1217"/>
         <location filename="../oscar/uiglossary.cpp" line="1222"/>
         <location filename="../oscar/uiglossary.cpp" line="1227"/>
@@ -9473,257 +9514,257 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <location filename="../oscar/uiglossary.cpp" line="1307"/>
         <location filename="../oscar/uiglossary.cpp" line="1312"/>
         <location filename="../oscar/uiglossary.cpp" line="1317"/>
+        <location filename="../oscar/uiglossary.cpp" line="1322"/>
+        <location filename="../oscar/uiglossary.cpp" line="1327"/>
         <source>Preferences → Appearance</source>
         <translation>Настройки → Внешний вид</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1208"/>
+        <location filename="../oscar/uiglossary.cpp" line="1218"/>
         <source>Which page OSCAR shows when a profile opens.</source>
         <translation>Какую страницу OSCAR показывает при открытии профиля.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1211"/>
+        <location filename="../oscar/uiglossary.cpp" line="1221"/>
         <source>Tab after import</source>
         <translation>Вкладка после импорта</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1213"/>
+        <location filename="../oscar/uiglossary.cpp" line="1223"/>
         <source>Which page OSCAR switches to after an import.</source>
         <translation>На какую страницу OSCAR переходит после импорта.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1214"/>
+        <location filename="../oscar/uiglossary.cpp" line="1224"/>
         <source>&quot;Welcome&quot; shows last night&apos;s summary.</source>
         <translation>«Начало» показывает итоги прошлой ночи.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1216"/>
+        <location filename="../oscar/uiglossary.cpp" line="1226"/>
         <source>Overlay flags</source>
         <translation>Отметки поверх графика</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1218"/>
+        <location filename="../oscar/uiglossary.cpp" line="1228"/>
         <source>How event flags are drawn over the flow graph: bars across the graph or marks at the top.</source>
         <translation>Как рисуются отметки событий поверх графика потока: полосы через график или метки сверху.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1221"/>
+        <location filename="../oscar/uiglossary.cpp" line="1231"/>
         <source>Overview chart style</source>
         <translation>Вид диаграмм «Сводки»</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1223"/>
+        <location filename="../oscar/uiglossary.cpp" line="1233"/>
         <source>Whether the Overview draws bars or lines.</source>
         <translation>Рисует ли «Сводка» столбики или линии.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1226"/>
+        <location filename="../oscar/uiglossary.cpp" line="1236"/>
         <source>Graph height</source>
         <translation>Высота графиков</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1228"/>
+        <location filename="../oscar/uiglossary.cpp" line="1238"/>
         <source>The standard height of graphs, in pixels.</source>
         <translation>Стандартная высота графиков в пикселях.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1231"/>
+        <location filename="../oscar/uiglossary.cpp" line="1241"/>
         <source>Line thickness</source>
         <translation>Толщина линий</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1233"/>
+        <location filename="../oscar/uiglossary.cpp" line="1243"/>
         <source>How thick the lines of the graphs are.</source>
         <translation>Насколько толстые линии на графиках.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1236"/>
+        <location filename="../oscar/uiglossary.cpp" line="1246"/>
         <source>Tooltip time</source>
         <translation>Время подсказок</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1238"/>
+        <location filename="../oscar/uiglossary.cpp" line="1248"/>
         <source>How long the graph tooltips stay visible.</source>
         <translation>Сколько остаются видимыми подсказки графиков.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1241"/>
+        <location filename="../oscar/uiglossary.cpp" line="1251"/>
         <source>Scroll dampening</source>
         <translation>Замедление прокрутки</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1243"/>
+        <location filename="../oscar/uiglossary.cpp" line="1253"/>
         <source>Slows down scrolling of zoomed graphs on sensitive touchpads.</source>
         <translation>Замедляет прокрутку увеличенных графиков на чувствительных тачпадах.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1244"/>
+        <location filename="../oscar/uiglossary.cpp" line="1254"/>
         <source>50 ms is recommended.</source>
         <translation>Рекомендуется 50 мс.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1246"/>
+        <location filename="../oscar/uiglossary.cpp" line="1256"/>
         <source>Grid line darkness</source>
         <translation>Тёмность линий сетки</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1248"/>
+        <location filename="../oscar/uiglossary.cpp" line="1258"/>
         <source>How dark the horizontal grid lines of the graphs are.</source>
         <translation>Насколько тёмные горизонтальные линии сетки на графиках.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1251"/>
+        <location filename="../oscar/uiglossary.cpp" line="1261"/>
         <source>Graph tooltips</source>
         <translation>Подсказки на графиках</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1253"/>
+        <location filename="../oscar/uiglossary.cpp" line="1263"/>
         <source>Shows the values under the mouse on the graphs.</source>
         <translation>Показывает значения под мышью на графиках.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1256"/>
+        <location filename="../oscar/uiglossary.cpp" line="1266"/>
         <source>Anti-aliasing</source>
         <translation>Сглаживание</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1258"/>
+        <location filename="../oscar/uiglossary.cpp" line="1268"/>
         <source>Smooths the lines of the graphs and printed reports.</source>
         <translation>Сглаживает линии графиков и печатных отчётов.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1261"/>
+        <location filename="../oscar/uiglossary.cpp" line="1271"/>
         <source>Square wave plots</source>
         <translation>Ступенчатые графики</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1263"/>
+        <location filename="../oscar/uiglossary.cpp" line="1273"/>
         <source>Draws settings such as pressure as steps instead of slopes.</source>
         <translation>Рисует настройки вроде давления ступеньками, а не наклонными линиями.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1266"/>
+        <location filename="../oscar/uiglossary.cpp" line="1276"/>
         <source>Pixmap caching</source>
         <translation>Кэширование изображений</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1268"/>
+        <location filename="../oscar/uiglossary.cpp" line="1278"/>
         <source>Speeds up drawing graph text; turn it off if the text looks broken.</source>
         <translation>Ускоряет рисование текста графиков; выключите, если текст выглядит испорченным.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1271"/>
+        <location filename="../oscar/uiglossary.cpp" line="1281"/>
         <source>Animations</source>
         <translation>Анимация</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1273"/>
+        <location filename="../oscar/uiglossary.cpp" line="1283"/>
         <source>Animated page changes; currently they do nothing.</source>
         <translation>Анимированная смена страниц; сейчас она ничего не делает.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1276"/>
+        <location filename="../oscar/uiglossary.cpp" line="1286"/>
         <source>Skip empty days</source>
         <translation>Пропускать пустые дни</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1278"/>
+        <location filename="../oscar/uiglossary.cpp" line="1288"/>
         <source>The Daily previous/next buttons jump over days without data.</source>
         <translation>Кнопки «предыдущий/следующий» на странице «День» перескакивают дни без данных.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1281"/>
+        <location filename="../oscar/uiglossary.cpp" line="1291"/>
         <source>Y axis scaling</source>
         <translation>Масштаб оси Y</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1283"/>
+        <location filename="../oscar/uiglossary.cpp" line="1293"/>
         <source>Lets you change a graph&apos;s vertical scale by double-clicking its axis.</source>
         <translation>Позволяет менять вертикальный масштаб графика двойным щелчком по оси.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1286"/>
+        <location filename="../oscar/uiglossary.cpp" line="1296"/>
         <source>Combine similar devices</source>
         <translation>Объединять похожие аппараты</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1288"/>
+        <location filename="../oscar/uiglossary.cpp" line="1298"/>
         <source>Treats devices with the same features as one in the report of setting changes.</source>
         <translation>Считает аппараты с одинаковыми возможностями одним в отчёте об изменении настроек.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1291"/>
+        <location filename="../oscar/uiglossary.cpp" line="1301"/>
         <source>Include serial number</source>
         <translation>Включать серийный номер</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1293"/>
+        <location filename="../oscar/uiglossary.cpp" line="1303"/>
         <source>Shows the device&apos;s serial number in the report of setting changes.</source>
         <translation>Показывает серийный номер аппарата в отчёте об изменении настроек.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1294"/>
+        <location filename="../oscar/uiglossary.cpp" line="1304"/>
         <source>Turn it off before sharing the report publicly.</source>
         <translation>Выключите перед публикацией отчёта.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1296"/>
+        <location filename="../oscar/uiglossary.cpp" line="1306"/>
         <source>Black and white printing</source>
         <translation>Чёрно-белая печать</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1298"/>
+        <location filename="../oscar/uiglossary.cpp" line="1308"/>
         <source>Prints reports without colour, clearer on black-and-white printers.</source>
         <translation>Печатает отчёты без цвета, так понятнее на чёрно-белых принтерах.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1301"/>
+        <location filename="../oscar/uiglossary.cpp" line="1311"/>
         <source>Session bar</source>
         <translation>Полоса сеансов</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1303"/>
+        <location filename="../oscar/uiglossary.cpp" line="1313"/>
         <source>With several sessions in a night, shows a thin bar for each above the event, SpO2 and pulse graphs.</source>
         <translation>Если за ночь несколько сеансов, показывает над графиками событий, SpO2 и пульса тонкую полосу для каждого.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1306"/>
+        <location filename="../oscar/uiglossary.cpp" line="1316"/>
         <source>Hide graph titles</source>
         <translation>Скрыть заголовки графиков</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1308"/>
+        <location filename="../oscar/uiglossary.cpp" line="1318"/>
         <source>Hides the titles of the Daily graphs, which overlap the labels on some high-resolution screens.</source>
         <translation>Скрывает заголовки графиков «Дня», которые на некоторых экранах высокого разрешения налезают на подписи.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1311"/>
+        <location filename="../oscar/uiglossary.cpp" line="1321"/>
         <source>Fusion theme</source>
         <translation>Тема Fusion</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1313"/>
+        <location filename="../oscar/uiglossary.cpp" line="1323"/>
         <source>Uses the same look on every system instead of the system&apos;s own; OSCAR restarts.</source>
         <translation>Одинаковый вид на всех системах вместо системного; OSCAR перезапускается.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1316"/>
+        <location filename="../oscar/uiglossary.cpp" line="1326"/>
         <source>Row shading</source>
         <translation>Чередование строк</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1318"/>
+        <location filename="../oscar/uiglossary.cpp" line="1328"/>
         <source>How often table rows get a shaded background.</source>
         <translation>Как часто строки таблиц получают затенённый фон.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1321"/>
+        <location filename="../oscar/uiglossary.cpp" line="1331"/>
         <source>Application text font</source>
         <translation>Шрифт интерфейса</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1322"/>
-        <location filename="../oscar/uiglossary.cpp" line="1327"/>
         <location filename="../oscar/uiglossary.cpp" line="1332"/>
         <location filename="../oscar/uiglossary.cpp" line="1337"/>
         <location filename="../oscar/uiglossary.cpp" line="1342"/>
@@ -9738,180 +9779,180 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <location filename="../oscar/uiglossary.cpp" line="1387"/>
         <location filename="../oscar/uiglossary.cpp" line="1392"/>
         <location filename="../oscar/uiglossary.cpp" line="1397"/>
+        <location filename="../oscar/uiglossary.cpp" line="1402"/>
+        <location filename="../oscar/uiglossary.cpp" line="1407"/>
         <source>Preferences → Appearance → Fonts</source>
         <translation>Настройки → Внешний вид → Шрифты</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1323"/>
+        <location filename="../oscar/uiglossary.cpp" line="1333"/>
         <source>The font of application text.</source>
         <translation>Шрифт текста программы.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1326"/>
+        <location filename="../oscar/uiglossary.cpp" line="1336"/>
         <source>Application text font size</source>
         <translation>Размер шрифта интерфейса</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1328"/>
+        <location filename="../oscar/uiglossary.cpp" line="1338"/>
         <source>The size of application text.</source>
         <translation>Размер текста программы.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1329"/>
-        <location filename="../oscar/uiglossary.cpp" line="1349"/>
-        <location filename="../oscar/uiglossary.cpp" line="1369"/>
-        <location filename="../oscar/uiglossary.cpp" line="1389"/>
+        <location filename="../oscar/uiglossary.cpp" line="1339"/>
+        <location filename="../oscar/uiglossary.cpp" line="1359"/>
+        <location filename="../oscar/uiglossary.cpp" line="1379"/>
+        <location filename="../oscar/uiglossary.cpp" line="1399"/>
         <source>Make it bigger if the text is hard to read.</source>
         <translation>Увеличьте, если текст трудно читать.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1331"/>
+        <location filename="../oscar/uiglossary.cpp" line="1341"/>
         <source>Application text bold</source>
         <translation>Жирный шрифт интерфейса</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1333"/>
+        <location filename="../oscar/uiglossary.cpp" line="1343"/>
         <source>Makes application text bold.</source>
         <translation>Делает текст программы жирным.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1336"/>
+        <location filename="../oscar/uiglossary.cpp" line="1346"/>
         <source>Application text italic</source>
         <translation>Курсив интерфейса</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1338"/>
+        <location filename="../oscar/uiglossary.cpp" line="1348"/>
         <source>Makes application text italic.</source>
         <translation>Делает текст программы курсивом.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1341"/>
+        <location filename="../oscar/uiglossary.cpp" line="1351"/>
         <source>Graph text font</source>
         <translation>Шрифт графиков</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1343"/>
+        <location filename="../oscar/uiglossary.cpp" line="1353"/>
         <source>The font of graph text.</source>
         <translation>Шрифт текста на графиках.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1346"/>
+        <location filename="../oscar/uiglossary.cpp" line="1356"/>
         <source>Graph text font size</source>
         <translation>Размер шрифта графиков</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1348"/>
+        <location filename="../oscar/uiglossary.cpp" line="1358"/>
         <source>The size of graph text.</source>
         <translation>Размер текста на графиках.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1351"/>
+        <location filename="../oscar/uiglossary.cpp" line="1361"/>
         <source>Graph text bold</source>
         <translation>Жирный шрифт графиков</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1353"/>
+        <location filename="../oscar/uiglossary.cpp" line="1363"/>
         <source>Makes graph text bold.</source>
         <translation>Делает текст на графиках жирным.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1356"/>
+        <location filename="../oscar/uiglossary.cpp" line="1366"/>
         <source>Graph text italic</source>
         <translation>Курсив графиков</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1358"/>
+        <location filename="../oscar/uiglossary.cpp" line="1368"/>
         <source>Makes graph text italic.</source>
         <translation>Делает текст на графиках курсивом.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1361"/>
+        <location filename="../oscar/uiglossary.cpp" line="1371"/>
         <source>Graph titles font</source>
         <translation>Шрифт заголовков графиков</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1363"/>
+        <location filename="../oscar/uiglossary.cpp" line="1373"/>
         <source>The font of graph titles.</source>
         <translation>Шрифт заголовков графиков.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1366"/>
+        <location filename="../oscar/uiglossary.cpp" line="1376"/>
         <source>Graph titles font size</source>
         <translation>Размер заголовков графиков</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1368"/>
+        <location filename="../oscar/uiglossary.cpp" line="1378"/>
         <source>The size of graph titles.</source>
         <translation>Размер заголовков графиков.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1371"/>
+        <location filename="../oscar/uiglossary.cpp" line="1381"/>
         <source>Graph titles bold</source>
         <translation>Жирные заголовки графиков</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1373"/>
+        <location filename="../oscar/uiglossary.cpp" line="1383"/>
         <source>Makes graph titles bold.</source>
         <translation>Делает заголовки графиков жирными.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1376"/>
+        <location filename="../oscar/uiglossary.cpp" line="1386"/>
         <source>Graph titles italic</source>
         <translation>Курсивные заголовки графиков</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1378"/>
+        <location filename="../oscar/uiglossary.cpp" line="1388"/>
         <source>Makes graph titles italic.</source>
         <translation>Делает заголовки графиков курсивом.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1381"/>
+        <location filename="../oscar/uiglossary.cpp" line="1391"/>
         <source>Big text font</source>
         <translation>Шрифт крупного текста</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1383"/>
+        <location filename="../oscar/uiglossary.cpp" line="1393"/>
         <source>The font of big text.</source>
         <translation>Шрифт крупного текста.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1386"/>
+        <location filename="../oscar/uiglossary.cpp" line="1396"/>
         <source>Big text font size</source>
         <translation>Размер крупного текста</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1388"/>
+        <location filename="../oscar/uiglossary.cpp" line="1398"/>
         <source>The size of big text.</source>
         <translation>Размер крупного текста.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1391"/>
+        <location filename="../oscar/uiglossary.cpp" line="1401"/>
         <source>Big text bold</source>
         <translation>Жирный крупный текст</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1393"/>
+        <location filename="../oscar/uiglossary.cpp" line="1403"/>
         <source>Makes big text bold.</source>
         <translation>Делает крупный текст жирным.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1396"/>
+        <location filename="../oscar/uiglossary.cpp" line="1406"/>
         <source>Big text italic</source>
         <translation>Курсивный крупный текст</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1398"/>
+        <location filename="../oscar/uiglossary.cpp" line="1408"/>
         <source>Makes big text italic.</source>
         <translation>Делает крупный текст курсивом.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1401"/>
+        <location filename="../oscar/uiglossary.cpp" line="1411"/>
         <source>Multithreading</source>
         <translation>Многопоточность</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1402"/>
-        <location filename="../oscar/uiglossary.cpp" line="1407"/>
         <location filename="../oscar/uiglossary.cpp" line="1412"/>
         <location filename="../oscar/uiglossary.cpp" line="1417"/>
         <location filename="../oscar/uiglossary.cpp" line="1422"/>
@@ -9919,71 +9960,73 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <location filename="../oscar/uiglossary.cpp" line="1432"/>
         <location filename="../oscar/uiglossary.cpp" line="1437"/>
         <location filename="../oscar/uiglossary.cpp" line="1442"/>
+        <location filename="../oscar/uiglossary.cpp" line="1447"/>
+        <location filename="../oscar/uiglossary.cpp" line="1452"/>
         <source>Preferences → General</source>
         <translation>Настройки → Общие</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1403"/>
+        <location filename="../oscar/uiglossary.cpp" line="1413"/>
         <source>Uses several processor cores, mainly to import faster.</source>
         <translation>Использует несколько ядер процессора, в основном чтобы импорт шёл быстрее.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1404"/>
+        <location filename="../oscar/uiglossary.cpp" line="1414"/>
         <source>Leave it on.</source>
         <translation>Оставьте включённой.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1406"/>
+        <location filename="../oscar/uiglossary.cpp" line="1416"/>
         <source>Put the card back reminder</source>
         <translation>Напоминание вернуть карту</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1408"/>
+        <location filename="../oscar/uiglossary.cpp" line="1418"/>
         <source>When OSCAR closes, reminds you to put the data card back into the CPAP device.</source>
         <translation>При закрытии OSCAR напоминает вставить карту данных обратно в аппарат CPAP.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1409"/>
+        <location filename="../oscar/uiglossary.cpp" line="1419"/>
         <source>Useful so the device does not run a night without its card.</source>
         <translation>Чтобы аппарат не проработал ночь без карты.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1451"/>
+        <location filename="../oscar/uiglossary.cpp" line="1461"/>
         <source>Nights to recalculate</source>
         <translation>Ночи для пересчёта</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1453"/>
+        <location filename="../oscar/uiglossary.cpp" line="1463"/>
         <source>How many nights the settings on this tab would recalculate after OK; the same number OSCAR asks about then.</source>
         <translation>Сколько ночей пересчитают настройки этой вкладки после OK; то же число OSCAR спросит после нажатия.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1454"/>
+        <location filename="../oscar/uiglossary.cpp" line="1464"/>
         <source>It includes nights that were already waiting, such as new imports. A night is also recalculated when you open it.</source>
         <translation>Сюда входят и ночи, которые уже ждали пересчёта, например после нового импорта. Ночь также пересчитывается, когда вы её открываете.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1458"/>
+        <location filename="../oscar/uiglossary.cpp" line="1468"/>
         <source>Which rule OSCAR&apos;s analysis uses to count a hypopnea: AASM 3%, CMS 4%, flow only or chosen automatically.</source>
         <translation>По какому правилу анализ OSCAR считает гипопноэ: AASM 3%, CMS 4%, только по потоку или автоматически.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1464"/>
+        <location filename="../oscar/uiglossary.cpp" line="1474"/>
         <source>Off by default: the whole oximeter recording counts. Turn it on to count only the time with the mask on.</source>
         <translation>По умолчанию выключено: учитывается вся запись оксиметра. Включите, чтобы считать только время в маске.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1479"/>
+        <location filename="../oscar/uiglossary.cpp" line="1489"/>
         <source>90 and 88 are the usual ones. A change shows at once, no recalculation is needed.</source>
         <translation>Обычные — 90 и 88. Изменение видно сразу, пересчёт не нужен.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1656"/>
+        <location filename="../oscar/uiglossary.cpp" line="1666"/>
         <source>Meant to delete the imported recording from the oximeter after a cable import; in this OSCAR version it has no effect.</source>
         <translation>Задумано для удаления импортированной записи из оксиметра после импорта по кабелю; в этой версии OSCAR ни на что не влияет.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1751"/>
+        <location filename="../oscar/uiglossary.cpp" line="1761"/>
         <source>Finishes the Bluetooth import and closes the wizard; the imported nights appear on the Daily and Overview pages.</source>
         <translation>Завершает импорт по Bluetooth и закрывает мастер; импортированные ночи появляются в «Дне» и «Сводке».</translation>
     </message>
@@ -10000,110 +10043,110 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <translation type="vanished">Чтобы не забыть вернуть карту в аппарат.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1411"/>
+        <location filename="../oscar/uiglossary.cpp" line="1421"/>
         <source>Notifications as windows</source>
         <translation>Уведомления окнами</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1413"/>
+        <location filename="../oscar/uiglossary.cpp" line="1423"/>
         <source>Shows OSCAR&apos;s notifications as message windows instead of system notifications.</source>
         <translation>Показывает уведомления OSCAR окнами сообщений вместо системных уведомлений.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1416"/>
+        <location filename="../oscar/uiglossary.cpp" line="1426"/>
         <source>Screenshots without asking</source>
         <translation>Снимки без вопроса</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1418"/>
+        <location filename="../oscar/uiglossary.cpp" line="1428"/>
         <source>Saves screenshots straight into the OSCAR data folder.</source>
         <translation>Сохраняет снимки экрана сразу в папку данных OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1421"/>
+        <location filename="../oscar/uiglossary.cpp" line="1431"/>
         <source>Database menu</source>
         <translation>Меню базы данных</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1423"/>
+        <location filename="../oscar/uiglossary.cpp" line="1433"/>
         <source>Adds New, Open and Delete database to the File menu.</source>
         <translation>Добавляет в меню «Файл» пункты «Новая», «Открыть» и «Удалить» базу данных.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1424"/>
+        <location filename="../oscar/uiglossary.cpp" line="1434"/>
         <source>Meant for support and developers.</source>
         <translation>Для поддержки и разработчиков.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1426"/>
+        <location filename="../oscar/uiglossary.cpp" line="1436"/>
         <source>Graphics engine</source>
         <translation>Графический движок</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1428"/>
+        <location filename="../oscar/uiglossary.cpp" line="1438"/>
         <source>How OSCAR draws on the screen; OSCAR restarts after a change.</source>
         <translation>Как OSCAR рисует на экране; после изменения OSCAR перезапускается.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1429"/>
+        <location filename="../oscar/uiglossary.cpp" line="1439"/>
         <source>Change it only if the graphs draw wrongly.</source>
         <translation>Меняйте, только если графики рисуются неправильно.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1433"/>
+        <location filename="../oscar/uiglossary.cpp" line="1443"/>
         <source>Lets OSCAR look for new versions by itself.</source>
         <translation>Разрешает OSCAR самому искать новые версии.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1436"/>
+        <location filename="../oscar/uiglossary.cpp" line="1446"/>
         <source>Update check interval</source>
         <translation>Интервал проверки обновлений</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1438"/>
+        <location filename="../oscar/uiglossary.cpp" line="1448"/>
         <source>How many days between checks for a new version.</source>
         <translation>Через сколько дней проверять новую версию.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1441"/>
+        <location filename="../oscar/uiglossary.cpp" line="1451"/>
         <source>Test versions</source>
         <translation>Тестовые версии</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1443"/>
+        <location filename="../oscar/uiglossary.cpp" line="1453"/>
         <source>Also tells you about test versions of OSCAR.</source>
         <translation>Сообщает и о тестовых версиях OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1444"/>
+        <location filename="../oscar/uiglossary.cpp" line="1454"/>
         <source>Only if you want to help test.</source>
         <translation>Только если хотите помочь с тестированием.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1446"/>
+        <location filename="../oscar/uiglossary.cpp" line="1456"/>
         <source>OSCAR&apos;s own analysis</source>
         <translation>Собственный анализ OSCAR</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1447"/>
-        <location filename="../oscar/uiglossary.cpp" line="1452"/>
         <location filename="../oscar/uiglossary.cpp" line="1457"/>
         <location filename="../oscar/uiglossary.cpp" line="1462"/>
         <location filename="../oscar/uiglossary.cpp" line="1467"/>
         <location filename="../oscar/uiglossary.cpp" line="1472"/>
         <location filename="../oscar/uiglossary.cpp" line="1477"/>
         <location filename="../oscar/uiglossary.cpp" line="1482"/>
-        <location filename="../oscar/uiglossary.cpp" line="1617"/>
+        <location filename="../oscar/uiglossary.cpp" line="1487"/>
+        <location filename="../oscar/uiglossary.cpp" line="1492"/>
+        <location filename="../oscar/uiglossary.cpp" line="1627"/>
         <source>Preferences → Analysis</source>
         <translation>Настройки → Анализ</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1448"/>
+        <location filename="../oscar/uiglossary.cpp" line="1458"/>
         <source>Lets OSCAR analyse the flow and oximetry of each night itself, next to what the device reports.</source>
         <translation>Позволяет OSCAR самому анализировать поток и оксиметрию каждой ночи рядом с тем, что сообщает аппарат.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1449"/>
+        <location filename="../oscar/uiglossary.cpp" line="1459"/>
         <source>Turn it on for a second opinion on AHI, flow limitation and desaturations.</source>
         <translation>Включите, чтобы получить второе мнение об AHI, ограничении потока и десатурациях.</translation>
     </message>
@@ -10112,22 +10155,22 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <translation type="vanished">По какому правилу анализ OSCAR считает гипопноэ: AASM 3 %, CMS 4 %, только по потоку или автоматически.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1459"/>
+        <location filename="../oscar/uiglossary.cpp" line="1469"/>
         <source>&quot;Auto&quot; picks the right rule depending on whether there is an oximeter recording.</source>
         <translation>«Авто» выбирает правило в зависимости от того, есть ли запись оксиметра.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1460"/>
+        <location filename="../oscar/uiglossary.cpp" line="1470"/>
         <source>Changing it makes OSCAR offer to recalculate all nights.</source>
         <translation>После изменения OSCAR предложит пересчитать все ночи.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1461"/>
+        <location filename="../oscar/uiglossary.cpp" line="1471"/>
         <source>Oximetry within CPAP time</source>
         <translation>Оксиметрия только во время CPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1463"/>
+        <location filename="../oscar/uiglossary.cpp" line="1473"/>
         <source>Counts the oximetry figures only while the CPAP ran, instead of the whole recording.</source>
         <translation>Считает цифры оксиметрии только пока работал CPAP, а не по всей записи.</translation>
     </message>
@@ -10136,37 +10179,37 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <translation type="vanished">Обычно включено: время до и после маски — не терапия.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1466"/>
+        <location filename="../oscar/uiglossary.cpp" line="1476"/>
         <source>Pulse rise as arousal</source>
         <translation>Рост пульса как микропробуждение</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1468"/>
+        <location filename="../oscar/uiglossary.cpp" line="1478"/>
         <source>Counts a pulse rise at the end of a flow reduction as an arousal that confirms a hypopnea.</source>
         <translation>Считает рост пульса в конце снижения потока микропробуждением, которое подтверждает гипопноэ.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1469"/>
+        <location filename="../oscar/uiglossary.cpp" line="1479"/>
         <source>Not part of the AASM rules; leave it off for figures comparable with a sleep lab.</source>
         <translation>Не входит в правила AASM; выключите, чтобы цифры были сравнимы с лабораторией сна.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1471"/>
+        <location filename="../oscar/uiglossary.cpp" line="1481"/>
         <source>Classify apneas</source>
         <translation>Классифицировать апноэ</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1473"/>
+        <location filename="../oscar/uiglossary.cpp" line="1483"/>
         <source>Experimental: OSCAR tries to tell obstructive from central apneas by the flow.</source>
         <translation>Экспериментально: OSCAR пытается отличить обструктивные апноэ от центральных по потоку.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1476"/>
+        <location filename="../oscar/uiglossary.cpp" line="1486"/>
         <source>SpO2 thresholds</source>
         <translation>Пороги SpO2</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1478"/>
+        <location filename="../oscar/uiglossary.cpp" line="1488"/>
         <source>The SpO2 levels for &quot;time below&quot;, separated by commas, up to six.</source>
         <translation>Уровни SpO2 для «времени ниже» через запятую, до шести.</translation>
     </message>
@@ -10175,33 +10218,31 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <translation type="vanished">Обычные — 90 и 88.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1481"/>
+        <location filename="../oscar/uiglossary.cpp" line="1491"/>
         <source>Advanced analysis settings</source>
         <translation>Дополнительные настройки анализа</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1483"/>
+        <location filename="../oscar/uiglossary.cpp" line="1493"/>
         <source>The detailed thresholds of OSCAR&apos;s analysis.</source>
         <translation>Подробные пороги анализа OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1484"/>
+        <location filename="../oscar/uiglossary.cpp" line="1494"/>
         <source>Leave them at the defaults unless you know why to change them.</source>
         <translation>Оставьте значения по умолчанию, если не знаете, зачем их менять.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1485"/>
+        <location filename="../oscar/uiglossary.cpp" line="1495"/>
         <source>Changing them makes OSCAR offer to recalculate all nights.</source>
         <translation>После изменения OSCAR предложит пересчитать все ночи.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1486"/>
+        <location filename="../oscar/uiglossary.cpp" line="1496"/>
         <source>Apnea flow reduction</source>
         <translation>Снижение потока для апноэ</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1487"/>
-        <location filename="../oscar/uiglossary.cpp" line="1492"/>
         <location filename="../oscar/uiglossary.cpp" line="1497"/>
         <location filename="../oscar/uiglossary.cpp" line="1502"/>
         <location filename="../oscar/uiglossary.cpp" line="1507"/>
@@ -10226,317 +10267,317 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <location filename="../oscar/uiglossary.cpp" line="1602"/>
         <location filename="../oscar/uiglossary.cpp" line="1607"/>
         <location filename="../oscar/uiglossary.cpp" line="1612"/>
+        <location filename="../oscar/uiglossary.cpp" line="1617"/>
+        <location filename="../oscar/uiglossary.cpp" line="1622"/>
         <source>Preferences → Analysis → Advanced</source>
         <translation>Настройки → Анализ → Дополнительно</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1488"/>
+        <location filename="../oscar/uiglossary.cpp" line="1498"/>
         <source>How far the flow must fall to count as an apnea.</source>
         <translation>Насколько должен упасть поток, чтобы считаться апноэ.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1489"/>
+        <location filename="../oscar/uiglossary.cpp" line="1499"/>
         <source>90 % follows the AASM rule.</source>
         <translation>90 % — по правилу AASM.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1491"/>
+        <location filename="../oscar/uiglossary.cpp" line="1501"/>
         <source>Hypopnea flow reduction</source>
         <translation>Снижение потока для гипопноэ</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1493"/>
+        <location filename="../oscar/uiglossary.cpp" line="1503"/>
         <source>How far the flow must fall to be a hypopnea candidate.</source>
         <translation>Насколько должен упасть поток, чтобы стать кандидатом в гипопноэ.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1494"/>
+        <location filename="../oscar/uiglossary.cpp" line="1504"/>
         <source>30 % follows the AASM rule.</source>
         <translation>30 % — по правилу AASM.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1496"/>
+        <location filename="../oscar/uiglossary.cpp" line="1506"/>
         <source>Flow-only hypopnea reduction</source>
         <translation>Снижение для гипопноэ только по потоку</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1498"/>
+        <location filename="../oscar/uiglossary.cpp" line="1508"/>
         <source>How far the flow must fall for a hypopnea under the flow-only rule, without oximetry.</source>
         <translation>Насколько должен упасть поток для гипопноэ по правилу «только поток», без оксиметрии.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1501"/>
+        <location filename="../oscar/uiglossary.cpp" line="1511"/>
         <source>Shortest event</source>
         <translation>Самое короткое событие</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1503"/>
+        <location filename="../oscar/uiglossary.cpp" line="1513"/>
         <source>Events shorter than this many seconds are not counted.</source>
         <translation>События короче стольких секунд не учитываются.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1504"/>
+        <location filename="../oscar/uiglossary.cpp" line="1514"/>
         <source>10 seconds is the standard.</source>
         <translation>Стандарт — 10 секунд.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1506"/>
+        <location filename="../oscar/uiglossary.cpp" line="1516"/>
         <source>Longest event</source>
         <translation>Самое длинное событие</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1508"/>
+        <location filename="../oscar/uiglossary.cpp" line="1518"/>
         <source>Reductions longer than this are treated as unscoreable, not as one huge event.</source>
         <translation>Снижения длиннее этого считаются неоценимыми, а не одним огромным событием.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1511"/>
+        <location filename="../oscar/uiglossary.cpp" line="1521"/>
         <source>Baseline window</source>
         <translation>Окно базового уровня</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1513"/>
+        <location filename="../oscar/uiglossary.cpp" line="1523"/>
         <source>How many seconds of breathing before an event form the normal level it is compared with.</source>
         <translation>Сколько секунд дыхания перед событием образуют обычный уровень, с которым его сравнивают.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1516"/>
+        <location filename="../oscar/uiglossary.cpp" line="1526"/>
         <source>Baseline percentile</source>
         <translation>Перцентиль базового уровня</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1518"/>
+        <location filename="../oscar/uiglossary.cpp" line="1528"/>
         <source>Which percentile of the breaths in the window is taken as the normal level.</source>
         <translation>Какой перцентиль вдохов в окне принимается за обычный уровень.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1521"/>
+        <location filename="../oscar/uiglossary.cpp" line="1531"/>
         <source>Flow limitation threshold</source>
         <translation>Порог ограничения потока</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1523"/>
+        <location filename="../oscar/uiglossary.cpp" line="1533"/>
         <source>The flow limitation score from which a breath counts as limited.</source>
         <translation>Оценка ограничения потока, начиная с которой вдох считается ограниченным.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1526"/>
+        <location filename="../oscar/uiglossary.cpp" line="1536"/>
         <source>Desaturation link window</source>
         <translation>Окно связи десатурации</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1528"/>
+        <location filename="../oscar/uiglossary.cpp" line="1538"/>
         <source>A desaturation is linked to an event that ended up to this many seconds before it.</source>
         <translation>Десатурация связывается с событием, закончившимся не раньше стольких секунд до неё.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1531"/>
+        <location filename="../oscar/uiglossary.cpp" line="1541"/>
         <source>Desaturation drop</source>
         <translation>Падение при десатурации</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1533"/>
+        <location filename="../oscar/uiglossary.cpp" line="1543"/>
         <source>How many percent SpO2 must fall to count as a desaturation.</source>
         <translation>На сколько процентов должен упасть SpO2, чтобы это считалось десатурацией.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1534"/>
+        <location filename="../oscar/uiglossary.cpp" line="1544"/>
         <source>3 % is the AASM rule, 4 % the CMS rule.</source>
         <translation>3 % — правило AASM, 4 % — правило CMS.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1536"/>
+        <location filename="../oscar/uiglossary.cpp" line="1546"/>
         <source>Shortest desaturation</source>
         <translation>Самая короткая десатурация</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1538"/>
+        <location filename="../oscar/uiglossary.cpp" line="1548"/>
         <source>A desaturation must last at least this many seconds.</source>
         <translation>Десатурация должна длиться не меньше стольких секунд.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1541"/>
+        <location filename="../oscar/uiglossary.cpp" line="1551"/>
         <source>Slowest fall</source>
         <translation>Самое медленное падение</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1543"/>
+        <location filename="../oscar/uiglossary.cpp" line="1553"/>
         <source>A fall slower than this is a drift, not a desaturation.</source>
         <translation>Падение медленнее этого — дрейф, а не десатурация.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1546"/>
+        <location filename="../oscar/uiglossary.cpp" line="1556"/>
         <source>Longest desaturation</source>
         <translation>Самая длинная десатурация</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1548"/>
+        <location filename="../oscar/uiglossary.cpp" line="1558"/>
         <source>A desaturation cannot last longer than this many seconds.</source>
         <translation>Десатурация не может длиться дольше стольких секунд.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1551"/>
+        <location filename="../oscar/uiglossary.cpp" line="1561"/>
         <source>Pulse rise</source>
         <translation>Рост пульса</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1553"/>
+        <location filename="../oscar/uiglossary.cpp" line="1563"/>
         <source>How many beats per minute the pulse must rise to count.</source>
         <translation>На сколько ударов в минуту должен вырасти пульс, чтобы это учитывалось.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1558"/>
+        <location filename="../oscar/uiglossary.cpp" line="1568"/>
         <source>A pulse below this is counted as low.</source>
         <translation>Пульс ниже этого считается низким.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1563"/>
+        <location filename="../oscar/uiglossary.cpp" line="1573"/>
         <source>A pulse above this is counted as high.</source>
         <translation>Пульс выше этого считается высоким.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1566"/>
+        <location filename="../oscar/uiglossary.cpp" line="1576"/>
         <source>Low or high pulse duration</source>
         <translation>Длительность низкого или высокого пульса</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1568"/>
+        <location filename="../oscar/uiglossary.cpp" line="1578"/>
         <source>The low or high pulse must last at least this many seconds.</source>
         <translation>Низкий или высокий пульс должен длиться не меньше стольких секунд.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1571"/>
+        <location filename="../oscar/uiglossary.cpp" line="1581"/>
         <source>Problem zone: low SpO2</source>
         <translation>Зона проблем: низкий SpO2</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1573"/>
+        <location filename="../oscar/uiglossary.cpp" line="1583"/>
         <source>The SpO2 level under which time counts towards a problem zone.</source>
         <translation>Уровень SpO2, время ниже которого идёт в зону проблем.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1576"/>
+        <location filename="../oscar/uiglossary.cpp" line="1586"/>
         <source>Problem zone: critical SpO2</source>
         <translation>Зона проблем: критический SpO2</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1578"/>
+        <location filename="../oscar/uiglossary.cpp" line="1588"/>
         <source>The SpO2 level under which time counts as critical.</source>
         <translation>Уровень SpO2, время ниже которого считается критическим.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1581"/>
+        <location filename="../oscar/uiglossary.cpp" line="1591"/>
         <source>Problem zone window</source>
         <translation>Окно зоны проблем</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1583"/>
+        <location filename="../oscar/uiglossary.cpp" line="1593"/>
         <source>The length of the sliding window in which zones are looked for.</source>
         <translation>Длина скользящего окна, в котором ищутся зоны.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1586"/>
+        <location filename="../oscar/uiglossary.cpp" line="1596"/>
         <source>Problem zone step</source>
         <translation>Шаг зоны проблем</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1588"/>
+        <location filename="../oscar/uiglossary.cpp" line="1598"/>
         <source>How far the window moves at each step.</source>
         <translation>На сколько сдвигается окно на каждом шаге.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1591"/>
+        <location filename="../oscar/uiglossary.cpp" line="1601"/>
         <source>Seconds below low SpO2</source>
         <translation>Секунд ниже низкого SpO2</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1593"/>
+        <location filename="../oscar/uiglossary.cpp" line="1603"/>
         <source>How many seconds in the window below the low level make a zone.</source>
         <translation>Сколько секунд в окне ниже низкого уровня образуют зону.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1596"/>
+        <location filename="../oscar/uiglossary.cpp" line="1606"/>
         <source>Seconds below critical SpO2</source>
         <translation>Секунд ниже критического SpO2</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1598"/>
+        <location filename="../oscar/uiglossary.cpp" line="1608"/>
         <source>How many seconds in the window below the critical level make a zone.</source>
         <translation>Сколько секунд в окне ниже критического уровня образуют зону.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1601"/>
+        <location filename="../oscar/uiglossary.cpp" line="1611"/>
         <source>Shortest zone</source>
         <translation>Самая короткая зона</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1603"/>
+        <location filename="../oscar/uiglossary.cpp" line="1613"/>
         <source>Zones shorter than this are dropped.</source>
         <translation>Зоны короче этого отбрасываются.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1606"/>
+        <location filename="../oscar/uiglossary.cpp" line="1616"/>
         <source>Merge zones</source>
         <translation>Объединять зоны</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1608"/>
+        <location filename="../oscar/uiglossary.cpp" line="1618"/>
         <source>Zones closer than this are joined into one.</source>
         <translation>Зоны ближе этого соединяются в одну.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1611"/>
+        <location filename="../oscar/uiglossary.cpp" line="1621"/>
         <source>Desaturations in a window</source>
         <translation>Десатураций в окне</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1613"/>
+        <location filename="../oscar/uiglossary.cpp" line="1623"/>
         <source>How many desaturations in the window also make a zone.</source>
         <translation>Сколько десатураций в окне тоже образуют зону.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1616"/>
+        <location filename="../oscar/uiglossary.cpp" line="1626"/>
         <source>Reset analysis defaults</source>
         <translation>Сбросить настройки анализа</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1618"/>
+        <location filename="../oscar/uiglossary.cpp" line="1628"/>
         <source>Puts all analysis settings back to OSCAR&apos;s defaults.</source>
         <translation>Возвращает все настройки анализа к значениям OSCAR по умолчанию.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1620"/>
+        <location filename="../oscar/uiglossary.cpp" line="1630"/>
         <source>Your own analysis settings are replaced; OSCAR then offers to recalculate.</source>
         <translation>Ваши настройки анализа заменятся; затем OSCAR предложит пересчёт.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1624"/>
+        <location filename="../oscar/uiglossary.cpp" line="1634"/>
         <source>Skip this page</source>
         <translation>Пропустить эту страницу</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1626"/>
+        <location filename="../oscar/uiglossary.cpp" line="1636"/>
         <source>Opens the wizard straight at the choice of import method next time.</source>
         <translation>В следующий раз мастер откроется сразу на выборе способа импорта.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1629"/>
+        <location filename="../oscar/uiglossary.cpp" line="1639"/>
         <source>Information page</source>
         <translation>Страница сведений</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1631"/>
+        <location filename="../oscar/uiglossary.cpp" line="1641"/>
         <source>Shows the introduction page about oximeters again.</source>
         <translation>Снова показывает вводную страницу об оксиметрах.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1634"/>
+        <location filename="../oscar/uiglossary.cpp" line="1644"/>
         <source>Oximeter type</source>
         <translation>Тип оксиметра</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1635"/>
-        <location filename="../oscar/uiglossary.cpp" line="1640"/>
         <location filename="../oscar/uiglossary.cpp" line="1645"/>
         <location filename="../oscar/uiglossary.cpp" line="1650"/>
         <location filename="../oscar/uiglossary.cpp" line="1655"/>
@@ -10544,58 +10585,60 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <location filename="../oscar/uiglossary.cpp" line="1665"/>
         <location filename="../oscar/uiglossary.cpp" line="1670"/>
         <location filename="../oscar/uiglossary.cpp" line="1675"/>
+        <location filename="../oscar/uiglossary.cpp" line="1680"/>
+        <location filename="../oscar/uiglossary.cpp" line="1685"/>
         <source>Oximetry wizard → start page</source>
         <translation>Мастер оксиметрии → первая страница</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1636"/>
+        <location filename="../oscar/uiglossary.cpp" line="1646"/>
         <source>Which model of pulse oximeter you import from; the models differ in how they talk to the computer.</source>
         <translation>С какой моделью пульсоксиметра идёт импорт; модели по-разному общаются с компьютером.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1637"/>
+        <location filename="../oscar/uiglossary.cpp" line="1647"/>
         <source>Choose your model exactly; for Contec CMS50 over Bluetooth use the Bluetooth button instead.</source>
         <translation>Выберите точно свою модель; для Contec CMS50 по Bluetooth используйте кнопку Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1639"/>
-        <location filename="../oscar/uiglossary.cpp" line="1764"/>
+        <location filename="../oscar/uiglossary.cpp" line="1649"/>
+        <location filename="../oscar/uiglossary.cpp" line="1774"/>
         <source>Set the oximeter&apos;s clock</source>
         <translation>Установить часы оксиметра</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1641"/>
+        <location filename="../oscar/uiglossary.cpp" line="1651"/>
         <source>Sets the oximeter&apos;s clock to the computer&apos;s time when importing by cable.</source>
         <translation>При импорте по кабелю ставит часы оксиметра по времени компьютера.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1642"/>
+        <location filename="../oscar/uiglossary.cpp" line="1652"/>
         <source>Keep it on: a right clock puts the oximetry at the right place in the night.</source>
         <translation>Оставьте включённым: верные часы ставят оксиметрию на правильное место в ночи.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1644"/>
+        <location filename="../oscar/uiglossary.cpp" line="1654"/>
         <source>Set device name</source>
         <translation>Задать имя прибора</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1646"/>
+        <location filename="../oscar/uiglossary.cpp" line="1656"/>
         <source>Lets you give the oximeter a name at the next import, to tell several oximeters apart.</source>
         <translation>Позволяет при следующем импорте дать оксиметру имя, чтобы различать несколько оксиметров.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1649"/>
+        <location filename="../oscar/uiglossary.cpp" line="1659"/>
         <source>Device name</source>
         <translation>Имя прибора</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1651"/>
+        <location filename="../oscar/uiglossary.cpp" line="1661"/>
         <source>A name of up to 7 letters for this oximeter.</source>
         <translation>Имя этого оксиметра длиной до 7 букв.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1654"/>
-        <location filename="../oscar/uiglossary.cpp" line="1769"/>
+        <location filename="../oscar/uiglossary.cpp" line="1664"/>
+        <location filename="../oscar/uiglossary.cpp" line="1779"/>
         <source>Erase after import</source>
         <translation>Стереть после импорта</translation>
     </message>
@@ -10612,233 +10655,233 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <translation type="vanished">Запись исчезнет из оксиметра; она останется только в OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1659"/>
+        <location filename="../oscar/uiglossary.cpp" line="1669"/>
         <source>Import from the device</source>
         <translation>Импорт из прибора</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1661"/>
+        <location filename="../oscar/uiglossary.cpp" line="1671"/>
         <source>Imports the recordings stored in the oximeter over a cable.</source>
         <translation>Импортирует записи, хранящиеся в оксиметре, по кабелю.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1664"/>
+        <location filename="../oscar/uiglossary.cpp" line="1674"/>
         <source>Import over Bluetooth</source>
         <translation>Импорт по Bluetooth</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1666"/>
+        <location filename="../oscar/uiglossary.cpp" line="1676"/>
         <source>Imports the recordings of a Contec oximeter (CMS50FW, CMS50D-BT and others) over Bluetooth.</source>
         <translation>Импортирует записи оксиметра Contec (CMS50FW, CMS50D-BT и других) по Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1667"/>
+        <location filename="../oscar/uiglossary.cpp" line="1677"/>
         <source>Close the Contec phone app and turn on Bluetooth in the oximeter&apos;s menu first.</source>
         <translation>Сначала закройте приложение Contec на телефоне и включите Bluetooth в меню оксиметра.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1669"/>
+        <location filename="../oscar/uiglossary.cpp" line="1679"/>
         <source>Record overnight</source>
         <translation>Запись ночью</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1671"/>
+        <location filename="../oscar/uiglossary.cpp" line="1681"/>
         <source>Records live from an oximeter attached to the computer all night; this also gives the pulse waveform.</source>
         <translation>Записывает всю ночь в реальном времени с оксиметра, подключённого к компьютеру; так получается и пульсовая волна.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1672"/>
+        <location filename="../oscar/uiglossary.cpp" line="1682"/>
         <source>Only if the computer can stay on and connected all night.</source>
         <translation>Только если компьютер может всю ночь оставаться включённым и подключённым.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1674"/>
+        <location filename="../oscar/uiglossary.cpp" line="1684"/>
         <source>Import from a file</source>
         <translation>Импорт из файла</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1676"/>
+        <location filename="../oscar/uiglossary.cpp" line="1686"/>
         <source>Imports a file saved by another program, such as SpO2Review or the oximeter&apos;s own software.</source>
         <translation>Импортирует файл, сохранённый другой программой, например SpO2Review или программой самого оксиметра.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1679"/>
+        <location filename="../oscar/uiglossary.cpp" line="1689"/>
         <source>Show live graphs</source>
         <translation>Показывать графики в реальном времени</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1681"/>
+        <location filename="../oscar/uiglossary.cpp" line="1691"/>
         <source>Shows the SpO2 and pulse graphs while recording live.</source>
         <translation>Показывает графики SpO2 и пульса во время записи в реальном времени.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1684"/>
+        <location filename="../oscar/uiglossary.cpp" line="1694"/>
         <source>Recording day</source>
         <translation>День записи</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1685"/>
-        <location filename="../oscar/uiglossary.cpp" line="1690"/>
         <location filename="../oscar/uiglossary.cpp" line="1695"/>
         <location filename="../oscar/uiglossary.cpp" line="1700"/>
         <location filename="../oscar/uiglossary.cpp" line="1705"/>
         <location filename="../oscar/uiglossary.cpp" line="1710"/>
+        <location filename="../oscar/uiglossary.cpp" line="1715"/>
+        <location filename="../oscar/uiglossary.cpp" line="1720"/>
         <source>Oximetry wizard → choosing the start time</source>
         <translation>Мастер оксиметрии → выбор времени начала</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1686"/>
+        <location filename="../oscar/uiglossary.cpp" line="1696"/>
         <source>The day the oximetry was recorded on, when the oximeter does not know its own time.</source>
         <translation>День, когда записана оксиметрия, если оксиметр не знает своего времени.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1689"/>
+        <location filename="../oscar/uiglossary.cpp" line="1699"/>
         <source>Start with the CPAP session</source>
         <translation>Начало по сеансу CPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1691"/>
+        <location filename="../oscar/uiglossary.cpp" line="1701"/>
         <source>Puts the start of the oximetry at the start of the CPAP session you choose.</source>
         <translation>Ставит начало оксиметрии на начало выбранного сеанса CPAP.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1692"/>
+        <location filename="../oscar/uiglossary.cpp" line="1702"/>
         <source>Best when you started the oximeter right when you put the mask on.</source>
         <translation>Лучше всего, если оксиметр включали одновременно с надеванием маски.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1694"/>
+        <location filename="../oscar/uiglossary.cpp" line="1704"/>
         <source>Oximeter&apos;s own time</source>
         <translation>Собственное время оксиметра</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1696"/>
+        <location filename="../oscar/uiglossary.cpp" line="1706"/>
         <source>Uses the start time the oximeter recorded.</source>
         <translation>Использует время начала, записанное оксиметром.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1697"/>
+        <location filename="../oscar/uiglossary.cpp" line="1707"/>
         <source>Best when the oximeter&apos;s clock is right.</source>
         <translation>Лучше всего, если часы оксиметра верные.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1699"/>
+        <location filename="../oscar/uiglossary.cpp" line="1709"/>
         <source>Previous session</source>
         <translation>Предыдущий сеанс</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1701"/>
+        <location filename="../oscar/uiglossary.cpp" line="1711"/>
         <source>Chooses the previous CPAP session to start the oximetry with.</source>
         <translation>Выбирает предыдущий сеанс CPAP как начало оксиметрии.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1704"/>
+        <location filename="../oscar/uiglossary.cpp" line="1714"/>
         <source>Next session</source>
         <translation>Следующий сеанс</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1706"/>
+        <location filename="../oscar/uiglossary.cpp" line="1716"/>
         <source>Chooses the next CPAP session to start the oximetry with.</source>
         <translation>Выбирает следующий сеанс CPAP как начало оксиметрии.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1709"/>
+        <location filename="../oscar/uiglossary.cpp" line="1719"/>
         <source>Start time</source>
         <translation>Время начала</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1711"/>
+        <location filename="../oscar/uiglossary.cpp" line="1721"/>
         <source>The date and time the oximetry recording started.</source>
         <translation>Дата и время начала записи оксиметрии.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1712"/>
+        <location filename="../oscar/uiglossary.cpp" line="1722"/>
         <source>Correct it if the oximeter&apos;s clock was wrong.</source>
         <translation>Исправьте, если часы оксиметра были неверными.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1714"/>
-        <location filename="../oscar/uiglossary.cpp" line="1744"/>
+        <location filename="../oscar/uiglossary.cpp" line="1724"/>
+        <location filename="../oscar/uiglossary.cpp" line="1754"/>
         <source>Retry</source>
         <translation>Повторить</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1716"/>
+        <location filename="../oscar/uiglossary.cpp" line="1726"/>
         <source>Tries the import again, for example after reconnecting the cable.</source>
         <translation>Пробует импорт снова, например после переподключения кабеля.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1719"/>
+        <location filename="../oscar/uiglossary.cpp" line="1729"/>
         <source>Choose session</source>
         <translation>Выбрать сеанс</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1721"/>
+        <location filename="../oscar/uiglossary.cpp" line="1731"/>
         <source>Picks one of several recordings stored in the oximeter.</source>
         <translation>Выбирает одну из нескольких записей в оксиметре.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1724"/>
+        <location filename="../oscar/uiglossary.cpp" line="1734"/>
         <source>End recording</source>
         <translation>Завершить запись</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1726"/>
+        <location filename="../oscar/uiglossary.cpp" line="1736"/>
         <source>Stops a live overnight recording.</source>
         <translation>Останавливает запись в реальном времени.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1729"/>
+        <location filename="../oscar/uiglossary.cpp" line="1739"/>
         <source>Sync and save</source>
         <translation>Синхронизировать и сохранить</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1731"/>
+        <location filename="../oscar/uiglossary.cpp" line="1741"/>
         <source>Saves the recording with the start time chosen on this page.</source>
         <translation>Сохраняет запись с выбранным на этой странице временем начала.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1734"/>
+        <location filename="../oscar/uiglossary.cpp" line="1744"/>
         <source>Save and finish</source>
         <translation>Сохранить и закончить</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1736"/>
+        <location filename="../oscar/uiglossary.cpp" line="1746"/>
         <source>Saves the imported oximetry and closes the wizard.</source>
         <translation>Сохраняет импортированную оксиметрию и закрывает мастер.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1739"/>
+        <location filename="../oscar/uiglossary.cpp" line="1749"/>
         <source>Next</source>
         <translation>Далее</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1741"/>
+        <location filename="../oscar/uiglossary.cpp" line="1751"/>
         <source>Goes to the next step of the wizard.</source>
         <translation>Переходит к следующему шагу мастера.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1745"/>
-        <location filename="../oscar/uiglossary.cpp" line="1750"/>
         <location filename="../oscar/uiglossary.cpp" line="1755"/>
         <location filename="../oscar/uiglossary.cpp" line="1760"/>
         <location filename="../oscar/uiglossary.cpp" line="1765"/>
         <location filename="../oscar/uiglossary.cpp" line="1770"/>
+        <location filename="../oscar/uiglossary.cpp" line="1775"/>
+        <location filename="../oscar/uiglossary.cpp" line="1780"/>
         <source>Oximetry wizard → Bluetooth</source>
         <translation>Мастер оксиметрии → Bluetooth</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1746"/>
+        <location filename="../oscar/uiglossary.cpp" line="1756"/>
         <source>Searches for the oximeter and tries the Bluetooth import again.</source>
         <translation>Снова ищет оксиметр и повторяет импорт по Bluetooth.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1747"/>
+        <location filename="../oscar/uiglossary.cpp" line="1757"/>
         <source>Make sure the phone app is closed and the oximeter&apos;s Bluetooth is on.</source>
         <translation>Проверьте, что приложение на телефоне закрыто, а Bluetooth оксиметра включён.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1749"/>
+        <location filename="../oscar/uiglossary.cpp" line="1759"/>
         <source>Done</source>
         <translation>Готово</translation>
     </message>
@@ -10847,52 +10890,52 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <translation type="vanished">Завершает импорт по Bluetooth и переходит к времени начала записей.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1754"/>
+        <location filename="../oscar/uiglossary.cpp" line="1764"/>
         <source>Oximeters found</source>
         <translation>Найденные оксиметры</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1756"/>
+        <location filename="../oscar/uiglossary.cpp" line="1766"/>
         <source>The Contec oximeters OSCAR found nearby; choose yours.</source>
         <translation>Оксиметры Contec, которые OSCAR нашёл рядом; выберите свой.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1757"/>
+        <location filename="../oscar/uiglossary.cpp" line="1767"/>
         <source>If the list stays empty, turn on Bluetooth in the oximeter&apos;s menu and close the phone app.</source>
         <translation>Если список остаётся пустым, включите Bluetooth в меню оксиметра и закройте приложение на телефоне.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1759"/>
+        <location filename="../oscar/uiglossary.cpp" line="1769"/>
         <source>Connect</source>
         <translation>Подключиться</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1761"/>
+        <location filename="../oscar/uiglossary.cpp" line="1771"/>
         <source>Connects to the chosen oximeter and reads its recordings.</source>
         <translation>Подключается к выбранному оксиметру и считывает его записи.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1766"/>
+        <location filename="../oscar/uiglossary.cpp" line="1776"/>
         <source>Sets the oximeter&apos;s clock to the computer&apos;s time while connected.</source>
         <translation>Во время подключения ставит часы оксиметра по времени компьютера.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1767"/>
+        <location filename="../oscar/uiglossary.cpp" line="1777"/>
         <source>Keep it on so the recordings line up with the CPAP nights.</source>
         <translation>Оставьте включённым, чтобы записи совпали с ночами CPAP.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1771"/>
+        <location filename="../oscar/uiglossary.cpp" line="1781"/>
         <source>Erases the recordings on the oximeter after a successful import; OSCAR erases only when every record is safely in OSCAR.</source>
         <translation>После успешного импорта стирает записи в оксиметре; OSCAR стирает, только когда все записи надёжно сохранены в OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1772"/>
+        <location filename="../oscar/uiglossary.cpp" line="1782"/>
         <source>Handy to free the oximeter&apos;s memory.</source>
         <translation>Удобно, чтобы освободить память оксиметра.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1773"/>
+        <location filename="../oscar/uiglossary.cpp" line="1783"/>
         <source>The recordings are gone from the oximeter; they stay only in OSCAR.</source>
         <translation>Записи исчезнут из оксиметра; они останутся только в OSCAR.</translation>
     </message>
@@ -11473,163 +11516,163 @@ Do you want to continue?</source>
     </message>
     <message>
         <location filename="../oscar/mainwindow.ui" line="1157"/>
-        <location filename="../oscar/mainwindow.ui" line="2813"/>
-        <location filename="../oscar/mainwindow.cpp" line="2784"/>
+        <location filename="../oscar/mainwindow.ui" line="2825"/>
+        <location filename="../oscar/mainwindow.cpp" line="2811"/>
         <source>Oximetry</source>
         <translation>Оксиметрия</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.ui" line="1207"/>
-        <location filename="../oscar/mainwindow.cpp" line="1480"/>
-        <location filename="../oscar/mainwindow.cpp" line="3688"/>
+        <location filename="../oscar/mainwindow.cpp" line="1486"/>
+        <location filename="../oscar/mainwindow.cpp" line="3715"/>
         <source>Import</source>
         <translation>Импорт</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.ui" line="1257"/>
-        <location filename="../oscar/mainwindow.ui" line="2173"/>
+        <location filename="../oscar/mainwindow.ui" line="2174"/>
         <source>Help</source>
         <translation>Помощь</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2177"/>
+        <location filename="../oscar/mainwindow.ui" line="2178"/>
         <source>Troubleshooting</source>
         <translation>Решение проблем</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2245"/>
+        <location filename="../oscar/mainwindow.ui" line="2246"/>
         <source>Rebuild CPAP Data</source>
         <translation>Перестроить данные CPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2322"/>
+        <location filename="../oscar/mainwindow.ui" line="2323"/>
         <source>Show Daily view</source>
         <translation>День</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2333"/>
+        <location filename="../oscar/mainwindow.ui" line="2334"/>
         <source>Show Overview view</source>
         <translation>Сводка</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2382"/>
+        <location filename="../oscar/mainwindow.ui" line="2383"/>
         <source>Maximize window</source>
         <translation>Развернуть окно</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2404"/>
+        <location filename="../oscar/mainwindow.ui" line="2405"/>
         <source>Reset sizes of graphs</source>
         <translation>Сбросить размеры графиков</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2430"/>
+        <location filename="../oscar/mainwindow.ui" line="2431"/>
         <source>Create PDF Report...</source>
         <translation>Создать PDF-отчёт…</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2469"/>
+        <location filename="../oscar/mainwindow.ui" line="2470"/>
         <source>Show Right Sidebar</source>
         <translation>Показать правую панель</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2483"/>
+        <location filename="../oscar/mainwindow.ui" line="2484"/>
         <source>Show Statistics view</source>
         <translation>Показать статистику</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2746"/>
+        <location filename="../oscar/mainwindow.ui" line="2758"/>
         <source>Standard - CPAP, APAP</source>
         <translation>Стандартный - CPAP, APAP</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2749"/>
+        <location filename="../oscar/mainwindow.ui" line="2761"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Standard graph order, good for CPAP, APAP,  Basic BPAP&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Стандартный набор графиков, подходит для CPAP, APAP,  базового BPAP&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2754"/>
+        <location filename="../oscar/mainwindow.ui" line="2766"/>
         <source>Advanced - BPAP, ASV</source>
         <translation>Расширенный - BPAP, ASV</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2757"/>
+        <location filename="../oscar/mainwindow.ui" line="2769"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Advanced graph order, good for BPAP w/BU, ASV, AVAPS, IVAPS&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Расширенный набор графиков, подходит для BPAP с BU, ASV, AVAPS, IVAPS&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2225"/>
-        <location filename="../oscar/mainwindow.ui" line="2798"/>
+        <location filename="../oscar/mainwindow.ui" line="2226"/>
+        <location filename="../oscar/mainwindow.ui" line="2810"/>
         <source>Purge Current Selected Day</source>
         <translation>Очистить выбранный день</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2220"/>
+        <location filename="../oscar/mainwindow.ui" line="2221"/>
         <source>Purge ALL Device Data</source>
         <translation>Очистить ВСЕ данные аппарата</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2491"/>
+        <location filename="../oscar/mainwindow.ui" line="2492"/>
         <source>Import ZEO Data</source>
         <translation>Импортировать данные ZEO</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2496"/>
+        <location filename="../oscar/mainwindow.ui" line="2497"/>
         <source>Import Dreem Data</source>
         <translation>Импортировать данные Dreem</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2506"/>
+        <location filename="../oscar/mainwindow.ui" line="2507"/>
         <source>Import RemStar MSeries Data</source>
         <translation>Импортировать данные RemStar MSeries</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2511"/>
+        <location filename="../oscar/mainwindow.ui" line="2512"/>
         <source>Sleep Disorder Terms Glossary</source>
         <translation>Глоссарий терминов нарушений сна</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2516"/>
+        <location filename="../oscar/mainwindow.ui" line="2517"/>
         <source>Change Language</source>
         <translation>Изменить язык</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2545"/>
+        <location filename="../oscar/mainwindow.ui" line="2546"/>
         <source>Import Somnopose Data</source>
         <translation>Импортировать данные Somnopose</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2550"/>
+        <location filename="../oscar/mainwindow.ui" line="2551"/>
         <source>Import Viatom/Wellue Data</source>
         <translation>Импортировать данные Viatom/Wellue</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2568"/>
+        <location filename="../oscar/mainwindow.ui" line="2569"/>
         <source>Show Line Cursor</source>
         <translation>Показать линию курсора</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2590"/>
+        <location filename="../oscar/mainwindow.ui" line="2591"/>
         <source>Show Daily Left Sidebar</source>
         <translation>Показать левую дневную панель</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2607"/>
+        <location filename="../oscar/mainwindow.ui" line="2608"/>
         <source>Show Daily Calendar</source>
         <translation>Показать дневной календарь</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2620"/>
-        <location filename="../oscar/mainwindow.cpp" line="4163"/>
+        <location filename="../oscar/mainwindow.ui" line="2621"/>
+        <location filename="../oscar/mainwindow.cpp" line="4190"/>
         <source>Import Journal</source>
         <translation>Импортировать дневник</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2667"/>
+        <location filename="../oscar/mainwindow.ui" line="2668"/>
         <source>Create zip of CPAP data card</source>
         <translation>Создать архив карты памяти CPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2672"/>
+        <location filename="../oscar/mainwindow.ui" line="2673"/>
         <source>Create zip of OSCAR diagnostic logs</source>
         <translation>Создать архив диагностических журналов OSCAR</translation>
     </message>
@@ -11638,37 +11681,37 @@ Do you want to continue?</source>
         <translation type="vanished">Создать архив всех данных OSCAR</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2719"/>
+        <location filename="../oscar/mainwindow.ui" line="2720"/>
         <source>Report an Issue</source>
         <translation>Сообщить о проблеме</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2724"/>
+        <location filename="../oscar/mainwindow.ui" line="2725"/>
         <source>System Information</source>
         <translation>Информация о системе</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2738"/>
+        <location filename="../oscar/mainwindow.ui" line="2750"/>
         <source>Show Pie Chart on Daily page</source>
         <translation>Показать круговую диаграмму на дневной странице</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2768"/>
+        <location filename="../oscar/mainwindow.ui" line="2780"/>
         <source>Show Personal Data</source>
         <translation>Показывать личные данные</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2652"/>
+        <location filename="../oscar/mainwindow.ui" line="2653"/>
         <source>Show Performance Information</source>
         <translation>Показать данные о производительности</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2685"/>
+        <location filename="../oscar/mainwindow.ui" line="2686"/>
         <source>CSV Export Wizard</source>
         <translation>Мастер экспорта в CSV</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2714"/>
+        <location filename="../oscar/mainwindow.ui" line="2715"/>
         <source>Export for Review</source>
         <translation>Экспорт для просмотра</translation>
     </message>
@@ -11677,23 +11720,23 @@ Do you want to continue?</source>
         <translation type="vanished">В&amp;ыход</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2314"/>
+        <location filename="../oscar/mainwindow.ui" line="2315"/>
         <location filename="../oscar/mainwindow.cpp" line="233"/>
         <source>Exit</source>
         <translation>Выход</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2393"/>
+        <location filename="../oscar/mainwindow.ui" line="2394"/>
         <source>Show Debug Pane</source>
         <translation>Показать панель отладки</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2604"/>
+        <location filename="../oscar/mainwindow.ui" line="2605"/>
         <source>Daily Calendar</source>
         <translation>Дневной календарь</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2587"/>
+        <location filename="../oscar/mainwindow.ui" line="2588"/>
         <source>Daily Sidebar</source>
         <translation>Дневная панель</translation>
     </message>
@@ -11715,7 +11758,7 @@ Do you want to continue?</source>
     <message>
         <location filename="../oscar/mainwindow.ui" line="975"/>
         <location filename="../oscar/mainwindow.ui" line="2096"/>
-        <location filename="../oscar/mainwindow.ui" line="2309"/>
+        <location filename="../oscar/mainwindow.ui" line="2310"/>
         <source>Profiles</source>
         <translation>Профили</translation>
     </message>
@@ -11765,108 +11808,108 @@ Do you want to continue?</source>
         <translation>Сбросить графики</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2206"/>
+        <location filename="../oscar/mainwindow.ui" line="2207"/>
         <source>Data</source>
         <translation>Данные</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2210"/>
+        <location filename="../oscar/mainwindow.ui" line="2211"/>
         <source>Advanced</source>
         <translation>Дополнительно</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2214"/>
+        <location filename="../oscar/mainwindow.ui" line="2215"/>
         <source>Purge Oximetry Data</source>
         <translation>Очистить данные оксиметрии</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2272"/>
+        <location filename="../oscar/mainwindow.ui" line="2273"/>
         <source>Time Corrections...</source>
         <translation>Коррекция времени...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2275"/>
+        <location filename="../oscar/mainwindow.ui" line="2276"/>
         <source>Adjust device clock errors (timezone, travel, DST, reset)</source>
         <translation>Исправить ошибки часов устройства (часовой пояс, поездки, летнее время, сброс)</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2280"/>
+        <location filename="../oscar/mainwindow.ui" line="2281"/>
         <source>Drift Analysis...</source>
         <translation>Анализ дрейфа...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2283"/>
+        <location filename="../oscar/mainwindow.ui" line="2284"/>
         <source>Analyse and model clock drift over time</source>
         <translation>Анализировать и моделировать дрейф часов с течением времени</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2288"/>
+        <location filename="../oscar/mainwindow.ui" line="2289"/>
         <source>Import CPAP Card Data</source>
         <translation>Импорт данных с карты CPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2296"/>
+        <location filename="../oscar/mainwindow.ui" line="2297"/>
         <source>Import from OSCAR...</source>
         <translation>Импорт из OSCAR...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2299"/>
+        <location filename="../oscar/mainwindow.ui" line="2300"/>
         <source>Import profile from file-based OSCAR</source>
         <translation>Импортировать профиль из файловой версии OSCAR</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2304"/>
-        <location filename="../oscar/mainwindow.cpp" line="1985"/>
+        <location filename="../oscar/mainwindow.ui" line="2305"/>
+        <location filename="../oscar/mainwindow.cpp" line="1991"/>
         <source>Preferences</source>
         <translation>Настройки</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2319"/>
+        <location filename="../oscar/mainwindow.ui" line="2320"/>
         <source>View Daily</source>
         <translation>Просмотр за день</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2330"/>
+        <location filename="../oscar/mainwindow.ui" line="2331"/>
         <source>View Overview</source>
         <translation>Просмотр сводки</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2341"/>
+        <location filename="../oscar/mainwindow.ui" line="2342"/>
         <source>View Welcome</source>
         <translation>Просмотр начальной страницы</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2366"/>
+        <location filename="../oscar/mainwindow.ui" line="2367"/>
         <source>Use AntiAliasing</source>
         <translation>Использовать сглаживание</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2371"/>
+        <location filename="../oscar/mainwindow.ui" line="2372"/>
         <source>About OSCAR</source>
         <translation>О программе OSCAR</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2379"/>
+        <location filename="../oscar/mainwindow.ui" line="2380"/>
         <source>Maximize Toggle</source>
         <translation>Развернуть окно</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2401"/>
+        <location filename="../oscar/mainwindow.ui" line="2402"/>
         <source>Reset Graph Heights</source>
         <translation>Сбросить высоту графиков</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2409"/>
+        <location filename="../oscar/mainwindow.ui" line="2410"/>
         <source>Take Screenshot</source>
         <translation>Сделать снимок экрана</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2417"/>
+        <location filename="../oscar/mainwindow.ui" line="2418"/>
         <source>Oximetry Wizard</source>
         <translation>Оксиметрия</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2425"/>
+        <location filename="../oscar/mainwindow.ui" line="2426"/>
         <source>Print Report</source>
         <translation>Печать отчёта</translation>
     </message>
@@ -11875,225 +11918,235 @@ Do you want to continue?</source>
         <translation type="vanished">Отчёт для врача (PDF)…</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2435"/>
+        <location filename="../oscar/mainwindow.ui" line="2436"/>
         <source>Edit Profile</source>
         <translation>Редактировать профиль</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2440"/>
+        <location filename="../oscar/mainwindow.ui" line="2441"/>
         <source>Online Users Guide</source>
         <translation>Онлайн-руководство пользователя</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2445"/>
+        <location filename="../oscar/mainwindow.ui" line="2446"/>
         <source>Frequently Asked Questions</source>
         <translation>Часто задаваемые вопросы</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2450"/>
+        <location filename="../oscar/mainwindow.ui" line="2451"/>
         <source>Automatic Oximetry Cleanup</source>
         <translation>Автоматическая очистка данных оксиметрии</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2455"/>
+        <location filename="../oscar/mainwindow.ui" line="2456"/>
         <source>Change User</source>
         <translation>Сменить пользователя</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2466"/>
+        <location filename="../oscar/mainwindow.ui" line="2467"/>
         <source>Right Sidebar</source>
         <translation>Правая боковая панель</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2477"/>
-        <location filename="../oscar/mainwindow.ui" line="2480"/>
+        <location filename="../oscar/mainwindow.ui" line="2478"/>
+        <location filename="../oscar/mainwindow.ui" line="2481"/>
         <source>View Statistics</source>
         <translation>Просмотр статистики</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2501"/>
+        <location filename="../oscar/mainwindow.ui" line="2502"/>
         <source>Import Apple Health Data</source>
         <translation>Импортировать данные Apple Health</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2521"/>
+        <location filename="../oscar/mainwindow.ui" line="2522"/>
         <source>New...</source>
         <translation>Создать...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2524"/>
+        <location filename="../oscar/mainwindow.ui" line="2525"/>
         <source>Create a new OSCAR database in a chosen folder</source>
         <translation>Создать новую базу данных OSCAR в выбранной папке</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2529"/>
+        <location filename="../oscar/mainwindow.ui" line="2530"/>
         <source>Open...</source>
         <translation>Открыть...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2532"/>
+        <location filename="../oscar/mainwindow.ui" line="2533"/>
         <source>Open an existing OSCAR database folder</source>
         <translation>Открыть существующую папку базы данных OSCAR</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2537"/>
+        <location filename="../oscar/mainwindow.ui" line="2538"/>
         <source>Delete...</source>
         <translation>Удалить...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2540"/>
+        <location filename="../oscar/mainwindow.ui" line="2541"/>
         <source>Permanently delete a non-active OSCAR database</source>
         <translation>Безвозвратно удалить неактивную базу данных OSCAR</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2560"/>
-        <location filename="../oscar/mainwindow.cpp" line="2127"/>
+        <location filename="../oscar/mainwindow.ui" line="2561"/>
+        <location filename="../oscar/mainwindow.cpp" line="2133"/>
         <source>Purge All Time Corrections</source>
         <translation>Очистить все коррекции времени</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2615"/>
+        <location filename="../oscar/mainwindow.ui" line="2616"/>
         <source>Export Journal...</source>
         <translation>Экспортировать дневник...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2625"/>
+        <location filename="../oscar/mainwindow.ui" line="2626"/>
         <source>Backup Profile...</source>
         <translation>Резервное копирование профиля...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2628"/>
+        <location filename="../oscar/mainwindow.ui" line="2629"/>
         <source>Back up the current profile to a .oscar file</source>
         <translation>Создать резервную копию текущего профиля в файл .oscar</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2633"/>
+        <location filename="../oscar/mainwindow.ui" line="2634"/>
         <source>Restore Profile...</source>
         <translation>Восстановить профиль...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2636"/>
+        <location filename="../oscar/mainwindow.ui" line="2637"/>
         <source>Restore a profile from a .oscar backup file</source>
         <translation>Восстановить профиль из резервного файла .oscar</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2641"/>
+        <location filename="../oscar/mainwindow.ui" line="2642"/>
         <source>Share Profile...</source>
         <translation>Поделиться профилем...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2644"/>
+        <location filename="../oscar/mainwindow.ui" line="2645"/>
         <source>Prepare profile data for sharing with another OSCAR user</source>
         <translation>Подготовить данные профиля для передачи другому пользователю OSCAR</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2657"/>
+        <location filename="../oscar/mainwindow.ui" line="2658"/>
         <source>Check database integrity</source>
         <translation>Проверить целостность базы данных</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2662"/>
+        <location filename="../oscar/mainwindow.ui" line="2663"/>
         <source>Compress database (rarely needed)</source>
         <translation>Сжать базу данных (требуется редко)</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2677"/>
+        <location filename="../oscar/mainwindow.ui" line="2678"/>
         <source>Create zip of OSCAR database</source>
         <translation>Создать zip-архив базы данных OSCAR</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2690"/>
+        <location filename="../oscar/mainwindow.ui" line="2691"/>
         <source>Version 1 CSV Reports...</source>
         <translation>Отчёты CSV версии 1...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2693"/>
+        <location filename="../oscar/mainwindow.ui" line="2694"/>
         <source>Export data in OSCAR 1.7.x CSV format</source>
         <translation>Экспортировать данные в формате CSV OSCAR 1.7.x</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2698"/>
+        <location filename="../oscar/mainwindow.ui" line="2699"/>
         <source>Manage Reports...</source>
         <translation>Управление отчётами...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2701"/>
+        <location filename="../oscar/mainwindow.ui" line="2702"/>
         <source>Manage CSV export report definitions</source>
         <translation>Управление шаблонами отчётов для экспорта в CSV</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2706"/>
+        <location filename="../oscar/mainwindow.ui" line="2707"/>
         <source>Journal Notes...</source>
         <translation>Заметки дневника...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2709"/>
+        <location filename="../oscar/mainwindow.ui" line="2710"/>
         <source>Export journal notes for a date range to HTML or Markdown</source>
         <translation>Экспортировать заметки дневника за период в HTML или Markdown</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2735"/>
+        <location filename="../oscar/mainwindow.ui" line="2733"/>
+        <source>OSCAR Analysis</source>
+        <translation>Анализ OSCAR</translation>
+    </message>
+    <message>
+        <location filename="../oscar/mainwindow.ui" line="2736"/>
+        <source>Show or hide OSCAR&apos;s own analysis on every page</source>
+        <translation>Показать или спрятать собственный анализ OSCAR на всех страницах</translation>
+    </message>
+    <message>
+        <location filename="../oscar/mainwindow.ui" line="2747"/>
         <source>Show Pie Chart</source>
         <translation>Показать круговую диаграмму</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2779"/>
+        <location filename="../oscar/mainwindow.ui" line="2791"/>
         <source>Hover Explanations</source>
         <translation>Пояснения при наведении</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2782"/>
+        <location filename="../oscar/mainwindow.ui" line="2794"/>
         <source>Explain figures and terms when the mouse rests on them</source>
         <translation>Пояснять цифры и термины, когда на них задерживается мышь</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2790"/>
+        <location filename="../oscar/mainwindow.ui" line="2802"/>
         <source>Check For Updates</source>
         <translation>Проверка обновлений</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2803"/>
+        <location filename="../oscar/mainwindow.ui" line="2815"/>
         <source>Purge Range of Days...</source>
         <translation>Очистить диапазон дней...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2808"/>
-        <location filename="../oscar/mainwindow.cpp" line="2783"/>
+        <location filename="../oscar/mainwindow.ui" line="2820"/>
+        <location filename="../oscar/mainwindow.cpp" line="2810"/>
         <source>CPAP</source>
         <translation>CPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2818"/>
-        <location filename="../oscar/mainwindow.cpp" line="2785"/>
+        <location filename="../oscar/mainwindow.ui" line="2830"/>
+        <location filename="../oscar/mainwindow.cpp" line="2812"/>
         <source>Sleep Stage</source>
         <translation>Фаза сна</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2823"/>
-        <location filename="../oscar/mainwindow.cpp" line="2786"/>
+        <location filename="../oscar/mainwindow.ui" line="2835"/>
+        <location filename="../oscar/mainwindow.cpp" line="2813"/>
         <source>Position</source>
         <translation>Позиция</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2828"/>
-        <location filename="../oscar/mainwindow.cpp" line="2787"/>
+        <location filename="../oscar/mainwindow.ui" line="2840"/>
+        <location filename="../oscar/mainwindow.cpp" line="2814"/>
         <source>All except Notes</source>
         <translation>Всё, кроме заметок</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2833"/>
-        <location filename="../oscar/mainwindow.cpp" line="2788"/>
+        <location filename="../oscar/mainwindow.ui" line="2845"/>
+        <location filename="../oscar/mainwindow.cpp" line="2815"/>
         <source>All including Notes</source>
         <translation>Всё, включая заметки</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.ui" line="2555"/>
+        <location filename="../oscar/mainwindow.ui" line="2556"/>
         <source>Current Days</source>
         <translation>Текущий день</translation>
     </message>
     <message>
         <location filename="../oscar/mainwindow.cpp" line="847"/>
-        <location filename="../oscar/mainwindow.cpp" line="3298"/>
+        <location filename="../oscar/mainwindow.cpp" line="3325"/>
         <source>Welcome</source>
         <translation>Начало</translation>
     </message>
@@ -12102,14 +12155,14 @@ Do you want to continue?</source>
         <translation type="vanished">&amp;О программе</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1277"/>
-        <location filename="../oscar/mainwindow.cpp" line="2927"/>
+        <location filename="../oscar/mainwindow.cpp" line="1283"/>
+        <location filename="../oscar/mainwindow.cpp" line="2954"/>
         <source>Please wait, importing from backup folder(s)...</source>
         <translation>Подождите, идет импорт из папок резервного копирования…</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1157"/>
-        <location filename="../oscar/mainwindow.cpp" line="1177"/>
+        <location filename="../oscar/mainwindow.cpp" line="1163"/>
+        <location filename="../oscar/mainwindow.cpp" line="1183"/>
         <source>Import Problem</source>
         <translation>Проблема импорта данных</translation>
     </message>
@@ -12124,19 +12177,19 @@ Do you want to continue?</source>
         <translation>Открытие %1</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="896"/>
+        <location filename="../oscar/mainwindow.cpp" line="902"/>
         <source>%1 (Profile: %2)%3</source>
         <translation>%1 (Профиль: %2)%3</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1076"/>
-        <location filename="../oscar/mainwindow.cpp" line="3747"/>
+        <location filename="../oscar/mainwindow.cpp" line="1082"/>
+        <location filename="../oscar/mainwindow.cpp" line="3774"/>
         <source>Database Locked</source>
         <translation>База данных заблокирована</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1077"/>
-        <location filename="../oscar/mainwindow.cpp" line="3748"/>
+        <location filename="../oscar/mainwindow.cpp" line="1083"/>
+        <location filename="../oscar/mainwindow.cpp" line="3775"/>
         <source>Cannot import data: the OSCAR database is locked by another application.
 
 If you have the database open in a SQLite viewer or editor, please close it and try again.
@@ -12149,12 +12202,12 @@ Error: %1</source>
 Ошибка: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1094"/>
+        <location filename="../oscar/mainwindow.cpp" line="1100"/>
         <source>unknown error</source>
         <translation>неизвестная ошибка</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1157"/>
+        <location filename="../oscar/mainwindow.cpp" line="1163"/>
         <source>Couldn&apos;t find any valid Device Data at
 
 %1</source>
@@ -12163,8 +12216,8 @@ Error: %1</source>
 %1</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1169"/>
-        <location filename="../oscar/mainwindow.cpp" line="3796"/>
+        <location filename="../oscar/mainwindow.cpp" line="1175"/>
+        <location filename="../oscar/mainwindow.cpp" line="3823"/>
         <source>The imported data could not be saved to the database. No data was stored.
 
 If you have the OSCAR database open in another application (e.g., a SQLite viewer or editor), please close it and try again.
@@ -12177,7 +12230,7 @@ Error: %1</source>
 Ошибка: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1178"/>
+        <location filename="../oscar/mainwindow.cpp" line="1184"/>
         <source>OSCAR could not read the device data at
 
 %1
@@ -12194,38 +12247,38 @@ Details: %2</source>
 Подробности: %2</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1391"/>
+        <location filename="../oscar/mainwindow.cpp" line="1397"/>
         <source>Please insert your CPAP data card...</source>
         <translation>Вставьте карту памяти CPAP...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1480"/>
-        <location filename="../oscar/mainwindow.cpp" line="3688"/>
+        <location filename="../oscar/mainwindow.cpp" line="1486"/>
+        <location filename="../oscar/mainwindow.cpp" line="3715"/>
         <source>Please open or create a profile before importing data.</source>
         <translation>Пожалуйста, откройте или создайте профиль перед импортом данных.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1484"/>
+        <location filename="../oscar/mainwindow.cpp" line="1490"/>
         <source>Access to Import has been blocked while recalculations are in progress.</source>
         <translation>Доступ к импорту данных заблокирован на время пересчета.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1535"/>
+        <location filename="../oscar/mainwindow.cpp" line="1541"/>
         <source>Import Cancelled</source>
         <translation>Импорт отменён</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1536"/>
+        <location filename="../oscar/mainwindow.cpp" line="1542"/>
         <source>Profile import was cancelled. Any partial data has been removed.</source>
         <translation>Импорт профиля был отменён. Все частичные данные были удалены.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1639"/>
+        <location filename="../oscar/mainwindow.cpp" line="1645"/>
         <source>Different CPAP Machine Detected</source>
         <translation>Обнаружен другой аппарат CPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1640"/>
+        <location filename="../oscar/mainwindow.cpp" line="1646"/>
         <source>This SD card is from a different machine than the last one imported into this profile.
 
 Last imported: %1
@@ -12240,49 +12293,49 @@ Are you sure you want to import from this card into this profile?</source>
 Вы уверены, что хотите импортировать данные с этой карты в данный профиль?</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1645"/>
+        <location filename="../oscar/mainwindow.cpp" line="1651"/>
         <source>Continue</source>
         <translation>Продолжить</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1659"/>
+        <location filename="../oscar/mainwindow.cpp" line="1665"/>
         <source>CPAP Data Located</source>
         <translation>Обнаружены данные CPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1698"/>
+        <location filename="../oscar/mainwindow.cpp" line="1704"/>
         <source>Import Reminder</source>
         <translation>Напоминание об импорте данных</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1714"/>
+        <location filename="../oscar/mainwindow.cpp" line="1720"/>
         <source>Find your CPAP data card</source>
         <translation>Найти карту памяти CPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1771"/>
+        <location filename="../oscar/mainwindow.cpp" line="1777"/>
         <source>Importing Data</source>
         <translation>Импорт данных</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1985"/>
-        <location filename="../oscar/mainwindow.cpp" line="2033"/>
-        <location filename="../oscar/mainwindow.cpp" line="2101"/>
+        <location filename="../oscar/mainwindow.cpp" line="1991"/>
+        <location filename="../oscar/mainwindow.cpp" line="2039"/>
+        <location filename="../oscar/mainwindow.cpp" line="2107"/>
         <source>Please open or create a profile first.</source>
         <translation>Пожалуйста, сначала откройте или создайте профиль.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2033"/>
+        <location filename="../oscar/mainwindow.cpp" line="2039"/>
         <source>Time Corrections</source>
         <translation>Коррекция времени</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2101"/>
+        <location filename="../oscar/mainwindow.cpp" line="2107"/>
         <source>Drift Analysis</source>
         <translation>Анализ дрейфа</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2128"/>
+        <location filename="../oscar/mainwindow.cpp" line="2134"/>
         <source>This will permanently delete all time corrections for every device in this profile.
 
 Are you sure?</source>
@@ -12291,124 +12344,124 @@ Are you sure?</source>
 Вы уверены?</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2356"/>
+        <location filename="../oscar/mainwindow.cpp" line="2383"/>
         <source>Choose where to save screenshot</source>
         <translation>Выберите место сохранения снимка экрана</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2356"/>
+        <location filename="../oscar/mainwindow.cpp" line="2383"/>
         <source>Image files (*.png)</source>
         <translation>Изображения (*.png)</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2438"/>
+        <location filename="../oscar/mainwindow.cpp" line="2465"/>
         <source>The User&apos;s Guide will open in your default browser</source>
         <translation>Руководство пользователя откроется в вашем браузере по умолчанию</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2445"/>
+        <location filename="../oscar/mainwindow.cpp" line="2472"/>
         <source>The FAQ is not yet implemented</source>
         <translation>FAQ еще не реализован</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2605"/>
-        <location filename="../oscar/mainwindow.cpp" line="2631"/>
+        <location filename="../oscar/mainwindow.cpp" line="2632"/>
+        <location filename="../oscar/mainwindow.cpp" line="2658"/>
         <source>If you can read this, the restart command didn&apos;t work. You will have to do it yourself manually.</source>
         <translation>Если вы видите это, перезапуск не сработал. Перезапустите приложение вручную.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2789"/>
+        <location filename="../oscar/mainwindow.cpp" line="2816"/>
         <source>Unknown</source>
         <translation>Неизвестно</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2794"/>
+        <location filename="../oscar/mainwindow.cpp" line="2821"/>
         <source>Confirm Purge</source>
         <translation>Подтверждение очистки</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2795"/>
+        <location filename="../oscar/mainwindow.cpp" line="2822"/>
         <source>&lt;p&gt;Purge &lt;b&gt;%1&lt;/b&gt; data from &lt;b&gt;%2&lt;/b&gt; to &lt;b&gt;%3&lt;/b&gt; (%4 day(s)).&lt;/p&gt;&lt;p&gt;Are you &lt;b&gt;absolutely sure&lt;/b&gt; you want to proceed?&lt;/p&gt;</source>
         <translation>&lt;p&gt;Очистить данные &lt;b&gt;%1&lt;/b&gt; с &lt;b&gt;%2&lt;/b&gt; по &lt;b&gt;%3&lt;/b&gt; (%4 дн.).&lt;/p&gt;&lt;p&gt;Вы &lt;b&gt;абсолютно уверены&lt;/b&gt;, что хотите продолжить?&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2810"/>
+        <location filename="../oscar/mainwindow.cpp" line="2837"/>
         <source>Purging data...</source>
         <translation>Очистка данных...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2822"/>
+        <location filename="../oscar/mainwindow.cpp" line="2849"/>
         <source>Purging %1...</source>
         <translation>Очистка %1...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2836"/>
+        <location filename="../oscar/mainwindow.cpp" line="2863"/>
         <source>Purge Range of Days</source>
         <translation>Очистить диапазон дней</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2837"/>
+        <location filename="../oscar/mainwindow.cpp" line="2864"/>
         <source>No data was found in the selected date range.</source>
         <translation>Данные в выбранном диапазоне дат не найдены.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3108"/>
+        <location filename="../oscar/mainwindow.cpp" line="3135"/>
         <source>No help is available.</source>
         <translation>Справка недоступна.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3292"/>
+        <location filename="../oscar/mainwindow.cpp" line="3319"/>
         <source>Updating daily summaries</source>
         <translation>Обновление дневных сводок</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3337"/>
+        <location filename="../oscar/mainwindow.cpp" line="3364"/>
         <source>Apple Health Import</source>
         <translation>Импорт Apple Health</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3338"/>
+        <location filename="../oscar/mainwindow.cpp" line="3365"/>
         <source>How much of your Apple Health history should be imported?</source>
         <translation>Какую часть истории Apple Health нужно импортировать?</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3341"/>
+        <location filename="../oscar/mainwindow.cpp" line="3368"/>
         <source>Overlapping CPAP history (recommended)</source>
         <translation>Только период с данными CPAP (рекомендуется)</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3343"/>
+        <location filename="../oscar/mainwindow.cpp" line="3370"/>
         <source>Full history</source>
         <translation>Вся история</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3365"/>
-        <location filename="../oscar/mainwindow.cpp" line="3434"/>
+        <location filename="../oscar/mainwindow.cpp" line="3392"/>
+        <location filename="../oscar/mainwindow.cpp" line="3461"/>
         <source>%1 (%2 records)</source>
         <translation>%1 (записей: %2)</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3375"/>
+        <location filename="../oscar/mainwindow.cpp" line="3402"/>
         <source>Apple Health Sleep Source</source>
         <translation>Источник данных о сне Apple Health</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3375"/>
+        <location filename="../oscar/mainwindow.cpp" line="3402"/>
         <source>Choose the source for sleep stages:</source>
         <translation>Выберите источник для стадий сна:</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3385"/>
+        <location filename="../oscar/mainwindow.cpp" line="3412"/>
         <source>Reading Apple Health export...</source>
         <translation>Чтение экспорта Apple Health...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3416"/>
+        <location filename="../oscar/mainwindow.cpp" line="3443"/>
         <source>No matching Apple Watch source</source>
         <translation>Нет подходящего источника Apple Watch</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3418"/>
+        <location filename="../oscar/mainwindow.cpp" line="3445"/>
         <source>Imported %1 sleep session(s) and %2 vitals session(s).
 Skipped %3 already-imported night(s).
 Sleep source: %4</source>
@@ -12417,42 +12470,42 @@ Sleep source: %4</source>
 Источник данных о сне: %4</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3427"/>
+        <location filename="../oscar/mainwindow.cpp" line="3454"/>
         <source>Vitals sources: %1</source>
         <translation>Источники показателей: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3428"/>
+        <location filename="../oscar/mainwindow.cpp" line="3455"/>
         <source>none</source>
         <translation>нет</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3439"/>
+        <location filename="../oscar/mainwindow.cpp" line="3466"/>
         <source>Ignored vitals from: %1</source>
         <translation>Проигнорированы показатели из источников: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3443"/>
+        <location filename="../oscar/mainwindow.cpp" line="3470"/>
         <source>Imported weight for %1 day(s).</source>
         <translation>Импортирован вес за %1 дн.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3446"/>
+        <location filename="../oscar/mainwindow.cpp" line="3473"/>
         <source>Apple Health Import Summary</source>
         <translation>Сводка импорта Apple Health</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3539"/>
+        <location filename="../oscar/mainwindow.cpp" line="3566"/>
         <source>Failed to restart OSCAR. Please restart it manually.</source>
         <translation>Не удалось перезапустить OSCAR. Пожалуйста, перезапустите его вручную.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3563"/>
+        <location filename="../oscar/mainwindow.cpp" line="3590"/>
         <source> (active)</source>
         <translation> (активная)</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3573"/>
+        <location filename="../oscar/mainwindow.cpp" line="3600"/>
         <source>(none)</source>
         <translation>(нет)</translation>
     </message>
@@ -12471,40 +12524,40 @@ Use File ▸ Database ▸ Open to open an existing database.</source>
 Используйте Файл ▸ База данных ▸ Открыть для открытия существующей базы данных.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3595"/>
+        <location filename="../oscar/mainwindow.cpp" line="3622"/>
         <source>Select OSCAR Database Folder</source>
         <translation>Выбор папки базы данных OSCAR</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3603"/>
-        <location filename="../oscar/mainwindow.cpp" line="3609"/>
+        <location filename="../oscar/mainwindow.cpp" line="3630"/>
+        <location filename="../oscar/mainwindow.cpp" line="3636"/>
         <source>Open Database</source>
         <translation>Открыть базу данных</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3604"/>
+        <location filename="../oscar/mainwindow.cpp" line="3631"/>
         <source>The selected folder contains OSCAR 1.x data, which OSCAR 2 cannot open directly.</source>
         <translation>Выбранная папка содержит данные OSCAR 1.x, которые OSCAR 2 не может открыть напрямую.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3605"/>
+        <location filename="../oscar/mainwindow.cpp" line="3632"/>
         <source>To bring that data into OSCAR 2, use File ▸ Profiles ▸ Import from OSCAR...</source>
         <translation>Чтобы перенести эти данные в OSCAR 2, используйте меню Файл ▸ Профили ▸ Импорт из OSCAR...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3610"/>
+        <location filename="../oscar/mainwindow.cpp" line="3637"/>
         <source>The selected folder does not contain an OSCAR database.
 Please select a folder that contains an oscar.db file.</source>
         <translation>Выбранная папка не содержит базы данных OSCAR.
 Пожалуйста, выберите папку, содержащую файл oscar.db.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3633"/>
+        <location filename="../oscar/mainwindow.cpp" line="3660"/>
         <source>Delete Database</source>
         <translation>Удалить базу данных</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3634"/>
+        <location filename="../oscar/mainwindow.cpp" line="3661"/>
         <source>There are no inactive databases in the recent list to delete.
 
 Open databases with File ▸ Database ▸ Open first to add them to the recent list.</source>
@@ -12513,43 +12566,43 @@ Open databases with File ▸ Database ▸ Open first to add them to the recent l
 Чтобы добавить базы данных в список недавних, сначала откройте их через Файл ▸ База данных ▸ Открыть.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3806"/>
+        <location filename="../oscar/mainwindow.cpp" line="3833"/>
         <source>Import aborted: %1 file(s) already imported were kept</source>
         <translation>Импорт прерван: уже импортированные файлы сохранены (%1)</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4154"/>
+        <location filename="../oscar/mainwindow.cpp" line="4181"/>
         <source>You must select and open the profile you wish to modify</source>
         <translation>Нужно выбрать и открыть профиль для редактирования</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4163"/>
-        <location filename="../oscar/mainwindow.cpp" line="4183"/>
+        <location filename="../oscar/mainwindow.cpp" line="4190"/>
+        <location filename="../oscar/mainwindow.cpp" line="4210"/>
         <source>No profile is currently open.</source>
         <translation>В данный момент профиль не открыт.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4168"/>
+        <location filename="../oscar/mainwindow.cpp" line="4195"/>
         <source>Choose where to read journal</source>
         <translation>Выберите файл дневника для импорта</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4183"/>
+        <location filename="../oscar/mainwindow.cpp" line="4210"/>
         <source>Export Journal</source>
         <translation>Экспорт дневника</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4195"/>
+        <location filename="../oscar/mainwindow.cpp" line="4222"/>
         <source>%1&apos;s Journal</source>
         <translation>Дневник пользователя %1</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4197"/>
+        <location filename="../oscar/mainwindow.cpp" line="4224"/>
         <source>Choose where to save journal</source>
         <translation>Выберите, куда сохранить дневник</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4486"/>
+        <location filename="../oscar/mainwindow.cpp" line="4513"/>
         <source>This will compact the database to reclaim unused disk space. It is most useful after deleting profiles.
 
 Current database size: %1
@@ -12566,7 +12619,7 @@ Continue?</source>
 Продолжить?</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4532"/>
+        <location filename="../oscar/mainwindow.cpp" line="4559"/>
         <source>The database integrity check failed. Compression cannot proceed on a damaged database.
 
 Recommended actions:
@@ -12585,7 +12638,7 @@ For advanced recovery options, see the OSCAR documentation.</source>
 Дополнительные способы восстановления описаны в документации OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4552"/>
+        <location filename="../oscar/mainwindow.cpp" line="4579"/>
         <source>Compressing database, please wait...
 
 This may take several minutes for large databases.</source>
@@ -12594,7 +12647,7 @@ This may take several minutes for large databases.</source>
 Для больших баз данных это может занять несколько минут.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4614"/>
+        <location filename="../oscar/mainwindow.cpp" line="4641"/>
         <source>Compression succeeded but the database file could not be replaced.
 
 The original database is unchanged.</source>
@@ -12603,7 +12656,7 @@ The original database is unchanged.</source>
 Исходная база данных не изменена.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4624"/>
+        <location filename="../oscar/mainwindow.cpp" line="4651"/>
         <source>Compression succeeded but the new file could not be put in place.
 
 The original database has been restored.</source>
@@ -12612,7 +12665,7 @@ The original database has been restored.</source>
 Исходная база данных была восстановлена.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4636"/>
+        <location filename="../oscar/mainwindow.cpp" line="4663"/>
         <source>Database compressed successfully.
 
 Before:    %1
@@ -12629,7 +12682,7 @@ OSCAR will restart when you press OK.</source>
 OSCAR перезапустится после нажатия кнопки ОК.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4645"/>
+        <location filename="../oscar/mainwindow.cpp" line="4672"/>
         <source>Database compressed successfully.
 
 Size: %1
@@ -12646,71 +12699,71 @@ OSCAR will restart when you press OK.</source>
 OSCAR перезапустится после нажатия кнопки ОК.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4768"/>
+        <location filename="../oscar/mainwindow.cpp" line="4795"/>
         <source>Copy to Clipboard</source>
         <translation>Копировать в буфер обмена</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4170"/>
         <location filename="../oscar/mainwindow.cpp" line="4197"/>
+        <location filename="../oscar/mainwindow.cpp" line="4224"/>
         <source>XML Files (*.xml)</source>
         <translation>XML-файлы (*.xml)</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4278"/>
+        <location filename="../oscar/mainwindow.cpp" line="4305"/>
         <source>Export review is not yet implemented</source>
         <translation>Экспорт для обзора еще не реализован</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4288"/>
+        <location filename="../oscar/mainwindow.cpp" line="4315"/>
         <source>Would you like to zip this card?</source>
         <translation>Заархивировать эту карту?</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4310"/>
-        <location filename="../oscar/mainwindow.cpp" line="4383"/>
-        <location filename="../oscar/mainwindow.cpp" line="4676"/>
+        <location filename="../oscar/mainwindow.cpp" line="4337"/>
+        <location filename="../oscar/mainwindow.cpp" line="4410"/>
+        <location filename="../oscar/mainwindow.cpp" line="4703"/>
         <source>Choose where to save zip</source>
         <translation>Выберите, куда сохранить архив</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4310"/>
-        <location filename="../oscar/mainwindow.cpp" line="4383"/>
-        <location filename="../oscar/mainwindow.cpp" line="4676"/>
+        <location filename="../oscar/mainwindow.cpp" line="4337"/>
+        <location filename="../oscar/mainwindow.cpp" line="4410"/>
+        <location filename="../oscar/mainwindow.cpp" line="4703"/>
         <source>ZIP files (*.zip)</source>
         <translation>ZIP-файлы (*.zip)</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4357"/>
-        <location filename="../oscar/mainwindow.cpp" line="4397"/>
+        <location filename="../oscar/mainwindow.cpp" line="4384"/>
+        <location filename="../oscar/mainwindow.cpp" line="4424"/>
         <source>Creating zip...</source>
         <translation>Создание архива...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4342"/>
+        <location filename="../oscar/mainwindow.cpp" line="4369"/>
         <source>Calculating size...</source>
         <translation>Расчет размера файла...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4430"/>
         <location filename="../oscar/mainwindow.cpp" line="4457"/>
-        <location filename="../oscar/mainwindow.cpp" line="4461"/>
+        <location filename="../oscar/mainwindow.cpp" line="4484"/>
+        <location filename="../oscar/mainwindow.cpp" line="4488"/>
         <source>Check Database Integrity</source>
         <translation>Проверить целостность базы данных</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4434"/>
-        <location filename="../oscar/mainwindow.cpp" line="4526"/>
+        <location filename="../oscar/mainwindow.cpp" line="4461"/>
+        <location filename="../oscar/mainwindow.cpp" line="4553"/>
         <source>Checking database integrity, please wait...</source>
         <translation>Выполняется проверка целостности базы данных, пожалуйста, подождите...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4458"/>
+        <location filename="../oscar/mainwindow.cpp" line="4485"/>
         <source>The database integrity check passed. No problems were found.</source>
         <translation>Проверка целостности базы данных пройдена. Проблем не обнаружено.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4462"/>
+        <location filename="../oscar/mainwindow.cpp" line="4489"/>
         <source>The database integrity check found problems. Some data may be missing or corrupted.
 
 The integrity check covers the entire database, which may contain multiple profiles.
@@ -12733,13 +12786,13 @@ For advanced recovery options, see the OSCAR documentation.</source>
 Дополнительные способы восстановления описаны в документации OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4485"/>
-        <location filename="../oscar/mainwindow.cpp" line="4500"/>
-        <location filename="../oscar/mainwindow.cpp" line="4531"/>
-        <location filename="../oscar/mainwindow.cpp" line="4577"/>
-        <location filename="../oscar/mainwindow.cpp" line="4613"/>
-        <location filename="../oscar/mainwindow.cpp" line="4623"/>
-        <location filename="../oscar/mainwindow.cpp" line="4651"/>
+        <location filename="../oscar/mainwindow.cpp" line="4512"/>
+        <location filename="../oscar/mainwindow.cpp" line="4527"/>
+        <location filename="../oscar/mainwindow.cpp" line="4558"/>
+        <location filename="../oscar/mainwindow.cpp" line="4604"/>
+        <location filename="../oscar/mainwindow.cpp" line="4640"/>
+        <location filename="../oscar/mainwindow.cpp" line="4650"/>
+        <location filename="../oscar/mainwindow.cpp" line="4678"/>
         <source>Compress Database</source>
         <translation>Сжать базу данных</translation>
     </message>
@@ -12752,7 +12805,7 @@ This may take several minutes. Continue?</source>
         <translation type="obsolete">Это сожмёт базу данных для освобождения неиспользуемого дискового пространства. Наиболее полезно после удаления профилей.\n\nТекущий размер базы данных: %1\n\nЭто может занять несколько минут. Продолжить?</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4578"/>
+        <location filename="../oscar/mainwindow.cpp" line="4605"/>
         <source>Database compression failed:
 %1</source>
         <translation>Сжатие базы данных завершилось ошибкой:
@@ -12775,23 +12828,23 @@ No space was reclaimed — the database was already compact.</source>
         <translation type="obsolete">База данных успешно сжата.\n\nРазмер: %1\n\nМесто не освобождено — база данных уже была компактной.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4692"/>
+        <location filename="../oscar/mainwindow.cpp" line="4719"/>
         <source>Unable to create zip: the database is locked by another process.</source>
         <translation>Не удалось создать zip-архив: база данных заблокирована другим процессом.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4701"/>
+        <location filename="../oscar/mainwindow.cpp" line="4728"/>
         <source>Creating %1.zip...</source>
         <translation>Создание %1.zip...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4738"/>
+        <location filename="../oscar/mainwindow.cpp" line="4765"/>
         <source>Reporting issues is not yet implemented</source>
         <translation>Сообщения о проблемах еще не реализованы</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1748"/>
-        <location filename="../oscar/mainwindow.cpp" line="4749"/>
+        <location filename="../oscar/mainwindow.cpp" line="1754"/>
+        <location filename="../oscar/mainwindow.cpp" line="4776"/>
         <source>OSCAR Information</source>
         <translation>Информация OSCAR</translation>
     </message>
@@ -12820,22 +12873,22 @@ No space was reclaimed — the database was already compact.</source>
         <translation type="vanished">%1 (профиль: %2)</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1049"/>
+        <location filename="../oscar/mainwindow.cpp" line="1055"/>
         <source>Importing CPAP data</source>
         <translation>Импорт данных CPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1518"/>
+        <location filename="../oscar/mainwindow.cpp" line="1524"/>
         <source>Importing Profile </source>
         <translation>Импорт профиля </translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1555"/>
+        <location filename="../oscar/mainwindow.cpp" line="1561"/>
         <source>Import Complete</source>
         <translation>Импорт завершён</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1556"/>
+        <location filename="../oscar/mainwindow.cpp" line="1562"/>
         <source>Profile &apos;%1&apos; has been successfully imported.
 
 You can now select it from the profile selector.</source>
@@ -12844,26 +12897,26 @@ You can now select it from the profile selector.</source>
 Теперь его можно выбрать в списке профилей.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1168"/>
-        <location filename="../oscar/mainwindow.cpp" line="1569"/>
-        <location filename="../oscar/mainwindow.cpp" line="3795"/>
+        <location filename="../oscar/mainwindow.cpp" line="1174"/>
+        <location filename="../oscar/mainwindow.cpp" line="1575"/>
+        <location filename="../oscar/mainwindow.cpp" line="3822"/>
         <source>Import Failed</source>
         <translation>Ошибка импорта</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1570"/>
+        <location filename="../oscar/mainwindow.cpp" line="1576"/>
         <source>Failed to import profile:
 %1</source>
         <translation>Не удалось импортировать профиль:
 %1</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1697"/>
+        <location filename="../oscar/mainwindow.cpp" line="1703"/>
         <source>Please remember to select the root folder or drive letter of your data card, and not a folder inside it.</source>
         <translation>Выбирайте корневую папку или диск вашей карты памяти, а не папку внутри нее.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1748"/>
+        <location filename="../oscar/mainwindow.cpp" line="1754"/>
         <source>No supported data was found</source>
         <translation>Подходящие данные не найдены</translation>
     </message>
@@ -12872,12 +12925,12 @@ You can now select it from the profile selector.</source>
         <translation type="vanished">Сначала откройте профиль.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2278"/>
+        <location filename="../oscar/mainwindow.cpp" line="2305"/>
         <source>Check for updates not implemented</source>
         <translation>Проверка обновлений не реализована</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2902"/>
+        <location filename="../oscar/mainwindow.cpp" line="2929"/>
         <source>Are you sure you want to rebuild all CPAP data for the following device:
 
 </source>
@@ -12886,106 +12939,106 @@ You can now select it from the profile selector.</source>
 </translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2912"/>
+        <location filename="../oscar/mainwindow.cpp" line="2939"/>
         <source>For some reason, OSCAR does not have any backups for the following device:</source>
         <translation>По какой-то причине OSCAR не содержит резервных копий для данного аппарата:</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2914"/>
+        <location filename="../oscar/mainwindow.cpp" line="2941"/>
         <source>Provided you have made &lt;i&gt;your &lt;b&gt;own&lt;/b&gt; backups for ALL of your CPAP data&lt;/i&gt;, you can still complete this operation, but you will have to restore from your backups manually.</source>
         <translation>При условии, что вы сделали &lt;i&gt;свою &lt;b&gt;собственную&lt;/b&gt; резервную копию всех данных CPAP&lt;/i&gt;, вы все еще можете завершить эту операцию, но нужно будет восстановить резервные копии вручную.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2915"/>
+        <location filename="../oscar/mainwindow.cpp" line="2942"/>
         <source>Are you really sure you want to do this?</source>
         <translation>Уверены, что хотите это сделать?</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2930"/>
+        <location filename="../oscar/mainwindow.cpp" line="2957"/>
         <source>Because there are no internal backups to rebuild from, you will have to restore from your own.</source>
         <translation>Поскольку нет внутренних резервных копий, используйте свои копии для восстановления.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2981"/>
+        <location filename="../oscar/mainwindow.cpp" line="3008"/>
         <source>Note as a precaution, the backup folder will be left in place.</source>
         <translation>Предупреждение: папка с архивом будет сохранена.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2983"/>
+        <location filename="../oscar/mainwindow.cpp" line="3010"/>
         <source>OSCAR does not have any backups for this device!</source>
         <translation>OSCAR не содержит резервных копий для этого аппарата!</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2984"/>
+        <location filename="../oscar/mainwindow.cpp" line="3011"/>
         <source>Unless you have made &lt;i&gt;your &lt;b&gt;own&lt;/b&gt; backups for ALL of your data for this device&lt;/i&gt;, &lt;font size=+2&gt;you will lose this device&apos;s data &lt;b&gt;permanently&lt;/b&gt;!&lt;/font&gt;</source>
         <translation>Если вы не сделали &lt;i&gt;свою &lt;b&gt;собственную&lt;/b&gt; резервную копию ВСЕХ ваших данных для этого аппарата,&lt;/i&gt;, &lt;font size=+2&gt; вы потеряете данные этого аппарата &lt;b&gt;навсегда&lt;/b&gt;!&lt;/font&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2990"/>
+        <location filename="../oscar/mainwindow.cpp" line="3017"/>
         <source>You are about to &lt;font size=+2&gt;obliterate&lt;/font&gt; OSCAR&apos;s device database for the following device:&lt;/p&gt;</source>
         <translation>Вы собираетесь &lt;font size=+2&gt;удалить&lt;/font&gt; базу данных OSCAR для этого аппарата:&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2993"/>
+        <location filename="../oscar/mainwindow.cpp" line="3020"/>
         <source>Are you &lt;b&gt;absolutely sure&lt;/b&gt; you want to proceed?</source>
         <translation>Вы &lt;b&gt;абсолютно уверены&lt;/b&gt; что хотите продолжить?</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3053"/>
+        <location filename="../oscar/mainwindow.cpp" line="3080"/>
         <source>A file permission error caused the purge process to fail; you will have to delete the following folder manually:</source>
         <translation>Не хватило прав доступа для очистки, придется удалить этот каталог вручную:</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3232"/>
+        <location filename="../oscar/mainwindow.cpp" line="3259"/>
         <source>Recalculating summaries</source>
         <translation>Пересчёт сводных данных</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3478"/>
+        <location filename="../oscar/mainwindow.cpp" line="3505"/>
         <source>The Glossary will open in your default browser</source>
         <translation>Глоссарий откроется в вашем браузере по умолчанию</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3812"/>
+        <location filename="../oscar/mainwindow.cpp" line="3839"/>
         <source>There was a problem parsing %1 
 Data File: %2</source>
         <translation>Возникла проблема при разборе %1 
 Файл данных: %2</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3818"/>
-        <location filename="../oscar/mainwindow.cpp" line="3822"/>
+        <location filename="../oscar/mainwindow.cpp" line="3845"/>
+        <location filename="../oscar/mainwindow.cpp" line="3849"/>
         <source>There was a problem opening %1 Data File: %2</source>
         <translation>Ошибка открытия файла данных %1: %2</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3821"/>
+        <location filename="../oscar/mainwindow.cpp" line="3848"/>
         <source>%1 Data Import of %2 file(s) complete</source>
         <translation>Импорт данных %1 из %2 файлов завершен</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3807"/>
-        <location filename="../oscar/mainwindow.cpp" line="3823"/>
+        <location filename="../oscar/mainwindow.cpp" line="3834"/>
+        <location filename="../oscar/mainwindow.cpp" line="3850"/>
         <source>%1 Import Partial Success</source>
         <translation>Импорт %1 выполнен частично</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3825"/>
+        <location filename="../oscar/mainwindow.cpp" line="3852"/>
         <source>%1 Data Import complete</source>
         <translation>Импорт данных %1 завершен</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4049"/>
+        <location filename="../oscar/mainwindow.cpp" line="4076"/>
         <source>Are you sure you want to delete oximetry data for %1</source>
         <translation>Удалить данные оксиметрии за %1?</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4052"/>
+        <location filename="../oscar/mainwindow.cpp" line="4079"/>
         <source>&lt;b&gt;Please be aware you can not undo this operation!&lt;/b&gt;</source>
         <translation>&lt;b&gt;Предупреждение: отменить эту операцию невозможно!&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4097"/>
+        <location filename="../oscar/mainwindow.cpp" line="4124"/>
         <source>Select the day with valid oximetry data in daily view first.</source>
         <translation>Выберите день с корректными данными оксиметрии в обзоре дня.</translation>
     </message>
@@ -12994,7 +13047,7 @@ Data File: %2</source>
         <translation type="vanished">Загрузка профиля &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1153"/>
+        <location filename="../oscar/mainwindow.cpp" line="1159"/>
         <source>Imported %1 CPAP session(s) from
 
 %2</source>
@@ -13003,12 +13056,12 @@ Data File: %2</source>
 %2</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1153"/>
+        <location filename="../oscar/mainwindow.cpp" line="1159"/>
         <source>Import Success</source>
         <translation>Импорт успешно завершен</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1155"/>
+        <location filename="../oscar/mainwindow.cpp" line="1161"/>
         <source>Already up to date with CPAP data at
 
 %1</source>
@@ -13017,12 +13070,12 @@ Data File: %2</source>
 %1</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1155"/>
+        <location filename="../oscar/mainwindow.cpp" line="1161"/>
         <source>Up to date</source>
         <translation>Обновление</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1398"/>
+        <location filename="../oscar/mainwindow.cpp" line="1404"/>
         <source>Choose a folder</source>
         <translation>Выберите папку</translation>
     </message>
@@ -13031,75 +13084,75 @@ Data File: %2</source>
         <translation type="vanished">Не выбран профиль для импорта.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1488"/>
+        <location filename="../oscar/mainwindow.cpp" line="1494"/>
         <source>Import is already running in the background.</source>
         <translation>Импорт уже работает в фоновом режиме.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1600"/>
+        <location filename="../oscar/mainwindow.cpp" line="1606"/>
         <source>A %1 file structure for a %2 was located at:</source>
         <translation>Обнаружена структура файлов %1 для %2:</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1602"/>
+        <location filename="../oscar/mainwindow.cpp" line="1608"/>
         <source>A %1 file structure was located at:</source>
         <translation>Обнаружена структура файлов %1:</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1496"/>
+        <location filename="../oscar/mainwindow.cpp" line="1502"/>
         <source>Would you like to import from this location?</source>
         <translation>Импортировать эти данные?</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1664"/>
+        <location filename="../oscar/mainwindow.cpp" line="1670"/>
         <source>Specify</source>
         <translation>Выбрать</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1990"/>
+        <location filename="../oscar/mainwindow.cpp" line="1996"/>
         <source>Access to Preferences has been blocked until recalculation completes.</source>
         <translation>Доступ к настройкам заблокирован до завершения пересчета.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2366"/>
+        <location filename="../oscar/mainwindow.cpp" line="2393"/>
         <source>There was an error saving screenshot to file &quot;%1&quot;</source>
         <translation>Ошибка сохранения снимка экрана в файл &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2368"/>
+        <location filename="../oscar/mainwindow.cpp" line="2395"/>
         <source>Screenshot saved to file &quot;%1&quot;</source>
         <translation>Снимок сохранен в файл &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2905"/>
+        <location filename="../oscar/mainwindow.cpp" line="2932"/>
         <source>Please note, that this could result in loss of data if OSCAR&apos;s backups have been disabled.</source>
         <translation>Обратите внимание, что это может привести к потере данных, если резервное копирование OSCAR было отключено.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2931"/>
+        <location filename="../oscar/mainwindow.cpp" line="2958"/>
         <source>Would you like to import from your own backups now? (you will have no data visible for this device until you do)</source>
         <translation>Хотите импортировать собственные резервные копии? (У вас не будет данных, видимых для этого аппарата, пока вы этого не сделаете)</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3465"/>
+        <location filename="../oscar/mainwindow.cpp" line="3492"/>
         <source>There was a problem opening MSeries block File: </source>
         <translation>Ошибка открытия файла MSeries: </translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3469"/>
+        <location filename="../oscar/mainwindow.cpp" line="3496"/>
         <source>MSeries Import complete</source>
         <translation>Импорт данных MSeries завершен</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1662"/>
+        <location filename="../oscar/mainwindow.cpp" line="1668"/>
         <source>Yes</source>
         <translation>Да</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1646"/>
-        <location filename="../oscar/mainwindow.cpp" line="1663"/>
-        <location filename="../oscar/mainwindow.cpp" line="2191"/>
-        <location filename="../oscar/mainwindow.cpp" line="2810"/>
+        <location filename="../oscar/mainwindow.cpp" line="1652"/>
+        <location filename="../oscar/mainwindow.cpp" line="1669"/>
+        <location filename="../oscar/mainwindow.cpp" line="2197"/>
+        <location filename="../oscar/mainwindow.cpp" line="2837"/>
         <source>Cancel</source>
         <translation>Отмена</translation>
     </message>
@@ -13114,7 +13167,7 @@ Data File: %2</source>
         <translation>Пересчитать собственный анализ ночей OSCAR</translation>
     </message>
     <message numerus="yes">
-        <location filename="../oscar/mainwindow.cpp" line="2191"/>
+        <location filename="../oscar/mainwindow.cpp" line="2197"/>
         <source>Analysing %n night(s)...</source>
         <translation>
             <numerusform>Анализ %n ночи...</numerusform>
@@ -13123,13 +13176,13 @@ Data File: %2</source>
         </translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2192"/>
-        <location filename="../oscar/mainwindow.cpp" line="2218"/>
+        <location filename="../oscar/mainwindow.cpp" line="2198"/>
+        <location filename="../oscar/mainwindow.cpp" line="2245"/>
         <source>Sleep Analysis</source>
         <translation>Анализ сна</translation>
     </message>
     <message numerus="yes">
-        <location filename="../oscar/mainwindow.cpp" line="2219"/>
+        <location filename="../oscar/mainwindow.cpp" line="2246"/>
         <source>The new settings outdate the analysis of %n day(s). Recalculate them now?
 
 Otherwise each day is recalculated when you open it.</source>
@@ -13146,18 +13199,18 @@ Otherwise each day is recalculated when you open it.</source>
         </translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2232"/>
-        <location filename="../oscar/mainwindow.cpp" line="2237"/>
+        <location filename="../oscar/mainwindow.cpp" line="2259"/>
+        <location filename="../oscar/mainwindow.cpp" line="2264"/>
         <source>Recalculate Analysis</source>
         <translation>Пересчитать анализ</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2233"/>
+        <location filename="../oscar/mainwindow.cpp" line="2260"/>
         <source>OSCAR&apos;s own sleep analysis is switched off (Preferences, Analysis tab).</source>
         <translation>Собственный анализ сна OSCAR выключен (Настройки, вкладка «Анализ»).</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2238"/>
+        <location filename="../oscar/mainwindow.cpp" line="2265"/>
         <source>Recalculate OSCAR&apos;s own analysis of your nights.
 
 Outdated days need it after an update or a change of settings. All days runs every night again, which takes a while for a long history.</source>
@@ -13166,12 +13219,12 @@ Outdated days need it after an update or a change of settings. All days runs eve
 Устаревшие дни нуждаются в пересчёте после обновления или смены настроек. «Все дни» заново обрабатывает каждую ночь, что для длинной истории займёт время.</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2241"/>
+        <location filename="../oscar/mainwindow.cpp" line="2268"/>
         <source>Outdated Days (%1)</source>
         <translation>Устаревшие дни (%1)</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="2243"/>
+        <location filename="../oscar/mainwindow.cpp" line="2270"/>
         <source>All Days</source>
         <translation>Все дни</translation>
     </message>
@@ -13621,7 +13674,7 @@ Outdated days need it after an update or a change of settings. All days runs eve
     <message>
         <location filename="../oscar/nightsummary.cpp" line="81"/>
         <location filename="../oscar/nightsummary.cpp" line="167"/>
-        <location filename="../oscar/tests/analysisintegrationtests.cpp" line="1210"/>
+        <location filename="../oscar/tests/analysisintegrationtests.cpp" line="1215"/>
         <location filename="../oscar/tests/nightsummarytests.cpp" line="266"/>
         <location filename="../oscar/tests/nightsummarytests.cpp" line="274"/>
         <source>%1 min</source>
@@ -14164,7 +14217,7 @@ Note: anonymous sharing may be disabled in your Microsoft account settings.</sou
         <translation>[Виджет даты]</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="318"/>
+        <location filename="../oscar/overview.cpp" line="320"/>
         <source>Respiratory
 Disturbance
 Index</source>
@@ -14173,7 +14226,7 @@ Index</source>
 дыхания (RDI)</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="320"/>
+        <location filename="../oscar/overview.cpp" line="322"/>
         <source>Apnea
 Hypopnea
 Index</source>
@@ -14182,37 +14235,37 @@ Index</source>
 гипоапноэ (AHI)</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="327"/>
+        <location filename="../oscar/overview.cpp" line="329"/>
         <source>Usage</source>
         <translation>Использование</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="327"/>
+        <location filename="../oscar/overview.cpp" line="329"/>
         <source>Usage
 (hours)</source>
         <translation>Использование
 (часы)</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="332"/>
-        <location filename="../oscar/overview.cpp" line="332"/>
+        <location filename="../oscar/overview.cpp" line="334"/>
+        <location filename="../oscar/overview.cpp" line="334"/>
         <source>Session Times</source>
         <translation>Время сеанса</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="341"/>
+        <location filename="../oscar/overview.cpp" line="343"/>
         <source>Total Time in Apnea</source>
         <translation>Время в апноэ</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="341"/>
+        <location filename="../oscar/overview.cpp" line="343"/>
         <source>Total Time in Apnea
 (Minutes)</source>
         <translation>Время в апноэ
 (минуты)</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="414"/>
+        <location filename="../oscar/overview.cpp" line="416"/>
         <source>Body
 Mass
 Index</source>
@@ -14221,24 +14274,24 @@ Index</source>
 тела (BMI)</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="420"/>
+        <location filename="../oscar/overview.cpp" line="422"/>
         <source>How you felt
 (1-10)</source>
         <translation>Самочувствие
 (1-10)</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.h" line="226"/>
+        <location filename="../oscar/overview.h" line="228"/>
         <source>Hide All Graphs</source>
         <translation>Скрыть все графики</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.h" line="227"/>
+        <location filename="../oscar/overview.h" line="229"/>
         <source>Show All Graphs</source>
         <translation>Показать все графики</translation>
     </message>
     <message numerus="yes">
-        <location filename="../oscar/overview.cpp" line="575"/>
+        <location filename="../oscar/overview.cpp" line="577"/>
         <source>Analysis is outdated for %n day(s).</source>
         <translation>
             <numerusform>Анализ устарел для %n дня.</numerusform>
@@ -14247,7 +14300,7 @@ Index</source>
         </translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="576"/>
+        <location filename="../oscar/overview.cpp" line="578"/>
         <source>Recalculate</source>
         <translation>Пересчитать</translation>
     </message>
@@ -18618,7 +18671,7 @@ TTIA: %1</translation>
         <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="751"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="922"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="1075"/>
-        <location filename="../oscar/mainwindow.cpp" line="3715"/>
+        <location filename="../oscar/mainwindow.cpp" line="3742"/>
         <source>Importing Sessions...</source>
         <translation>Импорт сеансов...</translation>
     </message>
@@ -18989,8 +19042,8 @@ TTIA: %1</translation>
         <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="1365"/>
         <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="1859"/>
         <location filename="../oscar/SleepLib/loader_plugins/yuwell_loader.cpp" line="2365"/>
-        <location filename="../oscar/mainwindow.cpp" line="1101"/>
-        <location filename="../oscar/mainwindow.cpp" line="3756"/>
+        <location filename="../oscar/mainwindow.cpp" line="1107"/>
+        <location filename="../oscar/mainwindow.cpp" line="3783"/>
         <source>Finishing up...</source>
         <translation>Завершение...</translation>
     </message>
@@ -21789,31 +21842,31 @@ You may continue, but some data may be incomplete or incorrect.</source>
         <translation>Загрузка профиля &quot;%1&quot;...</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1428"/>
+        <location filename="../oscar/mainwindow.cpp" line="1434"/>
         <source>Chromebook file system detected, but no removable device found
 </source>
         <translation>Обнаружена файловая система Chromebook, но не найдено съемных устройств
 </translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="1429"/>
+        <location filename="../oscar/mainwindow.cpp" line="1435"/>
         <source>You must share your SD card with Linux using the ChromeOS Files program</source>
         <translation>Нужно открыть доступ к SD карте из Linux с помощью программы ChromeOS Files</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="3199"/>
+        <location filename="../oscar/mainwindow.cpp" line="3226"/>
         <source>Recompressing Session Files</source>
         <translation>Распаковка файлов сеансов</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4320"/>
+        <location filename="../oscar/mainwindow.cpp" line="4347"/>
         <source>Please select a location for your zip other than the data card itself!</source>
         <translation>Выберите расположение для zip файла, отличное от карты памяти!</translation>
     </message>
     <message>
-        <location filename="../oscar/mainwindow.cpp" line="4369"/>
-        <location filename="../oscar/mainwindow.cpp" line="4421"/>
-        <location filename="../oscar/mainwindow.cpp" line="4727"/>
+        <location filename="../oscar/mainwindow.cpp" line="4396"/>
+        <location filename="../oscar/mainwindow.cpp" line="4448"/>
+        <location filename="../oscar/mainwindow.cpp" line="4754"/>
         <source>Unable to create zip!</source>
         <translation>Невозможно создать zip!</translation>
     </message>
@@ -22957,7 +23010,7 @@ popout window, delete it, then pop out this graph again.</source>
         <translation>SOMNOsoft2</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraph.cpp" line="446"/>
+        <location filename="../oscar/Graphs/gGraph.cpp" line="447"/>
         <source>Snapshot %1</source>
         <translation>Снимок %1</translation>
     </message>
@@ -23062,7 +23115,7 @@ popout window, delete it, then pop out this graph again.</source>
         <translation>Доступно не для всех аппаратов за этот период</translation>
     </message>
     <message>
-        <location filename="../oscar/overview.cpp" line="895"/>
+        <location filename="../oscar/overview.cpp" line="915"/>
         <source>Loading summaries</source>
         <translation>Загрузка статистики</translation>
     </message>
@@ -23209,24 +23262,24 @@ popout window, delete it, then pop out this graph again.</source>
         <translation>Эта страница на других языках:</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3754"/>
-        <location filename="../oscar/overview.cpp" line="610"/>
+        <location filename="../oscar/daily.cpp" line="3793"/>
+        <location filename="../oscar/overview.cpp" line="630"/>
         <source>%1 Graphs</source>
         <translation>%1 графиков</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3758"/>
-        <location filename="../oscar/overview.cpp" line="614"/>
+        <location filename="../oscar/daily.cpp" line="3797"/>
+        <location filename="../oscar/overview.cpp" line="634"/>
         <source>%1 of %2 Graphs</source>
         <translation>%1 из %2 графиков</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3795"/>
+        <location filename="../oscar/daily.cpp" line="3834"/>
         <source>%1 Event Types</source>
         <translation>%1 типов событий</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3799"/>
+        <location filename="../oscar/daily.cpp" line="3838"/>
         <source>%1 of %2 Event Types</source>
         <translation>%1 из %2 типов событий</translation>
     </message>
@@ -27029,9 +27082,9 @@ Make sure you trust the recipient before sharing this data.</source>
     <name>Statistics</name>
     <message>
         <location filename="../oscar/statistics.cpp" line="959"/>
-        <location filename="../oscar/tests/analysisintegrationtests.cpp" line="1261"/>
-        <location filename="../oscar/tests/analysisintegrationtests.cpp" line="1295"/>
-        <location filename="../oscar/tests/analysisintegrationtests.cpp" line="1553"/>
+        <location filename="../oscar/tests/analysisintegrationtests.cpp" line="1266"/>
+        <location filename="../oscar/tests/analysisintegrationtests.cpp" line="1300"/>
+        <location filename="../oscar/tests/analysisintegrationtests.cpp" line="1558"/>
         <source>CPAP Statistics</source>
         <translation>Статистика CPAP</translation>
     </message>
@@ -27203,15 +27256,15 @@ Make sure you trust the recipient before sharing this data.</source>
     </message>
     <message>
         <location filename="../oscar/statistics.cpp" line="1533"/>
-        <location filename="../oscar/tests/analysisintegrationtests.cpp" line="1254"/>
-        <location filename="../oscar/tests/analysisintegrationtests.cpp" line="1260"/>
+        <location filename="../oscar/tests/analysisintegrationtests.cpp" line="1259"/>
+        <location filename="../oscar/tests/analysisintegrationtests.cpp" line="1265"/>
         <source>Device Information</source>
         <translation>Информация об аппарате</translation>
     </message>
     <message>
         <location filename="../oscar/statistics.cpp" line="1645"/>
-        <location filename="../oscar/tests/analysisintegrationtests.cpp" line="1253"/>
-        <location filename="../oscar/tests/analysisintegrationtests.cpp" line="1259"/>
+        <location filename="../oscar/tests/analysisintegrationtests.cpp" line="1258"/>
+        <location filename="../oscar/tests/analysisintegrationtests.cpp" line="1264"/>
         <source>Changes to Device Settings</source>
         <translation>Изменения настроек аппарата</translation>
     </message>
@@ -28180,37 +28233,37 @@ Make sure you trust the recipient before sharing this data.</source>
 <context>
     <name>gGraph</name>
     <message>
-        <location filename="../oscar/Graphs/gGraph.cpp" line="675"/>
+        <location filename="../oscar/Graphs/gGraph.cpp" line="676"/>
         <source>Double click Y-axis: Return to AUTO-FIT Scaling</source>
         <translation>Двойной клик по оси Y: возврат к автоматическому масштабированию</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraph.cpp" line="677"/>
+        <location filename="../oscar/Graphs/gGraph.cpp" line="678"/>
         <source>Double click Y-axis: Return to DEFAULT Scaling</source>
         <translation>Двойной клик по оси Y: возврат к масштабированию по умолчанию</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraph.cpp" line="679"/>
+        <location filename="../oscar/Graphs/gGraph.cpp" line="680"/>
         <source>Double click Y-axis: Return to OVERRIDE Scaling</source>
         <translation>Двойной клик по оси Y: возврат к переопределенному масштабированию</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraph.cpp" line="682"/>
+        <location filename="../oscar/Graphs/gGraph.cpp" line="683"/>
         <source>Double click Y-axis: For Dynamic Scaling</source>
         <translation>Двойной клик по оси Y: включить динамическое масштабирование</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraph.cpp" line="686"/>
+        <location filename="../oscar/Graphs/gGraph.cpp" line="687"/>
         <source>Double click Y-axis: Select DEFAULT Scaling</source>
         <translation>Двойной клик по оси Y: включить масштабирование по умолчанию</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraph.cpp" line="688"/>
+        <location filename="../oscar/Graphs/gGraph.cpp" line="689"/>
         <source>Double click Y-axis: Select AUTO-FIT Scaling</source>
         <translation>Двойной клик по оси Y: включить автоматическое масштабирование</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gGraph.cpp" line="952"/>
+        <location filename="../oscar/Graphs/gGraph.cpp" line="953"/>
         <source>%1 days</source>
         <translation>%1 дней</translation>
     </message>

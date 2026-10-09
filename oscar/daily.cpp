@@ -743,6 +743,16 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     }
     connect(alignButton, &QPushButton::clicked, this, &Daily::onAlignButtonClicked);
 
+    // The "OSCAR analysis" switch: shows or hides OSCAR's own analysis on every page
+    analysisButton = new QPushButton(tr("OSCAR analysis"), this);
+    analysisButton->setObjectName(QStringLiteral("analysisButton"));
+    analysisButton->setCheckable(true);
+    analysisButton->setChecked(analysis::analysisShown());
+    if (auto *bar = qobject_cast<QBoxLayout *>(ui->frame->layout())) {
+        bar->insertWidget(bar->indexOf(ui->graphHelp), analysisButton);
+    }
+    connect(analysisButton, &QPushButton::toggled, this, &Daily::analysisToggled);
+
     // Manual scoring: the button next to Align, a banner above the graphs while it is on
     scoringButton = new QPushButton(tr("Scoring"), this);
     scoringButton->setObjectName(QStringLiteral("scoringButton"));
@@ -2538,6 +2548,13 @@ bool Daily::parseScoringLink(const QUrl &url, QString *what, qint64 *id)
     return true;
 }
 
+void Daily::setAnalysisButtonChecked(bool on)
+{
+    if (!analysisButton) return;
+    const QSignalBlocker block(analysisButton);
+    analysisButton->setChecked(on);
+}
+
 void Daily::applyAnalysisShown()
 {
     const bool shown = analysis::analysisShown();
@@ -4319,6 +4336,12 @@ void Daily::updateDifferenceOverlay()
 QString Daily::getAnalysisInformation(Day *day)
 {
     QString html;
+    analysis::AnalysisService *service = mainwin ? mainwin->analysisService() : nullptr;
+    if (day && analysis::analysisShown() && service && !service->params().enabled) {   // shown, but nothing is computed
+        htmlLsbSectionHeader(html, tr("Analysis (second opinion)"), LSB_ANALYSIS);
+        if (leftSideBarEnable[LSB_ANALYSIS]) html += AnalysisPanel::notComputedHtml() + "<hr/>\n";
+        return html;
+    }
     if (!day || !m_analysisShown) return html;
     htmlLsbSectionHeader(html, tr("Analysis (second opinion)"), LSB_ANALYSIS);
     if (!leftSideBarEnable[LSB_ANALYSIS]) return html;

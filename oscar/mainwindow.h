@@ -165,6 +165,9 @@ class MainWindow : public QMainWindow
     void recalculateAnalysis();
     //! \brief Reloads the Daily, Overview and Statistics pages after the analysis changed.
     void refreshAnalysisViews();
+    //! The "OSCAR analysis" switch: stores it in the profile, keeps the Daily button and the View
+    //! menu item alike, and shows or hides the analysis on every page at once.
+    void setAnalysisShown(bool on);
 
     //! \brief Returns the Overview Tab object
     Overview *getOverview() { return overview; }
@@ -409,6 +412,7 @@ class MainWindow : public QMainWindow
     void on_actionDaily_Calendar_toggled(bool arg1);
 
     void on_actionPie_Chart_toggled(bool arg1);
+    void on_actionShowAnalysis_toggled(bool on);
 
     void on_actionExport_Journal_triggered();
 

@@ -49,6 +49,8 @@ class AnalysisPanel
 
     //! The disclaimer shown wherever the analysis is (spec §1).
     static QString disclaimer();
+    //! The Daily analysis section while the analysis is shown but not computed.
+    static QString notComputedHtml();
 
     //! "12m 05s", or "1h 02m" from an hour.
     static QString duration(qint64 ms);

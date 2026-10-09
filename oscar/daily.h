@@ -123,6 +123,8 @@ public:
     static bool channelShown(ChannelID code, bool analysisShown);
     //! Hides the analysis graphs and the Analysis tab while the analysis is hidden (analysisShown()).
     void applyAnalysisShown();
+    //! Sets the "OSCAR analysis" button without emitting analysisToggled().
+    void setAnalysisButtonChecked(bool on);
     //! A link of the manual scoring list: \a what ("jump", "undo") of the edit \a id.
     static QString scoringLink(const QString &what, qint64 id);
     //! The parts of a scoringLink(); false for another link.
@@ -206,6 +208,8 @@ public:
     QString STR_SHOW_ALL_GRAPHS =QString(tr("Show All Graphs"));
     static QString convertHtmlToPlainText(QString html) ;
 signals:
+    //! The "OSCAR analysis" button was switched by the user.
+    void analysisToggled(bool on);
     void dateLoaded(QDate date);
 
 public slots:
@@ -469,6 +473,7 @@ private:
     QPushButton *alignButton = nullptr;
     // Manual scoring (SleepLib/manual_scoring)
     QPushButton *scoringButton = nullptr;
+    QPushButton *analysisButton = nullptr;   //!< the "OSCAR analysis" switch
     QWidget *m_scoringBanner = nullptr;   //!< the hint and the navigation through the events
     QComboBox *m_scoringType = nullptr;   //!< which events ◀ ▶ step through
     QComboBox *m_scoringWindow = nullptr; //!< how much of the night a step shows

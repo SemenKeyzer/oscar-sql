@@ -857,6 +857,12 @@ bool MainWindow::OpenProfile(QString profileName)
     sc.check("created Daily page");
     PERF_TIMER_STOP("MW::OP::Daily");
 
+    connect(daily, &Daily::analysisToggled, this, &MainWindow::setAnalysisShown);
+    {   // the profile's own "OSCAR analysis" switch
+        const QSignalBlocker block(ui->actionShowAnalysis);
+        ui->actionShowAnalysis->setChecked(analysis::analysisShown());
+    }
+
     PERF_TIMER_START("MW::OP::ReloadDailyGraphs");
     daily->ReloadGraphs();
 
@@ -2198,6 +2204,27 @@ void MainWindow::runAnalysis(const QList<QDate> &dates, bool force)
         QCoreApplication::processEvents();
         return !progress.wasCanceled();
     }, force);
+}
+
+void MainWindow::on_actionShowAnalysis_toggled(bool on)
+{
+    setAnalysisShown(on);
+}
+
+void MainWindow::setAnalysisShown(bool on)
+{
+    if (!p_profile) return;
+    p_profile->analysis->setShown(on);
+    {
+        const QSignalBlocker block(ui->actionShowAnalysis);
+        ui->actionShowAnalysis->setChecked(on);
+    }
+    if (daily) {
+        daily->setAnalysisButtonChecked(on);
+        daily->applyAnalysisShown();
+    }
+    if (overview) overview->applyAnalysisShown();
+    refreshAnalysisViews();
 }
 
 void MainWindow::refreshAnalysisViews()

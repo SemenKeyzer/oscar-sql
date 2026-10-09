@@ -509,3 +509,9 @@ QVector<DifferenceSpan> AnalysisPanel::differences(const DayResult &r)
     return out;
 }
 
+
+QString AnalysisPanel::notComputedHtml()
+{
+    return QStringLiteral("<p><i>%1</i></p>")
+        .arg(tr("OSCAR's analysis is not computed: switch it on in Preferences → Analysis.").toHtmlEscaped());
+}
