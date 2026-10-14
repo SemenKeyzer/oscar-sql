@@ -30,6 +30,7 @@
 #include "SleepLib/oximetry_session_builder.h"
 #ifdef HAVE_BLUETOOTH
 #include "bluetoothoximeterpage.h"
+#include "o2ringpage.h"
 #endif
 #include "mainwindow.h"
 
@@ -193,6 +194,9 @@ OximeterImport::OximeterImport(QWidget *parent) :
     m_btPage = new BluetoothOximeterPage(this);
     ui->stackedWidget->addWidget(m_btPage);
     connect(m_btPage, &BluetoothOximeterPage::ended, this, &OximeterImport::onBluetoothEnded);
+    m_o2ringPage = new O2RingPage(this);
+    ui->stackedWidget->addWidget(m_o2ringPage);
+    connect(m_o2ringPage, &O2RingPage::ended, this, &OximeterImport::onBluetoothEnded);
     // Retry and Done live in the wizard's own button row, sized like its other buttons.
     m_btRetryButton = new QPushButton(tr("Retry"), ui->frame_2);
     m_btRetryButton->setObjectName(QStringLiteral("bluetoothRetryButton"));
@@ -204,8 +208,15 @@ OximeterImport::OximeterImport(QWidget *parent) :
         b->hide();
         ui->buttonLayout->addWidget(b);
     }
-    connect(m_btRetryButton, &QPushButton::clicked, this, &OximeterImport::onBluetoothImportClicked);
-    connect(m_btDoneButton, &QPushButton::clicked, this, [this]() { onBluetoothFinished(m_btPage->importedAny()); });
+    // Retry and Done serve whichever Bluetooth page is showing
+    connect(m_btRetryButton, &QPushButton::clicked, this, [this]() {
+        if (ui->stackedWidget->currentWidget() == m_o2ringPage) onO2RingImportClicked();
+        else onBluetoothImportClicked();
+    });
+    connect(m_btDoneButton, &QPushButton::clicked, this, [this]() {
+        onBluetoothFinished(ui->stackedWidget->currentWidget() == m_o2ringPage ? m_o2ringPage->importedAny()
+                                                                               : m_btPage->importedAny());
+    });
     auto *btButton = new QPushButton(tr("Import over Bluetooth from a Contec oximeter (CMS50FW, CMS50D-BT, ...)"),
                                      ui->importSelectionPage);
     btButton->setObjectName(QStringLiteral("bluetoothImportButton"));
@@ -219,10 +230,20 @@ OximeterImport::OximeterImport(QWidget *parent) :
     btButton->setToolTip(tr("Turn on Bluetooth in the oximeter's menu and close the Contec phone app first."));
     ui->verticalLayout_6->insertWidget(ui->verticalLayout_6->indexOf(ui->directImportButton), btButton);
     connect(btButton, &QPushButton::clicked, this, &OximeterImport::onBluetoothImportClicked);
+    auto *o2ringButton = new QPushButton(tr("O2Ring (Bluetooth)"), ui->importSelectionPage);
+    o2ringButton->setObjectName(QStringLiteral("o2ringImportButton"));
+    o2ringButton->setIcon(btButton->icon());
+    o2ringButton->setIconSize(btButton->iconSize());
+    o2ringButton->setSizePolicy(btButton->sizePolicy());
+    o2ringButton->setMinimumHeight(btButton->minimumHeight());
+    o2ringButton->setAutoDefault(false);
+    o2ringButton->setToolTip(tr("Close the ViHealth app on the phone and wear the ring so that it wakes up."));
+    ui->verticalLayout_6->insertWidget(ui->verticalLayout_6->indexOf(btButton) + 1, o2ringButton);
+    connect(o2ringButton, &QPushButton::clicked, this, &OximeterImport::onO2RingImportClicked);
 #endif
 
     // hover explanations: the strip at the bottom shows what the control under the mouse does
-    HelpStrip::placeAbove(ui->verticalLayout_5, ui->frame_2, new HelpStrip({ QStringLiteral("ui.oximport."), QStringLiteral("ui.ble.") }, this));
+    HelpStrip::placeAbove(ui->verticalLayout_5, ui->frame_2, new HelpStrip({ QStringLiteral("ui.oximport."), QStringLiteral("ui.ble."), QStringLiteral("ui.o2ring.") }, this));
     HelpTips::attachAll(this, QStringLiteral("oximport"));
 }
 
@@ -871,6 +892,7 @@ void OximeterImport::on_cancelButton_clicked()
 	qDebug() << "oximod - Cancel button clicked";
 #ifdef HAVE_BLUETOOTH
     if (m_btPage && m_btPage->isBusy()) m_btPage->cancel();
+    if (m_o2ringPage && m_o2ringPage->isBusy()) m_o2ringPage->cancel();
 #endif
     if (oximodule && oximodule->isStreaming()) {
         oximodule->closeDevice();
@@ -1196,6 +1218,20 @@ void OximeterImport::onBluetoothImportClicked()
     m_btRetryButton->hide();
     m_btDoneButton->hide();
     m_btPage->start();
+#endif
+}
+
+void OximeterImport::onO2RingImportClicked()
+{
+#ifdef HAVE_BLUETOOTH
+    ui->stackedWidget->setCurrentWidget(m_o2ringPage);
+    ui->nextButton->setVisible(false);
+    ui->retryButton->setVisible(false);
+    ui->informationButton->setVisible(false);   // leaving the page would hide a running import
+    ui->cancelButton->setVisible(true);
+    m_btRetryButton->hide();
+    m_btDoneButton->hide();
+    m_o2ringPage->start();
 #endif
 }
 

@@ -26,6 +26,7 @@ enum OximeterImportMode {
 };
 
 class BluetoothOximeterPage;
+class O2RingPage;
 class QPushButton;
 
 class OximeterImport : public QDialog
@@ -81,6 +82,7 @@ private slots:
 
     void on_chooseSessionButton_clicked();
     void onBluetoothImportClicked();
+    void onO2RingImportClicked();
     void onBluetoothFinished(bool importedSomething);
     void onBluetoothEnded(bool canRetry);
 
@@ -126,6 +128,7 @@ private:
     bool selecting_session;
     QList<int> chosen_sessions;
     BluetoothOximeterPage *m_btPage = nullptr;
+    O2RingPage *m_o2ringPage = nullptr;
     QPushButton *m_btRetryButton = nullptr;
     QPushButton *m_btDoneButton = nullptr;
 };

@@ -41,6 +41,8 @@ void O2RingDownloader::download(const QStringList &names)
 void O2RingDownloader::cancel()
 {
     m_timer.stop();
+    // the ring keeps a read open until it is told the read is over
+    if ((m_step == Step::Start || m_step == Step::Data) && m_link) m_link->write(O2Ring::buildRequest(O2Ring::CmdEnd));
     m_step = Step::Idle;
     m_queue.clear();
     if (m_link) disconnect(m_link, nullptr, this, nullptr);

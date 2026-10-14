@@ -34,6 +34,12 @@ qtHaveModule(bluetooth):!no_bluetooth {
     DEFINES += HAVE_BLUETOOTH
     SOURCES += SleepLib/loader_plugins/contec_ble_link.cpp bluetoothoximeterpage.cpp
     HEADERS += SleepLib/loader_plugins/contec_ble_link.h bluetoothoximeterpage.h
+    SOURCES += SleepLib/loader_plugins/o2ring_link.cpp o2ringpage.cpp
+    HEADERS += SleepLib/loader_plugins/o2ring_link.h o2ringpage.h
+    test {
+        SOURCES += tests/o2ringpagetests.cpp
+        HEADERS += tests/o2ringpagetests.h
+    }
 } else {
     message("Building without Bluetooth oximeter import")
 }

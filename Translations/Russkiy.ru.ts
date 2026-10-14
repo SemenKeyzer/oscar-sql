@@ -9421,6 +9421,90 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <translation>Учитываются все сеансы, отключать сеансы нельзя. Цифры совпадают с тем, что увидела бы клиника.</translation>
     </message>
     <message>
+        <location filename="../oscar/uiglossary.cpp" line="1819"/>
+        <source>O2Ring (Bluetooth)</source>
+        <translation>O2Ring (Bluetooth)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uiglossary.cpp" line="1821"/>
+        <source>Downloads the night records from a Wellue / Viatom O2Ring ring over Bluetooth and imports them.</source>
+        <translation>Скачивает ночные записи с кольца Wellue / Viatom O2Ring по Bluetooth и импортирует их.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uiglossary.cpp" line="1822"/>
+        <source>Close the ViHealth app on the phone first: the ring keeps one connection at a time.</source>
+        <translation>Сначала закройте приложение ViHealth на телефоне: кольцо держит одно подключение.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uiglossary.cpp" line="1824"/>
+        <source>Rings found</source>
+        <translation>Найденные кольца</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uiglossary.cpp" line="1825"/>
+        <location filename="../oscar/uiglossary.cpp" line="1830"/>
+        <location filename="../oscar/uiglossary.cpp" line="1835"/>
+        <location filename="../oscar/uiglossary.cpp" line="1840"/>
+        <location filename="../oscar/uiglossary.cpp" line="1845"/>
+        <source>Oximetry wizard → O2Ring</source>
+        <translation>Мастер оксиметрии → O2Ring</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uiglossary.cpp" line="1826"/>
+        <source>The O2Rings OSCAR found nearby; choose yours.</source>
+        <translation>Кольца O2Ring, которые OSCAR нашёл рядом; выберите своё.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uiglossary.cpp" line="1827"/>
+        <source>If the list stays empty, close the ViHealth app and wear the ring so that it wakes up.</source>
+        <translation>Если список пуст, закройте приложение ViHealth и наденьте кольцо, чтобы оно проснулось.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uiglossary.cpp" line="1831"/>
+        <source>Connects to the chosen ring and reads its list of records.</source>
+        <translation>Подключается к выбранному кольцу и читает список его записей.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uiglossary.cpp" line="1834"/>
+        <source>Set the ring&apos;s clock</source>
+        <translation>Установить часы кольца</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uiglossary.cpp" line="1836"/>
+        <source>Before the download, sets the ring&apos;s clock to the computer&apos;s time. OSCAR remembers this choice.</source>
+        <translation>Перед скачиванием ставит на кольце время компьютера. OSCAR запоминает этот выбор.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uiglossary.cpp" line="1837"/>
+        <source>Keep it on so the ring&apos;s nights line up with the CPAP nights.</source>
+        <translation>Оставьте включённым, чтобы ночи кольца совпадали с ночами CPAP.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uiglossary.cpp" line="1839"/>
+        <source>Records on the ring</source>
+        <translation>Записи на кольце</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uiglossary.cpp" line="1841"/>
+        <source>Every record the ring keeps, by start time. New ones are ticked; the ones already in OSCAR are not, but you can tick them to download them again.</source>
+        <translation>Все записи кольца по времени начала. Новые отмечены; уже импортированные в OSCAR — нет, но их можно отметить и скачать снова.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uiglossary.cpp" line="1844"/>
+        <source>Download</source>
+        <translation>Скачать</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uiglossary.cpp" line="1846"/>
+        <source>Downloads the ticked records and imports them into OSCAR. The records stay on the ring.</source>
+        <translation>Скачивает отмеченные записи и импортирует их в OSCAR. На кольце записи остаются.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uiglossary.cpp" line="1847"/>
+        <source>Keep the ring close to the computer until the import finishes.</source>
+        <translation>Держите кольцо рядом с компьютером до конца импорта.</translation>
+    </message>
+    <message>
         <source>Use it when the figures go to a doctor.</source>
         <translation type="vanished">Используйте, когда цифры идут врачу.</translation>
     </message>
@@ -10692,6 +10776,7 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <location filename="../oscar/uiglossary.cpp" line="1710"/>
         <location filename="../oscar/uiglossary.cpp" line="1715"/>
         <location filename="../oscar/uiglossary.cpp" line="1720"/>
+        <location filename="../oscar/uiglossary.cpp" line="1820"/>
         <source>Oximetry wizard → start page</source>
         <translation>Мастер оксиметрии → первая страница</translation>
     </message>
@@ -11011,6 +11096,7 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
     </message>
     <message>
         <location filename="../oscar/uiglossary.cpp" line="1804"/>
+        <location filename="../oscar/uiglossary.cpp" line="1829"/>
         <source>Connect</source>
         <translation>Подключиться</translation>
     </message>
@@ -14084,6 +14170,231 @@ Outdated days need it after an update or a change of settings. All days runs eve
     </message>
 </context>
 <context>
+    <name>O2RingDownloader</name>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_downloader.cpp" line="101"/>
+        <source>The ring&apos;s answer could not be read: this ring is not supported yet.</source>
+        <translation>Не удалось разобрать ответ кольца: это кольцо пока не поддерживается.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_downloader.cpp" line="111"/>
+        <source>the ring reports a size of %1</source>
+        <translation>кольцо сообщает размер %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_downloader.cpp" line="120"/>
+        <source>empty piece at %1 of %2 bytes</source>
+        <translation>пустой кусок на %1 из %2 байт</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_downloader.cpp" line="126"/>
+        <source>got %1 bytes, the ring announced %2</source>
+        <translation>получено %1 байт, кольцо заявило %2</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_downloader.cpp" line="150"/>
+        <source>The ring does not answer. Close the phone app and wear the ring to wake it up.</source>
+        <translation>Кольцо не отвечает. Закройте приложение на телефоне и наденьте кольцо, чтобы оно проснулось.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_downloader.cpp" line="158"/>
+        <source>the ring stopped answering</source>
+        <translation>кольцо перестало отвечать</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_downloader.cpp" line="195"/>
+        <source>the Bluetooth link was lost</source>
+        <translation>связь Bluetooth прервалась</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_downloader.cpp" line="196"/>
+        <source>The Bluetooth link to the ring was lost.</source>
+        <translation>Связь Bluetooth с кольцом прервалась.</translation>
+    </message>
+</context>
+<context>
+    <name>O2RingPage</name>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="46"/>
+        <source>O2Ring (Bluetooth)</source>
+        <translation>O2Ring (Bluetooth)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="53"/>
+        <source>Connect</source>
+        <translation>Подключиться</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="62"/>
+        <source>Set the ring&apos;s clock to this computer&apos;s time</source>
+        <translation>Установить часы кольца по времени компьютера</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="70"/>
+        <source>Record start</source>
+        <translation>Начало записи</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="70"/>
+        <source>Status</source>
+        <translation>Состояние</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="78"/>
+        <source>Download</source>
+        <translation>Скачать</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="129"/>
+        <source>Searching for the ring...</source>
+        <translation>Поиск кольца...</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="130"/>
+        <source>Close the ViHealth app on the phone: the ring keeps one connection at a time. Wear the ring so that it wakes up.</source>
+        <translation>Закройте приложение ViHealth на телефоне — кольцо держит одно подключение; наденьте кольцо, чтобы оно проснулось.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="148"/>
+        <source>No ring found. Close the ViHealth app on the phone, wear the ring so that it wakes up and try again.</source>
+        <translation>Кольцо не найдено. Закройте приложение ViHealth на телефоне, наденьте кольцо, чтобы оно проснулось, и повторите.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="156"/>
+        <source>%1 (signal %2 dBm)</source>
+        <translation>%1 (сигнал %2 дБм)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="161"/>
+        <source>Several rings are nearby. Choose yours.</source>
+        <translation>Рядом несколько колец. Выберите своё.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="169"/>
+        <source>Connecting to %1...</source>
+        <translation>Подключение к %1...</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="180"/>
+        <source>Reading the records on %1...</source>
+        <translation>Чтение записей на %1...</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="181"/>
+        <source>Keep the ring close to the computer until the import finishes.</source>
+        <translation>Держите кольцо рядом с компьютером до конца импорта.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="191"/>
+        <source>Some records could not be downloaded.</source>
+        <translation>Некоторые записи скачать не удалось.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="203"/>
+        <source>Connected to %1</source>
+        <translation>Подключено к %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="204"/>
+        <source>Serial number %1, battery %2, firmware %3.</source>
+        <translation>Серийный номер %1, заряд %2, прошивка %3.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="206"/>
+        <source>Ring clock: %1; this computer: %2.</source>
+        <translation>Часы кольца: %1; компьютер: %2.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="216"/>
+        <location filename="../oscar/o2ringpage.cpp" line="288"/>
+        <source>already in OSCAR</source>
+        <translation>уже в OSCAR</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="216"/>
+        <source>new</source>
+        <translation>новая</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="218"/>
+        <source>The ring has no records.</source>
+        <translation>На кольце нет записей.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="219"/>
+        <source>Tick the records to download, then press Download.</source>
+        <translation>Отметьте записи для скачивания и нажмите «Скачать».</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="232"/>
+        <source>Setting the ring&apos;s clock...</source>
+        <translation>Установка часов кольца...</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="251"/>
+        <source>Downloading from %1...</source>
+        <translation>Скачивание с %1...</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="274"/>
+        <source>downloading, %1%</source>
+        <translation>скачивание, %1%</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="284"/>
+        <source>imported</source>
+        <translation>импортирована</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="292"/>
+        <source>failed: %1</source>
+        <translation>ошибка: %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="301"/>
+        <source>not downloaded: %1</source>
+        <translation>не скачана: %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="311"/>
+        <source>%1 imported, %2 skipped</source>
+        <translation>импортировано %1, пропущено %2</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="312"/>
+        <source>, %1 failed</source>
+        <translation>, с ошибкой %1</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="313"/>
+        <source>Done.</source>
+        <translation>Готово.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="313"/>
+        <source>Stopped.</source>
+        <translation>Остановлено.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="320"/>
+        <source>The import was cancelled.</source>
+        <translation>Импорт отменён.</translation>
+    </message>
+</context>
+<context>
+    <name>O2RingScanner</name>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_link.cpp" line="38"/>
+        <source>Bluetooth is turned off on this computer.</source>
+        <translation>На этом компьютере выключен Bluetooth.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_link.cpp" line="41"/>
+        <source>OSCAR isn&apos;t allowed to use Bluetooth. Allow it in System Settings &gt; Privacy &amp; Security &gt; Bluetooth.</source>
+        <translation>OSCAR не разрешено использовать Bluetooth. Разрешите это в Системных настройках &gt; Конфиденциальность и безопасность &gt; Bluetooth.</translation>
+    </message>
+</context>
+<context>
     <name>OAuth2Handler</name>
     <message>
         <location filename="../oscar/network/oauth2_handler.cpp" line="95"/>
@@ -14442,7 +14753,7 @@ Index</source>
     <name>OximeterImport</name>
     <message>
         <location filename="../oscar/oximeterimport.ui" line="61"/>
-        <location filename="../oscar/oximeterimport.cpp" line="50"/>
+        <location filename="../oscar/oximeterimport.cpp" line="51"/>
         <source>Oximeter Import Wizard</source>
         <translation>Мастер импорта оксиметрии</translation>
     </message>
@@ -14614,7 +14925,7 @@ Index</source>
     </message>
     <message>
         <location filename="../oscar/oximeterimport.ui" line="1812"/>
-        <location filename="../oscar/oximeterimport.cpp" line="197"/>
+        <location filename="../oscar/oximeterimport.cpp" line="201"/>
         <source>Retry</source>
         <translation>Повторить</translation>
     </message>
@@ -14640,7 +14951,7 @@ Index</source>
     </message>
     <message>
         <location filename="../oscar/oximeterimport.ui" line="1907"/>
-        <location filename="../oscar/oximeterimport.cpp" line="254"/>
+        <location filename="../oscar/oximeterimport.cpp" line="275"/>
         <source>Start</source>
         <translation>Начать</translation>
     </message>
@@ -14694,257 +15005,267 @@ Index</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;OSCAR нуждается в начальном времени для сохранения этого сеанса оксиметрии.&lt;/p&gt;&lt;p&gt;Выберите один из вариантов:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="299"/>
+        <location filename="../oscar/oximeterimport.cpp" line="320"/>
         <source>Scanning for compatible oximeters</source>
         <translation>Поиск совместимых оксиметров</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="331"/>
+        <location filename="../oscar/oximeterimport.cpp" line="352"/>
         <source>Could not detect any connected oximeter devices.</source>
         <translation>Не удалось обнаружить подключенные оксиметрические устройства.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="339"/>
+        <location filename="../oscar/oximeterimport.cpp" line="360"/>
         <source>Connecting to %1 Oximeter</source>
         <translation>Подключение к оксиметру %1</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="367"/>
+        <location filename="../oscar/oximeterimport.cpp" line="388"/>
         <source>Renaming this oximeter from &apos;%1&apos; to &apos;%2&apos;</source>
         <translation>Переименование оксиметра из &apos;%1&apos; в &apos; %2&apos;</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="370"/>
+        <location filename="../oscar/oximeterimport.cpp" line="391"/>
         <source>Oximeter name is different.. If you only have one and are sharing it between profiles, set the name to the same on both profiles.</source>
         <translation>Имя оксиметра отличается. Если у вас только один оксиметр и вы используете его в разных профилях, установите одно и то же имя во всех профилях.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="413"/>
+        <location filename="../oscar/oximeterimport.cpp" line="434"/>
         <source>&quot;%1&quot;, session %2</source>
         <translation>&quot;%1&quot;, сеанс %2</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="438"/>
+        <location filename="../oscar/oximeterimport.cpp" line="459"/>
         <source>Nothing to import</source>
         <translation>Нечего импортировать</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="439"/>
+        <location filename="../oscar/oximeterimport.cpp" line="460"/>
         <source>Your oximeter did not have any valid sessions.</source>
         <translation>Оксиметр не содержит корректных сессий.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="440"/>
+        <location filename="../oscar/oximeterimport.cpp" line="461"/>
         <source>Close</source>
         <translation>Закрыть</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="443"/>
+        <location filename="../oscar/oximeterimport.cpp" line="464"/>
         <source>Waiting for %1 to start</source>
         <translation>Ожидание запуска %1</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="444"/>
+        <location filename="../oscar/oximeterimport.cpp" line="465"/>
         <source>Waiting for the device to start the upload process...</source>
         <translation>Ожидание, пока устройство начнёт отправку данных...</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="446"/>
+        <location filename="../oscar/oximeterimport.cpp" line="467"/>
         <source>Select upload option on %1</source>
         <translation>Выберите отправку (Upload) на %1</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="447"/>
+        <location filename="../oscar/oximeterimport.cpp" line="468"/>
         <source>You need to tell your oximeter to begin sending data to the computer.</source>
         <translation>Включите передачу данных на компьютер в оксиметре.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="448"/>
+        <location filename="../oscar/oximeterimport.cpp" line="469"/>
         <source>Please connect your oximeter, enter it&apos;s menu and select upload to commence data transfer...</source>
         <translation>Подключите оксиметр, откройте его меню и выберите отправку (Upload), чтобы начать передачу данных...</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="478"/>
+        <location filename="../oscar/oximeterimport.cpp" line="499"/>
         <source>%1 device is uploading data...</source>
         <translation>Устройство %1 отправляет данные...</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="479"/>
+        <location filename="../oscar/oximeterimport.cpp" line="500"/>
         <source>Please wait until oximeter upload process completes. Do not unplug your oximeter.</source>
         <translation>Дождитесь, пока оксиметр закончит отправку данных. Не отключайте его.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="498"/>
+        <location filename="../oscar/oximeterimport.cpp" line="519"/>
         <source>Oximeter import completed..</source>
         <translation>Импорт оксиметра завершен..</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="523"/>
+        <location filename="../oscar/oximeterimport.cpp" line="544"/>
         <source>Select a valid oximetry data file</source>
         <translation>Выберите корректный файл данных оксиметрии</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="523"/>
+        <location filename="../oscar/oximeterimport.cpp" line="544"/>
         <source>Oximetry Files (*.spo *.spor *.spo2 *.SpO2 *.dat)</source>
         <translation>Файлы оксиметрии (*.spo *.spor *.spo2 *.SpO2 *.dat)</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="545"/>
+        <location filename="../oscar/oximeterimport.cpp" line="566"/>
         <source>No Oximetry module could parse the given file:</source>
         <translation>Нет подходящего модуля оксиметрии для распознавания файла:</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="593"/>
+        <location filename="../oscar/oximeterimport.cpp" line="614"/>
         <source>Live Oximetry Mode</source>
         <translation>Оксиметрия в реальном времени</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="645"/>
+        <location filename="../oscar/oximeterimport.cpp" line="666"/>
         <source>Live Oximetry Stopped</source>
         <translation>Оксиметрия в реальном времени остановлена</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="646"/>
+        <location filename="../oscar/oximeterimport.cpp" line="667"/>
         <source>Live Oximetry import has been stopped</source>
         <translation>Импорт оксиметрии в реальном времени был остановлен</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1067"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1089"/>
         <source>Oximeter Session %1</source>
         <translation>Сеанс оксиметра %1</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1112"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1134"/>
         <source>OSCAR gives you the ability to track Oximetry data alongside CPAP session data, which can give valuable insight into the effectiveness of CPAP treatment. It will also work standalone with your Pulse Oximeter, allowing you to store, track and review your recorded data.</source>
         <translation>OSCAR позволяет отслеживать данные оксиметрии вместе с данными сеансов CPAP, что может дать полезную информацию об эффективности CPAP терапии. Можно также работать только с самим пульсоксиметром: сохранять, отслеживать и просматривать записанные данные.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1123"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1145"/>
         <source>If you are trying to sync oximetry and CPAP data, please make sure you imported your CPAP sessions first before proceeding!</source>
         <translation>Если вы собираетесь синхронизировать данные оксиметрии и CPAP, убедитесь, что вы импортировали свои сеансы CPAP, прежде чем продолжить!</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1126"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1148"/>
         <source>For OSCAR to be able to locate and read directly from your Oximeter device, you need to ensure the correct device drivers (eg. USB to Serial UART) have been installed on your computer. For more information about this, %1click here%2.</source>
         <translation>Чтобы OSCAR смог найти и прочесть данные с вашего оксиметра, на компьютере должны быть установлены нужные драйверы устройств (например, USB to Serial UART). Для получения дополнительной информации об этом %1нажмите здесь%2.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="575"/>
+        <location filename="../oscar/oximeterimport.cpp" line="596"/>
         <source>Oximeter not detected</source>
         <translation>Оксиметр не обнаружен</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="199"/>
+        <location filename="../oscar/oximeterimport.cpp" line="203"/>
         <source>Done</source>
         <translation>Готово</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="209"/>
+        <location filename="../oscar/oximeterimport.cpp" line="220"/>
         <source>Import over Bluetooth from a Contec oximeter (CMS50FW, CMS50D-BT, ...)</source>
         <translation>Импортировать по Bluetooth (Contec CMS50FW, CMS50D-BT, ...)</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="219"/>
+        <location filename="../oscar/oximeterimport.cpp" line="230"/>
         <source>Turn on Bluetooth in the oximeter&apos;s menu and close the Contec phone app first.</source>
         <translation>Сначала включите Bluetooth в меню оксиметра и закройте приложение Contec на телефоне.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="582"/>
+        <location filename="../oscar/oximeterimport.cpp" line="233"/>
+        <source>O2Ring (Bluetooth)</source>
+        <translation>O2Ring (Bluetooth)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="240"/>
+        <source>Close the ViHealth app on the phone and wear the ring so that it wakes up.</source>
+        <translation>Закройте приложение ViHealth на телефоне и наденьте кольцо, чтобы оно проснулось.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="603"/>
         <source>Couldn&apos;t access oximeter</source>
         <translation>Невозможно получить доступ к оксиметру</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="596"/>
+        <location filename="../oscar/oximeterimport.cpp" line="617"/>
         <source>Starting up...</source>
         <translation>Запуск...</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="597"/>
+        <location filename="../oscar/oximeterimport.cpp" line="618"/>
         <source>If you can still read this after a few seconds, cancel and try again</source>
         <translation>Если вы все еще видите это сообщение через несколько секунд, отмените и попробуйте снова</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="644"/>
+        <location filename="../oscar/oximeterimport.cpp" line="665"/>
         <source>Live Import Stopped</source>
         <translation>Импорт в реальном времени остановлен</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="697"/>
+        <location filename="../oscar/oximeterimport.cpp" line="718"/>
         <source>%1 session(s) on %2, starting at %3</source>
         <translation>%1 сеанс(ов) за %2, начиная с %3</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="701"/>
+        <location filename="../oscar/oximeterimport.cpp" line="722"/>
         <source>No CPAP data available on %1</source>
         <translation>Нет данных CPAP доступных на %1</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="836"/>
+        <location filename="../oscar/oximeterimport.cpp" line="857"/>
         <source>Recording...</source>
         <translation>Запись...</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="843"/>
+        <location filename="../oscar/oximeterimport.cpp" line="864"/>
         <source>Finger not detected</source>
         <translation>Палец не обнаружен</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="946"/>
+        <location filename="../oscar/oximeterimport.cpp" line="968"/>
         <source>I want to use the time my computer recorded for this live oximetry session.</source>
         <translation>Использовать время компьютера для этой оксиметрической сессии в реальном времени.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="949"/>
+        <location filename="../oscar/oximeterimport.cpp" line="971"/>
         <source>I need to set the time manually, because my oximeter doesn&apos;t have an internal clock.</source>
         <translation>Установить время вручную, так как оксиметр не имеет внутренних часов.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="961"/>
+        <location filename="../oscar/oximeterimport.cpp" line="983"/>
         <source>Something went wrong getting session data</source>
         <translation>Что-то пошло не так при получении данных сеанса</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1108"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1130"/>
         <source>Welcome to the Oximeter Import Wizard</source>
         <translation>Добро пожаловать в Мастер импорта оксиметрии</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1110"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1132"/>
         <source>Pulse Oximeters are medical devices used to measure blood oxygen saturation. During extended Apnea events and abnormal breathing patterns, blood oxygen saturation levels can drop significantly, and can indicate issues that need medical attention.</source>
         <translation>Пульсоксиметры - это медицинские устройства, используемые для измерения насыщения крови кислородом. Во время апноэ и ненормальных форм дыхания, уровень кислорода в крови может значительно снижаться, и может указывать на проблемы, требующие медицинского вмешательства.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1114"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1136"/>
         <source>OSCAR is currently compatible with Contec CMS50D+, CMS50E, CMS50F and CMS50I serial oximeters.&lt;br/&gt;(Note: Direct importing from bluetooth models is &lt;span style=&quot; font-weight:600;&quot;&gt;probably not&lt;/span&gt; possible yet)</source>
         <translation>В настоящее время OSCAR совместим с оксиметрами Contec CMS50D +, CMS50E, CMS50F и CMS50i.&lt;br/&gt;(Примечание: прямой импорт данных из моделей с Bluetooth &lt;span style=&quot;font-weight:600;&quot;&gt;вероятно&lt;/span&gt; еще невозможен)</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1116"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1138"/>
         <source>You may wish to note, other companies, such as Pulox, simply rebadge Contec CMS50&apos;s under new names, such as the Pulox PO-200, PO-300, PO-400. These should also work.</source>
         <translation>Обратите внимание, что другие компании, такие как Pulox, выпускают Contec CMS50 под другими названиями, например Pulox PO-200, PO-300, PO-400. Они тоже будут работать.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1119"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1141"/>
         <source>It also can read from ChoiceMMed MD300W1 oximeter .dat files.</source>
         <translation>Можно также загружать .dat файлы оксиметра ChoiceMMed MD300W1.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1121"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1143"/>
         <source>Please remember:</source>
         <translation>Пожалуйста, помните:</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1125"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1147"/>
         <source>Important Notes:</source>
         <translation>Важное замечание:</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1128"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1150"/>
         <source>Contec CMS50D+ devices do not have an internal clock, and do not record a starting time. If you do not have a CPAP session to link a recording to, you will have to enter the start time manually after the import process is completed.</source>
         <translation>Устройства Contec CMS50D+ не имеют внутренних часов и не записывают время запуска. Если у вас нет сеанса CPAP, чтобы связать запись, нужно будет ввести время начала вручную после завершения процесса импорта.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1130"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1152"/>
         <source>Even for devices with an internal clock, it is still recommended to get into the habit of starting oximeter records at the same time as CPAP sessions, because CPAP internal clocks tend to drift over time, and not all can be reset easily.</source>
         <translation>Даже для устройств с внутренними часами, рекомендуется запускать запись оксиметрии одновременно с сеансом CPAP, так как внутренние часы CPAP теряют точность со временем, и не все можно легко установить.</translation>
     </message>
@@ -24413,6 +24734,22 @@ Pulse rises: %1 per hour</source>
         <source>Bluetooth oximeter</source>
         <translation>Bluetooth-оксиметр</translation>
     </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_import.cpp" line="48"/>
+        <source>Could not create the folder %1.</source>
+        <translation>Не удалось создать папку %1.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_import.cpp" line="53"/>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_import.cpp" line="61"/>
+        <source>Could not save the record %1.</source>
+        <translation>Не удалось сохранить запись %1.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_import.cpp" line="68"/>
+        <source>OSCAR could not read the record %1.</source>
+        <translation>OSCAR не смог прочитать запись %1.</translation>
+    </message>
 </context>
 <context>
     <name>QtContecBleLink</name>
@@ -24441,6 +24778,35 @@ Pulse rises: %1 per hour</source>
         <location filename="../oscar/SleepLib/loader_plugins/contec_ble_link.cpp" line="165"/>
         <source>Couldn&apos;t turn on notifications from the oximeter.</source>
         <translation>Не удалось включить уведомления от оксиметра.</translation>
+    </message>
+</context>
+<context>
+    <name>QtO2RingLink</name>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_link.cpp" line="88"/>
+        <source>Couldn&apos;t connect to the ring. Close the ViHealth app on the phone and try again.</source>
+        <translation>Не удалось подключиться к кольцу. Закройте приложение ViHealth на телефоне и повторите.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_link.cpp" line="118"/>
+        <source>The ring disconnected.</source>
+        <translation>Кольцо отключилось.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_link.cpp" line="128"/>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_link.cpp" line="156"/>
+        <source>This ring is not supported yet.</source>
+        <translation>Это кольцо пока не поддерживается.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_link.cpp" line="145"/>
+        <source>Bluetooth communication with the ring failed.</source>
+        <translation>Ошибка связи Bluetooth с кольцом.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_link.cpp" line="161"/>
+        <source>Couldn&apos;t turn on notifications from the ring.</source>
+        <translation>Не удалось включить уведомления от кольца.</translation>
     </message>
 </context>
 <context>

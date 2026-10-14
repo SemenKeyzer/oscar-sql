@@ -45,6 +45,7 @@
 #include "ui_welcome.h"
 #ifdef HAVE_BLUETOOTH
 #include "bluetoothoximeterpage.h"
+#include "o2ringpage.h"
 #endif
 
 namespace {
@@ -212,6 +213,8 @@ void UiCoverageTests::testOximportCovered()
 #ifdef HAVE_BLUETOOTH
     BluetoothOximeterPage page;
     missing += uncovered(&page, QStringLiteral("ble"), {});
+    O2RingPage o2ring;
+    missing += uncovered(&o2ring, QStringLiteral("o2ring"), {});
 #endif
     QVERIFY2(missing.isEmpty(), qPrintable(QString::number(missing.size()) + QStringLiteral(": ") + missing.join(QStringLiteral(", "))));
 }
@@ -220,7 +223,8 @@ void UiCoverageTests::testCodeCreatedControlsCovered()
 {
     QStringList keys = { QStringLiteral("ui.menu.actionRecalculateAnalysis"), QStringLiteral("ui.menu.actionHelpPanel"), QStringLiteral("ui.daily.alignButton"), QStringLiteral("ui.daily.scoringButton"), QStringLiteral("ui.daily.scoringType"), QStringLiteral("ui.daily.scoringPrev"), QStringLiteral("ui.daily.scoringNext"), QStringLiteral("ui.daily.scoringWindow"),
                          QStringLiteral("ui.prefs.searchSettings"), QStringLiteral("ui.oximport.bluetoothImportButton"),
-                         QStringLiteral("ui.oximport.bluetoothRetryButton"), QStringLiteral("ui.oximport.bluetoothDoneButton") };
+                         QStringLiteral("ui.oximport.bluetoothRetryButton"), QStringLiteral("ui.oximport.bluetoothDoneButton"),
+                         QStringLiteral("ui.oximport.o2ringImportButton") };
     // the Daily search tab is built in code
     for (const char *name : { "searchHelpButton", "searchMatchButton", "searchAddMatchButton", "searchClearButton", "searchStartButton",
                               "searchCommandButton", "searchOperationCombo", "searchOperationButton", "searchValueDouble",
