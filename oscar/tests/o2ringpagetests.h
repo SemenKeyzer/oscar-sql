@@ -21,6 +21,9 @@ private slots:
     void testSetClockFollowsSetting();
     void testCancelRemovesPart();
     void testLinkLostOffersRetry();
+    void testCancelDuringImport();
+    void testClockFailureShown();
+    void testOddSerialRefused();
     void cleanupTestCase();
 private:
     QApplication *m_app = nullptr;

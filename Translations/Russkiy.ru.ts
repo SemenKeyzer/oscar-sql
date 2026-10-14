@@ -14172,42 +14172,47 @@ Outdated days need it after an update or a change of settings. All days runs eve
 <context>
     <name>O2RingDownloader</name>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/o2ring_downloader.cpp" line="101"/>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_downloader.cpp" line="105"/>
         <source>The ring&apos;s answer could not be read: this ring is not supported yet.</source>
         <translation>Не удалось разобрать ответ кольца: это кольцо пока не поддерживается.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/o2ring_downloader.cpp" line="111"/>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_downloader.cpp" line="115"/>
         <source>the ring reports a size of %1</source>
         <translation>кольцо сообщает размер %1</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/o2ring_downloader.cpp" line="120"/>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_downloader.cpp" line="124"/>
         <source>empty piece at %1 of %2 bytes</source>
         <translation>пустой кусок на %1 из %2 байт</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/o2ring_downloader.cpp" line="126"/>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_downloader.cpp" line="130"/>
         <source>got %1 bytes, the ring announced %2</source>
         <translation>получено %1 байт, кольцо заявило %2</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/o2ring_downloader.cpp" line="150"/>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_downloader.cpp" line="131"/>
+        <source>the ring&apos;s answers came late and may be out of order; download this record again</source>
+        <translation>ответы кольца опоздали и могли перепутаться; скачайте эту запись ещё раз</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_downloader.cpp" line="159"/>
         <source>The ring does not answer. Close the phone app and wear the ring to wake it up.</source>
         <translation>Кольцо не отвечает. Закройте приложение на телефоне и наденьте кольцо, чтобы оно проснулось.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/o2ring_downloader.cpp" line="158"/>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_downloader.cpp" line="167"/>
         <source>the ring stopped answering</source>
         <translation>кольцо перестало отвечать</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/o2ring_downloader.cpp" line="195"/>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_downloader.cpp" line="206"/>
         <source>the Bluetooth link was lost</source>
         <translation>связь Bluetooth прервалась</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/o2ring_downloader.cpp" line="196"/>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_downloader.cpp" line="207"/>
         <source>The Bluetooth link to the ring was lost.</source>
         <translation>Связь Bluetooth с кольцом прервалась.</translation>
     </message>
@@ -14245,138 +14250,148 @@ Outdated days need it after an update or a change of settings. All days runs eve
         <translation>Скачать</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="129"/>
+        <location filename="../oscar/o2ringpage.cpp" line="131"/>
         <source>Searching for the ring...</source>
         <translation>Поиск кольца...</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="130"/>
+        <location filename="../oscar/o2ringpage.cpp" line="132"/>
         <source>Close the ViHealth app on the phone: the ring keeps one connection at a time. Wear the ring so that it wakes up.</source>
         <translation>Закройте приложение ViHealth на телефоне — кольцо держит одно подключение; наденьте кольцо, чтобы оно проснулось.</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="148"/>
+        <location filename="../oscar/o2ringpage.cpp" line="150"/>
         <source>No ring found. Close the ViHealth app on the phone, wear the ring so that it wakes up and try again.</source>
         <translation>Кольцо не найдено. Закройте приложение ViHealth на телефоне, наденьте кольцо, чтобы оно проснулось, и повторите.</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="156"/>
+        <location filename="../oscar/o2ringpage.cpp" line="158"/>
         <source>%1 (signal %2 dBm)</source>
         <translation>%1 (сигнал %2 дБм)</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="161"/>
+        <location filename="../oscar/o2ringpage.cpp" line="163"/>
         <source>Several rings are nearby. Choose yours.</source>
         <translation>Рядом несколько колец. Выберите своё.</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="169"/>
+        <location filename="../oscar/o2ringpage.cpp" line="171"/>
         <source>Connecting to %1...</source>
         <translation>Подключение к %1...</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="180"/>
+        <location filename="../oscar/o2ringpage.cpp" line="182"/>
         <source>Reading the records on %1...</source>
         <translation>Чтение записей на %1...</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="181"/>
+        <location filename="../oscar/o2ringpage.cpp" line="183"/>
         <source>Keep the ring close to the computer until the import finishes.</source>
         <translation>Держите кольцо рядом с компьютером до конца импорта.</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="191"/>
+        <location filename="../oscar/o2ringpage.cpp" line="188"/>
+        <source>The ring&apos;s clock could not be set.</source>
+        <translation>Не удалось установить часы кольца.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="197"/>
         <source>Some records could not be downloaded.</source>
         <translation>Некоторые записи скачать не удалось.</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="203"/>
+        <location filename="../oscar/o2ringpage.cpp" line="207"/>
+        <source>The ring reports an unexpected serial number (%1): this ring is not supported yet.</source>
+        <translation>Кольцо сообщает неожиданный серийный номер (%1): это кольцо пока не поддерживается.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="213"/>
         <source>Connected to %1</source>
         <translation>Подключено к %1</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="204"/>
+        <location filename="../oscar/o2ringpage.cpp" line="214"/>
         <source>Serial number %1, battery %2, firmware %3.</source>
         <translation>Серийный номер %1, заряд %2, прошивка %3.</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="206"/>
+        <location filename="../oscar/o2ringpage.cpp" line="216"/>
         <source>Ring clock: %1; this computer: %2.</source>
         <translation>Часы кольца: %1; компьютер: %2.</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="216"/>
-        <location filename="../oscar/o2ringpage.cpp" line="288"/>
+        <location filename="../oscar/o2ringpage.cpp" line="226"/>
+        <location filename="../oscar/o2ringpage.cpp" line="300"/>
         <source>already in OSCAR</source>
         <translation>уже в OSCAR</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="216"/>
+        <location filename="../oscar/o2ringpage.cpp" line="226"/>
         <source>new</source>
         <translation>новая</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="218"/>
+        <location filename="../oscar/o2ringpage.cpp" line="228"/>
         <source>The ring has no records.</source>
         <translation>На кольце нет записей.</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="219"/>
+        <location filename="../oscar/o2ringpage.cpp" line="229"/>
         <source>Tick the records to download, then press Download.</source>
         <translation>Отметьте записи для скачивания и нажмите «Скачать».</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="232"/>
+        <location filename="../oscar/o2ringpage.cpp" line="242"/>
         <source>Setting the ring&apos;s clock...</source>
         <translation>Установка часов кольца...</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="251"/>
+        <location filename="../oscar/o2ringpage.cpp" line="261"/>
         <source>Downloading from %1...</source>
         <translation>Скачивание с %1...</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="274"/>
+        <location filename="../oscar/o2ringpage.cpp" line="284"/>
         <source>downloading, %1%</source>
         <translation>скачивание, %1%</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="284"/>
+        <location filename="../oscar/o2ringpage.cpp" line="296"/>
         <source>imported</source>
         <translation>импортирована</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="292"/>
+        <location filename="../oscar/o2ringpage.cpp" line="304"/>
         <source>failed: %1</source>
         <translation>ошибка: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="301"/>
+        <location filename="../oscar/o2ringpage.cpp" line="314"/>
         <source>not downloaded: %1</source>
         <translation>не скачана: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="311"/>
+        <location filename="../oscar/o2ringpage.cpp" line="332"/>
         <source>%1 imported, %2 skipped</source>
         <translation>импортировано %1, пропущено %2</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="312"/>
+        <location filename="../oscar/o2ringpage.cpp" line="333"/>
         <source>, %1 failed</source>
         <translation>, с ошибкой %1</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="313"/>
+        <location filename="../oscar/o2ringpage.cpp" line="325"/>
         <source>Done.</source>
         <translation>Готово.</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="313"/>
+        <location filename="../oscar/o2ringpage.cpp" line="325"/>
         <source>Stopped.</source>
         <translation>Остановлено.</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="320"/>
+        <location filename="../oscar/o2ringpage.cpp" line="340"/>
         <source>The import was cancelled.</source>
         <translation>Импорт отменён.</translation>
     </message>
@@ -24735,18 +24750,18 @@ Pulse rises: %1 per hour</source>
         <translation>Bluetooth-оксиметр</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/o2ring_import.cpp" line="48"/>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_import.cpp" line="49"/>
         <source>Could not create the folder %1.</source>
         <translation>Не удалось создать папку %1.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/o2ring_import.cpp" line="53"/>
-        <location filename="../oscar/SleepLib/loader_plugins/o2ring_import.cpp" line="61"/>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_import.cpp" line="54"/>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_import.cpp" line="62"/>
         <source>Could not save the record %1.</source>
         <translation>Не удалось сохранить запись %1.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/o2ring_import.cpp" line="68"/>
+        <location filename="../oscar/SleepLib/loader_plugins/o2ring_import.cpp" line="69"/>
         <source>OSCAR could not read the record %1.</source>
         <translation>OSCAR не смог прочитать запись %1.</translation>
     </message>

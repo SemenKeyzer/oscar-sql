@@ -27,6 +27,7 @@
 #include <QSignalSpy>
 #include <QTableWidget>
 #include <QTemporaryDir>
+#include <QTimer>
 
 namespace {
 const QString kProfileName = QStringLiteral("O2RingPageUnitTest");
@@ -231,4 +232,68 @@ void O2RingPageTests::testLinkLostOffersRetry()
     QCOMPARE(ended[0][0].toBool(), true);
     QVERIFY(!page.importedAny());
     QVERIFY2(summary(page).contains(QStringLiteral("lost")), qPrintable(summary(page)));
+}
+
+// Cancel pressed while a downloaded record is being imported (the loader lets events through):
+// nothing crashes, the record is still imported and the summary counts it.
+void O2RingPageTests::testCancelDuringImport()
+{
+    FakeO2Ring ring;
+    const auto r = record(QDateTime(QDate(2026, 10, 17), QTime(23, 0, 0)));
+    ring.files.insert(r.first, r.second);
+    O2RingPage page;
+    QSignalSpy ended(&page, &O2RingPage::ended);
+    const int pieces = (r.second.size() + ring.chunk - 1) / ring.chunk;
+    ring.afterRequest = [&](const FakeO2Ring::Request &req) {
+        // queued behind the last piece's answer: runs inside the import of the record
+        if (req.cmd == O2Ring::CmdData && int(req.seq) == pieces - 1) QTimer::singleShot(0, &page, [&page]() { page.cancel(); });
+    };
+    page.startWithLink(&ring, QStringLiteral("O2Ring 6554"));
+    QTRY_COMPARE_WITH_TIMEOUT(table(page)->rowCount(), 1, 3000);
+    downloadButton(page)->click();
+    QTRY_COMPARE_WITH_TIMEOUT(ended.size(), 1, 5000);
+    QTest::qWait(100);
+    QVERIFY(O2RingImporter(ring.serial).alreadyImported(r.first));
+    QVERIFY(page.importedAny());
+    QVERIFY2(summary(page).contains(QStringLiteral("1 imported")), qPrintable(summary(page)));
+}
+
+// The ring does not confirm its new clock: the page says so, and still downloads.
+void O2RingPageTests::testClockFailureShown()
+{
+    p_profile->oxi->setO2RingSetClock(true);
+    FakeO2Ring ring;
+    const auto r = record(QDateTime(QDate(2026, 10, 18), QTime(23, 0, 0)));
+    ring.files.insert(r.first, r.second);
+    ring.lose = { { O2Ring::CmdSync, 1 }, { O2Ring::CmdSync, 2 }, { O2Ring::CmdSync, 3 }, { O2Ring::CmdSync, 4 } };
+    O2RingPage page;
+    page.setResponseTimeout(50);
+    QSignalSpy ended(&page, &O2RingPage::ended);
+    page.startWithLink(&ring, QStringLiteral("O2Ring 6554"));
+    QTRY_COMPARE_WITH_TIMEOUT(table(page)->rowCount(), 1, 3000);
+    downloadButton(page)->click();
+    QTRY_COMPARE_WITH_TIMEOUT(ended.size(), 1, 5000);
+    QVERIFY(O2RingImporter(ring.serial).alreadyImported(r.first));
+    QVERIFY2(summary(page).contains(QStringLiteral("clock could not be set")), qPrintable(summary(page)));
+}
+
+// A serial number that cannot name the ring's folder is refused before anything is written.
+void O2RingPageTests::testOddSerialRefused()
+{
+    QVERIFY(O2RingImporter::validSerial(QStringLiteral("2682C06554")));
+    QVERIFY(!O2RingImporter::validSerial(QString()));
+    QVERIFY(!O2RingImporter::validSerial(QStringLiteral("../../x1234")));
+    QVERIFY(!O2RingImporter::validSerial(QStringLiteral("ABCDEFGH")));   // the Viatom loader needs 4 digits at the end
+
+    FakeO2Ring ring;
+    ring.serial = QStringLiteral("../../x1234");
+    const auto r = record(QDateTime(QDate(2026, 10, 19), QTime(23, 0, 0)));
+    ring.files.insert(r.first, r.second);
+    O2RingPage page;
+    QSignalSpy ended(&page, &O2RingPage::ended);
+    page.startWithLink(&ring, QStringLiteral("O2Ring 6554"));
+    QTRY_COMPARE_WITH_TIMEOUT(ended.size(), 1, 3000);
+    QCOMPARE(ended[0][0].toBool(), true);
+    QCOMPARE(table(page)->rowCount(), 0);
+    QVERIFY2(summary(page).contains(QStringLiteral("serial number")), qPrintable(summary(page)));
 }

@@ -120,6 +120,8 @@ void O2RingPage::reset()
     m_info->clear();
     m_summary->clear();
     m_imported = m_skipped = m_failed = 0;
+    m_error.clear();
+    m_clockError.clear();
 }
 
 void O2RingPage::start()
@@ -180,12 +182,16 @@ void O2RingPage::begin(O2RingLink *link)
     m_status->setText(tr("Reading the records on %1...").arg(m_deviceName));
     m_summary->setText(tr("Keep the ring close to the computer until the import finishes."));
     m_downloader = new O2RingDownloader(this);
+    m_downloader->setResponseTimeout(m_timeoutMs);
     connect(m_downloader, &O2RingDownloader::infoReceived, this, &O2RingPage::onInfo);
-    connect(m_downloader, &O2RingDownloader::clockSet, this, [this](bool) {
+    connect(m_downloader, &O2RingDownloader::clockSet, this, [this](bool ok) {
+        if (!ok) m_clockError = tr("The ring's clock could not be set.");
         if (m_busy) downloadChosen();
     });
     connect(m_downloader, &O2RingDownloader::fileProgress, this, &O2RingPage::onFileProgress);
-    connect(m_downloader, &O2RingDownloader::fileDownloaded, this, &O2RingPage::onFileDownloaded);
+    // Queued: the Viatom loader lets events through (and may show a message box) while it imports,
+    // so the downloader must not be on the stack when a click there stops it.
+    connect(m_downloader, &O2RingDownloader::fileDownloaded, this, &O2RingPage::onFileDownloaded, Qt::QueuedConnection);
     connect(m_downloader, &O2RingDownloader::fileFailed, this, &O2RingPage::onFileFailed);
     connect(m_downloader, &O2RingDownloader::finished, this, [this]() {
         finish(m_failed > 0 ? tr("Some records could not be downloaded.") : QString());
@@ -197,7 +203,11 @@ void O2RingPage::begin(O2RingLink *link)
 void O2RingPage::onInfo(const O2Ring::Info &info)
 {
     if (!m_busy) return;
-    m_importer.reset(new O2RingImporter(info.serial));
+    if (!O2RingImporter::validSerial(info.serial)) {
+        finish(tr("The ring reports an unexpected serial number (%1): this ring is not supported yet.").arg(info.serial.toHtmlEscaped()));
+        return;
+    }
+    m_importer = std::make_shared<O2RingImporter>(info.serial);
     QString ringTime = info.time;
     ringTime.replace(QLatin1Char(','), QLatin1Char(' '));
     m_status->setText(tr("Connected to %1").arg(m_deviceName));
@@ -276,9 +286,11 @@ void O2RingPage::onFileProgress(const QString &name, qint64 done, qint64 total)
 
 void O2RingPage::onFileDownloaded(const QString &name, const QByteArray &data)
 {
-    if (!m_busy || !m_importer) return;
+    // a whole record is imported even when the import was stopped meanwhile
+    const std::shared_ptr<O2RingImporter> importer = m_importer;
+    if (!importer) return;
     QString error;
-    switch (m_importer->importFile(name, data, &error)) {
+    switch (importer->importFile(name, data, &error)) {
     case O2RingImporter::Result::Imported:
         ++m_imported;
         setStatus(name, tr("imported"));
@@ -292,6 +304,7 @@ void O2RingPage::onFileDownloaded(const QString &name, const QByteArray &data)
         setStatus(name, tr("failed: %1").arg(error));
         break;
     }
+    if (!m_busy) showSummary();
 }
 
 void O2RingPage::onFileFailed(const QString &name, const QString &error)
@@ -308,11 +321,18 @@ void O2RingPage::finish(const QString &error)
     stopDevice();
     m_progress->hide();
     m_downloadButton->setEnabled(false);
+    m_error = error;
+    m_status->setText(error.isEmpty() ? tr("Done.") : tr("Stopped."));
+    showSummary();
+    emit ended(!error.isEmpty());
+}
+
+void O2RingPage::showSummary()
+{
     QString counts = tr("%1 imported, %2 skipped").arg(m_imported).arg(m_skipped);
     if (m_failed > 0) counts += tr(", %1 failed").arg(m_failed);
-    m_status->setText(error.isEmpty() ? tr("Done.") : tr("Stopped."));
-    m_summary->setText(error.isEmpty() ? counts : error + QStringLiteral("\n") + counts);
-    emit ended(!error.isEmpty());
+    if (!m_clockError.isEmpty()) counts += QStringLiteral("\n") + m_clockError;
+    m_summary->setText(m_error.isEmpty() ? counts : m_error + QStringLiteral("\n") + counts);
 }
 
 void O2RingPage::cancel()

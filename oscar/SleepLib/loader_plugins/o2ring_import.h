@@ -31,6 +31,8 @@ public:
     //! Checks \a data, writes it as folder()/name (through a temporary file) and imports it.
     Result importFile(const QString &name, const QByteArray &data, QString *error);
 
+    //! Letters and digits ending in 4 digits: safe as a folder name, and the Viatom loader takes it as the serial.
+    static bool validSerial(const QString &serial);
     //! The session id the Viatom loader gives the record \a name ("yyyyMMddHHmmss", local time).
     static SessionID sessionIdFor(const QString &name);
 

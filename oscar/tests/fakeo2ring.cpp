@@ -77,4 +77,5 @@ void FakeO2Ring::write(const QByteArray &data)
     default:
         answer(QByteArray(), 1, r.seq);
     }
+    if (afterRequest) afterRequest(r);
 }

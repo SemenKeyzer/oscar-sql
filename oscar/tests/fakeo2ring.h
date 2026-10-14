@@ -10,6 +10,7 @@
 #define FAKEO2RING_H
 
 #include <QHash>
+#include <functional>
 #include <QList>
 #include <QMap>
 
@@ -49,6 +50,8 @@ class FakeO2Ring : public O2RingLink
     int startSize = -1;
 
     QList<Request> requests;
+    //! called after each request has been answered (or not)
+    std::function<void(const Request &)> afterRequest;
 
   private:
     void answer(const QByteArray &payload, quint8 status, quint16 seq, int delayMs = 0);

@@ -42,6 +42,8 @@ public:
     void cancel();
     bool isBusy() const { return m_busy; }
     bool importedAny() const { return m_imported > 0; }
+    //! How long to wait for each answer of the ring (tests shorten it).
+    void setResponseTimeout(int ms) { m_timeoutMs = ms; }
 
 signals:
     //! The import stopped (done or failed); the wizard now offers Done, and Retry when \a canRetry.
@@ -59,6 +61,7 @@ private:
     void onFileDownloaded(const QString &name, const QByteArray &data);
     void onFileFailed(const QString &name, const QString &error);
     void finish(const QString &error);
+    void showSummary();
     void stopDevice();
     int rowOf(const QString &name) const;
     void setStatus(const QString &name, const QString &text);
@@ -76,13 +79,16 @@ private:
     O2RingScanner *m_scanner = nullptr;
     QPointer<QtO2RingLink> m_ownLink;      //!< the Bluetooth link this page made (none in the tests)
     QPointer<O2RingDownloader> m_downloader;
-    std::unique_ptr<O2RingImporter> m_importer;
+    std::shared_ptr<O2RingImporter> m_importer;
     QList<O2RingFoundDevice> m_found;
     QStringList m_names;                   //!< the ring's records, in table order
     QString m_deviceName;
     int m_imported = 0;
     int m_skipped = 0;
     int m_failed = 0;
+    int m_timeoutMs = 5000;
+    QString m_clockError;                  //!< set when the ring did not confirm its new clock
+    QString m_error;                       //!< why the import stopped, empty when it finished
     bool m_busy = false;
 };
 

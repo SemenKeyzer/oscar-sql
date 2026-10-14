@@ -15,6 +15,7 @@
 #include <QDateTime>
 #include <QDir>
 #include <QFile>
+#include <QRegularExpression>
 
 O2RingImporter::O2RingImporter(const QString &serial)
     : m_serial(serial)
@@ -75,4 +76,10 @@ SessionID O2RingImporter::sessionIdFor(const QString &name)
 {
     const QDateTime start = QDateTime::fromString(name, QStringLiteral("yyyyMMddHHmmss"));
     return start.isValid() ? SessionID(start.toSecsSinceEpoch()) : 0;
+}
+
+bool O2RingImporter::validSerial(const QString &serial)
+{
+    static const QRegularExpression re(QStringLiteral("^[A-Za-z0-9]{0,28}[0-9]{4}$"));
+    return re.match(serial).hasMatch();
 }
