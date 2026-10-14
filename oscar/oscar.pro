@@ -373,6 +373,7 @@ SOURCES += \
     tabbuttons.cpp \
     SleepLib/loader_plugins/o2ring_protocol.cpp \
     SleepLib/loader_plugins/o2ring_downloader.cpp \
+    SleepLib/loader_plugins/o2ring_import.cpp \
     Graphs/gManualScoringLayer.cpp \
     database/manual_scoring_repository.cpp \
     helpstrip.cpp \
@@ -712,6 +713,7 @@ HEADERS  += \
     tabbuttons.h \
     SleepLib/loader_plugins/o2ring_protocol.h \
     SleepLib/loader_plugins/o2ring_downloader.h \
+    SleepLib/loader_plugins/o2ring_import.h \
     Graphs/gManualScoringLayer.h \
     database/manual_scoring_repository.h \
     helpstrip.h \
@@ -942,6 +944,7 @@ test {
         tests/o2ringprotocoltests.cpp \
         tests/fakeo2ring.cpp \
         tests/o2ringdownloadertests.cpp \
+        tests/o2ringimporttests.cpp \
         tests/htmlpagestests.cpp \
         tests/channelstoretests.cpp \
         tests/machinetests.cpp \
@@ -1001,6 +1004,7 @@ test {
         tests/o2ringprotocoltests.h \
         tests/fakeo2ring.h \
         tests/o2ringdownloadertests.h \
+        tests/o2ringimporttests.h \
         tests/htmlpagestests.h \
         tests/channelstoretests.h \
         tests/machinetests.h \
