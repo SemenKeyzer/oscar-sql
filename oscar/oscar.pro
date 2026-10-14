@@ -371,6 +371,7 @@ SOURCES += \
     Graphs/scoringgesture.cpp \
     Graphs/scoringresize.cpp \
     tabbuttons.cpp \
+    SleepLib/loader_plugins/o2ring_protocol.cpp \
     Graphs/gManualScoringLayer.cpp \
     database/manual_scoring_repository.cpp \
     helpstrip.cpp \
@@ -708,6 +709,7 @@ HEADERS  += \
     Graphs/scoringgesture.h \
     Graphs/scoringresize.h \
     tabbuttons.h \
+    SleepLib/loader_plugins/o2ring_protocol.h \
     Graphs/gManualScoringLayer.h \
     database/manual_scoring_repository.h \
     helpstrip.h \
@@ -934,6 +936,8 @@ test {
         tests/scoringmenustests.cpp \
         tests/helplinkstests.cpp \
         tests/tabbuttonstests.cpp \
+        tests/o2ringtestdata.cpp \
+        tests/o2ringprotocoltests.cpp \
         tests/htmlpagestests.cpp \
         tests/channelstoretests.cpp \
         tests/machinetests.cpp \
@@ -989,6 +993,8 @@ test {
         tests/scoringmenustests.h \
         tests/helplinkstests.h \
         tests/tabbuttonstests.h \
+        tests/o2ringtestdata.h \
+        tests/o2ringprotocoltests.h \
         tests/htmlpagestests.h \
         tests/channelstoretests.h \
         tests/machinetests.h \
