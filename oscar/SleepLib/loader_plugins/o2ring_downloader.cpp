@@ -82,8 +82,12 @@ void O2RingDownloader::onFrame(const O2Ring::Frame &f)
         qDebug() << "O2Ring: piece" << m_seq << "answered with seq" << f.seq;
         if (f.seq != m_seq) {
             if (f.seq != 0 || m_echo == 1) return;   // a late answer to another piece
-            if (m_seq > 0) m_echo = 0;
+            if (m_seq > 0) {
+                if (m_retryUnknown) m_unsure = true;   // maybe the late answer to piece 0
+                m_echo = 0;
+            }
         } else if (m_seq > 0) {
+            if (m_echo == 0) m_unsure = true;   // an earlier seq-0 answer was a late one after all
             m_echo = 1;
         }
     }
@@ -123,7 +127,9 @@ void O2RingDownloader::onFrame(const O2Ring::Frame &f)
         m_data += f.payload;
         emit fileProgress(m_name, m_data.size(), m_size);
         if (m_data.size() >= m_size) {
-            fileDone(m_data.size() == m_size ? QString() : tr("got %1 bytes, the ring announced %2").arg(m_data.size()).arg(m_size));
+            if (m_data.size() != m_size) fileDone(tr("got %1 bytes, the ring announced %2").arg(m_data.size()).arg(m_size));
+            else if (m_unsure) fileDone(tr("the ring's answers came late and may be out of order; download this record again"));
+            else fileDone(QString());
         } else {
             send(Step::Data, O2Ring::CmdData, QByteArray(), quint16(m_seq + 1));
         }
@@ -138,6 +144,9 @@ void O2RingDownloader::onFrame(const O2Ring::Frame &f)
 
 void O2RingDownloader::onTimeout()
 {
+    // the lost answer may still come and be taken for the next piece's, unless seq tells them apart
+    if (m_step == Step::Data && m_echo == 0) m_unsure = true;
+    if (m_step == Step::Data && m_echo == -1) m_retryUnknown = true;
     if (m_tries < m_attempts) resend();
     else giveUp();
 }
@@ -183,6 +192,8 @@ void O2RingDownloader::nextFile()
     }
     m_name = m_queue.takeFirst();
     m_data.clear();
+    m_unsure = false;
+    m_retryUnknown = false;
     m_size = 0;
     send(Step::Start, O2Ring::CmdStart, O2Ring::fileNamePayload(m_name));
 }

@@ -41,6 +41,8 @@ class FakeO2Ring : public O2RingLink
     QString lateFile;
     int lateSeq = -1;
     int lateMs = 0;
+    //! every answer comes this much later, in the order asked (a ring that answers one request after another)
+    int latency = 0;
     //! DATA of this file: the link is lost
     QString cutOn;
     //! START answers this size instead of the real one (-1: real)

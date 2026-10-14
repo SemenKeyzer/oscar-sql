@@ -20,7 +20,7 @@ FakeO2Ring::FakeO2Ring(QObject *parent) : O2RingLink(parent) {}
 void FakeO2Ring::answer(const QByteArray &payload, quint8 status, quint16 seq, int delayMs)
 {
     const QByteArray raw = O2RingTestData::response(payload, status, echoSeq ? seq : 0);
-    QTimer::singleShot(delayMs, this, [this, raw]() {
+    QTimer::singleShot(latency + delayMs, this, [this, raw]() {
         for (int i = 0; i < raw.size(); i += 20) emit received(raw.mid(i, 20));
     });
 }

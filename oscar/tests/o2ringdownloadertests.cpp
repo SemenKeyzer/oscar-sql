@@ -169,3 +169,43 @@ void O2RingDownloaderTests::testRingWithoutSeqEcho()
     QCOMPARE(got.size(), 1);
     QCOMPARE(got[0][1].toByteArray(), rig.ring.files.value(N1));
 }
+
+// The first piece's answer comes after its retry was sent, before the ring's seq echo is known:
+// the two answers to piece 0 must not become pieces 0 and 1 of the saved record.
+void O2RingDownloaderTests::testLateFirstPiece()
+{
+    Rig rig;
+    rig.down.setResponseTimeout(200);
+    rig.ring.latency = 120;
+    rig.ring.lateFile = N1;
+    rig.ring.lateSeq = 0;
+    rig.ring.lateMs = 160;   // answer A at 280 ms; the retry (200 ms) is answered at 320 ms
+    QVERIFY(rig.connected());
+    QSignalSpy got(&rig.down, &O2RingDownloader::fileDownloaded);
+    QSignalSpy failed(&rig.down, &O2RingDownloader::fileFailed);
+    QSignalSpy done(&rig.down, &O2RingDownloader::finished);
+    rig.down.download({ N1 });
+    QVERIFY(done.wait(20000));
+    for (const auto &g : got) QCOMPARE(g[1].toByteArray(), rig.ring.files.value(N1));   // never a wrong file
+    QCOMPARE(got.size() + failed.size(), 1);
+}
+
+// A ring that does not repeat seq: a late answer after a retry fails the record instead of shifting it.
+void O2RingDownloaderTests::testLateWithoutSeqEcho()
+{
+    Rig rig;
+    rig.down.setResponseTimeout(200);
+    rig.ring.echoSeq = false;
+    rig.ring.latency = 120;
+    rig.ring.lateFile = N1;
+    rig.ring.lateSeq = 1;
+    rig.ring.lateMs = 160;
+    QVERIFY(rig.connected());
+    QSignalSpy got(&rig.down, &O2RingDownloader::fileDownloaded);
+    QSignalSpy failed(&rig.down, &O2RingDownloader::fileFailed);
+    QSignalSpy done(&rig.down, &O2RingDownloader::finished);
+    rig.down.download({ N1 });
+    QVERIFY(done.wait(20000));
+    for (const auto &g : got) QCOMPARE(g[1].toByteArray(), rig.ring.files.value(N1));
+    QCOMPARE(got.size() + failed.size(), 1);
+}

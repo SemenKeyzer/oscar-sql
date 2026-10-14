@@ -21,6 +21,8 @@ private slots:
     void testDownloadTwoFiles();
     void testRetryAfterLostAnswer();
     void testLateDuplicate();
+    void testLateFirstPiece();
+    void testLateWithoutSeqEcho();
     void testLinkLostMidFile();
     void testWrongSize();
     void testSetClock();

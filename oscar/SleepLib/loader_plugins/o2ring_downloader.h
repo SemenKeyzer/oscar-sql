@@ -83,6 +83,8 @@ class O2RingDownloader : public QObject
     QByteArray m_payload;
     quint16 m_seq = 0;
     int m_echo = -1;   //!< whether the ring repeats a piece's seq in its answer: -1 not known yet
+    bool m_unsure = false;        //!< this record's answers may be shifted by a late one
+    bool m_retryUnknown = false;  //!< a piece was asked again before the seq echo was known
     QStringList m_queue;
     QString m_name;
     QByteArray m_data;
