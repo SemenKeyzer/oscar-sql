@@ -31,6 +31,7 @@ server= red 30+
 #include <QPainter>
 #include <QMainWindow>
 
+#include "analysismark.h"
 #include "mainwindow.h"
 #include "statistics.h"
 #include "SleepLib/manual_scoring.h"
@@ -133,7 +134,7 @@ QString analysisName(const QString &key)
     if (key == QLatin1String("#breathing")) return Statistics::tr("Breathing");
     if (key == QLatin1String("#oximetry")) return Statistics::tr("Oximetry");
     if (key == QLatin1String("#pulse")) return Statistics::tr("Pulse");
-    if (key == QLatin1String("ahi")) return Statistics::tr("AHI (analysis)");
+    if (key == QLatin1String("ahi")) return Statistics::tr("AHI");
     if (key == QLatin1String("oai")) return Statistics::tr("Obstructive Apnea Index");
     if (key == QLatin1String("cai")) return Statistics::tr("Central Apnea Index");
     if (key == QLatin1String("uai")) return Statistics::tr("Unclassified Apnea Index");
@@ -2170,8 +2171,10 @@ QString Statistics::GenerateCPAPUsage()
                                                        : p_profile->countDays(sectionType, first, last);
             skipsection = (days == 0);
             if (days > 0) {
-                html+=QString("<tr bgcolor='%1'><th colspan=%2 align=center><font size='+2'>%3</font></th></tr>").
-                        arg(heading_color).arg(periods.size()+1).arg(row.src);
+                const QString mark = row.calc != SC_ANALYSIS_HEADING ? QString()
+                                   : QStringLiteral(" ") + (s_override.active ? AnalysisMark::printPill() : AnalysisMark::pill());
+                html+=QString("<tr bgcolor='%1'><th colspan=%2 align=center><font size='+2'>%3</font>%4</th></tr>").
+                        arg(heading_color).arg(periods.size()+1).arg(row.src, mark);
             }
             if (days > 0 && row.calc == SC_ANALYSIS_HEADING) {
                 html += QString("<tr><td colspan=%1 align=center><i>%2</i></td></tr>").arg(periods.size()+1)
@@ -2306,7 +2309,13 @@ QString Statistics::GenerateCPAPUsage()
             headerWidth = 22;
         }
         QString bgColor = alternatingColor(alternatingColorCounter);
-        line += QString("<tr class=datarow bgcolor='%3'><td width='%1%'>%2</td>").arg(QString::number(headerWidth), s_override.active ? name : HelpTips::term(name, helpKey(row)), bgColor);   // no links in the PDF
+        // an analysis row: its bar along the name and the mark after it
+        const bool analysisRow = row.calc == SC_ANALYSIS;
+        QString label = s_override.active ? name : HelpTips::term(name, helpKey(row));   // no links in the PDF
+        if (analysisRow) label += QStringLiteral(" ") + (s_override.active ? AnalysisMark::printPill() : AnalysisMark::pill());
+        line += QString("<tr class=datarow bgcolor='%3'><td width='%1%'%4>%2</td>")
+                    .arg(QString::number(headerWidth), label, bgColor,
+                         analysisRow ? QStringLiteral(" style='%1'").arg(AnalysisMark::rowStyle()) : QString());
 
         for (int j=0; j < np; j++) {
             width = j < np-1 ? dataWidth : 100 - (headerWidth + dataWidth*(np-1));
@@ -2919,4 +2928,9 @@ QString Statistics::manualScoringNote(const QDate &from, const QDate &to)
 void Statistics::forgetRXChanges()
 {
     if (p_profile) QFile::remove(p_profile->Get("{" + STR_GEN_DataFolder + "}/RXChanges.cache"));
+}
+
+QString Statistics::analysisLabel(const QString &key, bool print)
+{
+    return analysisName(key) + QStringLiteral(" ") + (print ? AnalysisMark::printPill() : AnalysisMark::pill());
 }

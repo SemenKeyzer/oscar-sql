@@ -18,6 +18,7 @@ class HelpLinksTests : public QObject
 {
     Q_OBJECT
 private slots:
+    void testAhiFiguresMarked();
     void initTestCase();
     void cleanupTestCase();
     void testHelpLinkDoesNotNavigate();

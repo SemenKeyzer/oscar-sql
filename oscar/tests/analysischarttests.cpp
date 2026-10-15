@@ -103,3 +103,12 @@ void AnalysisChartTests::testFlMinutesValue()
     QCOMPARE(gAnalysisChart::flMinutesValue(r), 30.0);
     QVERIFY(gAnalysisChart::kinds().contains(gAnalysisChart::FlowLimitationMinutes));
 }
+
+// Every Overview chart of the analysis is named "… · analysis".
+void AnalysisChartTests::testAnalysisChartTitles()
+{
+    for (int k = gAnalysisChart::Ahi; k <= gAnalysisChart::PulseRises; ++k) {
+        const QString t = gAnalysisChart::title(gAnalysisChart::Kind(k));
+        QVERIFY2(t.endsWith(QStringLiteral(" · analysis")), qPrintable(t));
+    }
+}

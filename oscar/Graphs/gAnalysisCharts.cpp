@@ -6,6 +6,7 @@
  * License. See the file COPYING in the main directory of the source code
  * for more details. */
 
+#include "analysismark.h"
 #include "Graphs/gAnalysisCharts.h"
 
 #include <cmath>
@@ -83,17 +84,17 @@ QString gAnalysisChart::code(Kind kind)
 QString gAnalysisChart::title(Kind kind)
 {
     switch (kind) {
-    case Ahi: return QObject::tr("AHI (analysis)");
-    case Odi: return QObject::tr("ODI 3% / 4% (analysis)");
-    case Spo2Ranges: return QObject::tr("SpO2 Time in Ranges");
-    case ProblemZones: return QObject::tr("Oximetry Problem Zones");
-    case HypoxicBurden: return QObject::tr("Hypoxic Burden (approx.)");
-    case FlowLimitation: return QObject::tr("Flow Limitation (analysis)");
-    case FlowLimitationMinutes: return QObject::tr("Flow Limitation, minutes (analysis)");
-    case Glasgow: return QObject::tr("Glasgow Index (analysis)");
+    case Ahi: return AnalysisMark::title(QObject::tr("AHI"));
+    case Odi: return AnalysisMark::title(QObject::tr("ODI 3% / 4%"));
+    case Spo2Ranges: return AnalysisMark::title(QObject::tr("SpO2 Time in Ranges"));
+    case ProblemZones: return AnalysisMark::title(QObject::tr("Oximetry Problem Zones"));
+    case HypoxicBurden: return AnalysisMark::title(QObject::tr("Hypoxic Burden (approx.)"));
+    case FlowLimitation: return AnalysisMark::title(QObject::tr("Flow Limitation"));
+    case FlowLimitationMinutes: return AnalysisMark::title(QObject::tr("Flow Limitation, minutes"));
+    case Glasgow: return AnalysisMark::title(QObject::tr("Glasgow Index"));
     case PulseRises: break;
     }
-    return QObject::tr("Pulse Rise Index");
+    return AnalysisMark::title(QObject::tr("Pulse Rise Index"));
 }
 
 QString gAnalysisChart::units(Kind kind)
@@ -153,7 +154,7 @@ void gAnalysisChart::populate(Day *day, int idx)
             if (p.n) detail << QStringLiteral("%1 %2").arg(schema::channel[p.code].label(), num(v, 2));
         }
         m_device[idx] = day->calcAHI();
-        tip = QObject::tr("\nAHI (analysis): %1 (%2)\nAHI (device): %3").arg(num(total, 2), detail.join(QStringLiteral(", ")), num(m_device[idx], 2));
+        tip = QObject::tr("\n%4: %1 (%2)\nAHI (device): %3").arg(num(total, 2), detail.join(QStringLiteral(", ")), num(m_device[idx], 2), AnalysisMark::title(QObject::tr("AHI")));
         break;
     }
     case Odi: {

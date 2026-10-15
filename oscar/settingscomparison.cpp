@@ -6,6 +6,7 @@
  * License. See the file COPYING in the main directory of the source code
  * for more details. */
 
+#include "analysismark.h"
 #include "settingscomparison.h"
 #include "helptips.h"
 
@@ -229,6 +230,9 @@ QString html(const QList<Row> &rows, const Options &options)
     for (Column c : columns) {
         QString head = columnTitle(c, options).toHtmlEscaped();
         if (options.helpLinks) head = HelpTips::term(head, columnHelpKey(c));
+        if (c == AnalysisAhi || c == FlowLimitation || c == Glasgow || c == Odi3 || c == Below90) {   // the PDF has no links
+            head += QStringLiteral(" ") + (options.helpLinks ? AnalysisMark::pill() : AnalysisMark::printPill());
+        }
         if (c == Pressure) {
             const QString tip = QCoreApplication::translate("SettingsComparison",
                                     "Average over the nights of each night's %1th percentile")

@@ -6,6 +6,7 @@
  * License. See the file COPYING in the main directory of the source code
  * for more details. */
 
+#include "analysismark.h"
 #include "settingscomparisontests.h"
 
 #include <QCoreApplication>
@@ -270,4 +271,18 @@ void SettingsComparisonTests::testHtmlWithoutAnalysis()
         QVERIFY2(!hidden.contains(QLatin1String(head)), head);
     }
     QVERIFY(hidden.contains(QStringLiteral("Usage, h")));
+}
+
+// The analysis' columns carry the mark in their headers; without the analysis there is none.
+void SettingsComparisonTests::testComparisonAnalysisMarked()
+{
+    const QList<Row> rows { tableRow(QStringLiteral("9-16"), 4, 3.0) };
+    Options options;
+    options.analysis = true;
+    options.helpLinks = true;   // on screen
+    QCOMPARE(SettingsComparison::html(rows, options).count(AnalysisMark::pill()), 5);
+    options.helpLinks = false;  // in the PDF
+    QCOMPARE(SettingsComparison::html(rows, options).count(AnalysisMark::printPill()), 5);
+    options.analysis = false;
+    QCOMPARE(SettingsComparison::html(rows, options).count(AnalysisMark::printPill()), 0);
 }

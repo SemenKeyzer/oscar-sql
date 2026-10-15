@@ -431,3 +431,13 @@ void DoctorReportTests::testHtmlAnalysisHidden()
     QVERIFY2(!html.contains(QStringLiteral("OSCAR's analysis")), qPrintable(html));
     QVERIFY(!html.contains(QStringLiteral("Analysis AHI")));
 }
+
+// OSCAR's analysis in the doctor's PDF carries the printable mark.
+void DoctorReportTests::testDoctorReportMarked()
+{
+    DoctorReport r = fullReport();
+    r.analysisShown = true;
+    QVERIFY(DoctorReportPage::html(r, QStringLiteral("chart.png"), kChart).contains(QStringLiteral("[analysis]")));
+    r.analysisShown = false;
+    QVERIFY(!DoctorReportPage::html(r, QStringLiteral("chart.png"), kChart).contains(QStringLiteral("[analysis]")));
+}

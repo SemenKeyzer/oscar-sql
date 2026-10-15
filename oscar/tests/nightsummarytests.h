@@ -16,6 +16,8 @@ class NightSummaryTests : public QObject
 {
     Q_OBJECT
 private slots:
+    void testKeyFiguresMarked();
+    void testAnalysisConcernMarked();
     void initTestCase();
     void cleanupTestCase();
     void testLevelsAgainstTargets();

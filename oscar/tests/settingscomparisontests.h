@@ -16,6 +16,7 @@ class SettingsComparisonTests : public QObject
 {
     Q_OBJECT
 private slots:
+    void testComparisonAnalysisMarked();
     void testGroupMergesSameSettings();
     void testGroupKeepsDifferentSettingsApart();
     void testRowFigures();

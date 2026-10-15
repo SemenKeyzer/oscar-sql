@@ -353,7 +353,7 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
 
     // OSCAR's own analysis: its flags apart from the device's (hidden on days without any)
     gGraph *AF;
-    graphlist[STR_GRAPH_AnalysisFlags] = AF = new gGraph(STR_GRAPH_AnalysisFlags, GraphView, tr("Analysis Flags"),
+    graphlist[STR_GRAPH_AnalysisFlags] = AF = new gGraph(STR_GRAPH_AnalysisFlags, GraphView, AnalysisMark::title(tr("Flags")),
                                                          tr("Events found by OSCAR's own analysis (experimental)"), default_height);
 
     // Build union of channels with actual data across all loaded machines.
@@ -2146,7 +2146,10 @@ QString Daily::ahiFiguresHtml(const QString &name, double deviceAhi, double anal
                        .arg("#F88017", COLOR_Text.name(), name.toHtmlEscaped(), figure(deviceAhi, 2), title.toHtmlEscaped());
     // each part explains itself on hover
     QStringList parts;
-    if (analysisShown) parts << HelpTips::term(tr("OSCAR analysis — %1").arg(figure(analysisAhi, 1)).toHtmlEscaped(), QStringLiteral("an_ahi"));
+    if (analysisShown) {
+        parts << HelpTips::term(tr("OSCAR analysis — %1").arg(figure(analysisAhi, 1)).toHtmlEscaped(), QStringLiteral("an_ahi"))
+                     + QStringLiteral(" ") + AnalysisMark::pill();
+    }
     parts << HelpTips::term(tr("manual scoring — %1").arg(figure(manualAhi, 2)).toHtmlEscaped(), QStringLiteral("manual_scoring"));
     html += QString("<tr><td colspan=5 bgcolor='%1' align=center><font color='%2'>%3</font></td></tr>\n")
                 .arg("#F88017", COLOR_Text.name(), parts.join(QStringLiteral(" | ")));
@@ -4446,12 +4449,12 @@ QString Daily::getAnalysisInformation(Day *day)
     QString html;
     analysis::AnalysisService *service = mainwin ? mainwin->analysisService() : nullptr;
     if (day && analysis::analysisShown() && service && !service->params().enabled) {   // shown, but nothing is computed
-        htmlLsbSectionHeader(html, tr("Analysis (second opinion)"), LSB_ANALYSIS);
+        htmlLsbSectionHeader(html, tr("Analysis (second opinion)") + QStringLiteral(" ") + AnalysisMark::pill(), LSB_ANALYSIS);
         if (leftSideBarEnable[LSB_ANALYSIS]) html += AnalysisPanel::notComputedHtml() + "<hr/>\n";
         return html;
     }
     if (!day || !m_analysisShown) return html;
-    htmlLsbSectionHeader(html, tr("Analysis (second opinion)"), LSB_ANALYSIS);
+    htmlLsbSectionHeader(html, tr("Analysis (second opinion)") + QStringLiteral(" ") + AnalysisMark::pill(), LSB_ANALYSIS);
     if (!leftSideBarEnable[LSB_ANALYSIS]) return html;
     html += AnalysisPanel::sidebarHtml(day, m_analysisResult, m_analysisSource, p_profile->analysis->spo2Thresholds());
     html += "<hr/>\n";

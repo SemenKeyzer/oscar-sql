@@ -2690,3 +2690,11 @@ void AnalysisIntegrationTests::testTreeWithoutCpap()
     QVERIFY(!t.contains(QStringLiteral("OSCAR analysis")));
     QVERIFY(!t.contains(QStringLiteral("Manual scoring")));
 }
+
+// Statistics names an analysis row plainly and marks it; the print version stays readable without colour.
+void AnalysisIntegrationTests::testStatisticsAnalysisLabel()
+{
+    QCOMPARE(Statistics::analysisLabel(QStringLiteral("ahi"), false), Statistics::tr("AHI") + QStringLiteral(" ") + AnalysisMark::pill());
+    QVERIFY(Statistics::analysisLabel(QStringLiteral("ahi"), true).contains(QStringLiteral("[analysis]")));
+    QVERIFY(!Statistics::analysisLabel(QStringLiteral("hi"), false).contains(QStringLiteral("(analysis)")));
+}

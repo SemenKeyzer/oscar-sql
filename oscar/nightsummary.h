@@ -92,6 +92,10 @@ struct NightSummary {
     double medianAhi() const;
     //! What is off its target that night, one short sentence each; empty when nothing is.
     QStringList concerns() const;
+    //! The concern raised when OSCAR's analysis counts a higher AHI than the device.
+    QString analysisAhiConcern() const;
+    //! \a concern (from concerns()) comes from OSCAR's analysis and is shown with its mark.
+    bool isAnalysisConcern(const QString &concern) const;
     //! "at the maximum 14: 25 min (5.8%)"; empty without an upper limit.
     QString pressureMaxNote() const;
     //! What the user may want to do now, as rich text with links (daily=, import=,

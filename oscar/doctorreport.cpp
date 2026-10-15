@@ -6,6 +6,7 @@
  * License. See the file COPYING in the main directory of the source code
  * for more details. */
 
+#include "analysismark.h"
 #include "doctorreport.h"
 
 #include <QCoreApplication>
@@ -31,7 +32,8 @@ namespace {
 bool known(double value) { return !std::isnan(value); }
 
 // A tile: a coloured stripe, the caption, the figure with its sign and a short note.
-QString tile(const QString &caption, const QString &value, const QString &note, NightSummary::Level level)
+QString tile(const QString &caption, const QString &value, const QString &note, NightSummary::Level level,
+             const QString &mark = QString())
 {
     const QString color = NightSummaryView::levelColor(level).name();
     QString sign;
@@ -40,7 +42,7 @@ QString tile(const QString &caption, const QString &value, const QString &note, 
     return QStringLiteral("<table width='100%' cellspacing=0 cellpadding=3><tr><td width=4 bgcolor='%1'></td>"
                           "<td><font color='#606060'>%2</font><br><font size='+2'><b>%3</b></font>%4"
                           "<br><font size='-1' color='#606060'>%5</font></td></tr></table>")
-        .arg(color, caption.toHtmlEscaped(), value.toHtmlEscaped(), sign, note.toHtmlEscaped());
+        .arg(color, caption.toHtmlEscaped(), value.toHtmlEscaped(), sign, note.toHtmlEscaped() + mark);
 }
 
 NightSummary::Level below(double value, double target)
@@ -239,14 +241,15 @@ QString html(const DoctorReport &r, const QString &chartUrl, const QSizeF &chart
                               .arg(number(r.analysisAhi, 1), number(r.flowLimitation, 0), number(r.flowLimitationMinutes, 0),
                                    number(r.flowLimitedBreaths, 0), number(r.glasgow, 1), number(r.glasgowAdapted, 1))
                         : QString()),
-             r.ahiLevel()),
+             r.ahiLevel(), r.analysisShown ? QStringLiteral(" ") + AnalysisMark::printPill() : QString()),
         tile(DoctorReport::tr("Leak"), withUnits(r.leak, 1, r.leakUnits),
              r.leakRedline > 0 ? DoctorReport::tr("red line %1").arg(locale.toString(r.leakRedline)) : DoctorReport::tr("no red line set"),
              r.leakLevel()),
         tile(DoctorReport::tr("Pressure %1%").arg(locale.toString(r.percentile)), withUnits(r.pressure, 1, r.pressureUnits),
              DoctorReport::tr("average over the nights"), NightSummary::Unknown),
         tile(DoctorReport::tr("ODI 3%"), known(r.odi3) ? DoctorReport::tr("%1 an hour").arg(number(r.odi3, 1)) : none,
-             DoctorReport::tr("nights with an oximeter: %1").arg(r.oximetryNights), r.odiLevel()),
+             DoctorReport::tr("nights with an oximeter: %1").arg(r.oximetryNights), r.odiLevel(),
+             r.analysisShown ? QStringLiteral(" ") + AnalysisMark::printPill() : QString()),   // OSCAR's analysis counts the ODI
         tile(DoctorReport::tr("SpO2 below 90%"), known(r.below90) ? QStringLiteral("%1 %").arg(number(r.below90, 1)) : none,
              DoctorReport::tr("nights with an oximeter: %1").arg(r.oximetryNights), r.below90Level()),
     };

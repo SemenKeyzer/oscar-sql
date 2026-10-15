@@ -6,6 +6,7 @@
  * License. See the file COPYING in the main directory of the source code
  * for more details. */
 
+#include "analysismark.h"
 #include "nightsummarytests.h"
 
 #include <QApplication>
@@ -451,4 +452,29 @@ void NightSummaryTests::testNightTileMark()
     for (QLabel *l : view.findChildren<QLabel *>(QStringLiteral("nsNote"))) notes << l->text();
     const QString all = notes.join(QLatin1Char('\n'));
     QVERIFY2(all.contains(QStringLiteral("corrected by hand (device 4.3)")), qPrintable(all));
+}
+
+// The analysis' ODI on the SpO2 tile carries the mark; the classic drops do not.
+void NightSummaryTests::testKeyFiguresMarked()
+{
+    NightSummary s = goodNight();
+    s.oxi.valid = true;
+    s.oxi.spo2Avg = 95;
+    s.oxi.hours = 8;
+    s.oxi.desaturations = 16;
+    s.oxi.fromAnalysis = true;
+    QVERIFY(NightSummaryView::keyFiguresHtml(s).contains(AnalysisMark::pill()));
+    s.oxi.fromAnalysis = false;
+    QVERIFY(!NightSummaryView::keyFiguresHtml(s).contains(AnalysisMark::pill()));
+}
+
+// "OSCAR's analysis counts an AHI of …" is known as the analysis' own concern.
+void NightSummaryTests::testAnalysisConcernMarked()
+{
+    NightSummary s = goodNight();
+    s.analysisAhi = 6.0;
+    QCOMPARE(s.concerns().size(), 1);
+    QVERIFY(s.isAnalysisConcern(s.concerns().first()));
+    s.ahi = 7.0;   // the device's own AHI is the concern now
+    QVERIFY(!s.isAnalysisConcern(s.concerns().first()));
 }

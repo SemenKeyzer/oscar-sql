@@ -6,6 +6,7 @@
  * License. See the file COPYING in the main directory of the source code
  * for more details. */
 
+#include "analysismark.h"
 #include "nightsummary.h"
 #include "helptips.h"
 
@@ -186,6 +187,16 @@ double NightSummary::medianAhi() const
     return n % 2 ? v[n / 2] : (v[n / 2 - 1] + v[n / 2]) / 2;
 }
 
+QString NightSummary::analysisAhiConcern() const
+{
+    return tr("OSCAR's analysis counts an AHI of %1, more than the device's %2.").arg(num(analysisAhi), num(ahi));
+}
+
+bool NightSummary::isAnalysisConcern(const QString &concern) const
+{
+    return hasAnalysisAhi && concern == analysisAhiConcern();
+}
+
 QStringList NightSummary::concerns() const
 {
     QStringList out;
@@ -195,7 +206,7 @@ QStringList NightSummary::concerns() const
     if (ahiLevel() == Attention) {
         out << tr("AHI %1, at or above %2.").arg(num(ahi)).arg(kAhiTarget);
     } else if (ahiLevel() == Good && hasAnalysisAhi && analysisAhi >= kAhiTarget) {
-        out << tr("OSCAR's analysis counts an AHI of %1, more than the device's %2.").arg(num(analysisAhi), num(ahi));
+        out << analysisAhiConcern();
     }
     if (leakLevel() == Attention) {
         out << tr("Average leak %1 %2, at or above your red line of %3.").arg(num(leak), leakUnits).arg(leakRedline);
@@ -449,23 +460,25 @@ QString NightSummaryView::keyFiguresHtml(const NightSummary &s)
     struct Tile {
         QString caption, value, note;
         NightSummary::Level level;
+        QString mark;   //!< HTML after the note: the analysis mark when OSCAR's analysis counted it
     };
     QVector<Tile> tiles;
     if (s.hasCpap) {
-        tiles.append({ tr("Usage"), duration(s.hours), tr("target %1 h or more").arg(s.complianceHours), s.usageLevel() });
+        tiles.append({ tr("Usage"), duration(s.hours), tr("target %1 h or more").arg(s.complianceHours), s.usageLevel() , QString() });
         if (s.hasLeak) {
             tiles.append({ tr("Leak"), num(s.leak) + QLatin1Char(' ') + s.leakUnits,
-                           s.leakRedline > 0 ? tr("average; red line %1").arg(s.leakRedline) : tr("average"), s.leakLevel() });
+                           s.leakRedline > 0 ? tr("average; red line %1").arg(s.leakRedline) : tr("average"), s.leakLevel() , QString() });
         }
         if (!s.pressure.isEmpty()) {
-            tiles.append({ tr("Pressure"), s.pressure + QLatin1Char(' ') + s.pressureUnits, pressureTileNote(s), NightSummary::Unknown });
+            tiles.append({ tr("Pressure"), s.pressure + QLatin1Char(' ') + s.pressureUnits, pressureTileNote(s), NightSummary::Unknown , QString() });
         }
     }
     if (s.oxi.valid && !s.oxi.spotChecks && s.oxi.spo2Avg > 0 && s.oxi.hours > 0) {
         const QString note = s.oxi.fromAnalysis
             ? tr("ODI 3%: %1 per hour").arg(num(s.oxi.desaturations / s.oxi.hours))
             : tr("SpO2 drops (classic): %1 per hour").arg(num(s.oxi.desaturations / s.oxi.hours));
-        tiles.append({ tr("SpO2 below 90%"), num(s.oxi.percentBelow90) + QStringLiteral(" %"), note, s.spo2Level() });
+        tiles.append({ tr("SpO2 below 90%"), num(s.oxi.percentBelow90) + QStringLiteral(" %"), note, s.spo2Level(),
+                       s.oxi.fromAnalysis ? QStringLiteral(" ") + AnalysisMark::pill() : QString() });
     }
     if (tiles.isEmpty()) return QString();
 
@@ -481,7 +494,7 @@ QString NightSummaryView::keyFiguresHtml(const NightSummary &s)
         html += QStringLiteral("<td width='50%' valign=top><table width='100%' cellspacing=0 cellpadding=3 border=0 bgcolor='#ffffff'><tr>"
                                "<td width=4 bgcolor='%1'></td><td><font color='#5f5f5f'>%2</font><br/><b>%3</b><br/><small>%4%5</small></td>"
                                "</tr></table></td>")
-                    .arg(color, t.caption.toHtmlEscaped(), t.value.toHtmlEscaped(), sign, t.note.toHtmlEscaped());
+                    .arg(color, t.caption.toHtmlEscaped(), t.value.toHtmlEscaped(), sign, t.note.toHtmlEscaped() + t.mark);
         if (i % 2 == 1) html += QStringLiteral("</tr>");
     }
     if (tiles.size() % 2) html += QStringLiteral("<td></td></tr>");
@@ -575,7 +588,9 @@ void NightSummaryView::setSummary(const NightSummary &s)
         m_verdict->setText(QStringLiteral("<span style='color:%1'>%2</span>")
                                .arg(levelColor(NightSummary::Attention).name(), tr("Worth a look")));
         QStringList items;
-        for (const QString &c : concerns) items << QStringLiteral("&bull; ") + c.toHtmlEscaped();
+        for (const QString &c : concerns) {
+            items << QStringLiteral("&bull; ") + c.toHtmlEscaped() + (s.isAnalysisConcern(c) ? QStringLiteral(" ") + AnalysisMark::pill() : QString());
+        }
         m_concerns->setText(items.join(QStringLiteral("<br/>")));
     } else if (s.hasCpap) {
         m_verdict->setText(QStringLiteral("<span style='color:%1'>&#x2713; %2</span>")
@@ -598,7 +613,8 @@ void NightSummaryView::setSummary(const NightSummary &s)
             ahiNote += QStringLiteral("<br/>") + HelpTips::term(tr("corrected by hand (device %1)").arg(num(s.deviceAhi)), QStringLiteral("manual_scoring"));
         }
         if (s.hasAnalysisAhi) {
-            ahiNote += QStringLiteral("<br/>") + HelpTips::term(tr("OSCAR's analysis: %1").arg(num(s.analysisAhi)), QStringLiteral("an_ahi"));
+            ahiNote += QStringLiteral("<br/>") + HelpTips::term(tr("OSCAR's analysis: %1").arg(num(s.analysisAhi)), QStringLiteral("an_ahi"))
+                       + QStringLiteral(" ") + AnalysisMark::pill();
         }
         if (s.hasFlowLimitation) {
             const QString fl = QString::number(s.flPercent, 'f', 0), minutes = QString::number(s.flMinutes, 'f', 0);
@@ -621,7 +637,7 @@ void NightSummaryView::setSummary(const NightSummary &s)
     }
     if (s.oxi.valid && !s.oxi.spotChecks && s.oxi.spo2Avg > 0) {
         QString note = s.oxi.fromAnalysis
-            ? tr("ODI 3%: %1 per hour").arg(num(s.oxi.desaturations / s.oxi.hours))
+            ? tr("ODI 3%: %1 per hour").arg(num(s.oxi.desaturations / s.oxi.hours)) + QStringLiteral(" ") + AnalysisMark::pill()
             : tr("SpO2 drops (classic): %1 per hour").arg(num(s.oxi.desaturations / s.oxi.hours));
         note += QStringLiteral("<br/>") + tr("lowest %1%, average %2%").arg(num(s.oxi.spo2Min, 0), num(s.oxi.spo2Avg));
         if (s.hasCpap && s.oxi.pulseAvg > 0) {   // no room for a pulse tile next to the CPAP ones

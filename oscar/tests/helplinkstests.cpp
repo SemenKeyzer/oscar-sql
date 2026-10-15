@@ -6,6 +6,7 @@
  * License. See the file COPYING in the main directory of the source code
  * for more details. */
 
+#include "analysismark.h"
 #include "helplinkstests.h"
 
 #include <QApplication>
@@ -277,4 +278,14 @@ void HelpLinksTests::testSearchOpensPageByName()
     QCOMPARE(DailySearchTab::page(&tabs, 1)->objectName(), QStringLiteral("events"));
     QCOMPARE(DailySearchTab::page(&tabs, 0)->objectName(), QStringLiteral("details"));
     QVERIFY(!DailySearchTab::page(&tabs, -1));
+}
+
+// The frame's OSCAR analysis part carries the analysis mark; hidden analysis, no mark.
+void HelpLinksTests::testAhiFiguresMarked()
+{
+    QString html = Daily::ahiFiguresHtml(QStringLiteral("AHI"), 3.71, 3.0, true, 3.86);
+    QVERIFY(html.contains(AnalysisMark::pill()));
+    QVERIFY(html.contains(QStringLiteral("OSCAR analysis — 3.0")));
+    html = Daily::ahiFiguresHtml(QStringLiteral("AHI"), 3.71, 3.0, false, 3.86);
+    QVERIFY(!html.contains(AnalysisMark::pill()));
 }

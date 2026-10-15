@@ -232,6 +232,8 @@ class Statistics : public QObject
 {
     Q_OBJECT
   public:
+    //! An analysis row's name (\a key as in the Statistics rows) with the analysis mark; \a print for the PDF.
+    static QString analysisLabel(const QString &key, bool print);
     explicit Statistics(QObject *parent = 0);
 
     QString GenerateHTML();
