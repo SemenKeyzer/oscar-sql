@@ -65,6 +65,7 @@ private:
     void stopDevice();
     int rowOf(const QString &name) const;
     void setStatus(const QString &name, const QString &text);
+    QCheckBox *tickOf(int row) const;
 
     QLabel *m_status = nullptr;
     QLabel *m_info = nullptr;

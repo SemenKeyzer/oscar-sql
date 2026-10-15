@@ -17,7 +17,7 @@ class O2RingPageTests : public QObject
 private slots:
     void initTestCase();
     void testRecordsListed();
-    void testDownloadImportsChecked();
+    void testNewRecordsDownloadAutomatically();
     void testSetClockFollowsSetting();
     void testCancelRemovesPart();
     void testLinkLostOffersRetry();

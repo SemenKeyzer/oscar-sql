@@ -1838,7 +1838,7 @@ const UiGlossaryRaw kUiEntries[] = {
       "", "" },
     { "ui.o2ring.o2ringRecords", QT_TRANSLATE_NOOP("Glossary", "Records on the ring"),
       QT_TRANSLATE_NOOP("Glossary", "Oximetry wizard → O2Ring"),
-      QT_TRANSLATE_NOOP("Glossary", "Every record the ring keeps, by start time. New ones are ticked; the ones already in OSCAR are not, but you can tick them to download them again."),
+      QT_TRANSLATE_NOOP("Glossary", "Every record the ring keeps, by start time. New ones are downloaded as soon as the ring is connected; the ones already in OSCAR are left unticked, but you can tick them and press Download to read them again."),
       "",
       "", "" },
     { "ui.o2ring.downloadButton", QT_TRANSLATE_NOOP("Glossary", "Download"),

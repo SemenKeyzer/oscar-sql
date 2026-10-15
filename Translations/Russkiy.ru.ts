@@ -9486,8 +9486,12 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
     </message>
     <message>
         <location filename="../oscar/uiglossary.cpp" line="1841"/>
+        <source>Every record the ring keeps, by start time. New ones are downloaded as soon as the ring is connected; the ones already in OSCAR are left unticked, but you can tick them and press Download to read them again.</source>
+        <translation>Все записи кольца по времени начала. Новые скачиваются сразу после подключения; уже импортированные в OSCAR остаются без отметки, но их можно отметить и нажать «Скачать», чтобы прочитать снова.</translation>
+    </message>
+    <message>
         <source>Every record the ring keeps, by start time. New ones are ticked; the ones already in OSCAR are not, but you can tick them to download them again.</source>
-        <translation>Все записи кольца по времени начала. Новые отмечены; уже импортированные в OSCAR — нет, но их можно отметить и скачать снова.</translation>
+        <translation type="vanished">Все записи кольца по времени начала. Новые отмечены; уже импортированные в OSCAR — нет, но их можно отметить и скачать снова.</translation>
     </message>
     <message>
         <location filename="../oscar/uiglossary.cpp" line="1844"/>
@@ -14320,78 +14324,82 @@ Outdated days need it after an update or a change of settings. All days runs eve
         <translation>Часы кольца: %1; компьютер: %2.</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="226"/>
-        <location filename="../oscar/o2ringpage.cpp" line="300"/>
+        <location filename="../oscar/o2ringpage.cpp" line="229"/>
+        <location filename="../oscar/o2ringpage.cpp" line="313"/>
         <source>already in OSCAR</source>
         <translation>уже в OSCAR</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="226"/>
+        <location filename="../oscar/o2ringpage.cpp" line="229"/>
         <source>new</source>
         <translation>новая</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="228"/>
+        <location filename="../oscar/o2ringpage.cpp" line="238"/>
         <source>The ring has no records.</source>
         <translation>На кольце нет записей.</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="229"/>
         <source>Tick the records to download, then press Download.</source>
-        <translation>Отметьте записи для скачивания и нажмите «Скачать».</translation>
+        <translation type="vanished">Отметьте записи для скачивания и нажмите «Скачать».</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="242"/>
+        <location filename="../oscar/o2ringpage.cpp" line="255"/>
         <source>Setting the ring&apos;s clock...</source>
         <translation>Установка часов кольца...</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="261"/>
+        <location filename="../oscar/o2ringpage.cpp" line="274"/>
         <source>Downloading from %1...</source>
         <translation>Скачивание с %1...</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="284"/>
+        <location filename="../oscar/o2ringpage.cpp" line="297"/>
         <source>downloading, %1%</source>
         <translation>скачивание, %1%</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="296"/>
+        <location filename="../oscar/o2ringpage.cpp" line="309"/>
         <source>imported</source>
         <translation>импортирована</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="304"/>
+        <location filename="../oscar/o2ringpage.cpp" line="317"/>
         <source>failed: %1</source>
         <translation>ошибка: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="314"/>
+        <location filename="../oscar/o2ringpage.cpp" line="327"/>
         <source>not downloaded: %1</source>
         <translation>не скачана: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="332"/>
+        <location filename="../oscar/o2ringpage.cpp" line="345"/>
         <source>%1 imported, %2 skipped</source>
         <translation>импортировано %1, пропущено %2</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="333"/>
+        <location filename="../oscar/o2ringpage.cpp" line="346"/>
         <source>, %1 failed</source>
         <translation>, с ошибкой %1</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="325"/>
+        <location filename="../oscar/o2ringpage.cpp" line="338"/>
         <source>Done.</source>
         <translation>Готово.</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="325"/>
+        <location filename="../oscar/o2ringpage.cpp" line="239"/>
+        <source>Every record on the ring is already in OSCAR. Tick one and press Download to read it again.</source>
+        <translation>Все записи кольца уже в OSCAR. Отметьте запись и нажмите «Скачать», чтобы прочитать её снова.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/o2ringpage.cpp" line="338"/>
         <source>Stopped.</source>
         <translation>Остановлено.</translation>
     </message>
     <message>
-        <location filename="../oscar/o2ringpage.cpp" line="340"/>
+        <location filename="../oscar/o2ringpage.cpp" line="353"/>
         <source>The import was cancelled.</source>
         <translation>Импорт отменён.</translation>
     </message>

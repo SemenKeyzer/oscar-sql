@@ -217,18 +217,31 @@ void O2RingPage::onInfo(const O2Ring::Info &info)
                           .arg(ringTime, QDateTime::currentDateTime().toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"))));
     m_names = info.files;
     m_table->setRowCount(m_names.size());
+    bool anyNew = false;
     for (int i = 0; i < m_names.size(); ++i) {
         const bool already = m_importer->alreadyImported(m_names[i]);
-        auto *item = new QTableWidgetItem(startText(m_names[i]));
-        item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsUserCheckable);
-        item->setCheckState(already ? Qt::Unchecked : Qt::Checked);
-        m_table->setItem(i, 0, item);
+        anyNew = anyNew || !already;
+        // a real check box: the item view's own tick shows nothing for an unticked row on macOS
+        auto *tick = new QCheckBox(startText(m_names[i]), m_table);
+        tick->setChecked(!already);
+        HelpTips::attach(tick, QStringLiteral("ui.o2ring.o2ringRecords"));
+        m_table->setCellWidget(i, 0, tick);
         m_table->setItem(i, 1, new QTableWidgetItem(already ? tr("already in OSCAR") : tr("new")));
     }
-    m_summary->setText(m_names.isEmpty() ? tr("The ring has no records.")
-                                         : tr("Tick the records to download, then press Download."));
+    m_table->resizeColumnToContents(0);
     m_downloadButton->setEnabled(true);
     m_downloadButton->show();
+    if (anyNew) {   // new records are fetched at once
+        onDownloadClicked();
+        return;
+    }
+    m_summary->setText(m_names.isEmpty() ? tr("The ring has no records.")
+                                         : tr("Every record on the ring is already in OSCAR. Tick one and press Download to read it again."));
+}
+
+QCheckBox *O2RingPage::tickOf(int row) const
+{
+    return qobject_cast<QCheckBox *>(m_table->cellWidget(row, 0));
 }
 
 void O2RingPage::onDownloadClicked()
@@ -236,7 +249,7 @@ void O2RingPage::onDownloadClicked()
     if (!m_busy || !m_downloader) return;
     m_downloadButton->setEnabled(false);
     for (int i = 0; i < m_table->rowCount(); ++i) {
-        if (QTableWidgetItem *item = m_table->item(i, 0)) item->setFlags(Qt::ItemIsEnabled);
+        if (QCheckBox *tick = tickOf(i)) tick->setEnabled(false);
     }
     if (m_setClock->isChecked()) {
         m_status->setText(tr("Setting the ring's clock..."));
@@ -250,8 +263,8 @@ void O2RingPage::downloadChosen()
 {
     QStringList chosen;
     for (int i = 0; i < m_names.size(); ++i) {
-        const QTableWidgetItem *item = m_table->item(i, 0);
-        if (item && item->checkState() == Qt::Checked) chosen << m_names[i];
+        const QCheckBox *tick = tickOf(i);
+        if (tick && tick->isChecked()) chosen << m_names[i];
         else ++m_skipped;
     }
     if (chosen.isEmpty()) {

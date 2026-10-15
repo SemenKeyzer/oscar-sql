@@ -41,6 +41,8 @@ QPair<QString, QByteArray> record(const QDateTime &start)
 QTableWidget *table(O2RingPage &page) { return page.findChild<QTableWidget *>(QStringLiteral("o2ringRecords")); }
 QPushButton *downloadButton(O2RingPage &page) { return page.findChild<QPushButton *>(QStringLiteral("downloadButton")); }
 QCheckBox *setClock(O2RingPage &page) { return page.findChild<QCheckBox *>(QStringLiteral("setClock")); }
+//! The tick of a record row: a real check box, so an unticked row is visible too.
+QCheckBox *tick(O2RingPage &page, int row) { return qobject_cast<QCheckBox *>(table(page)->cellWidget(row, 0)); }
 QString summary(O2RingPage &page) { return page.findChild<QLabel *>(QStringLiteral("o2ringSummary"))->text(); }
 
 int countOf(const FakeO2Ring &ring, quint8 cmd)
@@ -97,47 +99,56 @@ void O2RingPageTests::cleanupTestCase()
     m_app = nullptr;
 }
 
-// The ring's records are listed; the one already in OSCAR is marked and left unticked.
+// A ring whose records are all in OSCAR: they are listed unticked and nothing is downloaded by itself.
 void O2RingPageTests::testRecordsListed()
 {
     FakeO2Ring ring;
     const auto old = record(QDateTime(QDate(2026, 10, 10), QTime(23, 0, 0)));
-    const auto fresh = record(QDateTime(QDate(2026, 10, 11), QTime(23, 0, 0)));
     ring.files.insert(old.first, old.second);
-    ring.files.insert(fresh.first, fresh.second);
     QString error;
     QCOMPARE(O2RingImporter(ring.serial).importFile(old.first, old.second, &error), O2RingImporter::Result::Imported);
 
     O2RingPage page;
+    QSignalSpy ended(&page, &O2RingPage::ended);
     page.startWithLink(&ring, QStringLiteral("O2Ring 6554"));
-    QTRY_COMPARE_WITH_TIMEOUT(table(page)->rowCount(), 2, 3000);
-    QCOMPARE(table(page)->item(0, 0)->checkState(), Qt::Unchecked);
+    QTRY_COMPARE_WITH_TIMEOUT(table(page)->rowCount(), 1, 3000);
+    QVERIFY(tick(page, 0) != nullptr);
+    QVERIFY(!tick(page, 0)->isChecked());
+    QVERIFY(tick(page, 0)->text().contains(QStringLiteral("10")));
     QVERIFY(table(page)->item(0, 1)->text().contains(QStringLiteral("already in OSCAR")));
-    QCOMPARE(table(page)->item(1, 0)->checkState(), Qt::Checked);
-    QVERIFY(table(page)->item(1, 1)->text().contains(QStringLiteral("new")));
     QVERIFY(downloadButton(page)->isEnabled());
-    page.cancel();
+    QTest::qWait(200);
+    QCOMPARE(countOf(ring, O2Ring::CmdStart), 0);
+    QCOMPARE(ended.size(), 0);
+
+    // ticked by hand, it is read again
+    tick(page, 0)->setChecked(true);
+    downloadButton(page)->click();
+    QTRY_COMPARE_WITH_TIMEOUT(ended.size(), 1, 5000);
+    QCOMPARE(countOf(ring, O2Ring::CmdStart), 1);
 }
 
-// Download fetches only the ticked records and imports them.
-void O2RingPageTests::testDownloadImportsChecked()
+// New records are ticked and downloaded at once, without pressing Download; old ones are left.
+void O2RingPageTests::testNewRecordsDownloadAutomatically()
 {
     FakeO2Ring ring;
     const auto old = record(QDateTime(QDate(2026, 10, 10), QTime(23, 0, 0)));     // imported above
     const auto fresh = record(QDateTime(QDate(2026, 10, 12), QTime(22, 30, 0)));
+    const auto fresh2 = record(QDateTime(QDate(2026, 10, 11), QTime(1, 30, 0)));
     ring.files.insert(old.first, old.second);
     ring.files.insert(fresh.first, fresh.second);
+    ring.files.insert(fresh2.first, fresh2.second);
 
     O2RingPage page;
     QSignalSpy ended(&page, &O2RingPage::ended);
     page.startWithLink(&ring, QStringLiteral("O2Ring 6554"));
-    QTRY_COMPARE_WITH_TIMEOUT(table(page)->rowCount(), 2, 3000);
-    downloadButton(page)->click();
     QTRY_COMPARE_WITH_TIMEOUT(ended.size(), 1, 5000);
     QCOMPARE(ended[0][0].toBool(), false);
-    QCOMPARE(countOf(ring, O2Ring::CmdStart), 1);
+    QCOMPARE(table(page)->rowCount(), 3);
+    QCOMPARE(countOf(ring, O2Ring::CmdStart), 2);
     QVERIFY(O2RingImporter(ring.serial).alreadyImported(fresh.first));
-    QVERIFY2(summary(page).contains(QStringLiteral("1 imported")), qPrintable(summary(page)));
+    QVERIFY(O2RingImporter(ring.serial).alreadyImported(fresh2.first));
+    QVERIFY2(summary(page).contains(QStringLiteral("2 imported")), qPrintable(summary(page)));
     QVERIFY(page.importedAny());
     QVERIFY(!page.isBusy());
 }
@@ -154,8 +165,6 @@ void O2RingPageTests::testSetClockFollowsSetting()
         QSignalSpy ended(&page, &O2RingPage::ended);
         page.startWithLink(&ring, QStringLiteral("O2Ring 6554"));
         QVERIFY(setClock(page)->isChecked());
-        QTRY_COMPARE_WITH_TIMEOUT(table(page)->rowCount(), 1, 3000);
-        downloadButton(page)->click();
         QTRY_COMPARE_WITH_TIMEOUT(ended.size(), 1, 5000);
         QCOMPARE(countOf(ring, O2Ring::CmdSync), 1);
         int sync = -1, start = -1;
@@ -175,8 +184,6 @@ void O2RingPageTests::testSetClockFollowsSetting()
         QSignalSpy ended(&page, &O2RingPage::ended);
         page.startWithLink(&ring, QStringLiteral("O2Ring 6554"));
         QVERIFY(!setClock(page)->isChecked());
-        QTRY_COMPARE_WITH_TIMEOUT(table(page)->rowCount(), 1, 3000);
-        downloadButton(page)->click();
         QTRY_COMPARE_WITH_TIMEOUT(ended.size(), 1, 5000);
         QCOMPARE(countOf(ring, O2Ring::CmdSync), 0);
         QCOMPARE(countOf(ring, O2Ring::CmdStart), 1);
@@ -197,8 +204,6 @@ void O2RingPageTests::testCancelRemovesPart()
     O2RingPage page;
     QSignalSpy ended(&page, &O2RingPage::ended);
     page.startWithLink(&ring, QStringLiteral("O2Ring 6554"));
-    QTRY_COMPARE_WITH_TIMEOUT(table(page)->rowCount(), 1, 3000);
-    downloadButton(page)->click();
     QTRY_VERIFY_WITH_TIMEOUT(countOf(ring, O2Ring::CmdData) > 0, 3000);
     page.cancel();
     QCOMPARE(ended.size(), 1);
@@ -226,8 +231,6 @@ void O2RingPageTests::testLinkLostOffersRetry()
     O2RingPage page;
     QSignalSpy ended(&page, &O2RingPage::ended);
     page.startWithLink(&ring, QStringLiteral("O2Ring 6554"));
-    QTRY_COMPARE_WITH_TIMEOUT(table(page)->rowCount(), 1, 3000);
-    downloadButton(page)->click();
     QTRY_COMPARE_WITH_TIMEOUT(ended.size(), 1, 5000);
     QCOMPARE(ended[0][0].toBool(), true);
     QVERIFY(!page.importedAny());
@@ -249,8 +252,6 @@ void O2RingPageTests::testCancelDuringImport()
         if (req.cmd == O2Ring::CmdData && int(req.seq) == pieces - 1) QTimer::singleShot(0, &page, [&page]() { page.cancel(); });
     };
     page.startWithLink(&ring, QStringLiteral("O2Ring 6554"));
-    QTRY_COMPARE_WITH_TIMEOUT(table(page)->rowCount(), 1, 3000);
-    downloadButton(page)->click();
     QTRY_COMPARE_WITH_TIMEOUT(ended.size(), 1, 5000);
     QTest::qWait(100);
     QVERIFY(O2RingImporter(ring.serial).alreadyImported(r.first));
@@ -270,8 +271,6 @@ void O2RingPageTests::testClockFailureShown()
     page.setResponseTimeout(50);
     QSignalSpy ended(&page, &O2RingPage::ended);
     page.startWithLink(&ring, QStringLiteral("O2Ring 6554"));
-    QTRY_COMPARE_WITH_TIMEOUT(table(page)->rowCount(), 1, 3000);
-    downloadButton(page)->click();
     QTRY_COMPARE_WITH_TIMEOUT(ended.size(), 1, 5000);
     QVERIFY(O2RingImporter(ring.serial).alreadyImported(r.first));
     QVERIFY2(summary(page).contains(QStringLiteral("clock could not be set")), qPrintable(summary(page)));
