@@ -18,6 +18,7 @@
 #include "Graphs/gGraphView.h"
 
 #include <QApplication>
+#include <QTreeWidget>
 #include <QCoreApplication>
 #include <QFile>
 #include <QRegularExpression>
@@ -2586,4 +2587,106 @@ void AnalysisIntegrationTests::testManualPageCounts()
     const int ahi = html.indexOf(QStringLiteral("AHI after manual scoring"));
     const int counts = html.indexOf(QStringLiteral("COUNTS"));
     QVERIFY2(ahi >= 0 && counts > ahi && html.indexOf(QStringLiteral("XBLOCK")) > counts, qPrintable(html));
+}
+
+namespace {
+
+QStringList topLevelTexts(QTreeWidget &tree)
+{
+    QStringList out;
+    for (int i = 0; i < tree.topLevelItemCount(); ++i) out << tree.topLevelItem(i)->text(0);
+    return out;
+}
+
+int indexStarting(const QStringList &texts, const QString &start)
+{
+    for (int i = 0; i < texts.size(); ++i) {
+        if (texts[i].startsWith(start)) return i;
+    }
+    return -1;
+}
+
+} // namespace
+
+// Device events, then OSCAR's analysis under its heading, then manual scoring under its heading.
+void AnalysisIntegrationTests::testTreeGroups()
+{
+    Machine cpap(p_profile, 96);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    Session *s = sessionWithAnalysis(&cpap, 961, m_machineRow);
+    day.addSession(s);
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Remove, CPAP_Obstructive, 88, 100)));
+
+    QTreeWidget tree;
+    Daily::UpdateEventsTree(&tree, &day, true);
+    const QStringList t = topLevelTexts(tree);
+    const int device = indexStarting(t, schema::channel[CPAP_Obstructive].fullname());
+    const int start = t.indexOf(QStringLiteral("Session Start Times"));
+    const int end = t.indexOf(QStringLiteral("Session End Times"));
+    const int anHead = t.indexOf(QStringLiteral("OSCAR analysis"));
+    const int an = t.indexOf(analysis::channelBaseName(AN_Hypopnea) + QStringLiteral(" 2 events"));
+    const int manualHead = t.indexOf(QStringLiteral("Manual scoring"));
+    const int edits = indexStarting(t, QStringLiteral("Edits (1)"));
+    QVERIFY2(device >= 0 && start > device && end > start && anHead > end && an > anHead && manualHead > an && edits > manualHead,
+             qPrintable(t.join(QStringLiteral(" | "))));
+    QVERIFY(!(tree.topLevelItem(anHead)->flags() & Qt::ItemIsSelectable));
+    QVERIFY(!(tree.topLevelItem(manualHead)->flags() & Qt::ItemIsSelectable));
+    QCOMPARE(Daily::treeNodeFor(&tree, AN_Hypopnea), tree.topLevelItem(an));
+    QCOMPARE(Daily::treeNodeFor(&tree, CPAP_Obstructive), tree.topLevelItem(device));
+
+    ManualScoringRepository::removeAllForSession(ManualScoring::keyOf(s));
+    ManualScoring::refresh(s);
+}
+
+void AnalysisIntegrationTests::testTreeAnalysisHidden()
+{
+    Machine cpap(p_profile, 97);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    Session *s = sessionWithAnalysis(&cpap, 971, m_machineRow);
+    day.addSession(s);
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Remove, CPAP_Obstructive, 88, 100)));
+
+    QTreeWidget tree;
+    Daily::UpdateEventsTree(&tree, &day, false);
+    const QStringList t = topLevelTexts(tree);
+    QVERIFY(!t.contains(QStringLiteral("OSCAR analysis")));
+    QCOMPARE(Daily::treeNodeFor(&tree, AN_Hypopnea), static_cast<QTreeWidgetItem *>(nullptr));
+    QVERIFY(t.contains(QStringLiteral("Manual scoring")));
+
+    ManualScoringRepository::removeAllForSession(ManualScoring::keyOf(s));
+    ManualScoring::refresh(s);
+}
+
+void AnalysisIntegrationTests::testTreeWithoutEdits()
+{
+    Machine cpap(p_profile, 98);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    day.addSession(sessionWithAnalysis(&cpap, 981, m_machineRow));
+    QTreeWidget tree;
+    Daily::UpdateEventsTree(&tree, &day, true);
+    const QStringList t = topLevelTexts(tree);
+    QVERIFY(!t.contains(QStringLiteral("Manual scoring")));
+    QVERIFY(t.contains(QStringLiteral("OSCAR analysis")));
+}
+
+void AnalysisIntegrationTests::testTreeWithoutCpap()
+{
+    const qint64 oxiRow = insertRow(QStringLiteral("INSERT INTO machines (profile_id, machine_id, loader_name, machine_type, serial_number) "
+                                                   "VALUES (?, 3099, 'TestOxi', ?, 'OX99')"), { m_profileId, int(MT_OXIMETER) });
+    Machine oxi(p_profile, 99);
+    oxi.info.type = MT_OXIMETER;
+    oxi.setDatabaseId(oxiRow);
+    Day day;
+    day.addSession(oximetrySession(&oxi, 991, oxiRow));
+    QTreeWidget tree;
+    Daily::UpdateEventsTree(&tree, &day, true);
+    const QStringList t = topLevelTexts(tree);
+    QVERIFY(!t.contains(QStringLiteral("OSCAR analysis")));
+    QVERIFY(!t.contains(QStringLiteral("Manual scoring")));
 }

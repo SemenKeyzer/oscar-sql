@@ -200,7 +200,7 @@ QList<ScoringMenus::EditRow> ScoringMenus::editRows(Day *day)
 QTreeWidgetItem *ScoringMenus::treeNode(const QList<EditRow> &rows)
 {
     if (rows.isEmpty()) return nullptr;
-    auto *node = new QTreeWidgetItem(QStringList(tr("Manual scoring (%1)").arg(rows.size())), kTreeNodeType);
+    auto *node = new QTreeWidgetItem(QStringList(tr("Edits (%1)").arg(rows.size())), kTreeNodeType);
     for (const EditRow &r : rows) {
         const QString time = QDateTime::fromMSecsSinceEpoch(r.timeMs).time().toString(QStringLiteral("HH:mm:ss"));
         auto *item = new QTreeWidgetItem(QStringList(QStringLiteral("%1 — %2").arg(time, r.text)));

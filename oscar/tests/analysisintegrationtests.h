@@ -112,6 +112,10 @@ private slots:
     void testIndicesWithoutCpap();
     void testManualCountsHtml();
     void testManualPageCounts();
+    void testTreeGroups();
+    void testTreeAnalysisHidden();
+    void testTreeWithoutEdits();
+    void testTreeWithoutCpap();
 private:
     class QCoreApplication *m_app = nullptr;
     class QTemporaryDir *m_tempDir = nullptr;

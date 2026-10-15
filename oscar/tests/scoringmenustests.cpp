@@ -136,7 +136,7 @@ void ScoringMenusTests::testTreeNode()
     const QList<ScoringMenus::EditRow> rows = { { 7, 1000000, QStringLiteral("removed: Obstructive apnea") },
                                                 { 9, 2000000, QStringLiteral("excluded 1 min") } };
     QScopedPointer<QTreeWidgetItem> node(ScoringMenus::treeNode(rows));
-    QCOMPARE(node->text(0), QStringLiteral("Manual scoring (2)"));
+    QCOMPARE(node->text(0), QStringLiteral("Edits (2)"));
     QCOMPARE(node->type(), ScoringMenus::kTreeNodeType);
     QCOMPARE(node->childCount(), 2);
     QVERIFY(node->child(1)->text(0).endsWith(QStringLiteral("excluded 1 min")));

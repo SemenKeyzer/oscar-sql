@@ -1010,11 +1010,10 @@ void Daily::Link_clicked(const QUrl &url)
         }
 
     } else if (code=="event")  {
-        QList<QTreeWidgetItem *> list=ui->treeWidget->findItems(schema::channel[sid].fullname(),Qt::MatchContains);
-        if (list.size()>0) {
+        if (QTreeWidgetItem *node = treeNodeFor(ui->treeWidget, sid)) {
             ui->treeWidget->collapseAll();
-            ui->treeWidget->expandItem(list.at(0));
-            QTreeWidgetItem *wi=list.at(0)->child(0);
+            ui->treeWidget->expandItem(node);
+            QTreeWidgetItem *wi=node->child(0);
             ui->treeWidget->setCurrentItem(wi);
             ui->tabWidget->setCurrentIndex(1);
         } else {
@@ -1118,7 +1117,16 @@ void Daily::on_calendar_currentPageChanged(int year, int month)
     }
 }
 
-void Daily::UpdateEventsTree(QTreeWidget *tree,Day *day)
+QTreeWidgetItem *Daily::treeNodeFor(QTreeWidget *tree, ChannelID code)
+{
+    for (int i = 0; i < tree->topLevelItemCount(); ++i) {
+        QTreeWidgetItem *item = tree->topLevelItem(i);
+        if (item->data(0, kTreeChannelRole).isValid() && item->data(0, kTreeChannelRole).toUInt() == code) return item;
+    }
+    return nullptr;
+}
+
+void Daily::UpdateEventsTree(QTreeWidget *tree, Day *day, bool analysisShown)
 {
     PERF_TIMER_SCOPE("Daily::UpdateEventsTree");
     DEBUGXD O("Daily::UpdateEventsTree") O(tree) O(day);
@@ -1142,8 +1150,7 @@ void Daily::UpdateEventsTree(QTreeWidget *tree,Day *day)
     quint32 chantype = schema::FLAG | schema::SPAN | schema::MINOR_FLAG;
     if (p_profile->general->showUnknownFlags()) chantype |= schema::UNKNOWN;
     QList<ChannelID> chans = day->getSortedMachineChannels(chantype);
-    const bool shown = analysis::analysisShown();
-    chans.removeIf([shown](ChannelID c) { return !channelShown(c, shown); });
+    chans.removeIf([analysisShown](ChannelID c) { return !channelShown(c, analysisShown); });
 
     int sessnum = 0;
     // Go through all the enabled sessions of the day
@@ -1176,7 +1183,8 @@ void Daily::UpdateEventsTree(QTreeWidget *tree,Day *day)
 //                    qDebug() << "UpdateEventsTree session" << ++sessnum << sess->session() << "type" << sess->machine()->type() << "starts"//                           << QDateTime::fromSecsSinceEpoch(sess->first()/1000).toString("yyyy-MM-dd HH:mm:ss");
 //                }
                 if (!cnt) continue; // If no events than don't bother showing..
-                QString st=eventTreeName(code);
+                const bool computed = schema::channel[code].isComputed();
+                QString st = computed ? analysis::channelBaseName(code) : eventTreeName(code);
                 st+=" ";
                 if (cnt==1) st+=tr("%1 event").arg(cnt);
                 else st+=tr("%1 events").arg(cnt);
@@ -1184,6 +1192,7 @@ void Daily::UpdateEventsTree(QTreeWidget *tree,Day *day)
                 QStringList l(st);
                 l.append("");
                 mcroot[code]=mcr=new QTreeWidgetItem(root,l);
+                mcr->setData(0, kTreeChannelRole, code);
                 mccnt[code]=0;
             } else {
                 mcr=mcroot[code];
@@ -1222,8 +1231,8 @@ void Daily::UpdateEventsTree(QTreeWidget *tree,Day *day)
                     item->setData(0,Qt::UserRole,t_post_context);
                     mcr->addChild(item);
 
-                    // Similarly add entry for consolidated node
-                    if (p_profile->cpap->consolidateEvents()) {
+                    // Similarly add entry for consolidated node (the device's events only)
+                    if (p_profile->cpap->consolidateEvents() && !schema::channel[code].isComputed()) {
                         s_all += " " + schema::channel[code].label();
                         a_all.append(s_all);
                         EventTreeWidgetItem item_all=EventTreeWidgetItem(a_all);
@@ -1234,22 +1243,17 @@ void Daily::UpdateEventsTree(QTreeWidget *tree,Day *day)
             }
         }
     }
+    // the device's event types first (sorted), OSCAR's analysis apart below
+    QList<QTreeWidgetItem *> deviceNodes, analysisNodes;
+    for (auto m = mcroot.cbegin(); m != mcroot.cend(); ++m) {
+        (schema::channel[m.key()].isComputed() ? analysisNodes : deviceNodes) << m.value();
+    }
+    const auto byText = [](const QTreeWidgetItem *a, const QTreeWidgetItem *b) { return a->text(0) < b->text(0); };
+    std::sort(deviceNodes.begin(), deviceNodes.end(), byText);
+    std::sort(analysisNodes.begin(), analysisNodes.end(), byText);
     int cnt=0;
-    for (QHash<ChannelID,QTreeWidgetItem *>::iterator m=mcroot.begin();m!=mcroot.end();m++) {
-        tree->insertTopLevelItem(cnt++,m.value());
-    }
+    for (QTreeWidgetItem *node : std::as_const(deviceNodes)) tree->insertTopLevelItem(cnt++, node);
     qDebug() << "Daily::UpdateEventsTree(): max_t_post_context:" << max_t_post_context;
-
-    // Sort the top-level nodes (i.e., event types)
-    // note: Done here so that UA occurs before Session Start/End
-    tree->sortByColumn(0,Qt::AscendingOrder);
-
-    // the doctor's manual scoring first: click a row to go there, right-click to undo it
-    if (QTreeWidgetItem *scoring = ScoringMenus::treeNode(ScoringMenus::editRows(day))) {
-        tree->insertTopLevelItem(0, scoring);
-        scoring->setExpanded(true);
-        ++cnt;
-    }
 
     if (day->hasMachine(MT_CPAP) || day->hasMachine(MT_OXIMETER) || day->hasMachine(MT_POSITION)) {
         QTreeWidgetItem * start = new QTreeWidgetItem(QStringList(tr("Session Start Times")),eventTypeStart);
@@ -1300,6 +1304,21 @@ void Daily::UpdateEventsTree(QTreeWidget *tree,Day *day)
         if (all_numbered_events->childCount()) {
             tree->insertTopLevelItem(cnt++,all_numbered_events);
         }
+    }
+
+    // OSCAR's analysis under its heading
+    if (analysisShown && !analysisNodes.isEmpty()) {
+        tree->addTopLevelItem(AnalysisMark::treeHeading(tr("OSCAR analysis"), true));
+        for (QTreeWidgetItem *node : std::as_const(analysisNodes)) tree->addTopLevelItem(node);
+    } else {
+        qDeleteAll(analysisNodes);
+    }
+
+    // the doctor's manual scoring last: click a row to go there, right-click to undo it
+    if (QTreeWidgetItem *scoring = ScoringMenus::treeNode(ScoringMenus::editRows(day))) {
+        tree->addTopLevelItem(AnalysisMark::treeHeading(tr("Manual scoring"), false));
+        tree->addTopLevelItem(scoring);
+        scoring->setExpanded(true);
     }
 
     // Trace out event-type nodes
@@ -2743,7 +2762,7 @@ void Daily::Load(QDate date)
     PERF_TIMER_STOP("Daily::Load::OpenEvents");
 
 
-    UpdateEventsTree(ui->treeWidget, day);
+    UpdateEventsTree(ui->treeWidget, day, analysis::analysisShown());
     updateAlignButton(day);
 
     // FIXME:
@@ -4230,7 +4249,7 @@ void Daily::afterAlignSaved()
 {
     stopAlign();
     if (Day *day = p_profile ? p_profile->GetDay(previous_date) : nullptr) {
-        UpdateEventsTree(ui->treeWidget, day);   // event times include the correction
+        UpdateEventsTree(ui->treeWidget, day, analysis::analysisShown());   // event times include the correction
     }
     if (mainwin) {
         mainwin->refreshTimeCorrectionsDialog();

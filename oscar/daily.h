@@ -446,7 +446,10 @@ private:
         \param QTreeWidget * tree
         \param Day *
         */
-    void UpdateEventsTree(QTreeWidget * tree,Day *day);
+    static void UpdateEventsTree(QTreeWidget * tree, Day *day, bool analysisShown);
+    //! The events tree's node of channel \a code, or nullptr.
+    static QTreeWidgetItem *treeNodeFor(QTreeWidget *tree, ChannelID code);
+    static constexpr int kTreeChannelRole = Qt::UserRole + 2;   //!< a type node's channel
 
     virtual bool eventFilter(QObject *object, QEvent *event);
 
@@ -546,8 +549,8 @@ private:
 
     gLineChart *leakchart;
 
-    const int eventTypeStart = QTreeWidgetItem::UserType+1;
-    const int eventTypeEnd   = QTreeWidgetItem::UserType+2;
+    static constexpr int eventTypeStart = QTreeWidgetItem::UserType+1;
+    static constexpr int eventTypeEnd   = QTreeWidgetItem::UserType+2;
 
 #ifndef REMOVE_FITNESS
     double user_weight_kg;
