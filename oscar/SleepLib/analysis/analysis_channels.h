@@ -28,6 +28,8 @@ namespace analysis {
 
 //! Adds the analysis channels to schema::channel; called by schema::init().
 void registerChannels();
+//! An analysis channel's name without " · analysis" (e.g. "Obstructive Apnea"); empty for other channels.
+QString channelBaseName(ChannelID code);
 
 //! Stage 1 flow channels of a CPAP session (events, spans and the per-breath score).
 QList<ChannelID> flowChannels();

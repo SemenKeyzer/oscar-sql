@@ -377,6 +377,7 @@ SOURCES += \
     Graphs/scoringgesture.cpp \
     Graphs/scoringresize.cpp \
     tabbuttons.cpp \
+    analysismark.cpp \
     SleepLib/loader_plugins/o2ring_protocol.cpp \
     SleepLib/loader_plugins/o2ring_downloader.cpp \
     SleepLib/loader_plugins/o2ring_import.cpp \
@@ -719,6 +720,7 @@ HEADERS  += \
     Graphs/scoringgesture.h \
     Graphs/scoringresize.h \
     tabbuttons.h \
+    analysismark.h \
     SleepLib/loader_plugins/o2ring_protocol.h \
     SleepLib/loader_plugins/o2ring_downloader.h \
     SleepLib/loader_plugins/o2ring_import.h \
@@ -954,6 +956,7 @@ test {
         tests/o2ringdownloadertests.cpp \
         tests/o2ringimporttests.cpp \
         tests/vihealthcsvtests.cpp \
+        tests/analysismarktests.cpp \
         tests/htmlpagestests.cpp \
         tests/channelstoretests.cpp \
         tests/machinetests.cpp \
@@ -1015,6 +1018,7 @@ test {
         tests/o2ringdownloadertests.h \
         tests/o2ringimporttests.h \
         tests/vihealthcsvtests.h \
+        tests/analysismarktests.h \
         tests/htmlpagestests.h \
         tests/channelstoretests.h \
         tests/machinetests.h \
