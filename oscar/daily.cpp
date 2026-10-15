@@ -1175,7 +1175,8 @@ void Daily::UpdateEventsTree(QTreeWidget *tree, Day *day, bool analysisShown)
             // Prepare title for this code, if there are any events
             QTreeWidgetItem *mcr;
             if (mcroot.find(code)==mcroot.end()) {
-                EventDataType fCnt = day->count(code);
+                // the device's events as it recorded them (manual scoring has its own group); the analysis' own
+                EventDataType fCnt = schema::channel[code].isComputed() ? day->count(code) : day->deviceCount(code);
                 int cnt=fCnt;
 //                if (cnt != fCnt) {
 //                    qDebug() << "Daily::UpdateEventsTree() counting for" << code << "got" << cnt << "(int) events, EventDataType value for fCnt"
@@ -1199,7 +1200,7 @@ void Daily::UpdateEventsTree(QTreeWidget *tree, Day *day, bool analysisShown)
             }
 
             // number of digits required for count depends on total for day
-            int numDigits = ceil(log10(day->count(code)+1));
+            int numDigits = ceil(log10((schema::channel[code].isComputed() ? day->count(code) : day->deviceCount(code)) + 1));
 
             // Now we go through the event list for the *session* (not for the day)
             for (int z=0;z<m.value().size();z++) {
@@ -2339,14 +2340,14 @@ QString Daily::indicesHtml(Day *day, bool analysisShown, QHash<ChannelID, EventD
         tooltip.replace("'", "&apos;");
         QColor altcolor = (brightness(chan.defaultColor()) < 0.3) ? Qt::white : Qt::black; // pick a contrasting color
         const bool computed = chan.isComputed();
-        (computed ? analysisHtml : html) += QString("<tr><td align='left' bgcolor='%1'%7><b><font color='%2'><a href='event=%5' style='text-decoration:none;color:%2' title='<p>%6</p>'>%3</a></font></b></td><td width=20% bgcolor='%1'><b><font color='%2'>%4</font></b></td></tr>")
+        (computed ? analysisHtml : html) += QString("<tr><td align='left' bgcolor='%1'><b>%7<font color='%2'><a href='event=%5' style='text-decoration:none;color:%2' title='<p>%6</p>'>%3</a></font></b></td><td width=20% bgcolor='%1'><b><font color='%2'>%4</font></b></td></tr>")
                 .arg(chan.defaultColor().name())
                 .arg(altcolor.name())
                 .arg(computed ? analysis::channelBaseName(code) : chan.fullname())
                 .arg(data)
                 .arg(code)
                 .arg(tooltip)
-                .arg(computed ? QStringLiteral(" style='%1'").arg(AnalysisMark::rowStyle()) : QString());
+                .arg(computed ? AnalysisMark::barMark() : QString());
     }
 
     if (day->settingExists(AW_BreathingDisturbances)) {

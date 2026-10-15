@@ -16,6 +16,7 @@ class DoctorReportTests : public QObject
 {
     Q_OBJECT
 private slots:
+    void testDoctorReportMarksBelow90();
     void testDoctorReportMarked();
     void initTestCase();
     void cleanupTestCase();

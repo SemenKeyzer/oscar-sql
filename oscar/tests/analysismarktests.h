@@ -14,6 +14,7 @@ class AnalysisMarkTests : public QObject
 {
     Q_OBJECT
 private slots:
+    void testBarMarkIsText();
     void initTestCase();
     void testPill();
     void testPrintPill();

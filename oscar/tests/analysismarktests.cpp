@@ -55,7 +55,6 @@ void AnalysisMarkTests::testHeadingRow()
     QVERIFY(row.contains(QStringLiteral("#7F77DD"), Qt::CaseInsensitive));
     QVERIFY(row.contains(QStringLiteral("<b>OSCAR analysis</b>")));
     QVERIFY(row.contains(AnalysisMark::pill()));
-    QVERIFY(AnalysisMark::rowStyle().contains(QStringLiteral("#7F77DD"), Qt::CaseInsensitive));
 }
 
 void AnalysisMarkTests::testTitle()
@@ -85,4 +84,14 @@ void AnalysisMarkTests::testChannelBaseName()
     QCOMPARE(analysis::channelBaseName(AN_ObstructiveApnea), QStringLiteral("Obstructive Apnea"));
     QCOMPARE(schema::channel[AN_ObstructiveApnea].fullname(), AnalysisMark::title(QStringLiteral("Obstructive Apnea")));
     QVERIFY(analysis::channelBaseName(CPAP_Obstructive).isEmpty());
+}
+
+// Qt's rich text draws no per-cell border in these tables: the bar is a purple glyph that shows on screen and in print.
+void AnalysisMarkTests::testBarMarkIsText()
+{
+    const QString bar = AnalysisMark::barMark();
+    QVERIFY(bar.contains(QChar(0x258C)));
+    QVERIFY(bar.contains(QStringLiteral("#7F77DD"), Qt::CaseInsensitive));
+    QVERIFY(AnalysisMark::headingRow(QStringLiteral("OSCAR analysis"), 2).contains(bar));
+    QVERIFY(!AnalysisMark::headingRow(QStringLiteral("OSCAR analysis"), 2).contains(QStringLiteral("border-left")));
 }

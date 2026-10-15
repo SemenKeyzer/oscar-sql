@@ -16,6 +16,7 @@ class AnalysisIntegrationTests : public QObject
 {
     Q_OBJECT
 private slots:
+    void testTreeCountsDevice();
     void testStatisticsAnalysisLabel();
     // manual scoring on real sessions and days
     void testDayCountsEdits();

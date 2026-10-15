@@ -441,3 +441,17 @@ void DoctorReportTests::testDoctorReportMarked()
     r.analysisShown = false;
     QVERIFY(!DoctorReportPage::html(r, QStringLiteral("chart.png"), kChart).contains(QStringLiteral("[analysis]")));
 }
+
+// SpO2 below 90% comes from OSCAR's analysis too; a tile without a value carries no mark.
+void DoctorReportTests::testDoctorReportMarksBelow90()
+{
+    DoctorReport r = fullReport();
+    r.analysisShown = true;
+    r.odi3 = 4.0;
+    r.below90 = 1.5;
+    const int both = DoctorReportPage::html(r, QStringLiteral("chart.png"), kChart).count(QStringLiteral("[analysis]"));
+    r.odi3 = DoctorReport::kNoValue;
+    r.below90 = DoctorReport::kNoValue;
+    const int none = DoctorReportPage::html(r, QStringLiteral("chart.png"), kChart).count(QStringLiteral("[analysis]"));
+    QCOMPARE(both - none, 2);
+}

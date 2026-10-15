@@ -2312,10 +2312,12 @@ QString Statistics::GenerateCPAPUsage()
         // an analysis row: its bar along the name and the mark after it
         const bool analysisRow = row.calc == SC_ANALYSIS;
         QString label = s_override.active ? name : HelpTips::term(name, helpKey(row));   // no links in the PDF
-        if (analysisRow) label += QStringLiteral(" ") + (s_override.active ? AnalysisMark::printPill() : AnalysisMark::pill());
-        line += QString("<tr class=datarow bgcolor='%3'><td width='%1%'%4>%2</td>")
-                    .arg(QString::number(headerWidth), label, bgColor,
-                         analysisRow ? QStringLiteral(" style='%1'").arg(AnalysisMark::rowStyle()) : QString());
+        if (analysisRow) {
+            label = AnalysisMark::barMark() + label + QStringLiteral(" ")
+                    + (s_override.active ? AnalysisMark::printPill() : AnalysisMark::pill());
+        }
+        line += QString("<tr class=datarow bgcolor='%3'><td width='%1%'>%2</td>")
+                    .arg(QString::number(headerWidth), label, bgColor);
 
         for (int j=0; j < np; j++) {
             width = j < np-1 ? dataWidth : 100 - (headerWidth + dataWidth*(np-1));

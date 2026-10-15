@@ -25,8 +25,8 @@ extern const char *const PillText;
 QString pill();
 //! The pill for printing and PDFs: readable in black and white.
 QString printPill();
-//! Inline CSS for a table cell of an analysis row: the bar on its left.
-QString rowStyle();
+//! The bar of an analysis row: a purple glyph put before the row's name (Qt draws no per-cell border).
+QString barMark();
 //! A table row heading the analysis rows: bold \a title and the pill, across \a colspan columns.
 QString headingRow(const QString &title, int colspan);
 //! "<base> · analysis", the name of a chart or channel of the analysis.

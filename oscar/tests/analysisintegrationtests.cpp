@@ -2698,3 +2698,24 @@ void AnalysisIntegrationTests::testStatisticsAnalysisLabel()
     QVERIFY(Statistics::analysisLabel(QStringLiteral("ahi"), true).contains(QStringLiteral("[analysis]")));
     QVERIFY(!Statistics::analysisLabel(QStringLiteral("hi"), false).contains(QStringLiteral("(analysis)")));
 }
+
+// The tree shows the device's events as recorded: a type whose events were all removed by hand stays.
+void AnalysisIntegrationTests::testTreeCountsDevice()
+{
+    Machine cpap(p_profile, 89);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    Session *s = sessionWithAnalysis(&cpap, 891, m_machineRow);
+    day.addSession(s);
+    s->setManualScoring({ { CPAP_Obstructive, -2 } }, 0, 0, true);
+    QTreeWidget tree;
+    Daily::UpdateEventsTree(&tree, &day, true);
+    QTreeWidgetItem *node = Daily::treeNodeFor(&tree, CPAP_Obstructive);
+    QVERIFY(node != nullptr);
+    QVERIFY2(node->text(0).contains(QStringLiteral("2 events")), qPrintable(node->text(0)));
+    QCOMPARE(node->childCount(), 2);
+    QHash<ChannelID, EventDataType> values;
+    QVERIFY(!Daily::indicesHtml(&day, true, values).contains(QStringLiteral("border-left")));
+    s->setManualScoring({}, 0, 0, false);
+}

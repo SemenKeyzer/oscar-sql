@@ -36,14 +36,14 @@ QString printPill()
     return QStringLiteral("<span style='color:%1;'>[%2]</span>").arg(QLatin1String(PillText), word().toHtmlEscaped());
 }
 
-QString rowStyle()
+QString barMark()
 {
-    return QStringLiteral("border-left: 3px solid %1;").arg(QLatin1String(BarColor));
+    return QStringLiteral("<font color='%1'>%2</font>&nbsp;").arg(QLatin1String(BarColor), QString(QChar(0x258C)));
 }
 
 QString headingRow(const QString &title, int colspan)
 {
-    return QStringLiteral("<tr><td colspan=%1 style='%2'><b>%3</b> %4</td></tr>\n").arg(colspan).arg(rowStyle(), title, pill());
+    return QStringLiteral("<tr><td colspan=%1>%2<b>%3</b> %4</td></tr>\n").arg(colspan).arg(barMark(), title, pill());
 }
 
 QString title(const QString &base)

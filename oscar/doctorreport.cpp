@@ -249,9 +249,10 @@ QString html(const DoctorReport &r, const QString &chartUrl, const QSizeF &chart
              DoctorReport::tr("average over the nights"), NightSummary::Unknown),
         tile(DoctorReport::tr("ODI 3%"), known(r.odi3) ? DoctorReport::tr("%1 an hour").arg(number(r.odi3, 1)) : none,
              DoctorReport::tr("nights with an oximeter: %1").arg(r.oximetryNights), r.odiLevel(),
-             r.analysisShown ? QStringLiteral(" ") + AnalysisMark::printPill() : QString()),   // OSCAR's analysis counts the ODI
+             r.analysisShown && known(r.odi3) ? QStringLiteral(" ") + AnalysisMark::printPill() : QString()),   // OSCAR's analysis counts it
         tile(DoctorReport::tr("SpO2 below 90%"), known(r.below90) ? QStringLiteral("%1 %").arg(number(r.below90, 1)) : none,
-             DoctorReport::tr("nights with an oximeter: %1").arg(r.oximetryNights), r.below90Level()),
+             DoctorReport::tr("nights with an oximeter: %1").arg(r.oximetryNights), r.below90Level(),
+             r.analysisShown && known(r.below90) ? QStringLiteral(" ") + AnalysisMark::printPill() : QString()),
     };
     html += QStringLiteral("<p><b>%1</b></p><table width='100%' cellspacing=4 cellpadding=0><tr>")
                 .arg(DoctorReport::tr("Summary for the period").toHtmlEscaped());
