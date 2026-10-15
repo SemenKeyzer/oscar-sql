@@ -201,7 +201,7 @@ const Raw kEntries[] = {
     { "second_opinion", QT_TRANSLATE_NOOP("Glossary", "Analysis (second opinion)"), QT_TRANSLATE_NOOP("Glossary", "OSCAR's own scoring of the flow"),
       QT_TRANSLATE_NOOP("Glossary", "OSCAR scores apneas, hypopneas and flow limitation from the recorded flow itself, independently of the device."),
       QT_TRANSLATE_NOOP("Glossary", "Useful to check the device's figures and to see what it does not report. It is not a sleep-lab diagnosis."), "", true, "an_ahi,agreement,hypopnea_rule", "" },
-    { "an_ahi", QT_TRANSLATE_NOOP("Glossary", "AHI (analysis)"), QT_TRANSLATE_NOOP("Glossary", "OSCAR's own AHI"),
+    { "an_ahi", QT_TRANSLATE_NOOP("Glossary", "AHI · analysis"), QT_TRANSLATE_NOOP("Glossary", "OSCAR's own AHI"),
       QT_TRANSLATE_NOOP("Glossary", "Apneas and hypopneas per hour as OSCAR's analysis scores them from the flow."),
       QT_TRANSLATE_NOOP("Glossary", "Can differ from the device's AHI; the agreement line shows by how much."), QT_TRANSLATE_NOOP("Glossary", "Below 5 an hour."), true, "ahi,agreement,hypopnea_rule", "" },
     { "hypopnea_rule", QT_TRANSLATE_NOOP("Glossary", "Hypopnea rule"), QT_TRANSLATE_NOOP("Glossary", "AASM 3%, CMS 4%, flow only"),

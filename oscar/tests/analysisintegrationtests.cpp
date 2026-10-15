@@ -2694,7 +2694,8 @@ void AnalysisIntegrationTests::testTreeWithoutCpap()
 // Statistics names an analysis row plainly and marks it; the print version stays readable without colour.
 void AnalysisIntegrationTests::testStatisticsAnalysisLabel()
 {
-    QCOMPARE(Statistics::analysisLabel(QStringLiteral("ahi"), false), Statistics::tr("AHI") + QStringLiteral(" ") + AnalysisMark::pill());
+    QCOMPARE(Statistics::analysisLabel(QStringLiteral("ahi"), false), Statistics::analysisRowLabel(Statistics::tr("AHI"), false));
+    QVERIFY(Statistics::analysisRowLabel(QStringLiteral("X"), false).contains(AnalysisMark::barMark() + QStringLiteral("X ") + AnalysisMark::pill()));
     QVERIFY(Statistics::analysisLabel(QStringLiteral("ahi"), true).contains(QStringLiteral("[analysis]")));
     QVERIFY(!Statistics::analysisLabel(QStringLiteral("hi"), false).contains(QStringLiteral("(analysis)")));
 }
@@ -2718,4 +2719,29 @@ void AnalysisIntegrationTests::testTreeCountsDevice()
     QHash<ChannelID, EventDataType> values;
     QVERIFY(!Daily::indicesHtml(&day, true, values).contains(QStringLiteral("border-left")));
     s->setManualScoring({}, 0, 0, false);
+}
+
+// The OAHI / CAHI line under the AHI frame follows the device, like the rows beside it.
+void AnalysisIntegrationTests::testDeviceOahiCahi()
+{
+    Machine cpap(p_profile, 88);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    Session *s = scoredSession(&cpap, 881, m_machineRow);
+    day.addSession(s);
+    s->setManualScoring({ { CPAP_Obstructive, -1 } }, 0, 0, true);
+    const double h = day.hours(MT_CPAP);
+    QVERIFY(qAbs(day.deviceOAHI() - 3.0 / h) < 1e-4);   // OA 2 + H 1, as the device scored them
+    QVERIFY(qAbs(day.deviceCAHI() - 1.0 / h) < 1e-4);
+    QVERIFY(day.calcOAHI() < day.deviceOAHI());          // the corrected one is lower
+    s->setManualScoring({}, 0, 0, false);
+}
+
+// The mark after a section's name stays outside the link that folds the section.
+void AnalysisIntegrationTests::testSectionHeaderMarkOutsideLink()
+{
+    const QString html = Daily::lsbHeaderHtml(QStringLiteral("Analysis"), 3, AnalysisMark::pill());
+    const int link = html.indexOf(QStringLiteral("</a>"));
+    QVERIFY(link >= 0 && html.indexOf(AnalysisMark::pill()) > link);
 }

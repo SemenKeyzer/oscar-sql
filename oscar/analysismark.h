@@ -10,6 +10,7 @@
 #define ANALYSISMARK_H
 
 #include <QString>
+#include <qnamespace.h>
 
 class QTreeWidgetItem;
 
@@ -21,8 +22,15 @@ extern const char *const BarColor;        //!< the bar along an analysis row
 extern const char *const PillBackground;
 extern const char *const PillText;
 
+//! A tree heading's marker role (apart from the manual edits' Qt::UserRole + 1).
+constexpr int HeadingRole = Qt::UserRole + 10;
+
+//! What the analysis is, for hover texts.
+QString hoverText();
 //! The pill for HTML pages; hovering it explains what the analysis is.
 QString pill();
+//! \a html with every screen pill turned into the printable one, for printing a page built for the screen.
+QString forPrint(QString html);
 //! The pill for printing and PDFs: readable in black and white.
 QString printPill();
 //! The bar of an analysis row: a purple glyph put before the row's name (Qt draws no per-cell border).

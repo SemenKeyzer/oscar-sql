@@ -16,6 +16,8 @@ class AnalysisIntegrationTests : public QObject
 {
     Q_OBJECT
 private slots:
+    void testDeviceOahiCahi();
+    void testSectionHeaderMarkOutsideLink();
     void testTreeCountsDevice();
     void testStatisticsAnalysisLabel();
     // manual scoring on real sessions and days

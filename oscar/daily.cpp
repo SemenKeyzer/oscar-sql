@@ -2254,8 +2254,9 @@ QString Daily::getAHI(Day * day, bool isBrick, double analysisAhi) {
     // neither obstructive nor central.
     Machine * cpap = day->machine(MT_CPAP);
     if (!isBrick && hours > 0 && cpap && cpap->reportsHypopneaMechanism()) {
-        EventDataType oahi = day->calcOAHI();
-        EventDataType cahi = day->calcCAHI();
+        // the device's own shares, like the large figure and the index rows (manual scoring has its page)
+        EventDataType oahi = day->deviceOAHI();
+        EventDataType cahi = day->deviceCAHI();
         html +="<tr>";
         html +=QString("<td colspan=5 bgcolor='%1' align=center><div title='  %2 \t  ' style='white-space: nowrap;'><font color='%3'>%4&nbsp;<b>%5</b>&nbsp;&nbsp;&nbsp;&nbsp;%6&nbsp;<b>%7</b></font></div></td>\n")
                 .arg("#F88017")
@@ -2476,18 +2477,9 @@ void Daily::htmlLsbSectionHeaderInit (bool section) {
     htmlLsbPrevSectionHeader = true;
 }
 
-void Daily::htmlLsbSectionHeader (QString&html , const QString& name,LEFT_SIDEBAR checkBox) {
-        QString handle = "leftsidebarenable";
-        bool on   = leftSideBarEnable[checkBox];  // this section is enabled
-        bool prev = htmlLsbPrevSectionHeader;  // prev section will be displayed
-                                                // only false when just section name is display
-                                                // true when full section should be displayed.
-        htmlLsbPrevSectionHeader = on;
-
-        if ( (!prev) && on) {
-            html+="<hr/>";
-        }
-        html += QString(
+QString Daily::lsbHeaderHtml(const QString &name, int checkBox, const QString &afterLink, bool on)
+{
+    return QString(
             "<table cellspacing=0 cellpadding=0 border=0 width='100%'>"
             "<tr>"
             "<td align=left>"
@@ -2499,13 +2491,28 @@ void Daily::htmlLsbSectionHeader (QString&html , const QString& name,LEFT_SIDEBA
             "</td>"
             "<td align=centered;>"
                 "<a href='leftsidebarenable=%3' style='text-decoration:none;color:black'>"
-                   "<b>%1</b></a>"
+                   "<b>%1</b></a>%4"
             "</td>"
             "</table>\n"
             )
             .arg(name)
             .arg(on ? "on" : "off")
-            .arg(checkBox);
+            .arg(checkBox)
+            .arg(afterLink.isEmpty() ? QString() : QStringLiteral(" ") + afterLink);
+}
+
+void Daily::htmlLsbSectionHeader (QString&html , const QString& name,LEFT_SIDEBAR checkBox, const QString &afterLink) {
+        QString handle = "leftsidebarenable";
+        bool on   = leftSideBarEnable[checkBox];  // this section is enabled
+        bool prev = htmlLsbPrevSectionHeader;  // prev section will be displayed
+                                                // only false when just section name is display
+                                                // true when full section should be displayed.
+        htmlLsbPrevSectionHeader = on;
+
+        if ( (!prev) && on) {
+            html+="<hr/>";
+        }
+        html += lsbHeaderHtml(name, checkBox, afterLink, on);
 }
 
 QString Daily::getPieChart (float values, Day * day) {
@@ -4450,12 +4457,12 @@ QString Daily::getAnalysisInformation(Day *day)
     QString html;
     analysis::AnalysisService *service = mainwin ? mainwin->analysisService() : nullptr;
     if (day && analysis::analysisShown() && service && !service->params().enabled) {   // shown, but nothing is computed
-        htmlLsbSectionHeader(html, tr("Analysis (second opinion)") + QStringLiteral(" ") + AnalysisMark::pill(), LSB_ANALYSIS);
+        htmlLsbSectionHeader(html, tr("Analysis (second opinion)"), LSB_ANALYSIS, AnalysisMark::pill());
         if (leftSideBarEnable[LSB_ANALYSIS]) html += AnalysisPanel::notComputedHtml() + "<hr/>\n";
         return html;
     }
     if (!day || !m_analysisShown) return html;
-    htmlLsbSectionHeader(html, tr("Analysis (second opinion)") + QStringLiteral(" ") + AnalysisMark::pill(), LSB_ANALYSIS);
+    htmlLsbSectionHeader(html, tr("Analysis (second opinion)"), LSB_ANALYSIS, AnalysisMark::pill());
     if (!leftSideBarEnable[LSB_ANALYSIS]) return html;
     html += AnalysisPanel::sidebarHtml(day, m_analysisResult, m_analysisSource, p_profile->analysis->spo2Thresholds());
     html += "<hr/>\n";

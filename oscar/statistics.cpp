@@ -2312,10 +2312,7 @@ QString Statistics::GenerateCPAPUsage()
         // an analysis row: its bar along the name and the mark after it
         const bool analysisRow = row.calc == SC_ANALYSIS;
         QString label = s_override.active ? name : HelpTips::term(name, helpKey(row));   // no links in the PDF
-        if (analysisRow) {
-            label = AnalysisMark::barMark() + label + QStringLiteral(" ")
-                    + (s_override.active ? AnalysisMark::printPill() : AnalysisMark::pill());
-        }
+        if (analysisRow) label = analysisRowLabel(label, s_override.active);
         line += QString("<tr class=datarow bgcolor='%3'><td width='%1%'>%2</td>")
                     .arg(QString::number(headerWidth), label, bgColor);
 
@@ -2432,7 +2429,7 @@ void Statistics::printReport(QWidget * parent) {
 
         qDebug() << "Enlarged printer font" << font << "printer default font set" << doc.defaultFont();
 
-        doc.setHtml(htmlReportHeaderPrint + htmlUsage + htmlReportFooter + htmlMachineSettings + htmlMachines + htmlReportFooter);
+        doc.setHtml(AnalysisMark::forPrint(htmlReportHeaderPrint + htmlUsage + htmlReportFooter + htmlMachineSettings + htmlMachines + htmlReportFooter));
 
         // Dump HTML for use with HTML4 validator
 //        QString html = htmlReportHeaderPrint + htmlUsage + htmlMachineSettings + htmlMachines + htmlReportFooter;
@@ -2932,7 +2929,12 @@ void Statistics::forgetRXChanges()
     if (p_profile) QFile::remove(p_profile->Get("{" + STR_GEN_DataFolder + "}/RXChanges.cache"));
 }
 
+QString Statistics::analysisRowLabel(const QString &label, bool print)
+{
+    return AnalysisMark::barMark() + label + QStringLiteral(" ") + (print ? AnalysisMark::printPill() : AnalysisMark::pill());
+}
+
 QString Statistics::analysisLabel(const QString &key, bool print)
 {
-    return analysisName(key) + QStringLiteral(" ") + (print ? AnalysisMark::printPill() : AnalysisMark::pill());
+    return analysisRowLabel(analysisName(key), print);
 }

@@ -677,6 +677,13 @@ void NightSummaryView::setSummary(const NightSummary &s)
     const QStringList actions = s.actions();
     m_actions->setText(actions.join(QStringLiteral("<br/>")));
     m_actions->setVisible(!actions.isEmpty());
+
+    // a QLabel shows no hover text from the mark's title attribute: the label holding a mark explains it
+    const QString pill = AnalysisMark::pill(), hover = AnalysisMark::hoverText();
+    for (QLabel *l : findChildren<QLabel *>()) {
+        if (l->text().contains(pill)) l->setToolTip(hover);
+        else if (l->toolTip() == hover) l->setToolTip(QString());
+    }
 }
 
 NightSummary::Level NightSummary::spo2Level() const

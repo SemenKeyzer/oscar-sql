@@ -133,6 +133,8 @@ public:
     static QString manualCountsHtml(Day *day);
     //! The index table: the device's own figures, then OSCAR's analysis under its heading (when \a analysisShown).
     static QString indicesHtml(Day *day, bool analysisShown, QHash<ChannelID, EventDataType> &values);
+    //! A left-sidebar section heading: \a name links to folding the section; \a afterLink (e.g. a mark) follows it.
+    static QString lsbHeaderHtml(const QString &name, int checkBox, const QString &afterLink = QString(), bool on = true);
     //! Hides the analysis graphs and the Analysis tab while the analysis is hidden (analysisShown()).
     void applyAnalysisShown();
     //! Sets the "OSCAR analysis" button without emitting analysisToggled().
@@ -572,7 +574,7 @@ private:
         LSB_ANALYSIS ,
         LSB_END_SIZE };
     QBitArray leftSideBarEnable = QBitArray(LSB_END_SIZE,true);
-    void htmlLsbSectionHeader (QString& html, const QString& name,LEFT_SIDEBAR checkBox) ;
+    void htmlLsbSectionHeader (QString& html, const QString& name,LEFT_SIDEBAR checkBox, const QString &afterLink = QString()) ;
     void htmlLsbSectionHeaderInit (bool section=true) ;
     bool htmlLsbPrevSectionHeader = true;
 };

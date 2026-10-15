@@ -6,6 +6,8 @@
  * License. See the file COPYING in the main directory of the source code
  * for more details. */
 
+#include "glossary.h"
+#include "Graphs/gAnalysisCharts.h"
 #include "analysismarktests.h"
 #include "analysismark.h"
 #include "SleepLib/schema.h"
@@ -68,7 +70,7 @@ void AnalysisMarkTests::testTreeHeading()
     QScopedPointer<QTreeWidgetItem> an(AnalysisMark::treeHeading(QStringLiteral("OSCAR analysis"), true));
     QVERIFY(!(an->flags() & Qt::ItemIsSelectable));
     QVERIFY(!an->data(0, Qt::UserRole).isValid());
-    QCOMPARE(an->data(0, Qt::UserRole + 1).toString(), QStringLiteral("heading"));
+    QVERIFY(an->data(0, AnalysisMark::HeadingRole).toBool());
     QCOMPARE(an->background(0).color(), QColor(QStringLiteral("#EEEDFE")));
     QVERIFY(!an->icon(0).isNull());
     QVERIFY(an->font(0).bold());
@@ -94,4 +96,31 @@ void AnalysisMarkTests::testBarMarkIsText()
     QVERIFY(bar.contains(QStringLiteral("#7F77DD"), Qt::CaseInsensitive));
     QVERIFY(AnalysisMark::headingRow(QStringLiteral("OSCAR analysis"), 2).contains(bar));
     QVERIFY(!AnalysisMark::headingRow(QStringLiteral("OSCAR analysis"), 2).contains(QStringLiteral("border-left")));
+}
+
+// A page printed from its screen HTML gets the printable mark.
+void AnalysisMarkTests::testForPrint()
+{
+    const QString screen = QStringLiteral("<td>AHI ") + AnalysisMark::pill() + QStringLiteral("</td>");
+    const QString print = AnalysisMark::forPrint(screen);
+    QVERIFY(!print.contains(AnalysisMark::pill()));
+    QVERIFY(print.contains(AnalysisMark::printPill()));
+}
+
+// The heading marker has a role of its own, apart from the manual edits' id role (Qt::UserRole + 1).
+void AnalysisMarkTests::testHeadingRole()
+{
+    QVERIFY(AnalysisMark::HeadingRole != Qt::UserRole + 1);
+    QScopedPointer<QTreeWidgetItem> h(AnalysisMark::treeHeading(QStringLiteral("x"), true));
+    QVERIFY(h->data(0, AnalysisMark::HeadingRole).toBool());
+    QVERIFY(!h->data(0, Qt::UserRole + 1).isValid());
+}
+
+// No "(analysis)" spelling is left in the glossary term or the Overview axis.
+void AnalysisMarkTests::testOldNamesGone()
+{
+    const GlossaryEntry *e = Glossary::find(QStringLiteral("an_ahi"));
+    QVERIFY(e);
+    QVERIFY2(!e->term.contains(QStringLiteral("(analysis)")), qPrintable(e->term));
+    QVERIFY(!gAnalysisChart::units(gAnalysisChart::Ahi).contains(QStringLiteral("(analysis)")));
 }

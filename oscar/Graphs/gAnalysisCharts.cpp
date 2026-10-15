@@ -100,7 +100,7 @@ QString gAnalysisChart::title(Kind kind)
 QString gAnalysisChart::units(Kind kind)
 {
     switch (kind) {
-    case Ahi: return QObject::tr("Events/hour\n(analysis)");
+    case Ahi: return QObject::tr("Events/hour\n· analysis");
     case Odi: return QObject::tr("Desaturations\nper hour");
     case Spo2Ranges: {
         const QList<double> t = p_profile && p_profile->analysis ? p_profile->analysis->spo2Thresholds() : QList<double>();

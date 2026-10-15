@@ -21,7 +21,13 @@ const char *const PillText = "#3C3489";
 
 namespace {
 QString word() { return QCoreApplication::translate("AnalysisMark", "analysis"); }
+}
+
 QString hoverText() { return QCoreApplication::translate("AnalysisMark", "OSCAR's second opinion, experimental"); }
+
+QString forPrint(QString html)
+{
+    return html.replace(pill(), printPill());
 }
 
 QString pill()
@@ -55,7 +61,7 @@ QTreeWidgetItem *treeHeading(const QString &text, bool analysis)
 {
     auto *item = new QTreeWidgetItem(QStringList(text));
     item->setFlags(Qt::ItemIsEnabled);
-    item->setData(0, Qt::UserRole + 1, QStringLiteral("heading"));
+    item->setData(0, HeadingRole, true);
     QFont font = item->font(0);
     font.setBold(true);
     item->setFont(0, font);

@@ -258,6 +258,9 @@ class Day
     EventDataType deviceCount(ChannelID code);
     //! \brief deviceCount() per CPAP hour; 0 without CPAP hours.
     double devicePerHour(ChannelID code);
+    //! \brief The device's own OAHI and CAHI (no manual scoring), over the CPAP hours like deviceAHI().
+    EventDataType deviceOAHI() { return EventDataType(devicePerHour(AllOahiChannels)); }
+    EventDataType deviceCAHI() { return EventDataType(devicePerHour(AllCahiChannels)); }
 
     //! \brief Calculate AHI (Apnea Hypopnea Index)
     EventDataType calcAHI() {

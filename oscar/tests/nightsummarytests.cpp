@@ -478,3 +478,19 @@ void NightSummaryTests::testAnalysisConcernMarked()
     s.ahi = 7.0;   // the device's own AHI is the concern now
     QVERIFY(!s.isAnalysisConcern(s.concerns().first()));
 }
+
+// QLabel shows no hover text from the mark's title attribute: the label holding the mark explains it.
+void NightSummaryTests::testMarkHoverOnLabels()
+{
+    NightSummaryView view;
+    NightSummary s = goodNight();   // with OSCAR's analysis AHI
+    view.setSummary(s);
+    bool found = false;
+    for (QLabel *l : view.findChildren<QLabel *>()) {
+        if (l->text().contains(AnalysisMark::pill())) {
+            QCOMPARE(l->toolTip(), AnalysisMark::hoverText());
+            found = true;
+        }
+    }
+    QVERIFY(found);
+}

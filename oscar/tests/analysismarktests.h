@@ -14,6 +14,9 @@ class AnalysisMarkTests : public QObject
 {
     Q_OBJECT
 private slots:
+    void testForPrint();
+    void testHeadingRole();
+    void testOldNamesGone();
     void testBarMarkIsText();
     void initTestCase();
     void testPill();
