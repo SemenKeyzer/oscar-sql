@@ -14974,7 +14974,7 @@ Index</source>
     </message>
     <message>
         <location filename="../oscar/oximeterimport.ui" line="1907"/>
-        <location filename="../oscar/oximeterimport.cpp" line="275"/>
+        <location filename="../oscar/oximeterimport.cpp" line="276"/>
         <source>Start</source>
         <translation>Начать</translation>
     </message>
@@ -15028,142 +15028,141 @@ Index</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;OSCAR нуждается в начальном времени для сохранения этого сеанса оксиметрии.&lt;/p&gt;&lt;p&gt;Выберите один из вариантов:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="320"/>
+        <location filename="../oscar/oximeterimport.cpp" line="321"/>
         <source>Scanning for compatible oximeters</source>
         <translation>Поиск совместимых оксиметров</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="352"/>
+        <location filename="../oscar/oximeterimport.cpp" line="353"/>
         <source>Could not detect any connected oximeter devices.</source>
         <translation>Не удалось обнаружить подключенные оксиметрические устройства.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="360"/>
+        <location filename="../oscar/oximeterimport.cpp" line="361"/>
         <source>Connecting to %1 Oximeter</source>
         <translation>Подключение к оксиметру %1</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="388"/>
+        <location filename="../oscar/oximeterimport.cpp" line="389"/>
         <source>Renaming this oximeter from &apos;%1&apos; to &apos;%2&apos;</source>
         <translation>Переименование оксиметра из &apos;%1&apos; в &apos; %2&apos;</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="391"/>
+        <location filename="../oscar/oximeterimport.cpp" line="392"/>
         <source>Oximeter name is different.. If you only have one and are sharing it between profiles, set the name to the same on both profiles.</source>
         <translation>Имя оксиметра отличается. Если у вас только один оксиметр и вы используете его в разных профилях, установите одно и то же имя во всех профилях.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="434"/>
+        <location filename="../oscar/oximeterimport.cpp" line="435"/>
         <source>&quot;%1&quot;, session %2</source>
         <translation>&quot;%1&quot;, сеанс %2</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="459"/>
+        <location filename="../oscar/oximeterimport.cpp" line="460"/>
         <source>Nothing to import</source>
         <translation>Нечего импортировать</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="460"/>
+        <location filename="../oscar/oximeterimport.cpp" line="461"/>
         <source>Your oximeter did not have any valid sessions.</source>
         <translation>Оксиметр не содержит корректных сессий.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="461"/>
+        <location filename="../oscar/oximeterimport.cpp" line="462"/>
         <source>Close</source>
         <translation>Закрыть</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="464"/>
+        <location filename="../oscar/oximeterimport.cpp" line="465"/>
         <source>Waiting for %1 to start</source>
         <translation>Ожидание запуска %1</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="465"/>
+        <location filename="../oscar/oximeterimport.cpp" line="466"/>
         <source>Waiting for the device to start the upload process...</source>
         <translation>Ожидание, пока устройство начнёт отправку данных...</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="467"/>
+        <location filename="../oscar/oximeterimport.cpp" line="468"/>
         <source>Select upload option on %1</source>
         <translation>Выберите отправку (Upload) на %1</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="468"/>
+        <location filename="../oscar/oximeterimport.cpp" line="469"/>
         <source>You need to tell your oximeter to begin sending data to the computer.</source>
         <translation>Включите передачу данных на компьютер в оксиметре.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="469"/>
+        <location filename="../oscar/oximeterimport.cpp" line="470"/>
         <source>Please connect your oximeter, enter it&apos;s menu and select upload to commence data transfer...</source>
         <translation>Подключите оксиметр, откройте его меню и выберите отправку (Upload), чтобы начать передачу данных...</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="499"/>
+        <location filename="../oscar/oximeterimport.cpp" line="500"/>
         <source>%1 device is uploading data...</source>
         <translation>Устройство %1 отправляет данные...</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="500"/>
+        <location filename="../oscar/oximeterimport.cpp" line="501"/>
         <source>Please wait until oximeter upload process completes. Do not unplug your oximeter.</source>
         <translation>Дождитесь, пока оксиметр закончит отправку данных. Не отключайте его.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="519"/>
+        <location filename="../oscar/oximeterimport.cpp" line="520"/>
         <source>Oximeter import completed..</source>
         <translation>Импорт оксиметра завершен..</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="544"/>
+        <location filename="../oscar/oximeterimport.cpp" line="545"/>
         <source>Select a valid oximetry data file</source>
         <translation>Выберите корректный файл данных оксиметрии</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="544"/>
         <source>Oximetry Files (*.spo *.spor *.spo2 *.SpO2 *.dat)</source>
-        <translation>Файлы оксиметрии (*.spo *.spor *.spo2 *.SpO2 *.dat)</translation>
+        <translation type="vanished">Файлы оксиметрии (*.spo *.spor *.spo2 *.SpO2 *.dat)</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="566"/>
+        <location filename="../oscar/oximeterimport.cpp" line="567"/>
         <source>No Oximetry module could parse the given file:</source>
         <translation>Нет подходящего модуля оксиметрии для распознавания файла:</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="614"/>
+        <location filename="../oscar/oximeterimport.cpp" line="615"/>
         <source>Live Oximetry Mode</source>
         <translation>Оксиметрия в реальном времени</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="666"/>
+        <location filename="../oscar/oximeterimport.cpp" line="667"/>
         <source>Live Oximetry Stopped</source>
         <translation>Оксиметрия в реальном времени остановлена</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="667"/>
+        <location filename="../oscar/oximeterimport.cpp" line="668"/>
         <source>Live Oximetry import has been stopped</source>
         <translation>Импорт оксиметрии в реальном времени был остановлен</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1089"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1090"/>
         <source>Oximeter Session %1</source>
         <translation>Сеанс оксиметра %1</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1134"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1135"/>
         <source>OSCAR gives you the ability to track Oximetry data alongside CPAP session data, which can give valuable insight into the effectiveness of CPAP treatment. It will also work standalone with your Pulse Oximeter, allowing you to store, track and review your recorded data.</source>
         <translation>OSCAR позволяет отслеживать данные оксиметрии вместе с данными сеансов CPAP, что может дать полезную информацию об эффективности CPAP терапии. Можно также работать только с самим пульсоксиметром: сохранять, отслеживать и просматривать записанные данные.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1145"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1146"/>
         <source>If you are trying to sync oximetry and CPAP data, please make sure you imported your CPAP sessions first before proceeding!</source>
         <translation>Если вы собираетесь синхронизировать данные оксиметрии и CPAP, убедитесь, что вы импортировали свои сеансы CPAP, прежде чем продолжить!</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1148"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1149"/>
         <source>For OSCAR to be able to locate and read directly from your Oximeter device, you need to ensure the correct device drivers (eg. USB to Serial UART) have been installed on your computer. For more information about this, %1click here%2.</source>
         <translation>Чтобы OSCAR смог найти и прочесть данные с вашего оксиметра, на компьютере должны быть установлены нужные драйверы устройств (например, USB to Serial UART). Для получения дополнительной информации об этом %1нажмите здесь%2.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="596"/>
+        <location filename="../oscar/oximeterimport.cpp" line="597"/>
         <source>Oximeter not detected</source>
         <translation>Оксиметр не обнаружен</translation>
     </message>
@@ -15188,107 +15187,112 @@ Index</source>
         <translation>O2Ring (Bluetooth)</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="240"/>
+        <location filename="../oscar/oximeterimport.cpp" line="241"/>
         <source>Close the ViHealth app on the phone and wear the ring so that it wakes up.</source>
         <translation>Закройте приложение ViHealth на телефоне и наденьте кольцо, чтобы оно проснулось.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="603"/>
+        <location filename="../oscar/oximeterimport.cpp" line="545"/>
+        <source>Oximetry Files (*.spo *.spor *.spo2 *.SpO2 *.dat *.csv)</source>
+        <translation>Файлы оксиметрии (*.spo *.spor *.spo2 *.SpO2 *.dat *.csv)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="604"/>
         <source>Couldn&apos;t access oximeter</source>
         <translation>Невозможно получить доступ к оксиметру</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="617"/>
+        <location filename="../oscar/oximeterimport.cpp" line="618"/>
         <source>Starting up...</source>
         <translation>Запуск...</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="618"/>
+        <location filename="../oscar/oximeterimport.cpp" line="619"/>
         <source>If you can still read this after a few seconds, cancel and try again</source>
         <translation>Если вы все еще видите это сообщение через несколько секунд, отмените и попробуйте снова</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="665"/>
+        <location filename="../oscar/oximeterimport.cpp" line="666"/>
         <source>Live Import Stopped</source>
         <translation>Импорт в реальном времени остановлен</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="718"/>
+        <location filename="../oscar/oximeterimport.cpp" line="719"/>
         <source>%1 session(s) on %2, starting at %3</source>
         <translation>%1 сеанс(ов) за %2, начиная с %3</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="722"/>
+        <location filename="../oscar/oximeterimport.cpp" line="723"/>
         <source>No CPAP data available on %1</source>
         <translation>Нет данных CPAP доступных на %1</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="857"/>
+        <location filename="../oscar/oximeterimport.cpp" line="858"/>
         <source>Recording...</source>
         <translation>Запись...</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="864"/>
+        <location filename="../oscar/oximeterimport.cpp" line="865"/>
         <source>Finger not detected</source>
         <translation>Палец не обнаружен</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="968"/>
+        <location filename="../oscar/oximeterimport.cpp" line="969"/>
         <source>I want to use the time my computer recorded for this live oximetry session.</source>
         <translation>Использовать время компьютера для этой оксиметрической сессии в реальном времени.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="971"/>
+        <location filename="../oscar/oximeterimport.cpp" line="972"/>
         <source>I need to set the time manually, because my oximeter doesn&apos;t have an internal clock.</source>
         <translation>Установить время вручную, так как оксиметр не имеет внутренних часов.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="983"/>
+        <location filename="../oscar/oximeterimport.cpp" line="984"/>
         <source>Something went wrong getting session data</source>
         <translation>Что-то пошло не так при получении данных сеанса</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1130"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1131"/>
         <source>Welcome to the Oximeter Import Wizard</source>
         <translation>Добро пожаловать в Мастер импорта оксиметрии</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1132"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1133"/>
         <source>Pulse Oximeters are medical devices used to measure blood oxygen saturation. During extended Apnea events and abnormal breathing patterns, blood oxygen saturation levels can drop significantly, and can indicate issues that need medical attention.</source>
         <translation>Пульсоксиметры - это медицинские устройства, используемые для измерения насыщения крови кислородом. Во время апноэ и ненормальных форм дыхания, уровень кислорода в крови может значительно снижаться, и может указывать на проблемы, требующие медицинского вмешательства.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1136"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1137"/>
         <source>OSCAR is currently compatible with Contec CMS50D+, CMS50E, CMS50F and CMS50I serial oximeters.&lt;br/&gt;(Note: Direct importing from bluetooth models is &lt;span style=&quot; font-weight:600;&quot;&gt;probably not&lt;/span&gt; possible yet)</source>
         <translation>В настоящее время OSCAR совместим с оксиметрами Contec CMS50D +, CMS50E, CMS50F и CMS50i.&lt;br/&gt;(Примечание: прямой импорт данных из моделей с Bluetooth &lt;span style=&quot;font-weight:600;&quot;&gt;вероятно&lt;/span&gt; еще невозможен)</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1138"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1139"/>
         <source>You may wish to note, other companies, such as Pulox, simply rebadge Contec CMS50&apos;s under new names, such as the Pulox PO-200, PO-300, PO-400. These should also work.</source>
         <translation>Обратите внимание, что другие компании, такие как Pulox, выпускают Contec CMS50 под другими названиями, например Pulox PO-200, PO-300, PO-400. Они тоже будут работать.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1141"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1142"/>
         <source>It also can read from ChoiceMMed MD300W1 oximeter .dat files.</source>
         <translation>Можно также загружать .dat файлы оксиметра ChoiceMMed MD300W1.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1143"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1144"/>
         <source>Please remember:</source>
         <translation>Пожалуйста, помните:</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1147"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1148"/>
         <source>Important Notes:</source>
         <translation>Важное замечание:</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1150"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1151"/>
         <source>Contec CMS50D+ devices do not have an internal clock, and do not record a starting time. If you do not have a CPAP session to link a recording to, you will have to enter the start time manually after the import process is completed.</source>
         <translation>Устройства Contec CMS50D+ не имеют внутренних часов и не записывают время запуска. Если у вас нет сеанса CPAP, чтобы связать запись, нужно будет ввести время начала вручную после завершения процесса импорта.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1152"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1153"/>
         <source>Even for devices with an internal clock, it is still recommended to get into the habit of starting oximeter records at the same time as CPAP sessions, because CPAP internal clocks tend to drift over time, and not all can be reset easily.</source>
         <translation>Даже для устройств с внутренними часами, рекомендуется запускать запись оксиметрии одновременно с сеансом CPAP, так как внутренние часы CPAP теряют точность со временем, и не все можно легко установить.</translation>
     </message>
@@ -18780,7 +18784,7 @@ TTIA: %1</translation>
         <location filename="../oscar/SleepLib/common.cpp" line="957"/>
         <location filename="../oscar/datafolderdialog.cpp" line="233"/>
         <location filename="../oscar/datafolderdialog.cpp" line="255"/>
-        <location filename="../oscar/main.cpp" line="191"/>
+        <location filename="../oscar/main.cpp" line="192"/>
         <source>Cancel</source>
         <translation>Отмена</translation>
     </message>
@@ -20524,7 +20528,7 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/profiles.cpp" line="888"/>
-        <location filename="../oscar/main.cpp" line="559"/>
+        <location filename="../oscar/main.cpp" line="560"/>
         <source>Important:</source>
         <translation>Важно:</translation>
     </message>
@@ -21744,12 +21748,12 @@ TTIA: %1</translation>
         <translation>Нижняя граница</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1022"/>
+        <location filename="../oscar/main.cpp" line="1023"/>
         <source>As you did not select a data folder, OSCAR will exit.</source>
         <translation>Папка с данными не выбрана, приложение будет закрыто.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="152"/>
+        <location filename="../oscar/main.cpp" line="153"/>
         <source>or CANCEL to skip migration.</source>
         <translation>или Отмена, чтобы пропустить миграцию.</translation>
     </message>
@@ -21782,12 +21786,12 @@ TTIA: %1</translation>
         <translation type="vanished">в </translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="832"/>
+        <location filename="../oscar/main.cpp" line="833"/>
         <source>OSCAR crashed due to an incompatibility with your graphics hardware.</source>
         <translation>Произошла ошибка OSCAR из-за несовместимости графического адаптера.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="833"/>
+        <location filename="../oscar/main.cpp" line="834"/>
         <source>To resolve this, OSCAR has reverted to a slower but more compatible method of drawing.</source>
         <translation>OSCAR переключен в более медленный совместимый режим отображения.</translation>
     </message>
@@ -21816,38 +21820,38 @@ TTIA: %1</translation>
         <translation type="vanished">Нажмите [ОК] для продолжения или [Нет], если вы не хотите использовать существующие данные  SleepyHead или OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="151"/>
+        <location filename="../oscar/main.cpp" line="152"/>
         <source>Choose the OSCAR 1.x data folder to migrate</source>
         <translation>Выберите папку с данными OSCAR 1.x для миграции</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="167"/>
+        <location filename="../oscar/main.cpp" line="168"/>
         <source>The folder you chose does not contain valid OSCAR 1.x data.</source>
         <translation>Выбранная папка не содержит допустимых данных OSCAR 1.x.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="168"/>
-        <location filename="../oscar/main.cpp" line="178"/>
+        <location filename="../oscar/main.cpp" line="169"/>
+        <location filename="../oscar/main.cpp" line="179"/>
         <source>You cannot migrate from this folder:</source>
         <translation>Невозможно выполнить миграцию из этой папки:</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="177"/>
+        <location filename="../oscar/main.cpp" line="178"/>
         <source>The folder you chose does not contain any OSCAR profiles.</source>
         <translation>Выбранная папка не содержит профилей OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="190"/>
+        <location filename="../oscar/main.cpp" line="191"/>
         <source>Migrating Profiles</source>
         <translation>Миграция профилей</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="197"/>
+        <location filename="../oscar/main.cpp" line="198"/>
         <source>Migrating OSCAR data</source>
         <translation>Миграция данных OSCAR</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="225"/>
+        <location filename="../oscar/main.cpp" line="226"/>
         <source>Migrating profile: %1
 (%2 of %3)
 
@@ -21858,7 +21862,7 @@ Starting import...</source>
 Начало импорта...</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="244"/>
+        <location filename="../oscar/main.cpp" line="245"/>
         <source>Cancelling: %1
 (%2 of %3)
 
@@ -21869,7 +21873,7 @@ Cleaning up, please wait...</source>
 Очистка, пожалуйста, подождите...</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="260"/>
+        <location filename="../oscar/main.cpp" line="261"/>
         <source>Migrating profile: %1
 (%2 of %3)
 
@@ -21880,214 +21884,214 @@ Cleaning up, please wait...</source>
 %4</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="301"/>
+        <location filename="../oscar/main.cpp" line="302"/>
         <source>Migration cancelled.</source>
         <translation>Миграция отменена.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="303"/>
+        <location filename="../oscar/main.cpp" line="304"/>
         <source>The following profile(s) were fully imported before cancellation:</source>
         <translation>Следующие профили были полностью импортированы до отмены:</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="306"/>
+        <location filename="../oscar/main.cpp" line="307"/>
         <source>No profiles were imported.</source>
         <translation>Профили не были импортированы.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="309"/>
+        <location filename="../oscar/main.cpp" line="310"/>
         <source>Migration Cancelled</source>
         <translation>Миграция отменена</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="312"/>
+        <location filename="../oscar/main.cpp" line="313"/>
         <source>Successfully migrated %1 profile(s) in %2 seconds.</source>
         <translation>Успешно перенесено профилей: %1 за %2 с.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="315"/>
-        <location filename="../oscar/main.cpp" line="325"/>
+        <location filename="../oscar/main.cpp" line="316"/>
+        <location filename="../oscar/main.cpp" line="326"/>
         <source>Imported profiles:</source>
         <translation>Импортированные профили:</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="317"/>
+        <location filename="../oscar/main.cpp" line="318"/>
         <source>Migration Complete</source>
         <translation>Миграция завершена</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="320"/>
+        <location filename="../oscar/main.cpp" line="321"/>
         <source>Migrated %1 profile(s) successfully, but %2 profile(s) failed in %3 seconds.</source>
         <translation>Успешно перенесено профилей: %1, не удалось перенести: %2 (за %3 с).</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="328"/>
+        <location filename="../oscar/main.cpp" line="329"/>
         <source>Failed profiles:</source>
         <translation>Профили с ошибками:</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="331"/>
+        <location filename="../oscar/main.cpp" line="332"/>
         <source>Migration Partially Complete</source>
         <translation>Миграция частично завершена</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="334"/>
+        <location filename="../oscar/main.cpp" line="335"/>
         <source>Failed to migrate any profiles. All %1 profile(s) failed.</source>
         <translation>Не удалось перенести ни одного профиля. Профилей с ошибками: %1.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="337"/>
+        <location filename="../oscar/main.cpp" line="338"/>
         <source>Migration Failed</source>
         <translation>Ошибка миграции</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="556"/>
+        <location filename="../oscar/main.cpp" line="557"/>
         <source>OSCAR %1 needs to upgrade its database from version %2 to version %3.</source>
         <translation>OSCAR %1 требуется обновить базу данных с версии %2 до версии %3.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="560"/>
+        <location filename="../oscar/main.cpp" line="561"/>
         <source>Once upgraded, this database &lt;font size=+1&gt;cannot&lt;/font&gt; be opened by earlier versions of OSCAR, and the upgrade cannot be undone.</source>
         <translation>После обновления эта база данных &lt;font size=+1&gt;не может&lt;/font&gt; быть открыта более ранними версиями OSCAR, и обновление нельзя отменить.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="562"/>
+        <location filename="../oscar/main.cpp" line="563"/>
         <source>&lt;b&gt;Back up and upgrade&lt;/b&gt; first saves a complete copy of the current database in %1, so you can go back to it if needed.</source>
         <translation>&lt;b&gt;Создать резервную копию и обновить&lt;/b&gt; сначала сохранит полную копию текущей базы данных в %1, чтобы вы могли вернуться к ней при необходимости.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="564"/>
+        <location filename="../oscar/main.cpp" line="565"/>
         <source>&lt;b&gt;Exit&lt;/b&gt; leaves the database unchanged, so you can back it up yourself before starting OSCAR again.</source>
         <translation>&lt;b&gt;Выход&lt;/b&gt; оставит базу данных без изменений, чтобы вы могли самостоятельно создать её резервную копию перед повторным запуском OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="566"/>
+        <location filename="../oscar/main.cpp" line="567"/>
         <source>Are you ready to upgrade?</source>
         <translation>Готовы приступить к обновлению?</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="568"/>
+        <location filename="../oscar/main.cpp" line="569"/>
         <source>Database Upgrade Required</source>
         <translation>Требуется обновление базы данных</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="569"/>
+        <location filename="../oscar/main.cpp" line="570"/>
         <source>Back up and upgrade</source>
         <translation>Создать резервную копию и обновить</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="570"/>
+        <location filename="../oscar/main.cpp" line="571"/>
         <source>Upgrade</source>
         <translation>Обновить</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="571"/>
-        <location filename="../oscar/main.cpp" line="623"/>
+        <location filename="../oscar/main.cpp" line="572"/>
+        <location filename="../oscar/main.cpp" line="624"/>
         <source>Exit</source>
         <translation>Выход</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="586"/>
+        <location filename="../oscar/main.cpp" line="587"/>
         <source>Upgrading Database</source>
         <translation>Обновление базы данных</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="607"/>
+        <location filename="../oscar/main.cpp" line="608"/>
         <source>Backing up the database to %1...</source>
         <translation>Создание резервной копии базы данных в %1...</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="619"/>
+        <location filename="../oscar/main.cpp" line="620"/>
         <source>Database Backup Failed</source>
         <translation>Не удалось создать резервную копию базы данных</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="620"/>
+        <location filename="../oscar/main.cpp" line="621"/>
         <source>OSCAR could not save a copy of the database:</source>
         <translation>OSCAR не смог сохранить копию базы данных:</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="621"/>
+        <location filename="../oscar/main.cpp" line="622"/>
         <source>You can upgrade without a backup, or exit and back up the database yourself first.</source>
         <translation>Вы можете обновить без резервного копирования или выйти и создать резервную копию базы данных самостоятельно.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="622"/>
+        <location filename="../oscar/main.cpp" line="623"/>
         <source>Upgrade without backup</source>
         <translation>Обновить без резервного копирования</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="636"/>
+        <location filename="../oscar/main.cpp" line="637"/>
         <source>Upgrading database from version %1 to version %2...</source>
         <translation>Обновление базы данных с версии %1 до версии %2...</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="643"/>
+        <location filename="../oscar/main.cpp" line="644"/>
         <source>Upgrading database from version %1 to version %2 (step %3 of %4)...</source>
         <translation>Обновление базы данных с версии %1 до версии %2 (шаг %3 из %4)...</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="654"/>
+        <location filename="../oscar/main.cpp" line="655"/>
         <source>OSCAR could not upgrade your database from version %1 to version %2.</source>
         <translation>OSCAR не смог обновить вашу базу данных с версии %1 до версии %2.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="657"/>
+        <location filename="../oscar/main.cpp" line="658"/>
         <source>The copy made before the upgrade is unchanged:</source>
         <translation>Копия, сделанная перед обновлением, осталась без изменений:</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="660"/>
+        <location filename="../oscar/main.cpp" line="661"/>
         <source>Each completed step has been kept, and OSCAR will try the remaining steps the next time it starts. If the problem persists, restore the database from a backup or delete oscar.db and re-import your CPAP data.</source>
         <translation>Каждый завершённый шаг был сохранён, и OSCAR попытается выполнить оставшиеся шаги при следующем запуске. Если проблема не исчезнет, восстановите базу данных из резервной копии или удалите oscar.db и повторно импортируйте данные CPAP.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="662"/>
+        <location filename="../oscar/main.cpp" line="663"/>
         <source>OSCAR will now close.</source>
         <translation>Сейчас OSCAR закроется.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="663"/>
+        <location filename="../oscar/main.cpp" line="664"/>
         <source>Database Upgrade Failed</source>
         <translation>Не удалось обновить базу данных</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="968"/>
+        <location filename="../oscar/main.cpp" line="969"/>
         <source>Your graphics hardware does not support the version of OpenGL that OSCAR needs.</source>
         <translation>Ваше графическое оборудование не поддерживает версию OpenGL, необходимую для OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="969"/>
+        <location filename="../oscar/main.cpp" line="970"/>
         <source>OSCAR will restart using a slower but more compatible method of drawing.</source>
         <translation>OSCAR перезапустится, используя более медленный, но более совместимый метод отображения.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="981"/>
+        <location filename="../oscar/main.cpp" line="982"/>
         <source>OSCAR was unable to restart itself. Please start OSCAR again.</source>
         <translation>OSCAR не удалось перезапуститься. Пожалуйста, запустите OSCAR снова.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1039"/>
+        <location filename="../oscar/main.cpp" line="1040"/>
         <source>Locate your OSCAR 2 data folder</source>
         <translation>Найдите папку данных OSCAR 2</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1050"/>
+        <location filename="../oscar/main.cpp" line="1051"/>
         <source>This folder contains OSCAR 1.x data, not OSCAR 2 data.</source>
         <translation>Эта папка содержит данные OSCAR 1.x, а не данные OSCAR 2.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1051"/>
+        <location filename="../oscar/main.cpp" line="1052"/>
         <source>This folder does not contain an OSCAR 2 database.</source>
         <translation>Эта папка не содержит базу данных OSCAR 2.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1052"/>
+        <location filename="../oscar/main.cpp" line="1053"/>
         <source>Not an OSCAR 2 data folder</source>
         <translation>Это не папка данных OSCAR 2</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1054"/>
+        <location filename="../oscar/main.cpp" line="1055"/>
         <source>Choose another folder, or Cancel to return to the previous screen.</source>
         <translation>Выберите другую папку или нажмите «Отмена», чтобы вернуться на предыдущий экран.</translation>
     </message>
@@ -22108,7 +22112,7 @@ Cleaning up, please wait...</source>
         <translation type="vanished">Выберите или создайте новую папку для данных OSCAR</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1023"/>
+        <location filename="../oscar/main.cpp" line="1024"/>
         <source>Next time you run OSCAR, you will be asked again.</source>
         <translation>При следующем запуске, вопрос повторится.</translation>
     </message>
@@ -22121,82 +22125,82 @@ Cleaning up, please wait...</source>
         <translation type="vanished">Выбранная папка не пустая, и не содержит корректных данных OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1070"/>
+        <location filename="../oscar/main.cpp" line="1071"/>
         <source>Data directory:</source>
         <translation>Папка данных:</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1071"/>
+        <location filename="../oscar/main.cpp" line="1072"/>
         <source>Database schema:</source>
         <translation>Схема базы данных:</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1078"/>
+        <location filename="../oscar/main.cpp" line="1079"/>
         <source>Unable to create the OSCAR data folder at</source>
         <translation>Невозможно создать папку данных OSCAR в</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1091"/>
+        <location filename="../oscar/main.cpp" line="1092"/>
         <source>Unable to write to OSCAR data directory</source>
         <translation>Невозможно сохранить данные OSCAR</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1092"/>
+        <location filename="../oscar/main.cpp" line="1093"/>
         <source>Error code</source>
         <translation>Код ошибки</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1093"/>
+        <location filename="../oscar/main.cpp" line="1094"/>
         <source>OSCAR cannot continue and is exiting.</source>
         <translation>Невозможно продолжить, приложение будет закрыто.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1109"/>
+        <location filename="../oscar/main.cpp" line="1110"/>
         <source>This OSCAR database folder is already open in another instance of OSCAR.</source>
         <translation>Эта папка базы данных OSCAR уже открыта в другом экземпляре OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1110"/>
+        <location filename="../oscar/main.cpp" line="1111"/>
         <source>Folder:</source>
         <translation>Папка:</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1111"/>
+        <location filename="../oscar/main.cpp" line="1112"/>
         <source>Close the other OSCAR instance before opening this database.</source>
         <translation>Закройте другой экземпляр OSCAR перед открытием этой базы данных.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1113"/>
+        <location filename="../oscar/main.cpp" line="1114"/>
         <source>(Other instance process ID: %1)</source>
         <translation>(Идентификатор процесса другого экземпляра: %1)</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1121"/>
+        <location filename="../oscar/main.cpp" line="1122"/>
         <source>Unable to write to debug log. You can still use the debug pane (Help/Troubleshooting/Show Debug Pane) but the debug log will not be written to disk.</source>
         <translation>Невозможно записать отладочный лог. Можно использовать окно отладки (Помощь/Разрешение проблем/Показать окно отладки), но эти данные не будут сохранены на диск.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1147"/>
+        <location filename="../oscar/main.cpp" line="1148"/>
         <source>Database Error</source>
         <translation>Ошибка базы данных</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1180"/>
+        <location filename="../oscar/main.cpp" line="1181"/>
         <source>Check Database Integrity</source>
         <translation>Проверка целостности базы данных</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1184"/>
+        <location filename="../oscar/main.cpp" line="1185"/>
         <source>Checking database integrity, please wait...</source>
         <translation>Выполняется проверка целостности базы данных, пожалуйста, подождите...</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1204"/>
+        <location filename="../oscar/main.cpp" line="1205"/>
         <source>Database Integrity Warning</source>
         <translation>Предупреждение о целостности базы данных</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1205"/>
+        <location filename="../oscar/main.cpp" line="1206"/>
         <source>OSCAR detected that the previous session ended unexpectedly, and the database integrity check found problems.
 
 Some data may be missing or corrupted.
@@ -22235,17 +22239,17 @@ You may continue, but some data may be incomplete or incorrect.</source>
         <translation type="obsolete">Нажмите [OK] для перехода к следующему экрану или [Нет], если вы не хотите использовать данные OSCAR 1.x.</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1374"/>
+        <location filename="../oscar/main.cpp" line="1376"/>
         <source>Version &quot;%1&quot; is invalid, cannot continue!</source>
         <translation>Версия &quot;%1&quot; некорректна, невозможно продолжить!</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1383"/>
+        <location filename="../oscar/main.cpp" line="1385"/>
         <source>The version of OSCAR you are running (%1) is OLDER than the one used to create this data (%2).</source>
         <translation>Используемая версия OSCAR (%1) балее старая, чем использовавшаяся с этими данными (%2).</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1387"/>
+        <location filename="../oscar/main.cpp" line="1389"/>
         <source>It is likely that doing this will cause data corruption, are you sure you want to do this?</source>
         <translation>Скорее всего данные будут повреждены, точно хотите продолжить?</translation>
     </message>
@@ -22255,9 +22259,9 @@ You may continue, but some data may be incomplete or incorrect.</source>
         <translation>Вопрос</translation>
     </message>
     <message>
-        <location filename="../oscar/main.cpp" line="1021"/>
-        <location filename="../oscar/main.cpp" line="1077"/>
-        <location filename="../oscar/main.cpp" line="1095"/>
+        <location filename="../oscar/main.cpp" line="1022"/>
+        <location filename="../oscar/main.cpp" line="1078"/>
+        <location filename="../oscar/main.cpp" line="1096"/>
         <source>Exiting</source>
         <translation>Завершение</translation>
     </message>
@@ -23606,6 +23610,8 @@ popout window, delete it, then pop out this graph again.</source>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/viatom_loader.h" line="40"/>
+        <location filename="../oscar/SleepLib/loader_plugins/vihealth_csv_loader.h" line="37"/>
+        <location filename="../oscar/SleepLib/loader_plugins/vihealth_csv_loader.h" line="40"/>
         <source>Viatom</source>
         <translation>Viatom</translation>
     </message>
@@ -24772,6 +24778,17 @@ Pulse rises: %1 per hour</source>
         <location filename="../oscar/SleepLib/loader_plugins/o2ring_import.cpp" line="69"/>
         <source>OSCAR could not read the record %1.</source>
         <translation>OSCAR не смог прочитать запись %1.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/vihealth_csv_loader.h" line="37"/>
+        <location filename="../oscar/SleepLib/loader_plugins/vihealth_csv_loader.h" line="41"/>
+        <source>ViHealth CSV export</source>
+        <translation>Выгрузка CSV из ViHealth</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/vihealth_csv_loader.h" line="38"/>
+        <source>ViHealth</source>
+        <translation>ViHealth</translation>
     </message>
 </context>
 <context>
