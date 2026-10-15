@@ -105,6 +105,13 @@ private slots:
     void testPeriodHtmlSerialNumbers();
     void testOximetryRows();
 
+private slots:
+    void testDeviceCounts();
+    void testDeviceCountSkipsDisabled();
+    void testIndicesDeviceThenAnalysis();
+    void testIndicesWithoutCpap();
+    void testManualCountsHtml();
+    void testManualPageCounts();
 private:
     class QCoreApplication *m_app = nullptr;
     class QTemporaryDir *m_tempDir = nullptr;

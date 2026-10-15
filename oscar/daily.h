@@ -128,7 +128,11 @@ public:
     //! The Manual analysis page: the AHI after manual scoring and \a scoringBlock (the edits), or a
     //! hint how to start when there are none.
     static QString manualAnalysisHtml(const QString &scoringBlock, double correctedAhi, double deviceAhi, const QString &name,
-                                      bool cpapData = true);
+                                      bool cpapData = true, const QString &countsTable = QString());
+    //! "type: device → after manual scoring" per hour, for the event types manual scoring changed; empty if none.
+    static QString manualCountsHtml(Day *day);
+    //! The index table: the device's own figures, then OSCAR's analysis under its heading (when \a analysisShown).
+    static QString indicesHtml(Day *day, bool analysisShown, QHash<ChannelID, EventDataType> &values);
     //! Hides the analysis graphs and the Analysis tab while the analysis is hidden (analysisShown()).
     void applyAnalysisShown();
     //! Sets the "OSCAR analysis" button without emitting analysisToggled().

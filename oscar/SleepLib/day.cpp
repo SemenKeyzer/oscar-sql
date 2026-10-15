@@ -1783,6 +1783,25 @@ EventDataType Day::deviceAHI()
     return minutes > 0 ? (c * 60.0) / minutes : 0;
 }
 
+EventDataType Day::deviceCount(ChannelID code)
+{
+    EventDataType total = 0;
+    if (const QVector<ChannelID> *group = ahiChannelGroup(code)) {
+        for (ChannelID c : *group) total += deviceCount(c);
+        return total;
+    }
+    for (Session *sess : std::as_const(sessions)) {
+        if (sess->enabled() && sess->m_cnt.contains(code)) total += sess->count(code);
+    }
+    return total;
+}
+
+double Day::devicePerHour(ChannelID code)
+{
+    const double h = hours(MT_CPAP);
+    return h > 0 ? double(deviceCount(code)) / h : 0.0;
+}
+
 double Day::perHour(ChannelID code)
 {
     // the AHI's events (OH/CH too) and RERA, which an excluded stretch leaves out, count over the AHI hours

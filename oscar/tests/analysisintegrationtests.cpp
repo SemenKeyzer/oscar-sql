@@ -10,6 +10,7 @@
 
 #include <QScopeGuard>
 #include "daily.h"
+#include "analysismark.h"
 #include "overviewpresets.h"
 #include "Graphs/gLineChart.h"
 #include "Graphs/gGraph.h"
@@ -2473,4 +2474,116 @@ void AnalysisIntegrationTests::testDoctorReportHiddenAnalysis()
     QVERIFY(!r.analysisShown);
     QCOMPARE(r.oximetryNights, 1);
     QCOMPARE(r.analysisMissing, 0);
+}
+
+namespace {
+
+//! scoredSession() plus two hypopneas of OSCAR's analysis.
+Session *sessionWithAnalysis(Machine *mach, SessionID id, qint64 machineRow)
+{
+    Session *s = scoredSession(mach, id, machineRow);
+    const qint64 t0 = synth::kStart;
+    s->AddEventList(AN_Hypopnea, EVL_Event)->AddEvent(t0 + 500000, 15);
+    s->eventlist[AN_Hypopnea].first()->AddEvent(t0 + 600000, 18);
+    s->setCount(AN_Hypopnea, 2);
+    s->UpdateSummaries();   // the machine learns the session's channels
+    return s;
+}
+
+} // namespace
+
+// The device's own counts leave the manual edits out.
+void AnalysisIntegrationTests::testDeviceCounts()
+{
+    Machine cpap(p_profile, 91);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    Session *s = scoredSession(&cpap, 911, m_machineRow);
+    day.addSession(s);
+    s->setManualScoring({ { CPAP_Obstructive, -1 } }, 0, 0, true);
+    QCOMPARE(day.deviceCount(CPAP_Obstructive), EventDataType(2));
+    QCOMPARE(day.count(CPAP_Obstructive), EventDataType(1));
+    QVERIFY(qAbs(day.devicePerHour(CPAP_Obstructive) - 2.0 / day.hours(MT_CPAP)) < 1e-6);
+    s->setManualScoring({}, 0, 0, false);
+}
+
+void AnalysisIntegrationTests::testDeviceCountSkipsDisabled()
+{
+    Machine cpap(p_profile, 92);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    Session *s = scoredSession(&cpap, 921, m_machineRow);
+    day.addSession(s);
+    s->setEnabled(false);
+    QCOMPARE(day.deviceCount(CPAP_Obstructive), EventDataType(0));
+    s->setEnabled(true);
+}
+
+// The index table: the device's rows with the device's figures, then OSCAR's analysis under its heading.
+void AnalysisIntegrationTests::testIndicesDeviceThenAnalysis()
+{
+    Machine cpap(p_profile, 93);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    Session *s = sessionWithAnalysis(&cpap, 931, m_machineRow);
+    day.addSession(s);
+    s->setManualScoring({ { CPAP_Obstructive, -1 } }, 0, 0, true);
+
+    QHash<ChannelID, EventDataType> values;
+    const QString html = Daily::indicesHtml(&day, true, values);
+    const int device = html.indexOf(schema::channel[CPAP_Obstructive].fullname());
+    const int heading = html.indexOf(QStringLiteral("OSCAR analysis"));
+    const int an = html.indexOf(QStringLiteral(">%1<").arg(analysis::channelBaseName(AN_Hypopnea)));
+    QVERIFY2(device >= 0 && heading > device && an > heading, qPrintable(html));
+    QVERIFY(html.contains(QString::number(2.0 / day.hours(MT_CPAP), 'f', 2)));
+    QVERIFY(html.contains(QStringLiteral("#7F77DD"), Qt::CaseInsensitive));
+    QVERIFY(!html.contains(QStringLiteral("· analysis")));
+
+    const QString hidden = Daily::indicesHtml(&day, false, values);
+    QVERIFY(!hidden.contains(QStringLiteral("OSCAR analysis")));
+    QVERIFY(!hidden.contains(analysis::channelBaseName(AN_Hypopnea) + QStringLiteral("<")));
+    s->setManualScoring({}, 0, 0, false);
+}
+
+void AnalysisIntegrationTests::testIndicesWithoutCpap()
+{
+    const qint64 oxiRow = insertRow(QStringLiteral("INSERT INTO machines (profile_id, machine_id, loader_name, machine_type, serial_number) "
+                                                   "VALUES (?, 3094, 'TestOxi', ?, 'OX94')"), { m_profileId, int(MT_OXIMETER) });
+    Machine oxi(p_profile, 94);
+    oxi.info.type = MT_OXIMETER;
+    oxi.setDatabaseId(oxiRow);
+    Day day;
+    day.addSession(oximetrySession(&oxi, 941, oxiRow));
+    QHash<ChannelID, EventDataType> values;
+    const QString html = Daily::indicesHtml(&day, true, values);
+    QVERIFY(!html.contains(QStringLiteral("OSCAR analysis")));
+}
+
+// The «Manual analysis» page lists device → after manual scoring for the types with edits.
+void AnalysisIntegrationTests::testManualCountsHtml()
+{
+    Machine cpap(p_profile, 95);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    Session *s = scoredSession(&cpap, 951, m_machineRow);
+    day.addSession(s);
+    QVERIFY(Daily::manualCountsHtml(&day).isEmpty());
+    s->setManualScoring({ { CPAP_Obstructive, -1 } }, 0, 0, true);
+    const QString html = Daily::manualCountsHtml(&day);
+    QVERIFY(html.contains(schema::channel[CPAP_Obstructive].fullname()));
+    QVERIFY(html.contains(QStringLiteral("→")));
+    QVERIFY(!html.contains(schema::channel[CPAP_Hypopnea].fullname()));
+    s->setManualScoring({}, 0, 0, false);
+}
+
+void AnalysisIntegrationTests::testManualPageCounts()
+{
+    const QString html = Daily::manualAnalysisHtml(QStringLiteral("XBLOCK"), 3.86, 3.71, QStringLiteral("AHI"), true, QStringLiteral("COUNTS"));
+    const int ahi = html.indexOf(QStringLiteral("AHI after manual scoring"));
+    const int counts = html.indexOf(QStringLiteral("COUNTS"));
+    QVERIFY2(ahi >= 0 && counts > ahi && html.indexOf(QStringLiteral("XBLOCK")) > counts, qPrintable(html));
 }

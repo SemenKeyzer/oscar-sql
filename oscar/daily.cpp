@@ -43,6 +43,7 @@
 
 #include "saveGraphLayoutSettings.h"
 #include "daily.h"
+#include "analysismark.h"
 #include "glossary.h"
 #include "helptips.h"
 #include "ui_daily.h"
@@ -2134,7 +2135,7 @@ QString Daily::ahiFiguresHtml(const QString &name, double deviceAhi, double anal
 }
 
 QString Daily::manualAnalysisHtml(const QString &scoringBlock, double correctedAhi, double deviceAhi, const QString &name,
-                                  bool cpapData)
+                                  bool cpapData, const QString &countsTable)
 {
     if (!cpapData) return QStringLiteral("<p><i>%1</i></p>").arg(tr("No CPAP data this night.").toHtmlEscaped());
     if (scoringBlock.isEmpty()) {
@@ -2143,7 +2144,23 @@ QString Daily::manualAnalysisHtml(const QString &scoringBlock, double correctedA
     return QStringLiteral("<p align=center><b>%1</b></p>")
                .arg(tr("%1 after manual scoring: %2 (device %3)").arg(name, QString::number(correctedAhi, 'f', 2), QString::number(deviceAhi, 'f', 2))
                         .toHtmlEscaped())
-        + scoringBlock;
+        + countsTable + scoringBlock;
+}
+
+QString Daily::manualCountsHtml(Day *day)
+{
+    if (!day) return QString();
+    const QList<ChannelID> codes = ManualScoring::countedChannels();
+    QString rows;
+    for (ChannelID code : codes) {
+        if (day->deviceCount(code) == day->count(code)) continue;
+        rows += QStringLiteral("<tr><td>%1</td><td align=right>%2</td></tr>\n")
+                    .arg(eventTreeName(code).toHtmlEscaped(),
+                         tr("%1 → %2").arg(QString::number(day->devicePerHour(code), 'f', 2), QString::number(day->perHour(code), 'f', 2)));
+    }
+    if (rows.isEmpty()) return QString();
+    return QStringLiteral("<table width='100%' cellspacing=0 cellpadding=1>\n<tr><td colspan=2><i>%1</i></td></tr>\n%2</table>\n")
+        .arg(tr("Events per hour: device → after manual scoring").toHtmlEscaped(), rows);
 }
 
 void Daily::ahiValues(Day *day, double *corrected, double *device)
@@ -2179,7 +2196,7 @@ void Daily::updateManualPage(Day *day)
     }
     double corrected = 0, device = 0;
     ahiValues(day, &corrected, &device);
-    m_manualView->setHtml(manualAnalysisHtml(getManualScoring(day), corrected, device, name));
+    m_manualView->setHtml(manualAnalysisHtml(getManualScoring(day), corrected, device, name, true, manualCountsHtml(day)));
 }
 
 QString Daily::getAHI(Day * day, bool isBrick, double analysisAhi) {
@@ -2231,7 +2248,22 @@ QString Daily::getAHI(Day * day, bool isBrick, double analysisAhi) {
 }
 
 QString Daily::getIndices(Day * day, QHash<ChannelID, EventDataType>& values ) {
+    const QString html = indicesHtml(day, analysis::analysisShown(), values);
+#ifndef COMBINE_MODE_3
+    if (!leftSideBarEnable[LSB_SLEEPTIME_INDICES] )
+#else
+    if (!leftSideBarEnable[LSB_MACHINE_INFO] )
+#endif
+    {
+        return QString();       // must calculate values first for pie chart.
+    }
+    return html;
+}
+
+QString Daily::indicesHtml(Day *day, bool analysisShown, QHash<ChannelID, EventDataType> &values)
+{
     QString html;
+    QString analysisHtml;   // OSCAR's analysis, under its own heading after the device's rows
     float hours=day->hours(MT_CPAP);
 
     html = "<table cellspacing=0 cellpadding=0 border=0 width='100%'>\n";
@@ -2242,8 +2274,7 @@ QString Daily::getIndices(Day * day, QHash<ChannelID, EventDataType>& values ) {
 
     if (show_minors) zchans |= schema::MINOR_FLAG;
     QList<ChannelID> available = day->getSortedMachineChannels(zchans);
-    const bool analysisOn = analysis::analysisShown();
-    available.removeIf([analysisOn](ChannelID c) { return !channelShown(c, analysisOn); });
+    available.removeIf([analysisShown](ChannelID c) { return !channelShown(c, analysisShown); });
 
     EventDataType val;
     for (int i=0; i < available.size(); ++i) {
@@ -2272,8 +2303,9 @@ QString Daily::getIndices(Day * day, QHash<ChannelID, EventDataType>& values ) {
             val = day->sum(code) / channelHours;
             data = QString("%1").arg(val,0,'f',2);
         } else {
-            // CPAP events per hour as the AHI counts them (less what manual scoring left out)
-            val = chan.machtype() == MT_CPAP ? day->perHour(code) : day->count(code) / channelHours;
+            // the device's own events per hour (manual scoring has its own page); the analysis' as before
+            if (chan.isComputed()) val = chan.machtype() == MT_CPAP ? day->perHour(code) : day->count(code) / channelHours;
+            else val = chan.machtype() == MT_CPAP ? day->devicePerHour(code) : day->count(code) / channelHours;
             data = QString("%1").arg(val,0,'f',2);
         }
         // TODO: percentage would be another useful option here for things like
@@ -2284,13 +2316,15 @@ QString Daily::getIndices(Day * day, QHash<ChannelID, EventDataType>& values ) {
         if (HelpTips::instance()->enabled() && !Glossary::keyForChannel(code).isEmpty()) tooltip = Glossary::channelTooltip(code);
         tooltip.replace("'", "&apos;");
         QColor altcolor = (brightness(chan.defaultColor()) < 0.3) ? Qt::white : Qt::black; // pick a contrasting color
-        html+=QString("<tr><td align='left' bgcolor='%1'><b><font color='%2'><a href='event=%5' style='text-decoration:none;color:%2' title='<p>%6</p>'>%3</a></font></b></td><td width=20% bgcolor='%1'><b><font color='%2'>%4</font></b></td></tr>")
+        const bool computed = chan.isComputed();
+        (computed ? analysisHtml : html) += QString("<tr><td align='left' bgcolor='%1'%7><b><font color='%2'><a href='event=%5' style='text-decoration:none;color:%2' title='<p>%6</p>'>%3</a></font></b></td><td width=20% bgcolor='%1'><b><font color='%2'>%4</font></b></td></tr>")
                 .arg(chan.defaultColor().name())
                 .arg(altcolor.name())
-                .arg(chan.fullname())
+                .arg(computed ? analysis::channelBaseName(code) : chan.fullname())
                 .arg(data)
                 .arg(code)
-                .arg(tooltip);
+                .arg(tooltip)
+                .arg(computed ? QStringLiteral(" style='%1'").arg(AnalysisMark::rowStyle()) : QString());
     }
 
     if (day->settingExists(AW_BreathingDisturbances)) {
@@ -2404,17 +2438,8 @@ QString Daily::getIndices(Day * day, QHash<ChannelID, EventDataType>& values ) {
                 .arg(tooltip);
     }
 
+    if (analysisShown && !analysisHtml.isEmpty()) html += AnalysisMark::headingRow(tr("OSCAR analysis"), 2) + analysisHtml;
     html+="</table><hr/>";
-
-#ifndef COMBINE_MODE_3
-    if (!leftSideBarEnable[LSB_SLEEPTIME_INDICES] )
-#else
-    if (!leftSideBarEnable[LSB_MACHINE_INFO] )
-#endif
-    {
-        return QString();       // must calculate values first for pie chart.
-    }
-
     return html;
 }
 

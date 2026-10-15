@@ -254,6 +254,10 @@ class Day
     bool hasManualScoring();
     //! \brief The AHI as the device scored it, without manual scoring.
     EventDataType deviceAHI();
+    //! \brief Events of \a code as the device recorded them: count() without manual scoring.
+    EventDataType deviceCount(ChannelID code);
+    //! \brief deviceCount() per CPAP hour; 0 without CPAP hours.
+    double devicePerHour(ChannelID code);
 
     //! \brief Calculate AHI (Apnea Hypopnea Index)
     EventDataType calcAHI() {
