@@ -232,7 +232,8 @@ OximeterImport::OximeterImport(QWidget *parent) :
     connect(btButton, &QPushButton::clicked, this, &OximeterImport::onBluetoothImportClicked);
     auto *o2ringButton = new QPushButton(tr("O2Ring (Bluetooth)"), ui->importSelectionPage);
     o2ringButton->setObjectName(QStringLiteral("o2ringImportButton"));
-    o2ringButton->setIcon(btButton->icon());
+    o2ringButton->setIcon(QIcon(QPixmap::fromImage(
+        BluetoothOximeterPage::badgedIcon(QImage(QStringLiteral(":/icons/o2ring.png")), 128))));
     o2ringButton->setIconSize(btButton->iconSize());
     o2ringButton->setSizePolicy(btButton->sizePolicy());
     o2ringButton->setMinimumHeight(btButton->minimumHeight());
@@ -1211,6 +1212,7 @@ void OximeterImport::onBluetoothImportClicked()
 {
 #ifdef HAVE_BLUETOOTH
     ui->stackedWidget->setCurrentWidget(m_btPage);
+    ui->label_5->setPixmap(QPixmap(QStringLiteral(":/icons/oximeter.png")));
     ui->nextButton->setVisible(false);
     ui->retryButton->setVisible(false);
     ui->informationButton->setVisible(false);   // leaving the page would hide a running import
@@ -1225,6 +1227,7 @@ void OximeterImport::onO2RingImportClicked()
 {
 #ifdef HAVE_BLUETOOTH
     ui->stackedWidget->setCurrentWidget(m_o2ringPage);
+    ui->label_5->setPixmap(QPixmap(QStringLiteral(":/icons/o2ring.png")));
     ui->nextButton->setVisible(false);
     ui->retryButton->setVisible(false);
     ui->informationButton->setVisible(false);   // leaving the page would hide a running import
