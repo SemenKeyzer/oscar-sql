@@ -1,8 +1,9 @@
 # A Windows 11 (64-bit) build of OSCAR to try out: a zip that runs without installing.
 # Run by hand only (Actions tab → "Windows build" → Run workflow); the zip is kept 14 days.
 #
-# The fork is built and tested with clang on macOS, where warnings are errors; MinGW's GCC
-# warns about other things, so this build does not stop on warnings.
+# Built with Microsoft's compiler (MSVC): Qt Bluetooth works on Windows only in an MSVC build
+# (with MinGW it falls back to a dummy backend and finds no device). The fork is built and
+# tested with clang on macOS, where warnings are errors; this build does not stop on warnings.
 
 name: Windows build
 
@@ -14,40 +15,44 @@ permissions:
 
 jobs:
   windows:
-    name: Windows 11, Qt 6.10 (MinGW)
+    name: Windows 11, Qt 6.10 (MSVC)
     runs-on: windows-latest
-    timeout-minutes: 120
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0   # the version string comes from git
 
-      - name: Install Qt and MinGW
+      - name: Install Qt for MSVC
         uses: jurplel/install-qt-action@v4
         with:
           version: '6.10.2'
           host: windows
           target: desktop
-          arch: win64_mingw
+          arch: win64_msvc2022_64
           modules: 'qtserialport qtconnectivity'
-          tools: 'tools_mingw1310'
           cache: true
+
+      - name: Set up the MSVC compiler
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
 
       - name: Build OSCAR
         shell: cmd
         run: |
-          set PATH=%IQTA_TOOLS%\mingw1310_64\bin;%PATH%
+          rem /MP compiles the files of a target in parallel; /utf-8 reads the sources as UTF-8; /EHsc C++ exceptions
+          set CL=/MP /utf-8
           mkdir build
           cd build
-          qmake ..\oscar\oscar.pro CONFIG+=release CONFIG-=debug_and_release -after "QMAKE_CXXFLAGS+=-Wno-error" "QMAKE_CFLAGS+=-Wno-error"
+          qmake ..\oscar\oscar.pro CONFIG+=release CONFIG-=debug_and_release
           if errorlevel 1 exit /b 1
-          mingw32-make -j4 SHELL=cmd.exe
+          nmake
           if errorlevel 1 exit /b 1
 
       - name: Gather OSCAR and the Qt libraries
         shell: pwsh
         run: |
-          $env:PATH = "$env:IQTA_TOOLS\mingw1310_64\bin;$env:PATH"
           $exe = Get-ChildItem -Path build -Recurse -Filter OSCAR.exe | Select-Object -First 1
           if (-not $exe) { throw "OSCAR.exe was not built" }
           New-Item -ItemType Directory -Path OSCAR-Windows | Out-Null   # not "OSCAR": Windows names ignore case, and oscar\ is the source
@@ -56,8 +61,12 @@ jobs:
             if (Test-Path "build\$dir") { Copy-Item "build\$dir" "OSCAR-Windows\$dir" -Recurse }
           }
           Remove-Item OSCAR-Windows\Translations\*.ts -ErrorAction SilentlyContinue
-          windeployqt --release --compiler-runtime --no-translations OSCAR-Windows\OSCAR.exe
+          windeployqt --release --no-translations OSCAR-Windows\OSCAR.exe
           if ($LASTEXITCODE -ne 0) { throw "windeployqt failed" }
+          # the Visual C++ runtime next to OSCAR.exe, so nothing has to be installed
+          $crt = Get-ChildItem -Path "$env:VCToolsRedistDir\x64" -Directory -Filter 'Microsoft.VC*.CRT' | Select-Object -First 1
+          if (-not $crt) { throw "Visual C++ runtime not found under $env:VCToolsRedistDir" }
+          Copy-Item "$($crt.FullName)\*.dll" OSCAR-Windows\
           # a start file that keeps this test build's data apart from an installed OSCAR's
           Set-Content -Path "OSCAR-Windows\Start OSCAR (test data).bat" -Encoding ascii -Value @(
             '@echo off',
