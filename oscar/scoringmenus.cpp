@@ -111,6 +111,7 @@ QMenu *ScoringMenus::forRange(qint64 durationMs, QWidget *parent)
         keyed(menu, text, keyOf(c))->setData(data("add", c));
     }
     menu->addSeparator();
+    keyed(menu, tr("Flow limitation"), QLatin1Char('F'))->setData(data("mark", CPAP_ManualFlowLimit));
     keyed(menu, tr("Artifact"), QLatin1Char('X'))->setData(data("exclude"));
     installLetterKeys(menu);
     return menu;
@@ -146,6 +147,16 @@ QMenu *ScoringMenus::forEvent(const EffectiveEvent &e, QWidget *parent, int coun
         }
         menu->addAction(tr("Remove all %1 (%2)").arg(typeName(e.channel)).arg(countOfType))->setData(data("removeAll", e.channel));
     }
+    installLetterKeys(menu);
+    return menu;
+}
+
+QMenu *ScoringMenus::forMark(qint64 editId, QWidget *parent)
+{
+    auto *menu = new QMenu(parent);
+    menu->setAttribute(Qt::WA_NoMouseReplay);   // the click that closes it must not zoom the graph (Windows)
+    menu->setObjectName(QStringLiteral("scoringMarkMenu"));
+    keyed(menu, tr("Undo flow limitation"), QLatin1Char('U'))->setData(data("undo", 0, 0, 0, editId));
     installLetterKeys(menu);
     return menu;
 }
@@ -231,7 +242,7 @@ QAction *ScoringMenus::actionForKey(QMenu *menu, const QString &text)
     // the same keys on the Russian (ЙЦУКЕН) layout
     static const QHash<QChar, QChar> russian {
         { QChar(0x0429), QLatin1Char('O') }, { QChar(0x0421), QLatin1Char('C') }, { QChar(0x0424), QLatin1Char('A') },
-        { QChar(0x042C), QLatin1Char('M') }, { QChar(0x041D), QLatin1Char('Y') },
+        { QChar(0x042C), QLatin1Char('M') }, { QChar(0x041D), QLatin1Char('Y') }, { QChar(0x0410), QLatin1Char('F') },
         { QChar(0x0420), QLatin1Char('H') }, { QChar(0x0427), QLatin1Char('X') }, { QChar(0x041A), QLatin1Char('R') },
         { QChar(0x0415), QLatin1Char('T') }, { QChar(0x0413), QLatin1Char('U') },
     };
@@ -250,12 +261,13 @@ QString ScoringMenus::excludedText(qint64 ms)
 
 ChannelID ScoringMenus::repeatableType(const QVariantMap &choice)
 {
-    return choice.value(QStringLiteral("action")).toString() == QLatin1String("add") ? choice.value(QStringLiteral("channel")).toUInt() : 0;
+    const QString action = choice.value(QStringLiteral("action")).toString();
+    return action == QLatin1String("add") || action == QLatin1String("mark") ? choice.value(QStringLiteral("channel")).toUInt() : 0;
 }
 
 QVariantMap ScoringMenus::repeatChoice(ChannelID type)
 {
-    return data("add", type);
+    return data(type == CPAP_ManualFlowLimit ? "mark" : "add", type);
 }
 
 QString ScoringMenus::repeatText(ChannelID type)

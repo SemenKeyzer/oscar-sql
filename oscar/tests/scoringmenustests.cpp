@@ -74,7 +74,7 @@ void ScoringMenusTests::testRangeMenu()
     QCOMPARE(texts(m.data()), QStringList({ QStringLiteral("Obstructive apnea"), QStringLiteral("Central apnea"),
                                             QStringLiteral("Mixed apnea"), QStringLiteral("Apnea"),
                                             QStringLiteral("Obstructive hypopnea"), QStringLiteral("Central hypopnea"),
-                                            QStringLiteral("Artifact") }));
+                                            QStringLiteral("Flow limitation"), QStringLiteral("Artifact") }));
     const QVariantMap oa = find(m.data(), QStringLiteral("Obstructive apnea"))->data().toMap();
     QCOMPARE(oa.value(QStringLiteral("action")).toString(), QStringLiteral("add"));
     QCOMPARE(oa.value(QStringLiteral("channel")).toUInt(), CPAP_Obstructive);
@@ -259,4 +259,43 @@ void ScoringMenusTests::testRepeatType()
     const QVariantMap again = ScoringMenus::repeatChoice(CPAP_ObstructiveHypopnea);
     QCOMPARE(again, oh);   // the same as choosing it in the menu
     QCOMPARE(ScoringMenus::repeatText(CPAP_ObstructiveHypopnea), QStringLiteral("Repeat: Obstructive hypopnea"));
+}
+
+// Flow limitation is marked from the selection menu, after the event types and before Artifact.
+void ScoringMenusTests::testFlowLimitationItem()
+{
+    QScopedPointer<QMenu> m(ScoringMenus::forRange(90000, nullptr));
+    QAction *fl = find(m.data(), QStringLiteral("Flow limitation"));
+    QVERIFY(fl);
+    QCOMPARE(fl->text(), QStringLiteral("Flow limitation\tF"));
+    QCOMPARE(fl->data().toMap().value(QStringLiteral("action")).toString(), QStringLiteral("mark"));
+    QCOMPARE(fl->data().toMap().value(QStringLiteral("channel")).toUInt(), CPAP_ManualFlowLimit);
+    QCOMPARE(ScoringMenus::actionForKey(m.data(), QStringLiteral("f")), fl);
+    QCOMPARE(ScoringMenus::actionForKey(m.data(), QStringLiteral("а")), fl);   // F on the Russian layout
+    QScopedPointer<QMenu> shortSel(ScoringMenus::forRange(5000, nullptr));
+    QVERIFY(find(shortSel.data(), QStringLiteral("Flow limitation")));   // no short-event warning for a stretch
+}
+
+// Chosen once, flow limitation is repeated for the next selections like an event type.
+void ScoringMenusTests::testRepeatMark()
+{
+    QScopedPointer<QMenu> m(ScoringMenus::forRange(90000, nullptr));
+    const QVariantMap fl = find(m.data(), QStringLiteral("Flow limitation"))->data().toMap();
+    QCOMPARE(ScoringMenus::repeatableType(fl), CPAP_ManualFlowLimit);
+    QCOMPARE(ScoringMenus::repeatChoice(CPAP_ManualFlowLimit), fl);
+}
+
+void ScoringMenusTests::testMarkMenu()
+{
+    QScopedPointer<QMenu> m(ScoringMenus::forMark(42, nullptr));
+    QAction *undo = find(m.data(), QStringLiteral("Undo flow limitation"));
+    QVERIFY(undo);
+    QCOMPARE(undo->text(), QStringLiteral("Undo flow limitation\tU"));
+    QCOMPARE(undo->data().toMap().value(QStringLiteral("action")).toString(), QStringLiteral("undo"));
+    QCOMPARE(undo->data().toMap().value(QStringLiteral("editId")).toLongLong(), qint64(42));
+}
+
+void ScoringMenusTests::testMarkEditRow()
+{
+    QCOMPARE(ScoringMenus::markText(130000), QStringLiteral("flow limitation 2:10"));
 }

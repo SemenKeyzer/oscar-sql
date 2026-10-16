@@ -4583,8 +4583,8 @@ void Daily::applyScoring(const QVariantMap &choice, qint64 startMs, qint64 endMs
         e.startMs = startMs;
         e.endMs = endMs;
         if (Session *s = scoringSessionAt(day, endMs)) ManualScoring::addEdit(s, e);
-    } else if (action == QLatin1String("exclude")) {
-        e.kind = Kind::Exclude;
+    } else if (action == QLatin1String("exclude") || action == QLatin1String("mark")) {
+        e.kind = action == QLatin1String("mark") ? Kind::Mark : Kind::Exclude;
         e.startMs = startMs;
         e.endMs = endMs;
         for (Session *s : day->sessions) {   // every session the stretch touches
@@ -4680,12 +4680,13 @@ void Daily::onScoringContext(gGraph *graph, qint64 timeMs, QPoint globalPos)
     if (best) {
         menu.reset(ScoringMenus::forEvent(*best, this, ManualScoring::countOf(events, best->channel)));
     } else {
-        // inside an excluded stretch?
+        // inside an excluded or a marked stretch? (stored in device time, the graph shows it corrected)
         for (Session *s : day->sessions) {
+            const qint64 c = s->correctionMs();
             for (const ManualScoring::Edit &e : ManualScoringRepository::editsForSession(ManualScoring::keyOf(s))) {
-                if (e.kind == ManualScoring::Kind::Exclude && timeMs >= e.startMs && timeMs <= e.endMs) {
-                    menu.reset(ScoringMenus::forExcluded(e.id, this));
-                }
+                if (timeMs < e.startMs + c || timeMs > e.endMs + c) continue;
+                if (e.kind == ManualScoring::Kind::Exclude) menu.reset(ScoringMenus::forExcluded(e.id, this));
+                else if (e.kind == ManualScoring::Kind::Mark) menu.reset(ScoringMenus::forMark(e.id, this));
             }
         }
     }
