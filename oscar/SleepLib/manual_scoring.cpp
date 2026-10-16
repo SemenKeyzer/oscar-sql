@@ -306,13 +306,26 @@ Result resultFor(Session *s)
         x.startMs += c;
         x.endMs += c;
     }
+    for (MarkEdit &m : r.markEdits) {
+        m.startMs += c;
+        m.endMs += c;
+    }
+    for (auto &span : r.flowLimitedSpans) {
+        span.first += c;
+        span.second += c;
+    }
     return r;
 }
 
 void refresh(Session *s)
 {
     const SessionKey key = keyOf(s);
-    if (!ManualScoringRepository::hasScoring(key)) {
+    // marks (flow limitation) change no count: a session with only marks is not corrected by hand
+    bool counts = false;
+    if (ManualScoringRepository::hasScoring(key)) {
+        for (const Edit &e : ManualScoringRepository::editsForSession(key)) counts = counts || e.kind != Kind::Mark;
+    }
+    if (!counts) {
         ManualScoringRepository::removeSummary(key);
         s->setManualScoring({}, 0, 0, false);
         return;
@@ -500,9 +513,18 @@ qint64 flowLimitedMs(Day *day)
     qint64 ms = 0;
     if (!day) return ms;
     for (Session *s : day->sessions) {
-        if (s->type() == MT_CPAP && s->enabled() && s->hasManualScoring()) ms += resultFor(s).flowLimitedMs;
+        if (s->type() == MT_CPAP && s->enabled() && ManualScoringRepository::hasScoring(keyOf(s))) ms += resultFor(s).flowLimitedMs;
     }
     return ms;
+}
+
+bool hasEdits(Day *day)
+{
+    if (!day) return false;
+    for (Session *s : day->sessions) {
+        if (s->type() == MT_CPAP && s->enabled() && ManualScoringRepository::hasScoring(keyOf(s))) return true;
+    }
+    return false;
 }
 
 void storeDaySummary(Day *day)

@@ -46,7 +46,8 @@ class gManualScoringLayer : public Layer
 
     //! What is drawn for \a result between \a minX and \a maxX: the edited events when
     //! \a markers, and the excluded stretches always.
-    static QList<Item> items(const ManualScoring::Result &result, qint64 minX, qint64 maxX, bool markers, bool boxes = false);
+    static QList<Item> items(const ManualScoring::Result &result, qint64 minX, qint64 maxX, bool markers, bool boxes = false,
+                             bool flowGraph = false);
     //! The time range a graph draws: the whole night for a block-zoomed graph (event and analysis
     //! flags), else the zoomed range.
     static QPair<qint64, qint64> drawnRange(bool blockZoom, qint64 minX, qint64 maxX, qint64 rMinX, qint64 rMaxX);

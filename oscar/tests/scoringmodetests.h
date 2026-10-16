@@ -16,6 +16,7 @@ class ScoringModeTests : public QObject
 {
     Q_OBJECT
 private slots:
+    void testMarkedOnlyOnFlowGraph();
     void testMarkedItems();
     void testDragMarkEdge();
     void testDragSelectsInScoringMode();

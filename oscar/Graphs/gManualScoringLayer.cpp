@@ -26,7 +26,7 @@ gManualScoringLayer::gManualScoringLayer(QSharedPointer<ManualScoring::Result> r
 }
 
 QList<gManualScoringLayer::Item> gManualScoringLayer::items(const ManualScoring::Result &result, qint64 minX, qint64 maxX,
-                                                            bool markers, bool boxes)
+                                                            bool markers, bool boxes, bool flowGraph)
 {
     QList<Item> out;
     const bool zoomed = boxes && (maxX - minX) <= kBoxRangeMs;
@@ -57,8 +57,8 @@ QList<gManualScoringLayer::Item> gManualScoringLayer::items(const ManualScoring:
     for (const auto &span : result.excludedSpans) {
         if (span.second >= minX && span.first <= maxX) out.append({ Item::Excluded, span.first, span.second, 0, QString(), QString() });
     }
-    for (const auto &span : result.flowLimitedSpans) {   // flow limitation marked by hand, at any zoom
-        if (span.second < minX || span.first > maxX) continue;
+    for (const auto &span : result.flowLimitedSpans) {   // flow limitation marked by hand: on the flow graph, at any zoom
+        if (!flowGraph || span.second < minX || span.first > maxX) continue;
         const qint64 seconds = (span.second - span.first + 500) / 1000;
         const QString length = QStringLiteral("%1:%2").arg(seconds / 60).arg(seconds % 60, 2, 10, QLatin1Char('0'));
         out.append({ Item::Marked, span.first, span.second, CPAP_ManualFlowLimit, tr("FL %1").arg(length), QString() });
@@ -98,7 +98,7 @@ void gManualScoringLayer::paint(QPainter &painter, gGraph &w, const QRegion &reg
 
     painter.save();
     painter.setClipRect(r);
-    for (const Item &it : items(shown, range.first, range.second, m_markers, showsBoxes(m_boxes, w.graphView() && w.graphView()->scoringMode(), w.blockZoom()))) {
+    for (const Item &it : items(shown, range.first, range.second, m_markers, showsBoxes(m_boxes, w.graphView() && w.graphView()->scoringMode(), w.blockZoom()), m_boxes)) {
         // at least 4 px, so a short stretch still shows on a whole night
         double x1 = px(it.start), x2 = px(it.end);
         if (x2 - x1 < 4) {

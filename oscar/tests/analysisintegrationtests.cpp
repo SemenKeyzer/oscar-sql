@@ -2812,3 +2812,45 @@ void AnalysisIntegrationTests::testManualFlowLineWithoutHours()
     QVERIFY(Daily::manualFlowHtml(&day).isEmpty());
     QVERIFY(Daily::manualFlowHtml(nullptr).isEmpty());
 }
+
+// Marks are stored in device time and drawn in graph time, like the excluded stretches.
+void AnalysisIntegrationTests::testMarksFollowTimeCorrection()
+{
+    Machine cpap(p_profile, 85);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    cpap.rebuildCorrections({ TimeCorrectionRow { kNightDate.addDays(-10), QDate(), QStringLiteral("offset"), 600000, 0, 0.0 } });
+    Day day;
+    day.setDate(kNightDate);
+    Session *s = scoredSession(&cpap, 851, m_machineRow);
+    day.addSession(s);
+    QCOMPARE(s->correctionMs(), qint64(600000));
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Mark, CPAP_ManualFlowLimit, 750, 950)));   // as shown
+    const ManualScoring::Result r = ManualScoring::resultFor(s);
+    QCOMPARE(r.markEdits.first().startMs, synth::kStart + 750000);
+    QCOMPARE(r.flowLimitedSpans.first(), qMakePair(synth::kStart + 750000, synth::kStart + 950000));
+    QCOMPARE(r.flowLimitedMs, qint64(200000));
+    ManualScoringRepository::removeAllForSession(ManualScoring::keyOf(s));
+    ManualScoring::refresh(s);
+}
+
+// A night with nothing but marks is not "corrected by hand": the AHI and the reports stay the device's.
+void AnalysisIntegrationTests::testMarksOnlyNotCorrected()
+{
+    Machine cpap(p_profile, 84);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    Session *s = scoredSession(&cpap, 841, m_machineRow);
+    day.addSession(s);
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Mark, CPAP_ManualFlowLimit, 100, 200)));
+    QVERIFY(!s->hasManualScoring());
+    QVERIFY(!day.hasManualScoring());
+    QVERIFY(ManualScoring::hasEdits(&day));               // the Manual page still lists it
+    QCOMPARE(ManualScoring::flowLimitedMs(&day), qint64(100000));
+    ManualScoring::loadSummary(s);                          // as when the profile opens again
+    QVERIFY(!s->hasManualScoring());
+    QCOMPARE(ManualScoring::flowLimitedMs(&day), qint64(100000));
+    ManualScoringRepository::removeAllForSession(ManualScoring::keyOf(s));
+    ManualScoring::refresh(s);
+}

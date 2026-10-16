@@ -157,6 +157,8 @@ bool updateEdit(Day *day, qint64 id, qint64 startMs, qint64 endMs);
 bool undoEdit(Day *day, qint64 id);
 //! The flow limitation marked by hand in the day's enabled CPAP sessions, less excluded time.
 qint64 flowLimitedMs(Day *day);
+//! Whether any enabled CPAP session of \a day has edits of any kind (marks too).
+bool hasEdits(Day *day);
 //! Stores the day's daily summary again (its AHI changed); the SQL reports read it.
 void storeDaySummary(Day *day);
 //! Removes every edit of the day's sessions.

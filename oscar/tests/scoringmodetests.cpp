@@ -238,7 +238,7 @@ void ScoringModeTests::testMarkedItems()
     r.markEdits = { { 7, CPAP_ManualFlowLimit, 100000, 230000 } };
     r.flowLimitedSpans = { { 100000, 230000 } };
     int marked = 0;
-    for (const Item &it : gManualScoringLayer::items(r, 0, 1000000, true)) {
+    for (const Item &it : gManualScoringLayer::items(r, 0, 1000000, true, false, true)) {
         if (it.kind != Item::Marked) continue;
         ++marked;
         QCOMPARE(it.start, qint64(100000));
@@ -262,4 +262,13 @@ void ScoringModeTests::testDragMarkEdge()
     QCOMPARE(ScoringResize::dragTo(t, 300000, 0, 3600000), qMakePair(qint64(100000), qint64(300000)));
     r.markEdits[0].endMs = 300000;
     QVERIFY(!ScoringResize::stillTargets(r, t));   // moved meanwhile
+}
+
+// The marked stretches belong to the flow graph, not to every graph of the day.
+void ScoringModeTests::testMarkedOnlyOnFlowGraph()
+{
+    using Item = gManualScoringLayer::Item;
+    ManualScoring::Result r;
+    r.flowLimitedSpans = { { 100000, 230000 } };
+    for (const Item &it : gManualScoringLayer::items(r, 0, 1000000, true, false, false)) QVERIFY(it.kind != Item::Marked);
 }

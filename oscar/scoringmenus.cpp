@@ -96,6 +96,7 @@ QString ScoringMenus::typeName(ChannelID channel)
     if (channel == CPAP_Hypopnea) return tr("Hypopnea");
     if (channel == CPAP_ObstructiveHypopnea) return tr("Obstructive hypopnea");
     if (channel == CPAP_CentralHypopnea) return tr("Central hypopnea");
+    if (channel == CPAP_ManualFlowLimit) return tr("Flow limitation");
     return schema::channel[channel].label();
 }
 

@@ -4699,7 +4699,7 @@ void Daily::onScoringContext(gGraph *graph, qint64 timeMs, QPoint globalPos)
 
 QString Daily::getManualScoring(Day *day)
 {
-    if (!day || !day->hasManualScoring()) return QString();
+    if (!ManualScoring::hasEdits(day)) return QString();   // marks alone are listed too
     using ManualScoring::Kind;
     int added = 0, removed = 0, retyped = 0, resized = 0, notFound = 0;
     qint64 excludedMs = 0;

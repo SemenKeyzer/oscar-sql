@@ -299,3 +299,10 @@ void ScoringMenusTests::testMarkEditRow()
 {
     QCOMPARE(ScoringMenus::markText(130000), QStringLiteral("flow limitation 2:10"));
 }
+
+// The repeat banner names the mark in words, not by its short channel label.
+void ScoringMenusTests::testMarkTypeName()
+{
+    QCOMPARE(ScoringMenus::typeName(CPAP_ManualFlowLimit), QStringLiteral("Flow limitation"));
+    QCOMPARE(ScoringMenus::repeatText(CPAP_ManualFlowLimit), QStringLiteral("Repeat: Flow limitation"));
+}

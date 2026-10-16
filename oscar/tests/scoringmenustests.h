@@ -18,6 +18,7 @@ class ScoringMenusTests : public QObject
 {
     Q_OBJECT
 private slots:
+    void testMarkTypeName();
     void testFlowLimitationItem();
     void testRepeatMark();
     void testMarkMenu();

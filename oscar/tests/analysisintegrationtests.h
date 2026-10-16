@@ -16,6 +16,8 @@ class AnalysisIntegrationTests : public QObject
 {
     Q_OBJECT
 private slots:
+    void testMarksFollowTimeCorrection();
+    void testMarksOnlyNotCorrected();
     void testManualFlowLine();
     void testManualFlowLineWithoutHours();
     void testMarkMoveAndUndo();
