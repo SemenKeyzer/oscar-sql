@@ -436,6 +436,11 @@ static QString oximetryNightHtml(const OximetryNight &n)
             html += QObject::tr("Below 90%: %1% of the time (%2 min).").arg(n.percentBelow90, 0, 'f', 1).arg(qRound(n.minutesBelow90)) + "<br/>";
             if (n.fromAnalysis) {
                 html += QObject::tr("ODI 3%: %1 per hour (%2 desaturations).").arg(n.desaturations / n.hours, 0, 'f', 1).arg(n.desaturations) + "<br/>";
+                html += QObject::tr("ODI 4%: %1 per hour.").arg(n.desaturations4 / n.hours, 0, 'f', 1) + "<br/>";
+                if (!std::isnan(n.hypoxicBurden)) {
+                    html += QObject::tr("Hypoxic burden: %1 %·min/h (%2).").arg(n.hypoxicBurden, 0, 'f', 1)
+                                .arg(hypoxicBurdenGradeName(hypoxicBurdenGrade(n.hypoxicBurden))) + "<br/>";
+                }
                 if (n.zones > 0) {
                     html += QObject::tr("Problem zones: %1, %2 min.").arg(n.zones).arg(qRound(n.zoneMinutes)) + "<br/>";
                 }

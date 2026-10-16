@@ -156,6 +156,9 @@ void NightSummaryTests::testViewShowsTheNight()
     s.oxi.spo2Min = 86;
     s.oxi.percentBelow90 = 0.4;
     s.oxi.desaturations = 14;
+    s.oxi.desaturations4 = 7;
+    s.oxi.minutesBelow90 = 1.6;
+    s.oxi.hypoxicBurden = 20;
     s.oxi.pulseAvg = 61;
     s.oxi.pulseMin = 52;
     s.oxi.pulseMax = 96;
@@ -170,7 +173,10 @@ void NightSummaryTests::testViewShowsTheNight()
     QVERIFY(text(QStringLiteral("nsValue")).startsWith(QStringLiteral("7<span")));    // 7 h 12 min, units smaller
     QVERIFY(text(QStringLiteral("nsValue")).contains(QStringLiteral("&nbsp;min</span>")));
     QVERIFY(text(QStringLiteral("nsNote")).contains(QStringLiteral("OSCAR analysis — 2.1")));
-    QVERIFY(text(QStringLiteral("nsNote")).contains(QStringLiteral("ODI 3%: 2.2 per hour")));
+    QVERIFY(text(QStringLiteral("nsNote")).contains(QStringLiteral("ODI 3%: 2.2 per hour, 4%: 1.1")));
+    // the doctor's SpO2 tile: ODI 3 % and 4 %, T90 in minutes and the hypoxic burden with its grade
+    QVERIFY(text(QStringLiteral("nsNote")).contains(QStringLiteral("T90: 2 min")));
+    QVERIFY(text(QStringLiteral("nsNote")).contains(QStringLiteral("Hypoxic burden: 20.0 %·min/h (mild)")));
     QVERIFY(text(QStringLiteral("nsNote")).contains(QStringLiteral("pulse 61 (52 to 96)")));   // in the SpO2 tile
     QVERIFY(text(QStringLiteral("nsCaption")).contains(QStringLiteral("28 of 30 night")));
     QVERIFY(text(QStringLiteral("nsTitle")).contains(QStringLiteral("href='daily=2026-09-30'")));
@@ -186,6 +192,7 @@ void NightSummaryTests::testViewShowsTheNight()
     view.setSummary(o);
     QCOMPARE(view.findChildren<QFrame *>(QStringLiteral("nsTile")).size(), 2);   // SpO2, and pulse in a tile of its own
     QVERIFY(text(QStringLiteral("nsNote")).contains(QStringLiteral("SpO2 drops (classic)")));
+    QVERIFY(!text(QStringLiteral("nsNote")).contains(QStringLiteral("Hypoxic burden")));   // only the analysis has one
     QVERIFY(view.findChild<QLabel *>(QStringLiteral("nsVerdict"))->isHidden());
     QVERIFY(view.findChild<QFrame *>(QStringLiteral("nsTrends"))->isHidden());
     QVERIFY(!view.findChild<QLabel *>(QStringLiteral("nsActions"))->isHidden());
