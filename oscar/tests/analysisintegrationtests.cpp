@@ -2745,3 +2745,4 @@ void AnalysisIntegrationTests::testSectionHeaderMarkOutsideLink()
     const int link = html.indexOf(QStringLiteral("</a>"));
     QVERIFY(link >= 0 && html.indexOf(AnalysisMark::pill()) > link);
 }
+

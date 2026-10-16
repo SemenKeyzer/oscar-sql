@@ -31,7 +31,6 @@
 #include <cmath>
 
 #include "preferencesdialog.h"
-#include "helpstrip.h"
 #include "helptips.h"
 #include <QScrollArea>
 #include "analysisprefs.h"
@@ -509,7 +508,7 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
     auto *buttons = new QWidget(this);
     buttons->setLayout(buttonRow);
     ui->mainlayout->addWidget(buttons);
-    HelpStrip::placeAbove(ui->mainlayout, buttons, new HelpStrip({ QStringLiteral("ui.prefs.") }, this));
+    // no help strip here: the explanations show on hover and in the help panel (the doctor found the strip redundant)
     HelpTips::attachAll(this, QStringLiteral("prefs"));
 }
 
