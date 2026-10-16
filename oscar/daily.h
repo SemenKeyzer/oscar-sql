@@ -56,6 +56,7 @@ class gDifferenceOverlay;
 /*! \class Daily
     \brief OSCAR's Daily view which displays the calendar and all the graphs relative to a selected Day
     */
+class QScrollBar;
 class Daily : public QWidget
 {
     Q_OBJECT
@@ -134,6 +135,16 @@ public:
     //! The index table: the device's own figures, then OSCAR's analysis under its heading (when \a analysisShown).
     static QString indicesHtml(Day *day, bool analysisShown, QHash<ChannelID, EventDataType> &values);
     //! A left-sidebar section heading: \a name links to folding the section; \a afterLink (e.g. a mark) follows it.
+    //! The long slider above the graphs, in seconds from the start of the night.
+    struct NightScroll {
+        bool enabled = false;   //!< false when the whole night is shown
+        int maximum = 0;
+        int pageStep = 0;       //!< the shown window's width
+        int value = 0;          //!< the shown window's start
+    };
+    static NightScroll nightScroll(qint64 nightFirst, qint64 nightLast, qint64 shownFirst, qint64 shownLast);
+    //! The shown window moved to \a value (seconds into the night), its width kept.
+    static QPair<qint64, qint64> scrolledRange(qint64 nightFirst, qint64 shownFirst, qint64 shownLast, int value);
     static QString lsbHeaderHtml(const QString &name, int checkBox, const QString &afterLink = QString(), bool on = true);
     //! Hides the analysis graphs and the Analysis tab while the analysis is hidden (analysisShown()).
     void applyAnalysisShown();
@@ -499,6 +510,9 @@ private:
     QPushButton *analysisButton = nullptr;   //!< the "OSCAR analysis" switch
     class MyTextBrowser *m_manualView = nullptr;   //!< the Manual analysis page
     class TabButtons *m_tabButtons = nullptr;      //!< the left panel's pages as buttons
+    QScrollBar *m_nightScroll = nullptr;  //!< moves the shown window through the night
+    qint64 m_nightFirst = 0, m_nightLast = 0;
+    void updateNightScroll(qint64 from, qint64 to);
     ChannelID m_repeatType = 0;          //!< the scoring type repeated for new selections
     QLabel *m_repeatLabel = nullptr;
     QToolButton *m_repeatReset = nullptr;

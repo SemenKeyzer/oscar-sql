@@ -832,7 +832,19 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
         row->addWidget(ui->label_7);
         row->addWidget(ui->evViewSlider);
         row->addWidget(ui->evViewLCD);
-        row->addStretch(1);
+        // where the shown window sits in the night; drag it to move through the night
+        m_nightScroll = new QScrollBar(Qt::Horizontal, eventWindowBar);
+        m_nightScroll->setObjectName(QStringLiteral("nightScroll"));
+        m_nightScroll->setEnabled(false);
+        row->addSpacing(12);
+        row->addWidget(m_nightScroll, 1);
+        connect(m_nightScroll, &QScrollBar::valueChanged, this, [this](int value) {
+            const QPair<qint64, qint64> shown = shownRange();
+            if (shown.second <= shown.first || m_nightLast <= m_nightFirst) return;
+            const QPair<qint64, qint64> r = scrolledRange(m_nightFirst, shown.first, shown.second, value);
+            GraphView->SetXBounds(r.first, r.second);
+        });
+        connect(GraphView, &gGraphView::XBoundsChanged, this, &Daily::updateNightScroll);
     }
     ui->verticalLayout_3->insertWidget(ui->verticalLayout_3->indexOf(m_scoringBanner), eventWindowBar);
     connect(scoringButton, &QPushButton::toggled, this, &Daily::onScoringButtonToggled);
@@ -4838,4 +4850,37 @@ void Daily::setRepeatType(ChannelID type)
     m_repeatLabel->setText(type ? ScoringMenus::repeatText(type) : QString());
     m_repeatLabel->setVisible(type != 0);
     m_repeatReset->setVisible(type != 0);
+}
+
+Daily::NightScroll Daily::nightScroll(qint64 nightFirst, qint64 nightLast, qint64 shownFirst, qint64 shownLast)
+{
+    NightScroll s;
+    const qint64 night = (nightLast - nightFirst) / 1000, width = (shownLast - shownFirst) / 1000;
+    if (night <= 0 || width <= 0 || width >= night) return s;
+    s.enabled = true;
+    s.pageStep = int(width);
+    s.maximum = int(night - width);
+    s.value = int(qBound<qint64>(0, (shownFirst - nightFirst) / 1000, qint64(s.maximum)));
+    return s;
+}
+
+QPair<qint64, qint64> Daily::scrolledRange(qint64 nightFirst, qint64 shownFirst, qint64 shownLast, int value)
+{
+    const qint64 start = nightFirst + qint64(value) * 1000;
+    return { start, start + (shownLast - shownFirst) };
+}
+
+void Daily::updateNightScroll(qint64 from, qint64 to)
+{
+    if (!m_nightScroll) return;
+    Day *day = p_profile ? p_profile->GetDay(previous_date) : nullptr;
+    m_nightFirst = day ? day->first() : 0;
+    m_nightLast = day ? day->last() : 0;
+    const NightScroll s = nightScroll(m_nightFirst, m_nightLast, from, to);
+    const QSignalBlocker block(m_nightScroll);   // following the graphs, not moving them
+    m_nightScroll->setEnabled(s.enabled);
+    m_nightScroll->setRange(0, s.maximum);
+    m_nightScroll->setPageStep(qMax(1, s.pageStep));
+    m_nightScroll->setSingleStep(qMax(1, s.pageStep / 10));
+    m_nightScroll->setValue(s.value);
 }

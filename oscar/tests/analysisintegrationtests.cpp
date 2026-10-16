@@ -2746,3 +2746,22 @@ void AnalysisIntegrationTests::testSectionHeaderMarkOutsideLink()
     QVERIFY(link >= 0 && html.indexOf(AnalysisMark::pill()) > link);
 }
 
+
+// The long slider above the graphs: where the shown window sits in the night, in seconds.
+void AnalysisIntegrationTests::testNightScroll()
+{
+    const qint64 first = 1000000000000LL, last = first + 8 * 3600000LL;
+    // the whole night shown: nothing to scroll
+    Daily::NightScroll all = Daily::nightScroll(first, last, first, last);
+    QVERIFY(!all.enabled);
+    // the second hour shown
+    Daily::NightScroll s = Daily::nightScroll(first, last, first + 3600000, first + 7200000);
+    QVERIFY(s.enabled);
+    QCOMPARE(s.pageStep, 3600);
+    QCOMPARE(s.value, 3600);
+    QCOMPARE(s.maximum, 8 * 3600 - 3600);
+    // moved to the end: the same width, ending with the night
+    const QPair<qint64, qint64> r = Daily::scrolledRange(first, first + 3600000, first + 7200000, s.maximum);
+    QCOMPARE(r.first, last - 3600000);
+    QCOMPARE(r.second, last);
+}
