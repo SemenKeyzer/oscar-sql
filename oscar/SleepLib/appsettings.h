@@ -84,6 +84,7 @@ const QString STR_US_NotifyMessagBoxOption = "NotifyMessagBoxOption";
 const QString STR_US_DontAskWhenSavingScreenshots = "DontAskWhenSavingScreenshots";
 const QString STR_US_ShowPersonalData = "ShowPersonalData";
 const QString STR_AS_HoverHelp = "HoverHelp";
+const QString STR_AS_ShowTargetLines = "ShowTargetLines";
 const QString STR_IS_CacheSessions = "MemoryHog";
 
 const QString STR_GEN_AutoOpenLastUsed = "AutoOpenLastUsed";
@@ -216,6 +217,8 @@ public:
   bool showPersonalData() const { return getPref(STR_US_ShowPersonalData).toBool(); }
   //! Explanations shown when hovering figures and terms.
   bool hoverHelp() const { return getPref(STR_AS_HoverHelp).toBool(); }
+  //! Overview charts draw their targets (AHI 5/15/30, compliance hours) as dashed lines.
+  bool showTargetLines() const { return getPref(STR_AS_ShowTargetLines).toBool(); }
 
   void setProfileName(QString name) { setPref(STR_GEN_Profile, m_profileName=name); }
   void setAutoLaunchImport(bool b) { setPref(STR_US_AutoLaunchImport, b); }
@@ -293,6 +296,7 @@ public:
   void setDontAskWhenSavingScreenshots(bool b) { setPref(STR_US_DontAskWhenSavingScreenshots, b); }
   void setShowPersonalData(bool b) { setPref(STR_US_ShowPersonalData, b); }
   void setHoverHelp(bool b) { setPref(STR_AS_HoverHelp, b); }
+  void setShowTargetLines(bool b) { setPref(STR_AS_ShowTargetLines, b); }
   //! \brief Sets whether to show the Database submenu. Stored in QSettings so it survives DB switches.
   void setShowDatabaseMenu(bool b) { QSettings s; s.setValue("ShowDatabaseMenu", b); }
 

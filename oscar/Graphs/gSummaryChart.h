@@ -248,6 +248,10 @@ public:
     //! \brief A target to draw as a dashed line across the chart (when it is within the
     //! y-axis), so that nights past it stand out; 0 for none.
     virtual float targetValue() { return 0; }
+    //! \brief Every target drawn as a dashed line; by default targetValue() alone.
+    virtual QList<float> targetValues() { const float t = targetValue(); return t > 0 ? QList<float> { t } : QList<float>(); }
+    //! \brief Whether the target lines are drawn (the graphs' right-click menu switches them).
+    static bool targetLinesShown();
 
     //! \brief Return any extra data to show beneath the date in the hover over tooltip
     virtual QString tooltipData(Day *, int);

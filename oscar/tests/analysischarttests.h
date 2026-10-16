@@ -17,6 +17,7 @@ class AnalysisChartTests : public QObject
     Q_OBJECT
 
 private slots:
+    void testAhiTargetLines();
     void testAnalysisChartTitles();
     void testSpo2RangeSharesAddUpToTheNight();
     void testSpo2RangeLabels();

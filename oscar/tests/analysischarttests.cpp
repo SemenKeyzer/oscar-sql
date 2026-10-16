@@ -6,6 +6,8 @@
  * License. See the file COPYING in the main directory of the source code
  * for more details. */
 
+#include "Graphs/gAHIChart.h"
+#include "SleepLib/appsettings.h"
 #include "analysischarttests.h"
 #include "Graphs/gAnalysisCharts.h"
 #include "SleepLib/analysis/oxi_analyzer.h"
@@ -110,5 +112,18 @@ void AnalysisChartTests::testAnalysisChartTitles()
     for (int k = gAnalysisChart::Ahi; k <= gAnalysisChart::PulseRises; ++k) {
         const QString t = gAnalysisChart::title(gAnalysisChart::Kind(k));
         QVERIFY2(t.endsWith(QStringLiteral(" · analysis")), qPrintable(t));
+    }
+}
+
+// The AHI chart draws the AASM grades 5, 15 and 30; one setting (on by default) shows or hides every target line.
+void AnalysisChartTests::testAhiTargetLines()
+{
+    QCOMPARE(gAHIChart::ahiTargets(), (QList<float> { 5, 15, 30 }));
+    QVERIFY(gSummaryChart::targetLinesShown());   // without settings: shown
+    if (AppSetting) {
+        const bool was = AppSetting->showTargetLines();
+        AppSetting->setShowTargetLines(false);
+        QVERIFY(!gSummaryChart::targetLinesShown());
+        AppSetting->setShowTargetLines(was);
     }
 }

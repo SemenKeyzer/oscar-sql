@@ -598,6 +598,15 @@ gGraphView::gGraphView(QWidget *parent, gGraphView *shared, QWidget *caller)
     lines_menu = context_menu->addMenu(tr("Dotted Lines"));
     connect(lines_menu, SIGNAL(triggered(QAction*)), this, SLOT(onLinesClicked(QAction*)));
 
+    // Overview: the target lines (AHI 5/15/30, compliance hours) on or off for every chart
+    target_lines_action = context_menu->addAction(tr("Target Lines"));
+    target_lines_action->setObjectName(QStringLiteral("actionTargetLines"));
+    target_lines_action->setCheckable(true);
+    connect(target_lines_action, &QAction::toggled, this, [this](bool on) {
+        if (AppSetting) AppSetting->setShowTargetLines(on);
+        timedRedraw(0);
+    });
+
 #if !defined(Q_OS_MAC)
     context_menu->setStyleSheet("QMenu {\
                               background-color: #f0f0f0; /* sets background of the menu */\
@@ -2457,6 +2466,11 @@ void gGraphView::populateMenu(gGraph * graph)
     gOverviewGraph * sc = dynamic_cast<gOverviewGraph *>(findLayer(graph,LT_SummaryChart));
     #endif
     gSummaryChart * stg = dynamic_cast<gSummaryChart *>(findLayer(graph,LT_Overview));
+    {
+        const QSignalBlocker block(target_lines_action);
+        target_lines_action->setChecked(gSummaryChart::targetLinesShown());
+        target_lines_action->setVisible(stg && !stg->targetValues().isEmpty());
+    }
 
     limits_menu->clear();
     #ifndef REMOVE_FITNESS

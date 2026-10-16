@@ -40,6 +40,9 @@ public:
     virtual void afterDraw(QPainter &, gGraph &, QRectF);
     //! An AHI of 5, as a line.
     virtual float targetValue() { return 5; }
+    //! The AASM grades 5, 15 and 30 (mild, moderate, severe), as lines.
+    virtual QList<float> targetValues() { return ahiTargets(); }
+    static QList<float> ahiTargets() { return { 5, 15, 30 }; }
 
     virtual void populate(Day *, int idx);
 

@@ -623,6 +623,7 @@ class gGraphView
 
     QMenu * limits_menu;
     QMenu * lines_menu;
+    QAction * target_lines_action = nullptr;
     QMenu * plots_menu;
 
     QMenu * oximeter_menu;

@@ -8,6 +8,7 @@
  * for more details. */
 
 #define TEST_MACROS_ENABLEDoff
+#include "SleepLib/appsettings.h"
 #include "test_macros.h"
 
 #include <math.h>
@@ -660,11 +661,14 @@ void gSummaryChart::paint(QPainter &painter, gGraph &graph, const QRegion &regio
     painter.setPen(QPen(Qt::black,1));
     painter.drawRects(outlines);
 
-    const float target = targetValue();
-    if (target > miny && target < maxy) {
-        const float y = rect.bottom() - (target - miny) * ymult;
-        painter.setPen(QPen(QColor(0x40, 0x40, 0x40), 1, Qt::DashLine));
-        painter.drawLine(QPointF(rect.left(), y), QPointF(rect.right(), y));
+    if (targetLinesShown()) {
+        const QList<float> targets = targetValues();
+        for (const float target : targets) {
+            if (target <= miny || target >= maxy) continue;
+            const float y = rect.bottom() - (target - miny) * ymult;
+            painter.setPen(QPen(QColor(0x40, 0x40, 0x40), 1, Qt::DashLine));
+            painter.drawLine(QPointF(rect.left(), y), QPointF(rect.right(), y));
+        }
     }
 
     if (hl) {
@@ -797,3 +801,8 @@ QString gSummaryChart::durationInSecondsToHhMmSs(double duration) {
         return *this;
     }
 
+
+bool gSummaryChart::targetLinesShown()
+{
+    return AppSetting == nullptr || AppSetting->showTargetLines();
+}
