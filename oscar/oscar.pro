@@ -192,6 +192,7 @@ macx  {
     DEFINES         += _TTY_POSIX_
 } else:win32 {
     DEFINES          += WINVER=0x0501 # needed for mingw to pull in appropriate dbt business...probably a better way to do this
+    DEFINES          += NOMINMAX      # windows.h must not define min/max macros (they break min()/max() members under MSVC)
     LIBS             += -lsetupapi
     LIBS             += -ldbghelp # needed for call stack with names rather than addresses
 
