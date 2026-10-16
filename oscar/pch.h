@@ -34,7 +34,9 @@
 #include <QTime>
 #include <QUrl>
 #include <QPrinter>
+#ifndef helpless   // Qt Help is not used (and may not be installed) when OSCAR is built without it
 #include <QHelpEngine>
+#endif
 #include <QTabWidget>
 #include <QAction>
 #include <QColor>
