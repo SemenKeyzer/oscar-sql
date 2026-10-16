@@ -16,6 +16,10 @@ class NightSummaryTests : public QObject
 {
     Q_OBJECT
 private slots:
+    void testAhiTileDeviceFirst();
+    void testFlowLimitationTile();
+    void testLeakPercentile();
+    void testTrendBarsRedAboveTarget();
     void testMarkHoverOnLabels();
     void testKeyFiguresMarked();
     void testAnalysisConcernMarked();

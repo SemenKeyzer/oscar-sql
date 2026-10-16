@@ -169,7 +169,7 @@ void NightSummaryTests::testViewShowsTheNight()
     QVERIFY(text(QStringLiteral("nsVerdict")).contains(QStringLiteral("Within your targets")));
     QVERIFY(text(QStringLiteral("nsValue")).startsWith(QStringLiteral("7<span")));    // 7 h 12 min, units smaller
     QVERIFY(text(QStringLiteral("nsValue")).contains(QStringLiteral("&nbsp;min</span>")));
-    QVERIFY(text(QStringLiteral("nsNote")).contains(QStringLiteral("OSCAR's analysis: 2.1")));
+    QVERIFY(text(QStringLiteral("nsNote")).contains(QStringLiteral("OSCAR analysis — 2.1")));
     QVERIFY(text(QStringLiteral("nsNote")).contains(QStringLiteral("ODI 3%: 2.2 per hour")));
     QVERIFY(text(QStringLiteral("nsNote")).contains(QStringLiteral("pulse 61 (52 to 96)")));   // in the SpO2 tile
     QVERIFY(text(QStringLiteral("nsCaption")).contains(QStringLiteral("28 of 30 night")));
@@ -335,7 +335,7 @@ void NightSummaryTests::testFlowLimitationInAhiTile()
     QStringList notes;
     for (QLabel *l : view.findChildren<QLabel *>(QStringLiteral("nsNote"))) notes << l->text();
     const QString all = notes.join(QLatin1Char('\n'));
-    QVERIFY2(all.contains(NightSummaryView::tr("flow limitation %1% (%2 min)").arg(QStringLiteral("6"), QStringLiteral("32"))), qPrintable(all));
+    QVERIFY2(all.contains(NightSummaryView::tr("%1 min").arg(QStringLiteral("32"))), qPrintable(all));   // in the flow limitation tile
     QVERIFY2(all.contains(NightSummaryView::tr("Glasgow %1 / %2").arg(QStringLiteral("3.3"), QStringLiteral("2.9"))), qPrintable(all));
 }
 
@@ -451,7 +451,7 @@ void NightSummaryTests::testNightTileMark()
     QStringList notes;
     for (QLabel *l : view.findChildren<QLabel *>(QStringLiteral("nsNote"))) notes << l->text();
     const QString all = notes.join(QLatin1Char('\n'));
-    QVERIFY2(all.contains(QStringLiteral("corrected by hand (device 4.3)")), qPrintable(all));
+    QVERIFY2(all.contains(QStringLiteral("manual scoring — 1.8")), qPrintable(all));   // the device's 4.3 is the tile's figure
 }
 
 // The analysis' ODI on the SpO2 tile carries the mark; the classic drops do not.
@@ -493,4 +493,82 @@ void NightSummaryTests::testMarkHoverOnLabels()
         }
     }
     QVERIFY(found);
+}
+
+namespace {
+QString tileTexts(NightSummaryView &view, const QString &caption, const QString &part)
+{
+    for (QFrame *t : view.findChildren<QFrame *>(QStringLiteral("nsTile"))) {
+        QLabel *c = t->findChild<QLabel *>(QStringLiteral("nsCaption"));
+        if (c && c->text() == caption) return t->findChild<QLabel *>(part)->text();
+    }
+    return QString();
+}
+}
+
+// The AHI tile: the device's figure large, then OSCAR's analysis and manual scoring, a dash where none.
+void NightSummaryTests::testAhiTileDeviceFirst()
+{
+    NightSummaryView view;
+    NightSummary s = goodNight();
+    s.correctedByHand = true;
+    s.deviceAhi = 3.7;
+    s.ahi = 3.9;
+    s.analysisAhi = 3.0;
+    view.setSummary(s);
+    QVERIFY(tileTexts(view, QStringLiteral("AHI"), QStringLiteral("nsValue")).contains(QStringLiteral("3.7")));
+    const QString note = tileTexts(view, QStringLiteral("AHI"), QStringLiteral("nsNote"));
+    QVERIFY2(note.contains(QStringLiteral("OSCAR analysis — 3.0")), qPrintable(note));
+    QVERIFY(note.contains(QStringLiteral("manual scoring — 3.9")));
+    QVERIFY(note.contains(AnalysisMark::pill()));
+
+    s.correctedByHand = false;
+    s.deviceAhi = 1.8;
+    s.hasAnalysisAhi = false;
+    view.setSummary(s);
+    const QString plain = tileTexts(view, QStringLiteral("AHI"), QStringLiteral("nsNote"));
+    QVERIFY(plain.contains(QStringLiteral("manual scoring — —")));
+    QVERIFY(!plain.contains(QStringLiteral("OSCAR analysis")));
+}
+
+// Flow limitation and Glasgow leave the AHI tile for a tile of their own, marked as the analysis'.
+void NightSummaryTests::testFlowLimitationTile()
+{
+    NightSummaryView view;
+    NightSummary s = goodNight();
+    s.deviceAhi = s.ahi;
+    s.hasFlowLimitation = true;
+    s.flPercent = 23;
+    s.flMinutes = 100;
+    s.hasGlasgow = true;
+    s.glasgow = 2.7;
+    s.glasgowAdapted = 2.6;
+    view.setSummary(s);
+    QVERIFY(!tileTexts(view, QStringLiteral("AHI"), QStringLiteral("nsNote")).contains(QStringLiteral("flow limitation")));
+    QVERIFY(tileTexts(view, QStringLiteral("Flow limitation"), QStringLiteral("nsValue")).contains(QStringLiteral("23")));
+    const QString note = tileTexts(view, QStringLiteral("Flow limitation"), QStringLiteral("nsNote"));
+    QVERIFY2(note.contains(QStringLiteral("Glasgow 2.7 / 2.6")), qPrintable(note));
+    QVERIFY(note.contains(AnalysisMark::pill()));
+}
+
+// The leak is judged by its 95th percentile, the one the red line is meant for; the median beside it.
+void NightSummaryTests::testLeakPercentile()
+{
+    NightSummary s = goodNight();
+    s.leak = 30;          // 95th percentile
+    s.leakMedian = 5;
+    QCOMPARE(s.leakLevel(), NightSummary::Attention);
+    QVERIFY(s.concerns().join(QLatin1Char(' ')).contains(QStringLiteral("95%")));
+    NightSummaryView view;
+    s.deviceAhi = s.ahi;
+    view.setSummary(s);
+    const QString note = tileTexts(view, QStringLiteral("Leak"), QStringLiteral("nsNote"));
+    QVERIFY2(note.contains(QStringLiteral("95%")) && note.contains(QStringLiteral("median 5")), qPrintable(note));
+}
+
+// A night above the target is a red bar in the 30-night trends.
+void NightSummaryTests::testTrendBarsRedAboveTarget()
+{
+    QCOMPARE(NightTrend::barColor(false), QColor(0xd0, 0x30, 0x30));
+    QVERIFY(NightTrend::barColor(true) != NightTrend::barColor(false));
 }

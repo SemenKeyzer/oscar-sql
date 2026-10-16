@@ -61,7 +61,8 @@ struct NightSummary {
     //! Takes the flow limitation figures from the analysis' row for the night.
     void takeFlowLimitation(const AnalysisDailyData &row);
     bool hasLeak = false;
-    double leak = 0;                //!< weighted average
+    double leak = 0;                //!< 95th percentile: the red line is meant for it
+    double leakMedian = 0;          //!< 50th percentile
     double leakRedline = 0;         //!< 0: none set
     QString leakUnits;
     QString pressure;               //!< e.g. "9.8", or "5 / 9.8" for EPAP / IPAP
@@ -121,6 +122,8 @@ class NightTrend : public QWidget
     explicit NightTrend(QWidget *parent = nullptr);
     //! \a aboveIsGood: whether reaching the target is good (usage) or bad (AHI).
     void setValues(const QVector<double> &values, double target, bool aboveIsGood, double minScale);
+    //! A bar's colour: blue for a night within the target, red for one beyond it.
+    static QColor barColor(bool good);
     QSize sizeHint() const override;
 
   protected:

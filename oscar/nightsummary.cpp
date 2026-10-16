@@ -54,6 +54,13 @@ QString duration(double hours)
 }
 
 // The pressure tile's note: what the figure is, then how long the APAP sat at its limit.
+//! "95%; median X; red line Y" under the leak figure, which is the 95th percentile.
+QString leakNote(const NightSummary &s)
+{
+    const QString median = QCoreApplication::translate("NightSummary", "95%; median %1").arg(num(s.leakMedian));
+    return s.leakRedline > 0 ? QCoreApplication::translate("NightSummary", "%1; red line %2").arg(median).arg(s.leakRedline) : median;
+}
+
 QString pressureTileNote(const NightSummary &s)
 {
     const QString atMax = s.pressureMaxNote();
@@ -209,7 +216,7 @@ QStringList NightSummary::concerns() const
         out << analysisAhiConcern();
     }
     if (leakLevel() == Attention) {
-        out << tr("Average leak %1 %2, at or above your red line of %3.").arg(num(leak), leakUnits).arg(leakRedline);
+        out << tr("Leak at the 95%: %1 %2, at or above your red line of %3.").arg(num(leak), leakUnits).arg(leakRedline);
     }
     if (spo2Level() == Attention) {
         if (oxi.percentBelow90 >= kT90Target) {
@@ -282,7 +289,8 @@ NightSummary buildNightSummaryFor(Profile *profile, analysis::AnalysisService *s
         s.takeFlowLimitation(row);
         if (day->channelHasData(CPAP_Leak)) {
             s.hasLeak = true;
-            s.leak = day->wavg(CPAP_Leak);
+            s.leak = day->percentile(CPAP_Leak, 0.95);
+            s.leakMedian = day->percentile(CPAP_Leak, 0.5);
             s.leakRedline = profile->cpap->leakRedline();
             s.leakUnits = schema::channel[CPAP_Leak].units();
         }
@@ -349,6 +357,11 @@ QSize NightTrend::sizeHint() const
     return QSize(240, 52);
 }
 
+QColor NightTrend::barColor(bool good)
+{
+    return good ? QColor(0x4a, 0x7f, 0xb5) : QColor(0xd0, 0x30, 0x30);
+}
+
 void NightTrend::paintEvent(QPaintEvent *)
 {
     if (m_values.isEmpty()) return;
@@ -364,7 +377,6 @@ void NightTrend::paintEvent(QPaintEvent *)
     const double slot = r.width() / NightSummary::kTrendNights;      // a month always spans the same width
     const double bar = std::max(2.0, slot * 0.7);
     const double x0 = r.right() - n * slot;
-    const QColor good(0x4a, 0x7f, 0xb5), attention = NightSummaryView::levelColor(NightSummary::Attention);
     for (int i = 0; i < n; ++i) {
         const double v = m_values[i];
         const double x = x0 + i * slot + (slot - bar) / 2;
@@ -376,7 +388,7 @@ void NightTrend::paintEvent(QPaintEvent *)
         }
         const bool reached = v >= m_target;
         p.setPen(Qt::NoPen);
-        p.setBrush(reached == m_aboveIsGood ? good : attention);
+        p.setBrush(barColor(reached == m_aboveIsGood));
         const double h = std::max(1.5, r.height() * v / top);
         p.drawRect(QRectF(x, r.bottom() - h, bar, h));
     }
@@ -466,8 +478,7 @@ QString NightSummaryView::keyFiguresHtml(const NightSummary &s)
     if (s.hasCpap) {
         tiles.append({ tr("Usage"), duration(s.hours), tr("target %1 h or more").arg(s.complianceHours), s.usageLevel() , QString() });
         if (s.hasLeak) {
-            tiles.append({ tr("Leak"), num(s.leak) + QLatin1Char(' ') + s.leakUnits,
-                           s.leakRedline > 0 ? tr("average; red line %1").arg(s.leakRedline) : tr("average"), s.leakLevel() , QString() });
+            tiles.append({ tr("Leak"), num(s.leak) + QLatin1Char(' ') + s.leakUnits, leakNote(s), s.leakLevel(), QString() });
         }
         if (!s.pressure.isEmpty()) {
             tiles.append({ tr("Pressure"), s.pressure + QLatin1Char(' ') + s.pressureUnits, pressureTileNote(s), NightSummary::Unknown , QString() });
@@ -608,27 +619,31 @@ void NightSummaryView::setSummary(const NightSummary &s)
     if (s.hasCpap) {
         HelpTips::attach(addTile(col++, tr("Usage"), usageFigure(s.hours),
                                  tr("target %1 h or more").arg(s.complianceHours), s.usageLevel()), QStringLiteral("usage"));
-        QString ahiNote = tr("target under %1").arg(NightSummary::kAhiTarget);
-        if (s.correctedByHand) {
-            ahiNote += QStringLiteral("<br/>") + HelpTips::term(tr("corrected by hand (device %1)").arg(num(s.deviceAhi)), QStringLiteral("manual_scoring"));
-        }
+        // the device's AHI large; OSCAR's analysis and manual scoring beneath it ("—" where none)
+        QString ahiNote = tr("target under %1").arg(NightSummary::kAhiTarget) + QStringLiteral("<br/>");
+        QStringList parts;
         if (s.hasAnalysisAhi) {
-            ahiNote += QStringLiteral("<br/>") + HelpTips::term(tr("OSCAR's analysis: %1").arg(num(s.analysisAhi)), QStringLiteral("an_ahi"))
-                       + QStringLiteral(" ") + AnalysisMark::pill();
+            parts << HelpTips::term(tr("OSCAR analysis — %1").arg(num(s.analysisAhi)), QStringLiteral("an_ahi"))
+                         + QStringLiteral(" ") + AnalysisMark::pill();
         }
-        if (s.hasFlowLimitation) {
-            const QString fl = QString::number(s.flPercent, 'f', 0), minutes = QString::number(s.flMinutes, 'f', 0);
-            ahiNote += QStringLiteral("<br/>") + HelpTips::term(tr("flow limitation %1% (%2 min)").arg(fl, minutes), QStringLiteral("fl_time"));
-            if (s.hasGlasgow) {
-                ahiNote += QStringLiteral(" · ") + HelpTips::term(tr("Glasgow %1 / %2").arg(num(s.glasgow), num(s.glasgowAdapted)), QStringLiteral("glasgow"))
-                         + (s.glasgowLessReliable ? QLatin1Char(' ') + tr("(less reliable on this device)") : QString());
-            }
-        }
-        HelpTips::attach(addTile(col++, tr("AHI"), num(s.ahi), ahiNote, s.ahiLevel(),
+        parts << HelpTips::term(tr("manual scoring — %1").arg(s.correctedByHand ? num(s.ahi) : QStringLiteral("—")),
+                                QStringLiteral("manual_scoring"));
+        ahiNote += parts.join(QStringLiteral(" | "));
+        HelpTips::attach(addTile(col++, tr("AHI"), num(s.deviceAhi), ahiNote, s.ahiLevel(),
                                  tr("Apneas and hypopneas per hour, as the device counted them.")), QStringLiteral("ahi"));
+        if (s.hasFlowLimitation) {   // OSCAR's analysis: a tile of its own
+            QString note = HelpTips::term(tr("%1 min").arg(QString::number(s.flMinutes, 'f', 0)), QStringLiteral("fl_time"));
+            if (s.hasGlasgow) {
+                note += QStringLiteral(" · ") + HelpTips::term(tr("Glasgow %1 / %2").arg(num(s.glasgow), num(s.glasgowAdapted)), QStringLiteral("glasgow"))
+                      + (s.glasgowLessReliable ? QLatin1Char(' ') + tr("(less reliable on this device)") : QString());
+            }
+            note += QStringLiteral(" ") + AnalysisMark::pill();
+            HelpTips::attach(addTile(col++, tr("Flow limitation"), figure(QString::number(s.flPercent, 'f', 0), QStringLiteral("%")), note,
+                                     NightSummary::Unknown), QStringLiteral("fl_time"));
+        }
         if (s.hasLeak) {
-            const QString note = s.leakRedline > 0 ? tr("average; red line %1").arg(s.leakRedline) : tr("average");
-            HelpTips::attach(addTile(col++, tr("Leak"), figure(num(s.leak), s.leakUnits), note, s.leakLevel()), QStringLiteral("leak"));
+            HelpTips::attach(addTile(col++, tr("Leak"), figure(num(s.leak), s.leakUnits), leakNote(s).toHtmlEscaped(), s.leakLevel()),
+                             QStringLiteral("leak"));
         }
         if (!s.pressure.isEmpty()) {
             HelpTips::attach(addTile(col++, tr("Pressure"), figure(s.pressure, s.pressureUnits), pressureTileNote(s).toHtmlEscaped(),
