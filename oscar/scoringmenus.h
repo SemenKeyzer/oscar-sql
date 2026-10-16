@@ -36,6 +36,8 @@ class ScoringMenus
     static QMenu *forExcluded(qint64 editId, QWidget *parent);
     //! The name of a scored channel in the menus: "Obstructive apnea", …
     static QString typeName(ChannelID channel);
+    //! "flow limitation m:ss" for a marked stretch of \a ms.
+    static QString markText(qint64 ms);
     //! The event type a menu choice adds (it is then repeated for the next selections); 0 for anything else.
     static ChannelID repeatableType(const QVariantMap &choice);
     //! The choice that adds \a type, as picking it in the selection menu would.

@@ -2765,3 +2765,26 @@ void AnalysisIntegrationTests::testNightScroll()
     QCOMPARE(r.first, last - 3600000);
     QCOMPARE(r.second, last);
 }
+
+// A marked flow limitation stretch moves by its edge and is undone like an excluded one.
+void AnalysisIntegrationTests::testMarkMoveAndUndo()
+{
+    Machine cpap(p_profile, 87);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    Session *s = scoredSession(&cpap, 871, m_machineRow);
+    day.addSession(s);
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Mark, CPAP_ManualFlowLimit, 100, 200)));
+    ManualScoring::Result r = ManualScoring::resultFor(s);
+    QCOMPARE(r.flowLimitedMs, qint64(100000));
+    const qint64 id = r.markEdits.first().editId;
+    QVERIFY(ManualScoring::updateEdit(&day, id, synth::kStart + 100000, synth::kStart + 250000));
+    r = ManualScoring::resultFor(s);
+    QCOMPARE(r.flowLimitedMs, qint64(150000));
+    QCOMPARE(ManualScoring::flowLimitedMs(&day), qint64(150000));
+    QVERIFY(ManualScoring::undoEdit(&day, r.markEdits.first().editId));
+    QCOMPARE(ManualScoring::resultFor(s).flowLimitedMs, qint64(0));
+    ManualScoringRepository::removeAllForSession(ManualScoring::keyOf(s));
+    ManualScoring::refresh(s);
+}

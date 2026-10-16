@@ -594,3 +594,39 @@ void ManualScoringTests::testBulkRetypeResized()
     QCOMPARE(after.delta.value(CPAP_Hypopnea), 2);
     QCOMPARE(eventMatching(after, 100 * kSec)->endMs, 106 * kSec);   // the bounds stay
 }
+
+// Flow limitation stretches: overlapping ones count once, only inside the sessions; the AHI is untouched.
+void ManualScoringTests::testMarksMergedAndClipped()
+{
+    const QList<QPair<qint64, qint64>> session = { { 0, 1000 * kSec } };
+    const Result r = apply(deviceEvents(), { edit(1, Kind::Mark, CPAP_ManualFlowLimit, 100 * kSec, 200 * kSec),
+                                              edit(2, Kind::Mark, CPAP_ManualFlowLimit, 150 * kSec, 300 * kSec),
+                                              edit(3, Kind::Mark, CPAP_ManualFlowLimit, 900 * kSec, 1100 * kSec) }, session);
+    QCOMPARE(r.flowLimitedMs, qint64(300 * kSec));
+    QCOMPARE(r.flowLimitedSpans, (QList<QPair<qint64, qint64>> { { 100 * kSec, 300 * kSec }, { 900 * kSec, 1000 * kSec } }));
+    QCOMPARE(r.markEdits.size(), 3);
+    QVERIFY(r.delta.isEmpty());   // no event count changes
+    QCOMPARE(r.excludedMs, qint64(0));
+}
+
+// An artifact stretch leaves its minutes out of the flow limitation.
+void ManualScoringTests::testMarksLessArtifact()
+{
+    const Result r = apply(deviceEvents(), { edit(1, Kind::Mark, CPAP_ManualFlowLimit, 100 * kSec, 300 * kSec),
+                                              edit(2, Kind::Exclude, 0, 200 * kSec, 250 * kSec) }, oneSession());
+    QCOMPARE(r.flowLimitedMs, qint64(150 * kSec));
+    QCOMPARE(r.flowLimitedSpans, (QList<QPair<qint64, qint64>> { { 100 * kSec, 200 * kSec }, { 250 * kSec, 300 * kSec } }));
+}
+
+void ManualScoringTests::testMarkStored()
+{
+    Edit e = edit(0, Kind::Mark, CPAP_ManualFlowLimit, 120 * kSec, 250 * kSec);
+    e.key = key(102);
+    e.id = ManualScoringRepository::add(e);
+    QVERIFY(e.id > 0);
+    const QList<Edit> loaded = ManualScoringRepository::editsForSession(key(102));
+    QCOMPARE(loaded.size(), 1);
+    QCOMPARE(int(loaded.first().kind), int(Kind::Mark));
+    QCOMPARE(loaded.first().channel, CPAP_ManualFlowLimit);
+    ManualScoringRepository::removeAllForSession(key(102));
+}

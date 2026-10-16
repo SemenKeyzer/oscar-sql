@@ -16,6 +16,7 @@ class AnalysisIntegrationTests : public QObject
 {
     Q_OBJECT
 private slots:
+    void testMarkMoveAndUndo();
     void testNightScroll();
     void testDeviceOahiCahi();
     void testSectionHeaderMarkOutsideLink();

@@ -194,6 +194,14 @@ QList<ScoringMenus::EditRow> ScoringMenus::editRows(Day *day)
                 text = excludedText(e.endMs - e.startMs);
                 break;
             }
+            case Kind::Mark: {   // a stretch across sessions is one row
+                const QPair<qint64, qint64> span(-e.startMs, -e.endMs);   // apart from the excluded ones
+                if (stretches.contains(span)) continue;
+                stretches.insert(span);
+                at = e.startMs + c;
+                text = markText(e.endMs - e.startMs);
+                break;
+            }
             }
             rows.append({ e.id, at, text });
         }
@@ -253,4 +261,10 @@ QVariantMap ScoringMenus::repeatChoice(ChannelID type)
 QString ScoringMenus::repeatText(ChannelID type)
 {
     return tr("Repeat: %1").arg(typeName(type));
+}
+
+QString ScoringMenus::markText(qint64 ms)
+{
+    const qint64 seconds = (ms + 500) / 1000;
+    return tr("flow limitation %1").arg(QStringLiteral("%1:%2").arg(seconds / 60).arg(seconds % 60, 2, 10, QLatin1Char('0')));
 }

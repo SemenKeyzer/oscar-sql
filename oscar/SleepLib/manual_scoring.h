@@ -21,7 +21,7 @@
 //! events added, removed or retyped, and stretches excluded from scoring (noise, awake).
 namespace ManualScoring {
 
-enum class Kind { Add, Remove, Retype, Exclude, Resize };
+enum class Kind { Add, Remove, Retype, Exclude, Resize, Mark };   //!< Mark: a stretch of a span type (flow limitation)
 
 //! Which session an edit belongs to. Kept by what survives a rebuild of the device's data
 //! (which deletes and re-creates the database rows): the profile, the device's serial number and
@@ -77,6 +77,13 @@ struct ExcludeEdit {
     qint64 startMs, endMs;
 };
 
+//! A Mark edit's own stretch, before stretches are merged.
+struct MarkEdit {
+    qint64 editId;
+    ChannelID channel;
+    qint64 startMs, endMs;
+};
+
 struct Result {
     QHash<ChannelID, int> delta;   //!< counted minus device count, per scored channel
     qint64 excludedMs = 0;         //!< excluded time inside the sessions, overlaps counted once
@@ -84,6 +91,9 @@ struct Result {
     QList<qint64> notFound;        //!< Remove/Retype edits whose device event is not there
     QList<EffectiveEvent> events;  //!< every device and added event of the scored channels
     QList<ExcludeEdit> excludeEdits;   //!< every Exclude edit, unmerged
+    QList<MarkEdit> markEdits;         //!< every Mark edit (flow limitation), unmerged
+    QList<QPair<qint64, qint64>> flowLimitedSpans;   //!< the marked flow limitation, merged, in the sessions, less excluded time
+    qint64 flowLimitedMs = 0;
 };
 
 constexpr qint64 kMatchToleranceMs = 1000;
@@ -145,6 +155,8 @@ bool updateEdit(Day *day, qint64 id, qint64 startMs, qint64 endMs);
 //! Undoes the edit \a id of \a day's sessions; an excluded stretch stored with several sessions
 //! is undone in all of them.
 bool undoEdit(Day *day, qint64 id);
+//! The flow limitation marked by hand in the day's enabled CPAP sessions, less excluded time.
+qint64 flowLimitedMs(Day *day);
 //! Stores the day's daily summary again (its AHI changed); the SQL reports read it.
 void storeDaySummary(Day *day);
 //! Removes every edit of the day's sessions.

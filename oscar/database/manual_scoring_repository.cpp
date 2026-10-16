@@ -34,6 +34,7 @@ QString kindName(Kind k)
     case Kind::Retype: return QStringLiteral("retype");
     case Kind::Exclude: return QStringLiteral("exclude");
     case Kind::Resize: return QStringLiteral("resize");
+    case Kind::Mark: return QStringLiteral("mark");
     }
     return QString();
 }
@@ -44,6 +45,7 @@ Kind kindOf(const QString &name)
     if (name == QLatin1String("retype")) return Kind::Retype;
     if (name == QLatin1String("exclude")) return Kind::Exclude;
     if (name == QLatin1String("resize")) return Kind::Resize;
+    if (name == QLatin1String("mark")) return Kind::Mark;
     return Kind::Add;
 }
 

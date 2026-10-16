@@ -4714,6 +4714,7 @@ QString Daily::getManualScoring(Day *day)
             case Kind::Retype: ++retyped; break;
             case Kind::Exclude: stretches.insert({ e.startMs, e.endMs }); break;
             case Kind::Resize: ++resized; break;
+            case Kind::Mark: break;   // listed with the edits; its total is on the page above
             }
         }
     }

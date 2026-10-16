@@ -70,6 +70,24 @@ QList<QPair<qint64, qint64>> clippedUnion(const QList<QPair<qint64, qint64>> &sp
 
 } // namespace
 
+namespace {
+//! \a spans (sorted, disjoint) with the parts inside \a cuts (sorted, disjoint) taken out.
+QList<QPair<qint64, qint64>> without(const QList<QPair<qint64, qint64>> &spans, const QList<QPair<qint64, qint64>> &cuts)
+{
+    QList<QPair<qint64, qint64>> out;
+    for (auto span : spans) {
+        for (const auto &cut : cuts) {
+            if (cut.second <= span.first || cut.first >= span.second) continue;
+            if (cut.first > span.first) out.append({ span.first, cut.first });
+            span.first = qMax(span.first, cut.second);
+            if (span.first >= span.second) break;
+        }
+        if (span.first < span.second) out.append(span);
+    }
+    return out;
+}
+} // namespace
+
 Result apply(const QList<DeviceEvent> &device, const QList<Edit> &edits, const QList<QPair<qint64, qint64>> &sessionSpans)
 {
     // RERA and the hypopneas some devices split by mechanism (OH/CH) cannot be edited, but an
@@ -96,6 +114,9 @@ Result apply(const QList<DeviceEvent> &device, const QList<Edit> &edits, const Q
         case Kind::Exclude:
             excludes.append({ e.startMs, e.endMs });
             r.excludeEdits.append({ e.id, e.startMs, e.endMs });
+            break;
+        case Kind::Mark:
+            r.markEdits.append({ e.id, e.channel, e.startMs, e.endMs });
             break;
         case Kind::Remove:
         case Kind::Retype:
@@ -139,6 +160,11 @@ Result apply(const QList<DeviceEvent> &device, const QList<Edit> &edits, const Q
     const QList<QPair<qint64, qint64>> excluded = clippedUnion(excludes, sessionSpans);
     r.excludedSpans = excluded;
     for (const auto &span : excluded) r.excludedMs += span.second - span.first;
+    // flow limitation marked by hand: merged, inside the sessions, less the excluded time
+    QList<QPair<qint64, qint64>> marks;
+    for (const MarkEdit &m : r.markEdits) marks.append({ m.startMs, m.endMs });
+    r.flowLimitedSpans = without(clippedUnion(marks, sessionSpans), excluded);
+    for (const auto &span : r.flowLimitedSpans) r.flowLimitedMs += span.second - span.first;
     QHash<ChannelID, int> counted;
     for (EffectiveEvent &ev : r.events) {
         for (const auto &span : excluded) {
@@ -369,7 +395,7 @@ bool moveStretch(Day *day, const Edit &target, qint64 startMs, qint64 endMs)
         const qint64 c = s->correctionMs();
         bool stored = false, changed = false;
         for (const Edit &e : ManualScoringRepository::editsForSession(keyOf(s))) {
-            if (e.kind != Kind::Exclude || (e.id != target.id && (e.startMs != target.startMs || e.endMs != target.endMs))) continue;
+            if (e.kind != target.kind || (e.id != target.id && (e.startMs != target.startMs || e.endMs != target.endMs))) continue;
             stored = true;
             changed = true;
             if (touched.isEmpty() || touched.contains(s)) ok = ManualScoringRepository::update(e.id, startMs - c, endMs - c) && ok;
@@ -422,8 +448,8 @@ bool updateEdit(Day *day, qint64 id, qint64 startMs, qint64 endMs)
             }
         }
     }
-    if (!found || (target.kind != Kind::Add && target.kind != Kind::Exclude)) return false;
-    if (target.kind == Kind::Exclude) return moveStretch(day, target, startMs, endMs);
+    if (!found || (target.kind != Kind::Add && target.kind != Kind::Exclude && target.kind != Kind::Mark)) return false;
+    if (target.kind == Kind::Exclude || target.kind == Kind::Mark) return moveStretch(day, target, startMs, endMs);
     bool ok = true;
     for (Session *s : day->sessions) {
         bool changed = false;
@@ -458,14 +484,25 @@ bool undoEdit(Day *day, qint64 id)
     for (Session *s : day->sessions) {
         bool changed = false;
         for (const Edit &e : ManualScoringRepository::editsForSession(keyOf(s))) {
+            // a stretch (excluded or marked) is stored once per session it touches: all of them go
+            const bool stretch = target.kind == Kind::Exclude || target.kind == Kind::Mark;
             const bool same = e.id == id
-                              || (target.kind == Kind::Exclude && e.kind == Kind::Exclude && e.startMs == target.startMs
-                                  && e.endMs == target.endMs);
+                              || (stretch && e.kind == target.kind && e.startMs == target.startMs && e.endMs == target.endMs);
             if (same) changed = ManualScoringRepository::remove(e.id) || changed;
         }
         if (changed) refresh(s);
     }
     return true;
+}
+
+qint64 flowLimitedMs(Day *day)
+{
+    qint64 ms = 0;
+    if (!day) return ms;
+    for (Session *s : day->sessions) {
+        if (s->type() == MT_CPAP && s->enabled() && s->hasManualScoring()) ms += resultFor(s).flowLimitedMs;
+    }
+    return ms;
 }
 
 void storeDaySummary(Day *day)
