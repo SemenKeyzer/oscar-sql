@@ -15,6 +15,8 @@ class ContecBleImportTests : public QObject
 {
     Q_OBJECT
 private slots:
+    void testScannerAcceptsWindowsDevices();
+    void testScannerTakesLateName();
     void initTestCase();
     void testOximetryEventsSplitAtGaps();
     void testDecideRecord();

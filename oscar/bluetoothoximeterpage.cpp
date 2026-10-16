@@ -178,7 +178,12 @@ void BluetoothOximeterPage::onScanFinished(const QList<ContecBleFoundDevice> &de
     if (!m_busy) return;
     m_found = devices;
     if (devices.isEmpty()) {
-        onFailed(tr("No oximeter found. Turn on Bluetooth in the oximeter's menu, close the Contec phone app and try again."));
+        QString message = tr("No oximeter found. Turn on Bluetooth in the oximeter's menu, close the Contec phone app and try again.");
+#ifdef Q_OS_WIN
+        // a device Windows added in its settings stays connected to Windows and stops advertising
+        message += QStringLiteral(" ") + tr("If you added the oximeter in Windows Settings → Bluetooth & devices, remove it there: OSCAR connects to it by itself.");
+#endif
+        onFailed(message);
         return;
     }
     if (devices.size() == 1) {

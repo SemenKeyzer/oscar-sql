@@ -147,7 +147,12 @@ void O2RingPage::onScanFinished(const QList<O2RingFoundDevice> &devices)
     if (!m_busy) return;
     m_found = devices;
     if (devices.isEmpty()) {
-        finish(tr("No ring found. Close the ViHealth app on the phone, wear the ring so that it wakes up and try again."));
+        QString message = tr("No ring found. Close the ViHealth app on the phone, wear the ring so that it wakes up and try again.");
+#ifdef Q_OS_WIN
+        // a device Windows added in its settings stays connected to Windows and stops advertising
+        message += QStringLiteral(" ") + tr("If you added the ring in Windows Settings → Bluetooth & devices, remove it there: OSCAR connects to it by itself.");
+#endif
+        finish(message);
         return;
     }
     if (devices.size() == 1) {

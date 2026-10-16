@@ -27,7 +27,10 @@ void ContecBleScanner::start(int timeoutMs)
     m_found.clear();
     if (!m_agent) {
         m_agent = new QBluetoothDeviceDiscoveryAgent(this);
-        connect(m_agent, &QBluetoothDeviceDiscoveryAgent::deviceDiscovered, this, &ContecBleScanner::onDiscovered);
+        connect(m_agent, &QBluetoothDeviceDiscoveryAgent::deviceDiscovered, this, &ContecBleScanner::consider);
+        // Windows: the name often comes in a later update of the same device
+        connect(m_agent, &QBluetoothDeviceDiscoveryAgent::deviceUpdated, this,
+                [this](const QBluetoothDeviceInfo &info, QBluetoothDeviceInfo::Fields) { consider(info); });
         connect(m_agent, &QBluetoothDeviceDiscoveryAgent::finished, this, &ContecBleScanner::onFinished);
         connect(m_agent, &QBluetoothDeviceDiscoveryAgent::errorOccurred, this,
                 [this](QBluetoothDeviceDiscoveryAgent::Error error) {
@@ -53,15 +56,24 @@ void ContecBleScanner::stop()
     if (m_agent && m_agent->isActive()) m_agent->stop();
 }
 
-void ContecBleScanner::onDiscovered(const QBluetoothDeviceInfo &info)
+bool ContecBleScanner::matches(const QBluetoothDeviceInfo &info)
 {
-    if (!(info.coreConfigurations() & QBluetoothDeviceInfo::LowEnergyCoreConfiguration)) return;
+    const QBluetoothDeviceInfo::CoreConfigurations config = info.coreConfigurations();
+    if (config != QBluetoothDeviceInfo::UnknownCoreConfiguration
+        && !(config & QBluetoothDeviceInfo::LowEnergyCoreConfiguration)) return false;   // classic only
+    return modelForName(info.name()).isValid();
+}
+
+void ContecBleScanner::consider(const QBluetoothDeviceInfo &info)
+{
+    qDebug() << "ContecBLE scan:" << info.name() << info.address().toString() << info.deviceUuid().toString()
+             << "core" << int(info.coreConfigurations()) << "rssi" << info.rssi();
+    if (!matches(info)) return;
     const ModelInfo model = modelForName(info.name());
-    if (!model.isValid()) return;
     for (ContecBleFoundDevice &f : m_found) {
         if (f.info.address() == info.address() && f.info.deviceUuid() == info.deviceUuid()) {
             f.info = info;
-            f.rssi = info.rssi();
+            if (info.rssi() != 0) f.rssi = info.rssi();
             return;
         }
     }
@@ -75,6 +87,8 @@ void ContecBleScanner::onDiscovered(const QBluetoothDeviceInfo &info)
 
 void ContecBleScanner::onFinished()
 {
+    // the agent's own list carries the latest name of each device
+    for (const QBluetoothDeviceInfo &info : m_agent->discoveredDevices()) consider(info);
     std::sort(m_found.begin(), m_found.end(),
               [](const ContecBleFoundDevice &a, const ContecBleFoundDevice &b) { return a.rssi > b.rssi; });
     emit finished(m_found);

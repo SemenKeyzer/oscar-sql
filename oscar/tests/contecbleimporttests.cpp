@@ -18,6 +18,7 @@
 #include "SleepLib/profiles.h"
 #include "SleepLib/loader_plugins/contec_ble_import.h"
 #include "SleepLib/loader_plugins/contec_ble_loader.h"
+#include "SleepLib/loader_plugins/contec_ble_link.h"
 #include "database/database_manager.h"
 #include "bluetoothoximeterpage.h"
 #include "SleepLib/oximetry_summary.h"
@@ -427,3 +428,35 @@ void ContecBleImportTests::testNightSummaryForAnyDate()
     QVERIFY(!buildNightSummaryFor(p_profile, nullptr, QDate(2026, 8, 4), QDate(2026, 8, 6), false).oxi.valid);
 }
 
+
+namespace {
+QBluetoothDeviceInfo bleDevice(const QString &name, QBluetoothDeviceInfo::CoreConfigurations config)
+{
+    QBluetoothDeviceInfo info(QBluetoothAddress(QStringLiteral("00:11:22:33:44:55")), name, 0);
+    info.setCoreConfigurations(config);
+    return info;
+}
+}
+
+// Windows may report an oximeter it saw in "Add a device" with an unknown core configuration;
+// a classic-only device still cannot be one.
+void ContecBleImportTests::testScannerAcceptsWindowsDevices()
+{
+    QVERIFY(ContecBleScanner::matches(bleDevice(QStringLiteral("SpO202"), QBluetoothDeviceInfo::LowEnergyCoreConfiguration)));
+    QVERIFY(ContecBleScanner::matches(bleDevice(QStringLiteral("SpO202"), QBluetoothDeviceInfo::UnknownCoreConfiguration)));
+    QVERIFY(!ContecBleScanner::matches(bleDevice(QStringLiteral("SpO202"), QBluetoothDeviceInfo::BaseRateCoreConfiguration)));
+    QVERIFY(!ContecBleScanner::matches(bleDevice(QStringLiteral("Keyboard"), QBluetoothDeviceInfo::LowEnergyCoreConfiguration)));
+}
+
+// Windows names an LE device only in a later update: the scanner takes it then.
+void ContecBleImportTests::testScannerTakesLateName()
+{
+    ContecBleScanner scanner;
+    scanner.consider(bleDevice(QString(), QBluetoothDeviceInfo::LowEnergyCoreConfiguration));
+    QVERIFY(scanner.found().isEmpty());
+    scanner.consider(bleDevice(QStringLiteral("SpO202"), QBluetoothDeviceInfo::LowEnergyCoreConfiguration));
+    QCOMPARE(scanner.found().size(), 1);
+    QCOMPARE(scanner.found().first().model, QStringLiteral("CMS50FW"));
+    scanner.consider(bleDevice(QStringLiteral("SpO202"), QBluetoothDeviceInfo::LowEnergyCoreConfiguration));
+    QCOMPARE(scanner.found().size(), 1);   // the same device once
+}

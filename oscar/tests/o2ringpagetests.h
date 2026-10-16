@@ -15,6 +15,7 @@ class O2RingPageTests : public QObject
 {
     Q_OBJECT
 private slots:
+    void testScannerAcceptsWindowsDevices();
     void initTestCase();
     void testRecordsListed();
     void testNewRecordsDownloadAutomatically();

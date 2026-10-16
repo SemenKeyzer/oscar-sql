@@ -296,3 +296,21 @@ void O2RingPageTests::testOddSerialRefused()
     QCOMPARE(table(page)->rowCount(), 0);
     QVERIFY2(summary(page).contains(QStringLiteral("serial number")), qPrintable(summary(page)));
 }
+
+// Windows: a ring seen in "Add a device" may come with an unknown core configuration; its name arrives late.
+void O2RingPageTests::testScannerAcceptsWindowsDevices()
+{
+    QBluetoothDeviceInfo ring(QBluetoothAddress(QStringLiteral("00:11:22:33:44:66")), QStringLiteral("O2Ring 6554"), 0);
+    ring.setCoreConfigurations(QBluetoothDeviceInfo::UnknownCoreConfiguration);
+    QVERIFY(O2RingScanner::matches(ring));
+    ring.setCoreConfigurations(QBluetoothDeviceInfo::BaseRateCoreConfiguration);
+    QVERIFY(!O2RingScanner::matches(ring));
+    O2RingScanner scanner;
+    QBluetoothDeviceInfo unnamed(QBluetoothAddress(QStringLiteral("00:11:22:33:44:66")), QString(), 0);
+    unnamed.setCoreConfigurations(QBluetoothDeviceInfo::LowEnergyCoreConfiguration);
+    scanner.consider(unnamed);
+    QVERIFY(scanner.found().isEmpty());
+    ring.setCoreConfigurations(QBluetoothDeviceInfo::LowEnergyCoreConfiguration);
+    scanner.consider(ring);
+    QCOMPARE(scanner.found().size(), 1);
+}

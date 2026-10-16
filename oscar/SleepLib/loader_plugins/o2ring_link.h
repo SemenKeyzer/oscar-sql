@@ -34,11 +34,15 @@ public:
     explicit O2RingScanner(QObject *parent = nullptr);
     void start(int timeoutMs = 15000);
     void stop();
+    //! An O2Ring by its name; LE, or an unknown core configuration (Windows after "Add a device").
+    static bool matches(const QBluetoothDeviceInfo &info);
+    //! Takes a discovered or updated device (Windows names LE devices only in a later update).
+    void consider(const QBluetoothDeviceInfo &info);
+    const QList<O2RingFoundDevice> &found() const { return m_found; }
 signals:
     void finished(const QList<O2RingFoundDevice> &devices);   //!< strongest signal first
     void failed(const QString &message);
 private:
-    void onDiscovered(const QBluetoothDeviceInfo &info);
     void onFinished();
     QBluetoothDeviceDiscoveryAgent *m_agent = nullptr;
     QList<O2RingFoundDevice> m_found;

@@ -29,7 +29,10 @@ void O2RingScanner::start(int timeoutMs)
     m_found.clear();
     if (!m_agent) {
         m_agent = new QBluetoothDeviceDiscoveryAgent(this);
-        connect(m_agent, &QBluetoothDeviceDiscoveryAgent::deviceDiscovered, this, &O2RingScanner::onDiscovered);
+        connect(m_agent, &QBluetoothDeviceDiscoveryAgent::deviceDiscovered, this, &O2RingScanner::consider);
+        // Windows: the name often comes in a later update of the same device
+        connect(m_agent, &QBluetoothDeviceDiscoveryAgent::deviceUpdated, this,
+                [this](const QBluetoothDeviceInfo &info, QBluetoothDeviceInfo::Fields) { consider(info); });
         connect(m_agent, &QBluetoothDeviceDiscoveryAgent::finished, this, &O2RingScanner::onFinished);
         connect(m_agent, &QBluetoothDeviceDiscoveryAgent::errorOccurred, this,
                 [this](QBluetoothDeviceDiscoveryAgent::Error error) {
@@ -55,14 +58,23 @@ void O2RingScanner::stop()
     if (m_agent && m_agent->isActive()) m_agent->stop();
 }
 
-void O2RingScanner::onDiscovered(const QBluetoothDeviceInfo &info)
+bool O2RingScanner::matches(const QBluetoothDeviceInfo &info)
 {
-    if (!(info.coreConfigurations() & QBluetoothDeviceInfo::LowEnergyCoreConfiguration)) return;
-    if (!info.name().startsWith(QString::fromLatin1(O2Ring::NamePrefix))) return;
+    const QBluetoothDeviceInfo::CoreConfigurations config = info.coreConfigurations();
+    if (config != QBluetoothDeviceInfo::UnknownCoreConfiguration
+        && !(config & QBluetoothDeviceInfo::LowEnergyCoreConfiguration)) return false;   // classic only
+    return info.name().startsWith(QString::fromLatin1(O2Ring::NamePrefix));
+}
+
+void O2RingScanner::consider(const QBluetoothDeviceInfo &info)
+{
+    qDebug() << "O2Ring scan:" << info.name() << info.address().toString() << info.deviceUuid().toString()
+             << "core" << int(info.coreConfigurations()) << "rssi" << info.rssi();
+    if (!matches(info)) return;
     for (O2RingFoundDevice &f : m_found) {
         if (f.info.address() == info.address() && f.info.deviceUuid() == info.deviceUuid()) {
             f.info = info;
-            f.rssi = info.rssi();
+            if (info.rssi() != 0) f.rssi = info.rssi();
             return;
         }
     }
@@ -75,6 +87,8 @@ void O2RingScanner::onDiscovered(const QBluetoothDeviceInfo &info)
 
 void O2RingScanner::onFinished()
 {
+    // the agent's own list carries the latest name of each device
+    for (const QBluetoothDeviceInfo &info : m_agent->discoveredDevices()) consider(info);
     std::sort(m_found.begin(), m_found.end(),
               [](const O2RingFoundDevice &a, const O2RingFoundDevice &b) { return a.rssi > b.rssi; });
     emit finished(m_found);

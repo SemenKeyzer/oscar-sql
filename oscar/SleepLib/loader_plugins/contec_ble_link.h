@@ -35,11 +35,16 @@ public:
     explicit ContecBleScanner(QObject *parent = nullptr);
     void start(int timeoutMs = 15000);
     void stop();
+    //! A Contec oximeter by its advertised name; an LE device, or one Windows reports with an unknown
+    //! core configuration (e.g. after "Add a device" in its settings).
+    static bool matches(const QBluetoothDeviceInfo &info);
+    //! Takes a discovered or updated device (Windows names LE devices only in a later update).
+    void consider(const QBluetoothDeviceInfo &info);
+    const QList<ContecBleFoundDevice> &found() const { return m_found; }
 signals:
     void finished(const QList<ContecBleFoundDevice> &devices);   //!< strongest signal first
     void failed(const QString &message);
 private:
-    void onDiscovered(const QBluetoothDeviceInfo &info);
     void onFinished();
     QBluetoothDeviceDiscoveryAgent *m_agent = nullptr;
     QList<ContecBleFoundDevice> m_found;
