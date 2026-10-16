@@ -221,3 +221,26 @@ void OxiAnalyzerTests::testOximetryWithoutPulse()
     QVERIFY(!hasData(r.zones.first().meanPulse));
     QCOMPARE(r.pulseSeconds, 0);
 }
+
+// The hypoxic burden counts a desaturation's area only in a 60 s window around its nadir (as
+// MediOX and Azarbarzin's search window appear to), so a long, shallow sag does not outweigh
+// a short deep dip; a short dip keeps all of its area.
+void OxiAnalyzerTests::testDesaturationAreaIsWindowed()
+{
+    Grid longSag = synth::flat(900, 96);
+    synth::dip(longSag, 100, 4, 10, 150, 10);   // 4 points down for about 2.5 min
+    const OxiResult r = analyze(longSag);
+    QCOMPARE(r.desaturations.size(), 1);
+    const Desaturation &d = r.desaturations.first();
+    QVERIFY2(secondsOf(d.start, d.end) > 120, qPrintable(QString::number(secondsOf(d.start, d.end))));   // the event stays long
+    QVERIFY2(d.area <= 4.0 * kBurdenWindowSec + 1e-6, qPrintable(QString::number(d.area)));
+    QVERIFY2(d.area > 4.0 * kBurdenWindowSec / 2, qPrintable(QString::number(d.area)));
+
+    Grid shortDip = synth::flat(600, 96);
+    synth::dip(shortDip, 100, 5, 5, 20, 5);
+    const OxiResult q = analyze(shortDip);
+    QCOMPARE(q.desaturations.size(), 1);
+    const Desaturation &e = q.desaturations.first();
+    QVERIFY2(secondsOf(e.start, e.end) < kBurdenWindowSec, qPrintable(QString::number(secondsOf(e.start, e.end))));
+    QVERIFY(e.area > 5.0 * 20);   // at least the hold at full depth
+}

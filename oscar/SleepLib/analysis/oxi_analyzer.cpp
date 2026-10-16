@@ -138,7 +138,11 @@ QVector<Desaturation> findDesaturations(const Grid &s, const OxiParams &p)
                 d.end = s.timeAt(et);
                 d.peak = peak;
                 d.nadir = nadir;
-                for (int k = st; k < et; ++k) {
+                // the burden's area: only a window around the nadir, so a long shallow sag
+                // does not outweigh a short deep dip
+                const int from = qMax(st, nt - kBurdenWindowSec / 2);
+                const int to = qMin(et, from + kBurdenWindowSec);
+                for (int k = from; k < to; ++k) {
                     if (hasData(v[k]) && v[k] < peak) d.area += peak - v[k];
                 }
                 out.append(d);

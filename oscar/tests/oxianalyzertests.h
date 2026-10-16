@@ -33,6 +33,7 @@ private slots:
     void testCloseZonesMerge();
     void testSingleDesaturationMakesNoZone();
     void testOximetryWithoutPulse();
+    void testDesaturationAreaIsWindowed();
 };
 DECLARE_TEST(OxiAnalyzerTests)
 

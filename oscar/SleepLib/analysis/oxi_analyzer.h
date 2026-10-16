@@ -25,13 +25,16 @@ struct Span {
 };
 
 //! A fall of SpO2 from a peak to a nadir and back (spec §3.2.1).
+//! The hypoxic burden counts a desaturation's area only within this many seconds around its nadir.
+constexpr int kBurdenWindowSec = 60;
+
 struct Desaturation {
     qint64 start = 0;       //!< first second at least 1 point below the peak
     qint64 nadirTime = 0;
     qint64 end = 0;         //!< first second back near the peak (or 2/3 recovered)
     float peak = 0;
     float nadir = 0;
-    double area = 0;        //!< sum of (peak - SpO2) over the event, %·s
+    double area = 0;        //!< sum of (peak - SpO2) within kBurdenWindowSec around the nadir, %·s
     float depth() const { return peak - nadir; }
 };
 

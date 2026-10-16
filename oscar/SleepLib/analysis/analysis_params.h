@@ -17,7 +17,7 @@ namespace analysis {
 
 //! Bump whenever an algorithm changes in a way that changes its results: every stored
 //! analysis then counts as outdated and is recalculated.
-constexpr int kAnalysisAlgoVersion = 8;   // 2: the stage 1 stamp carries the flow totals; 3: Glasgow Index, limited breaths; 4: its adapted grey zone; 5: adapted No Pause, series warm-up; 6: below 20 Hz on a 25 Hz grid; 7: whole-L/min recordings smoothed; 8: also in the adapted variant
+constexpr int kAnalysisAlgoVersion = 9;   // 2: the stage 1 stamp carries the flow totals; 3: Glasgow Index, limited breaths; 4: its adapted grey zone; 5: adapted No Pause, series warm-up; 6: below 20 Hz on a 25 Hz grid; 7: whole-L/min recordings smoothed; 8: also in the adapted variant; 9: desaturation area within 60 s of the nadir
 
 //! How a flow reduction candidate becomes a hypopnea (stage 2).
 enum class HypopneaRule {
