@@ -211,7 +211,7 @@ void gAnalysisChart::populate(Day *day, int idx)
         weight = r.oxiSeconds / 3600.0f;
         const float hb = hypoxicBurden(r.desatArea, r.oxiSeconds);
         slices.append(SummaryChartSlice(calc, hb, hb, title(HypoxicBurden), QColor(0x90, 0x50, 0xa0)));
-        tip = QObject::tr("\nHypoxic burden (approx.): %1 %·min/h (%2)").arg(num(hb), hypoxicBurdenGradeName(hypoxicBurdenGrade(hb)));
+        tip = QObject::tr("\nHypoxic burden (approx.): %1 %·min/h (%2)").arg(num(hb), oxiGradeName(hypoxicBurdenGrade(hb)));
         if (r.hasCpap && r.hasFlow && r.flowSeconds > 0) {
             tip += QObject::tr("\nlinked to breathing events: %1 %·min/h").arg(num(r.linkedDesatArea / 60.0 / (r.flowSeconds / 3600.0)));
         }

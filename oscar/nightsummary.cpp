@@ -652,14 +652,16 @@ void NightSummaryView::setSummary(const NightSummary &s)
     }
     if (s.oxi.valid && !s.oxi.spotChecks && s.oxi.spo2Avg > 0) {
         QString note = s.oxi.fromAnalysis
-            ? tr("ODI 3%: %1 per hour, 4%: %2").arg(num(s.oxi.desaturations / s.oxi.hours), num(s.oxi.desaturations4 / s.oxi.hours))
+            ? tr("ODI 3%: %1 per hour (%2), 4%: %3").arg(num(s.oxi.desaturations / s.oxi.hours),
+                                                          oxiGradeHtml(odiGrade(s.oxi.desaturations / s.oxi.hours)),
+                                                          num(s.oxi.desaturations4 / s.oxi.hours))
                   + QStringLiteral(" ") + AnalysisMark::pill()
             : tr("SpO2 drops (classic): %1 per hour").arg(num(s.oxi.desaturations / s.oxi.hours));
         note += QStringLiteral("<br/>") + tr("T90: %1 min").arg(qRound(s.oxi.minutesBelow90)) + QStringLiteral(", ")
                 + tr("lowest %1%, average %2%").arg(num(s.oxi.spo2Min, 0), num(s.oxi.spo2Avg));
         if (s.oxi.fromAnalysis && !std::isnan(s.oxi.hypoxicBurden)) {
             note += QStringLiteral("<br/>") + tr("Hypoxic burden: %1 %·min/h (%2)")
-                        .arg(num(s.oxi.hypoxicBurden), hypoxicBurdenGradeName(hypoxicBurdenGrade(s.oxi.hypoxicBurden)));
+                        .arg(num(s.oxi.hypoxicBurden), oxiGradeHtml(hypoxicBurdenGrade(s.oxi.hypoxicBurden)));
         }
         if (s.hasCpap && s.oxi.pulseAvg > 0) {   // no room for a pulse tile next to the CPAP ones
             note += QStringLiteral("<br/>") + tr("pulse %1 (%2 to %3)").arg(num(s.oxi.pulseAvg, 0), num(s.oxi.pulseMin, 0), num(s.oxi.pulseMax, 0));

@@ -227,6 +227,29 @@ QString AnalysisPanel::sidebarHtml(Day *day, const DayResult &r, const QString &
         }
         html += QStringLiteral("</table>");
 
+        // graded as on Braebon's MediOX report: the grade in its colour, the scale under it
+        html += kTable;
+        html += wide(QStringLiteral("<b>%1</b>").arg(tr("Severity (MediOX scales)")));
+        const auto graded = [&html](const QString &label, const QString &value, OxiGrade grade, const double (&bounds)[3]) {
+            html += row(label, value + QStringLiteral(" ") + oxiGradeHtml(grade));
+            html += wide(QStringLiteral("<small>%1</small>").arg(oxiGradeScaleHtml(bounds, grade)));
+        };
+        if (oxiHours > 0) {
+            const double odi = o.countDesaturations(3) / oxiHours;
+            graded(HelpTips::term(tr("ODI 3%"), QStringLiteral("odi3")), number(odi), odiGrade(odi), kOdiGradeBounds);
+        }
+        // from the oximeter alone (every desaturation)
+        const double hb = hypoxicBurden(o.desaturationArea(), o.spo2Seconds);
+        if (!std::isnan(hb)) {
+            graded(HelpTips::term(tr("Hypoxic burden index (HBI)"), QStringLiteral("hypoxic_burden")),
+                   QStringLiteral("%1 %&middot;min/h").arg(number(hb)), hypoxicBurdenGrade(hb), kHypoxicGradeBounds);
+        }
+        if (r.hasCpap && r.hasFlow) {
+            html += row(tr("&nbsp;&nbsp;linked to breathing events"), analysisHours > 0
+                        ? QStringLiteral("%1 %&middot;min/h").arg(number(r.linkedDesatArea / 60.0 / analysisHours)) : QStringLiteral("&mdash;"));
+        }
+        html += QStringLiteral("</table>");
+
         // time below each threshold, then in each range between them
         html += kTable;
         html += QStringLiteral("<tr><td><b>%1</b></td><td align=right><b>%2</b></td><td align=right><b>%3</b></td></tr>")
@@ -249,14 +272,7 @@ QString AnalysisPanel::sidebarHtml(Day *day, const DayResult &r, const QString &
         html += kTable;
         html += row(HelpTips::term(tr("Problem zones"), QStringLiteral("oxi_zones")), o.zones.isEmpty() ? tr("none")
                     : tr("%1, %2 (marked %3)").arg(o.zones.size()).arg(duration(1000LL * o.zoneSeconds(1)), duration(1000LL * o.zoneSeconds(2))));
-        // from the oximeter alone (every desaturation), graded as Braebon grades its MediOX
-        const double hb = hypoxicBurden(o.desaturationArea(), o.spo2Seconds);
-        html += row(HelpTips::term(tr("Hypoxic burden (approx.)"), QStringLiteral("hypoxic_burden")), std::isnan(hb)
-                    ? QStringLiteral("&mdash;")
-                    : QStringLiteral("%1 %&middot;min/h (%2)").arg(number(hb), hypoxicBurdenGradeName(hypoxicBurdenGrade(hb)).toHtmlEscaped()));
         if (r.hasCpap && r.hasFlow) {
-            html += row(tr("&nbsp;&nbsp;linked to breathing events"), analysisHours > 0
-                        ? QStringLiteral("%1 %&middot;min/h").arg(number(r.linkedDesatArea / 60.0 / analysisHours)) : QStringLiteral("&mdash;"));
             html += row(HelpTips::term(tr("Unexplained desaturations"), QStringLiteral("unexplained_desat")), QString::number(r.unexplained.size()));
         }
         html += row(tr("SpO2 source"), oxiSource.toHtmlEscaped() + (r.oxiScope == QLatin1String("cpap") ? tr(" (CPAP time only)") : QString()));

@@ -466,19 +466,43 @@ void ContecBleImportTests::testScannerTakesLateName()
     QCOMPARE(scanner.found().size(), 1);   // the same device once
 }
 
-// MediOX (Braebon) grades of the hypoxic burden: normal below 13, mild below 32, moderate up to 71,
-// severe above 71. Without time with SpO2 there is no burden.
+// MediOX (Braebon) grades: the hypoxic burden is normal below 13, mild below 32, moderate up to 71,
+// severe above 71; the ODI normal below 5, mild below 15, moderate up to 30, severe above 30.
+// Without time with SpO2 there is no burden.
 void ContecBleImportTests::testHypoxicBurdenGrades()
 {
     QCOMPARE(hypoxicBurden(2400, 7200), 20.0);
     QVERIFY(std::isnan(hypoxicBurden(2400, 0)));
-    QCOMPARE(hypoxicBurdenGrade(0), HypoxicGrade::Normal);
-    QCOMPARE(hypoxicBurdenGrade(12.9), HypoxicGrade::Normal);
-    QCOMPARE(hypoxicBurdenGrade(13), HypoxicGrade::Mild);
-    QCOMPARE(hypoxicBurdenGrade(31.9), HypoxicGrade::Mild);
-    QCOMPARE(hypoxicBurdenGrade(32), HypoxicGrade::Moderate);
-    QCOMPARE(hypoxicBurdenGrade(71), HypoxicGrade::Moderate);
-    QCOMPARE(hypoxicBurdenGrade(71.1), HypoxicGrade::Severe);
-    QCOMPARE(hypoxicBurdenGradeName(HypoxicGrade::Normal), QStringLiteral("normal"));
-    QCOMPARE(hypoxicBurdenGradeName(HypoxicGrade::Severe), QStringLiteral("severe"));
+    QCOMPARE(hypoxicBurdenGrade(0), OxiGrade::Normal);
+    QCOMPARE(hypoxicBurdenGrade(12.9), OxiGrade::Normal);
+    QCOMPARE(hypoxicBurdenGrade(13), OxiGrade::Mild);
+    QCOMPARE(hypoxicBurdenGrade(31.9), OxiGrade::Mild);
+    QCOMPARE(hypoxicBurdenGrade(32), OxiGrade::Moderate);
+    QCOMPARE(hypoxicBurdenGrade(71), OxiGrade::Moderate);
+    QCOMPARE(hypoxicBurdenGrade(71.1), OxiGrade::Severe);
+    QCOMPARE(odiGrade(4.9), OxiGrade::Normal);
+    QCOMPARE(odiGrade(5), OxiGrade::Mild);
+    QCOMPARE(odiGrade(15), OxiGrade::Moderate);
+    QCOMPARE(odiGrade(30), OxiGrade::Moderate);
+    QCOMPARE(odiGrade(30.1), OxiGrade::Severe);
+    QCOMPARE(oxiGradeName(OxiGrade::Normal), QStringLiteral("normal"));
+    QCOMPARE(oxiGradeName(OxiGrade::Severe), QStringLiteral("severe"));
+}
+
+// The grade in its colour (green, yellow, orange, red), and the scale with the night's step in
+// that colour, so that a glance tells whether all is well.
+void ContecBleImportTests::testOxiGradeHtml()
+{
+    QCOMPARE(oxiGradeColor(OxiGrade::Normal), QStringLiteral("#2e8b3a"));
+    QCOMPARE(oxiGradeColor(OxiGrade::Severe), QStringLiteral("#d03030"));
+    const QString grade = oxiGradeHtml(OxiGrade::Severe);
+    QVERIFY(grade.contains(QStringLiteral("#d03030")) && grade.contains(QStringLiteral("severe")));
+    const QString scale = oxiGradeScaleHtml(kOdiGradeBounds, OxiGrade::Mild);
+    QVERIFY2(scale.contains(QStringLiteral("normal &lt; 5")), qPrintable(scale));
+    QVERIFY(scale.contains(QStringLiteral("mild 5–15")));
+    QVERIFY(scale.contains(QStringLiteral("moderate 15–30")));
+    QVERIFY(scale.contains(QStringLiteral("severe &gt; 30")));
+    QVERIFY(scale.contains(oxiGradeColor(OxiGrade::Mild)));        // the night's step stands out
+    QVERIFY(!scale.contains(oxiGradeColor(OxiGrade::Severe)));
+    QVERIFY(oxiGradeScaleHtml(kHypoxicGradeBounds, OxiGrade::Normal).contains(QStringLiteral("normal &lt; 13")));
 }

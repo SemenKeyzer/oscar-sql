@@ -117,7 +117,7 @@ void AnalysisPanelTests::testSidebarForCpapNight()
     QVERIFY(html.contains(QStringLiteral("href='analysis=differences'")));
     QVERIFY(html.contains(QStringLiteral("below 94 %")));
     QVERIFY(html.contains(QStringLiteral("below 90 %")));
-    QVERIFY(html.contains(QStringLiteral("Hypoxic burden (approx.)")));
+    QVERIFY(html.contains(QStringLiteral("Hypoxic burden index (HBI)")));
     QVERIFY(html.contains(QStringLiteral("linked to breathing events")));   // the old figure, under it
     QVERIFY(html.contains(QStringLiteral("CMS50F")));
     QVERIFY(html.contains(QStringLiteral("href='align=oximeter'")));
@@ -136,7 +136,12 @@ void AnalysisPanelTests::testSidebarForOximetryOnlyNight()
     // the hypoxic burden comes from the oximeter alone (all desaturations), graded as MediOX does
     QVERIFY2(html.contains(QStringLiteral("Hypoxic burden")), qPrintable(html));
     QVERIFY(!html.contains(QStringLiteral("linked to breathing events")));
-    QVERIFY(html.contains(hypoxicBurdenGradeName(hypoxicBurdenGrade(hypoxicBurden(r.oxi.desaturationArea(), r.oxi.spo2Seconds)))));
+    const OxiGrade hb = hypoxicBurdenGrade(hypoxicBurden(r.oxi.desaturationArea(), r.oxi.spo2Seconds));
+    QVERIFY(html.contains(oxiGradeHtml(hb)));
+    // like the MediOX report: the ODI and the burden index with their grades and scales
+    QVERIFY(html.contains(QStringLiteral("Hypoxic burden index (HBI)")));
+    QVERIFY(html.contains(oxiGradeScaleHtml(kHypoxicGradeBounds, hb)));
+    QVERIFY(html.contains(oxiGradeScaleHtml(kOdiGradeBounds, odiGrade(r.oxi.countDesaturations(3) / (r.oxi.spo2Seconds / 3600.0)))));
     QVERIFY(html.contains(QStringLiteral("Problem zones")));
     QVERIFY(html.contains(QStringLiteral("below 85 %")));
     QVERIFY(html.contains(QStringLiteral("&lt; 85 %")));

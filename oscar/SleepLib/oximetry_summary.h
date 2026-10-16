@@ -46,14 +46,24 @@ struct OximetryNight {
 //! Esmaeili et al. 2023 (desaturations found automatically). NaN without time with SpO2.
 double hypoxicBurden(double desatArea, int seconds);
 
-//! The grades Braebon gives for its MediOX oximeter's hypoxic burden index.
-enum class HypoxicGrade { Normal, Mild, Moderate, Severe };
-//! Normal below 13, mild below 32, moderate up to 71, severe above 71 (%·min/h).
-HypoxicGrade hypoxicBurdenGrade(double hb);
-//! "normal", "mild", "moderate" or "severe", translated.
-QString hypoxicBurdenGradeName(HypoxicGrade grade);
-//! The upper bounds of the normal, mild and moderate grades: 13, 32, 71.
+//! The grades Braebon gives on its MediOX oximeter's report.
+enum class OxiGrade { Normal, Mild, Moderate, Severe };
+//! The upper bounds of the normal, mild and moderate grades of the hypoxic burden (%·min/h).
 constexpr double kHypoxicGradeBounds[] = { 13, 32, 71 };
+//! The same bounds for the ODI (per hour).
+constexpr double kOdiGradeBounds[] = { 5, 15, 30 };
+//! Normal below bounds[0], mild below bounds[1], moderate up to bounds[2], severe above.
+OxiGrade oxiGrade(double value, const double (&bounds)[3]);
+inline OxiGrade hypoxicBurdenGrade(double hb) { return oxiGrade(hb, kHypoxicGradeBounds); }
+inline OxiGrade odiGrade(double odi) { return oxiGrade(odi, kOdiGradeBounds); }
+//! "normal", "mild", "moderate" or "severe", translated.
+QString oxiGradeName(OxiGrade grade);
+//! Green, yellow, orange or red, as "#rrggbb".
+QString oxiGradeColor(OxiGrade grade);
+//! The grade's name in bold in its colour, as HTML.
+QString oxiGradeHtml(OxiGrade grade);
+//! The whole scale ("normal < 5 · mild 5–15 · …") as HTML, with \a current's step in its colour.
+QString oxiGradeScaleHtml(const double (&bounds)[3], OxiGrade current);
 
 //! \brief Summarises the oximetry of \a day recorded by its \a source machine type
 //! (MT_OXIMETER, or MT_CPAP for a device with a built-in oximeter), from the samples,

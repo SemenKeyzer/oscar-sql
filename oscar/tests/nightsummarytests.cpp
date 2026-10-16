@@ -173,10 +173,11 @@ void NightSummaryTests::testViewShowsTheNight()
     QVERIFY(text(QStringLiteral("nsValue")).startsWith(QStringLiteral("7<span")));    // 7 h 12 min, units smaller
     QVERIFY(text(QStringLiteral("nsValue")).contains(QStringLiteral("&nbsp;min</span>")));
     QVERIFY(text(QStringLiteral("nsNote")).contains(QStringLiteral("OSCAR analysis — 2.1")));
-    QVERIFY(text(QStringLiteral("nsNote")).contains(QStringLiteral("ODI 3%: 2.2 per hour, 4%: 1.1")));
+    QVERIFY(text(QStringLiteral("nsNote")).contains(QStringLiteral("ODI 3%: 2.2 per hour (") + oxiGradeHtml(OxiGrade::Normal)
+                                                     + QStringLiteral("), 4%: 1.1")));
     // the doctor's SpO2 tile: ODI 3 % and 4 %, T90 in minutes and the hypoxic burden with its grade
     QVERIFY(text(QStringLiteral("nsNote")).contains(QStringLiteral("T90: 2 min")));
-    QVERIFY(text(QStringLiteral("nsNote")).contains(QStringLiteral("Hypoxic burden: 20.0 %·min/h (mild)")));
+    QVERIFY(text(QStringLiteral("nsNote")).contains(QStringLiteral("Hypoxic burden: 20.0 %·min/h (") + oxiGradeHtml(OxiGrade::Mild) + QStringLiteral(")")));
     QVERIFY(text(QStringLiteral("nsNote")).contains(QStringLiteral("pulse 61 (52 to 96)")));   // in the SpO2 tile
     QVERIFY(text(QStringLiteral("nsCaption")).contains(QStringLiteral("28 of 30 night")));
     QVERIFY(text(QStringLiteral("nsTitle")).contains(QStringLiteral("href='daily=2026-09-30'")));

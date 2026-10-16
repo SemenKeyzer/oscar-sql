@@ -141,21 +141,55 @@ double hypoxicBurden(double desatArea, int seconds)
     return desatArea / 60.0 / (seconds / 3600.0);
 }
 
-HypoxicGrade hypoxicBurdenGrade(double hb)
+OxiGrade oxiGrade(double value, const double (&bounds)[3])
 {
-    if (hb < kHypoxicGradeBounds[0]) return HypoxicGrade::Normal;
-    if (hb < kHypoxicGradeBounds[1]) return HypoxicGrade::Mild;
-    if (hb <= kHypoxicGradeBounds[2]) return HypoxicGrade::Moderate;
-    return HypoxicGrade::Severe;
+    if (value < bounds[0]) return OxiGrade::Normal;
+    if (value < bounds[1]) return OxiGrade::Mild;
+    if (value <= bounds[2]) return OxiGrade::Moderate;
+    return OxiGrade::Severe;
 }
 
-QString hypoxicBurdenGradeName(HypoxicGrade grade)
+QString oxiGradeName(OxiGrade grade)
 {
     switch (grade) {
-    case HypoxicGrade::Normal: return QCoreApplication::translate("OximetryNight", "normal");
-    case HypoxicGrade::Mild: return QCoreApplication::translate("OximetryNight", "mild");
-    case HypoxicGrade::Moderate: return QCoreApplication::translate("OximetryNight", "moderate");
-    case HypoxicGrade::Severe: return QCoreApplication::translate("OximetryNight", "severe");
+    case OxiGrade::Normal: return QCoreApplication::translate("OximetryNight", "normal");
+    case OxiGrade::Mild: return QCoreApplication::translate("OximetryNight", "mild");
+    case OxiGrade::Moderate: return QCoreApplication::translate("OximetryNight", "moderate");
+    case OxiGrade::Severe: return QCoreApplication::translate("OximetryNight", "severe");
     }
     return QString();
+}
+
+QString oxiGradeColor(OxiGrade grade)
+{
+    switch (grade) {
+    case OxiGrade::Normal: return QStringLiteral("#2e8b3a");
+    case OxiGrade::Mild: return QStringLiteral("#b89400");     // a yellow dark enough to read on white
+    case OxiGrade::Moderate: return QStringLiteral("#e07000");
+    case OxiGrade::Severe: return QStringLiteral("#d03030");
+    }
+    return QString();
+}
+
+QString oxiGradeHtml(OxiGrade grade)
+{
+    return QStringLiteral("<b style='color:%1'>%2</b>").arg(oxiGradeColor(grade), oxiGradeName(grade).toHtmlEscaped());
+}
+
+QString oxiGradeScaleHtml(const double (&bounds)[3], OxiGrade current)
+{
+    auto n = [](double v) { return QString::number(v); };
+    const QString steps[] = {
+        QCoreApplication::translate("OximetryNight", "normal &lt; %1").arg(n(bounds[0])),
+        QCoreApplication::translate("OximetryNight", "mild %1–%2").arg(n(bounds[0]), n(bounds[1])),
+        QCoreApplication::translate("OximetryNight", "moderate %1–%2").arg(n(bounds[1]), n(bounds[2])),
+        QCoreApplication::translate("OximetryNight", "severe &gt; %1").arg(n(bounds[2])),
+    };
+    QStringList out;
+    for (int g = 0; g < 4; ++g) {
+        out << (OxiGrade(g) == current
+                    ? QStringLiteral("<b style='color:%1'>%2</b>").arg(oxiGradeColor(current), steps[g])
+                    : QStringLiteral("<span style='color:#808080'>%1</span>").arg(steps[g]));
+    }
+    return out.join(QStringLiteral(" · "));
 }
