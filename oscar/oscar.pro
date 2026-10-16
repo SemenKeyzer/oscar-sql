@@ -197,7 +197,14 @@ macx  {
     LIBS             += -ldbghelp # needed for call stack with names rather than addresses
 
     INCLUDEPATH += $$PWD
-    INCLUDEPATH += $$[QT_INSTALL_PREFIX]/../src/qtbase/src/3rdparty/zlib
+    # MSVC: Qt 6 does not export zlib's gz* functions, so a zlib is given with ZLIB_DIR=<prefix>
+    # (include/zlib.h, lib/zlib.lib; the Windows workflow takes it from vcpkg)
+    *-msvc*:!isEmpty(ZLIB_DIR) {
+        INCLUDEPATH += $$ZLIB_DIR/include
+        LIBS += $$ZLIB_DIR/lib/zlib.lib
+    } else {
+        INCLUDEPATH += $$[QT_INSTALL_PREFIX]/../src/qtbase/src/3rdparty/zlib
+    }
 
     if (*-msvc*):!equals(TEMPLATE_PREFIX, "vc") {
         LIBS += -ladvapi32

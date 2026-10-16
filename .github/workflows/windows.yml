@@ -38,6 +38,13 @@ jobs:
         with:
           arch: x64
 
+      - name: Install zlib (vcpkg)
+        shell: cmd
+        run: |
+          rem Qt 6 does not export zlib's gz* functions: a static zlib with the shared C runtime (/MD)
+          "%VCPKG_INSTALLATION_ROOT%\vcpkg" install zlib:x64-windows-static-md
+          if errorlevel 1 exit /b 1
+
       - name: Build OSCAR
         shell: cmd
         run: |
@@ -45,7 +52,7 @@ jobs:
           set CL=/MP /utf-8
           mkdir build
           cd build
-          qmake ..\oscar\oscar.pro CONFIG+=release CONFIG-=debug_and_release
+          qmake ..\oscar\oscar.pro CONFIG+=release CONFIG-=debug_and_release "ZLIB_DIR=%VCPKG_INSTALLATION_ROOT:\=/%/installed/x64-windows-static-md"
           if errorlevel 1 exit /b 1
           nmake
           if errorlevel 1 exit /b 1
