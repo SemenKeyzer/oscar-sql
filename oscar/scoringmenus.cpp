@@ -34,8 +34,10 @@ QChar keyOf(ChannelID c)
 {
     if (c == CPAP_Obstructive) return QLatin1Char('O');
     if (c == CPAP_ClearAirway) return QLatin1Char('C');
+    if (c == CPAP_MixedApnea) return QLatin1Char('M');
     if (c == CPAP_Apnea) return QLatin1Char('A');
-    if (c == CPAP_Hypopnea) return QLatin1Char('H');
+    if (c == CPAP_ObstructiveHypopnea) return QLatin1Char('H');
+    if (c == CPAP_CentralHypopnea) return QLatin1Char('Y');
     return QChar();
 }
 
@@ -89,8 +91,11 @@ QString ScoringMenus::typeName(ChannelID channel)
 {
     if (channel == CPAP_Obstructive) return tr("Obstructive apnea");
     if (channel == CPAP_ClearAirway) return tr("Central apnea");
-    if (channel == CPAP_Apnea) return tr("Apnea (unclassified)");
+    if (channel == CPAP_MixedApnea) return tr("Mixed apnea");
+    if (channel == CPAP_Apnea) return tr("Apnea");
     if (channel == CPAP_Hypopnea) return tr("Hypopnea");
+    if (channel == CPAP_ObstructiveHypopnea) return tr("Obstructive hypopnea");
+    if (channel == CPAP_CentralHypopnea) return tr("Central hypopnea");
     return schema::channel[channel].label();
 }
 
@@ -101,12 +106,12 @@ QMenu *ScoringMenus::forRange(qint64 durationMs, QWidget *parent)
     menu->setObjectName(QStringLiteral("scoringRangeMenu"));
     menu->setTitle(tr("Selected: %1 s").arg(QLocale().toString(durationMs / 1000.0, 'g', 3)));
     const bool shortEvent = durationMs < qint64(ManualScoring::kShortEventSec * 1000);
-    for (ChannelID c : ManualScoring::scoredChannels()) {
+    for (ChannelID c : ManualScoring::menuChannels()) {
         const QString text = shortEvent ? tr("%1 — shorter than 10 s").arg(typeName(c)) : typeName(c);
         keyed(menu, text, keyOf(c))->setData(data("add", c));
     }
     menu->addSeparator();
-    keyed(menu, tr("Exclude stretch (noise / awake)"), QLatin1Char('X'))->setData(data("exclude"));
+    keyed(menu, tr("Artifact"), QLatin1Char('X'))->setData(data("exclude"));
     installLetterKeys(menu);
     return menu;
 }
@@ -124,7 +129,7 @@ QMenu *ScoringMenus::forEvent(const EffectiveEvent &e, QWidget *parent, int coun
         QMenu *types = menu->addMenu(tr("Change type"));
         types->menuAction()->setText(tr("Change type") + QStringLiteral("\tT"));
         types->menuAction()->setProperty(kKeyProperty, QStringLiteral("T"));
-        for (ChannelID c : ManualScoring::scoredChannels()) {
+        for (ChannelID c : ManualScoring::menuChannels()) {
             if (c != e.channel) keyed(types, typeName(c), keyOf(c))->setData(data("retype", own, c, ownEnd));
         }
     }
@@ -136,7 +141,7 @@ QMenu *ScoringMenus::forEvent(const EffectiveEvent &e, QWidget *parent, int coun
     if (e.origin != Origin::Removed && countOfType > 1) {
         menu->addSeparator();
         QMenu *all = menu->addMenu(tr("Change type of all %1 (%2)").arg(typeName(e.channel)).arg(countOfType));
-        for (ChannelID c : ManualScoring::scoredChannels()) {
+        for (ChannelID c : ManualScoring::menuChannels()) {
             if (c != e.channel) all->addAction(typeName(c))->setData(data("retypeAll", e.channel, c));
         }
         menu->addAction(tr("Remove all %1 (%2)").arg(typeName(e.channel)).arg(countOfType))->setData(data("removeAll", e.channel));
@@ -218,6 +223,7 @@ QAction *ScoringMenus::actionForKey(QMenu *menu, const QString &text)
     // the same keys on the Russian (ЙЦУКЕН) layout
     static const QHash<QChar, QChar> russian {
         { QChar(0x0429), QLatin1Char('O') }, { QChar(0x0421), QLatin1Char('C') }, { QChar(0x0424), QLatin1Char('A') },
+        { QChar(0x042C), QLatin1Char('M') }, { QChar(0x041D), QLatin1Char('Y') },
         { QChar(0x0420), QLatin1Char('H') }, { QChar(0x0427), QLatin1Char('X') }, { QChar(0x041A), QLatin1Char('R') },
         { QChar(0x0415), QLatin1Char('T') }, { QChar(0x0413), QLatin1Char('U') },
     };

@@ -319,10 +319,10 @@ void ManualScoringTests::testExcludeDropsMechanismHypopneas()
     const Result r = apply(device, { edit(1, Kind::Exclude, 0, 150 * kSec, 350 * kSec) }, oneSession());
     QCOMPARE(r.delta.value(CPAP_ObstructiveHypopnea), -1);
     QCOMPARE(r.delta.value(CPAP_CentralHypopnea), 0);
-    // a RERA (or OH/CH) is never a step target, nor offered for editing
-    device.append({ CPAP_RERA, 260 * kSec, 8 });
+    // OH/CH are scored by hand now (the doctor splits hypopneas): a step target; a RERA still is not
+    device.append({ CPAP_RERA, 245 * kSec, 8 });
     const Result all = apply(device, {}, oneSession());
-    QCOMPARE(all.events.at(stepEvent(all.events, 0, 240 * kSec, -1, true)).endMs, qint64(300 * kSec));
+    QCOMPARE(all.events.at(stepEvent(all.events, 0, 240 * kSec, -1, true)).endMs, qint64(250 * kSec));
 }
 
 // ---- storage

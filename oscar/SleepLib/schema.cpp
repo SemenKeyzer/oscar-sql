@@ -81,6 +81,7 @@ void setOrders() {
     schema::channel[CPAP_LargeLeak].setOrder(order++);
 
     schema::channel[CPAP_ClearAirway].setOrder(order++);
+    schema::channel[CPAP_MixedApnea].setOrder(order++);
     schema::channel[CPAP_NRI].setOrder(order++);
     schema::channel[CPAP_AllApnea].setOrder(order++);
     schema::channel[CPAP_Obstructive].setOrder(order++);
@@ -196,6 +197,9 @@ void init()
             QObject::tr("Obstructive Hypopnea (OH)"), QObject::tr("A hypopnea caused by airway obstruction"), QObject::tr("OH"), STR_UNIT_EventsPerHour,    DEFAULT,    QColor(0x30, 0x90, 0xd0)));
     schema::channel.add(GRP_CPAP, new Channel(CPAP_CentralHypopnea     = 0x1012, FLAG,  MT_CPAP, SESSION, "CentralHypopnea",
             QObject::tr("Central Hypopnea (CH)"), QObject::tr("A hypopnea where respiratory effort is reduced rather than obstructed"), QObject::tr("CH"), STR_UNIT_EventsPerHour,    DEFAULT,    QColor(0xd0, 0x60, 0xd0)));
+    // Scored by hand (manual scoring): an apnea that starts central and ends obstructive. AASM counts it obstructive.
+    schema::channel.add(GRP_CPAP, new Channel(CPAP_MixedApnea    = 0x1013, FLAG,        MT_CPAP, SESSION, "MixedApnea",
+            QObject::tr("Mixed Apnea (MA)"), QObject::tr("An apnea that begins without effort and ends with effort against a closed airway"), QObject::tr("MA"), STR_UNIT_EventsPerHour, DEFAULT, QColor(0x60, 0x40, 0xa0)));
     schema::channel.add(GRP_CPAP, new Channel(CPAP_Apnea         = 0x1004, FLAG,        MT_CPAP, SESSION, "Apnea",
             QObject::tr("Unclassified Apnea (UA)"), QObject::tr("An apnea that couldn't be determined as Central or Obstructive."),QObject::tr("UA"),       STR_UNIT_EventsPerHour,    DEFAULT,    QColor("dark green")));
     schema::channel.add(GRP_CPAP, new Channel(CPAP_AllApnea      = 0x1010, FLAG,        MT_CPAP, SESSION, "AllApnea",
@@ -465,6 +469,7 @@ void init()
     ahiChannels.append(CPAP_ObstructiveHypopnea);
     ahiChannels.append(CPAP_CentralHypopnea);
     ahiChannels.append(CPAP_Apnea);
+    ahiChannels.append(CPAP_MixedApnea);
 
     // The centrally scored share of the above. OAHI is everything else, which puts
     // the unclassified channels (UA, A and plain H) on the obstructive side — the

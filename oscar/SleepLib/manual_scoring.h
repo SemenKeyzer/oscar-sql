@@ -91,6 +91,8 @@ constexpr double kShortEventSec = 10.0;
 
 //! The channels that can be scored: OA, CA, A, H.
 QList<ChannelID> scoredChannels();
+//! The types the scoring menus offer: scoredChannels() without the plain hypopnea (H).
+QList<ChannelID> menuChannels();
 //! The channels an excluded stretch leaves out: every AHI channel (also OH/CH) and RERA.
 QList<ChannelID> countedChannels();
 

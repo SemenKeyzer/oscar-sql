@@ -26,7 +26,15 @@ namespace ManualScoring {
 QList<ChannelID> scoredChannels()
 {
     // built on each call: the channel ids are set by schema::init()
-    return { CPAP_Obstructive, CPAP_ClearAirway, CPAP_Apnea, CPAP_Hypopnea };
+    return { CPAP_Obstructive, CPAP_ClearAirway, CPAP_MixedApnea, CPAP_Apnea, CPAP_Hypopnea, CPAP_ObstructiveHypopnea, CPAP_CentralHypopnea };
+}
+
+QList<ChannelID> menuChannels()
+{
+    // what the doctor scores by hand: hypopneas by mechanism, not the plain H some devices report
+    QList<ChannelID> out = scoredChannels();
+    out.removeAll(CPAP_Hypopnea);
+    return out;
 }
 
 QList<ChannelID> countedChannels()

@@ -18,6 +18,7 @@ class ScoringMenusTests : public QObject
 {
     Q_OBJECT
 private slots:
+    void testMixedApneaCounts();
     void initTestCase();
     void cleanupTestCase();
     void testRangeMenu();
