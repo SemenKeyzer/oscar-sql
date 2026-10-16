@@ -809,6 +809,22 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     }
     m_scoringBanner->hide();
     ui->verticalLayout_3->insertWidget(ui->verticalLayout_3->indexOf(ui->graphMainArea), m_scoringBanner);
+
+    // the event window (how far the graphs zoom around an event) in a bar above the graphs, where zoom is looked for
+    auto *eventWindowBar = new QWidget(this);
+    eventWindowBar->setObjectName(QStringLiteral("eventWindowBar"));
+    {
+        auto *row = new QHBoxLayout(eventWindowBar);
+        row->setContentsMargins(6, 2, 6, 2);
+        ui->label_7->setText(tr("Event window, min:"));
+        ui->evViewSlider->setMaximumWidth(220);
+        ui->evViewLCD->setMaximumHeight(22);
+        row->addWidget(ui->label_7);
+        row->addWidget(ui->evViewSlider);
+        row->addWidget(ui->evViewLCD);
+        row->addStretch(1);
+    }
+    ui->verticalLayout_3->insertWidget(ui->verticalLayout_3->indexOf(m_scoringBanner), eventWindowBar);
     connect(scoringButton, &QPushButton::toggled, this, &Daily::onScoringButtonToggled);
     ui->treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->treeWidget, &QTreeWidget::customContextMenuRequested, this, [this](const QPoint &pos) {
