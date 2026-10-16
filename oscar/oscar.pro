@@ -201,6 +201,7 @@ macx  {
     # (include/zlib.h, lib/zlib.lib; the Windows workflow takes it from vcpkg)
     *-msvc*:!isEmpty(ZLIB_DIR) {
         INCLUDEPATH += $$ZLIB_DIR/include
+        DEFINES += OSCAR_EXTERNAL_ZLIB
         isEmpty(ZLIB_LIB): ZLIB_LIB = $$ZLIB_DIR/lib/zlib.lib
         LIBS += $$ZLIB_LIB
     } else {
