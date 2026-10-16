@@ -8,6 +8,7 @@
 
 #include "oximetry_summary.h"
 
+#include <QCoreApplication>
 #include <QSet>
 #include <cmath>
 
@@ -125,10 +126,36 @@ OximetryNight summarizeOximetry(const AnalysisDailyData &row)
     n.desaturations4 = row.nDesat4;
     n.zones = row.nZones;
     n.zoneMinutes = row.zoneSeconds / 60.0;
+    n.hypoxicBurden = hypoxicBurden(row.desatArea, row.oxiSeconds);
     if (row.hasPulse && row.pulseSeconds > 0) {
         n.pulseAvg = row.pulseSum / row.pulseSeconds;
         n.pulseMin = row.pulseMin;
         n.pulseMax = row.pulseMax;
     }
     return n;
+}
+
+double hypoxicBurden(double desatArea, int seconds)
+{
+    if (seconds <= 0) return std::numeric_limits<double>::quiet_NaN();
+    return desatArea / 60.0 / (seconds / 3600.0);
+}
+
+HypoxicGrade hypoxicBurdenGrade(double hb)
+{
+    if (hb < kHypoxicGradeBounds[0]) return HypoxicGrade::Normal;
+    if (hb < kHypoxicGradeBounds[1]) return HypoxicGrade::Mild;
+    if (hb <= kHypoxicGradeBounds[2]) return HypoxicGrade::Moderate;
+    return HypoxicGrade::Severe;
+}
+
+QString hypoxicBurdenGradeName(HypoxicGrade grade)
+{
+    switch (grade) {
+    case HypoxicGrade::Normal: return QCoreApplication::translate("OximetryNight", "normal");
+    case HypoxicGrade::Mild: return QCoreApplication::translate("OximetryNight", "mild");
+    case HypoxicGrade::Moderate: return QCoreApplication::translate("OximetryNight", "moderate");
+    case HypoxicGrade::Severe: return QCoreApplication::translate("OximetryNight", "severe");
+    }
+    return QString();
 }

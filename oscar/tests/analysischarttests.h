@@ -24,6 +24,7 @@ private slots:
     void testSpo2RangeColorsDarkenWithDepth();
     void testProblemZoneShares();
     void testOdiTargetLine();
+    void testHypoxicBurdenTargetLines();
     void testGlasgowValue();
     void testFlMinutesValue();
 };

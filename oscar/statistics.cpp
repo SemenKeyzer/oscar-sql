@@ -121,8 +121,10 @@ int analysisGroups(const QDate &first, const QDate &last, QSet<QString> &has)
         if (d.hasFlow && d.flBreaths > 0) has.insert(QStringLiteral("fl"));
         if (d.hasFlow && !d.glasgow.isEmpty()) has.insert(QStringLiteral("gi"));
         if (d.hasComparison) has.insert(QStringLiteral("comparison"));
-        if (d.hasOximetry) has.insert(QStringLiteral("oxi"));
-        if (d.hasFlow && d.hasOximetry && d.hasCpap) has.insert(QStringLiteral("hb"));
+        if (d.hasOximetry) {
+            has.insert(QStringLiteral("oxi"));
+            has.insert(QStringLiteral("hb"));   // from the oximeter alone
+        }
         if (d.hasPulse) has.insert(QStringLiteral("pulse"));
         if (d.hasPulse && d.nDhr > 0) has.insert(QStringLiteral("dhr"));
     }
@@ -190,7 +192,6 @@ double analysisFigureValue(const QString &key, const QList<AnalysisDailyData> &r
             else if (key == QLatin1String("flbr") && d.flBreaths > 0 && d.hasFlRuns) { num += 100.0 * d.flLimitedBreaths; den += d.flBreaths; }
             else if (key == QLatin1String("gi")) glasgow += d.glasgow;
             else if (key == QLatin1String("gia")) glasgow += d.glasgowAdapted;
-            else if (key == QLatin1String("hb") && d.hasOximetry && d.hasCpap) { num += d.linkedDesatArea / 60.0; den += h; }
         }
         if (d.hasComparison && key == QLatin1String("agreement")) {
             num += 100.0 * d.cmpMatched;
@@ -201,6 +202,7 @@ double analysisFigureValue(const QString &key, const QList<AnalysisDailyData> &r
             if (key == QLatin1String("odi3")) { num += d.nDesat3; den += h; }
             else if (key == QLatin1String("odi4")) { num += d.nDesat4; den += h; }
             else if (key == QLatin1String("zones")) { num += 100.0 * d.zoneSeconds; den += d.oxiSeconds; }
+            else if (key == QLatin1String("hb")) { num += d.desatArea / 60.0; den += h; }   // every desaturation, CPAP or not
             else if (key == QLatin1String("nadir")) { nadir = qMin(nadir, d.spo2Nadir); den += 1; }
             else if (key.startsWith(QLatin1String("below:"))) {
                 const double t = key.mid(6).toDouble();

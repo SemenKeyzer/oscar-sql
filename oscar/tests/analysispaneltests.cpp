@@ -23,6 +23,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include "statistics.h"
+#include "SleepLib/oximetry_summary.h"
 #include "SleepLib/analysis/day_scorer.h"
 #include "tests/analysis_synth.h"
 
@@ -117,6 +118,7 @@ void AnalysisPanelTests::testSidebarForCpapNight()
     QVERIFY(html.contains(QStringLiteral("below 94 %")));
     QVERIFY(html.contains(QStringLiteral("below 90 %")));
     QVERIFY(html.contains(QStringLiteral("Hypoxic burden (approx.)")));
+    QVERIFY(html.contains(QStringLiteral("linked to breathing events")));   // the old figure, under it
     QVERIFY(html.contains(QStringLiteral("CMS50F")));
     QVERIFY(html.contains(QStringLiteral("href='align=oximeter'")));
     QVERIFY(html.contains(AnalysisPanel::offset(r.offsetHintMs)));
@@ -131,7 +133,10 @@ void AnalysisPanelTests::testSidebarForOximetryOnlyNight()
     const QString html = AnalysisPanel::sidebarHtml(nullptr, r, QStringLiteral("CMS50F"), { 94, 90, 85 });
     QVERIFY(!html.contains(QStringLiteral("AHI")));                    // no CPAP rows ...
     QVERIFY(!html.contains(QStringLiteral("analysis=differences")));   // ... nor comparison
-    QVERIFY(!html.contains(QStringLiteral("Hypoxic burden")));
+    // the hypoxic burden comes from the oximeter alone (all desaturations), graded as MediOX does
+    QVERIFY2(html.contains(QStringLiteral("Hypoxic burden")), qPrintable(html));
+    QVERIFY(!html.contains(QStringLiteral("linked to breathing events")));
+    QVERIFY(html.contains(hypoxicBurdenGradeName(hypoxicBurdenGrade(hypoxicBurden(r.oxi.desaturationArea(), r.oxi.spo2Seconds)))));
     QVERIFY(html.contains(QStringLiteral("Problem zones")));
     QVERIFY(html.contains(QStringLiteral("below 85 %")));
     QVERIFY(html.contains(QStringLiteral("&lt; 85 %")));
@@ -254,6 +259,26 @@ void AnalysisPanelTests::testStatisticsFigures()
     QCOMPARE(analysisFigure(QStringLiteral("nadir"), rows), QStringLiteral("86"));
     QCOMPARE(analysisFigure(QStringLiteral("pri"), rows), QStringLiteral("-"));   // no pulse
     QCOMPARE(analysisFigure(QStringLiteral("ahi"), {}), QStringLiteral("-"));
+}
+
+// The hypoxic burden needs only the oximeter: every desaturation's area over the time with SpO2,
+// on nights with or without CPAP.
+void AnalysisPanelTests::testStatisticsHypoxicBurden()
+{
+    AnalysisDailyData oxiOnly, cpap, noOxi;
+    oxiOnly.hasOximetry = cpap.hasOximetry = true;
+    oxiOnly.oxiSeconds = 7200;
+    oxiOnly.desatArea = 2400;      // 40 %·min
+    cpap.hasCpap = cpap.hasFlow = true;
+    cpap.flowSeconds = 10800;
+    cpap.oxiSeconds = 10800;
+    cpap.desatArea = 6000;         // 100 %·min
+    cpap.linkedDesatArea = 600;    // not the figure any more
+    noOxi.hasFlow = true;
+    noOxi.flowSeconds = 3600;
+    QCOMPARE(analysisFigureValue(QStringLiteral("hb"), { oxiOnly, cpap, noOxi }), 28.0);   // 140 over 5 h
+    QCOMPARE(analysisFigureValue(QStringLiteral("hb"), { oxiOnly }), 20.0);
+    QVERIFY(std::isnan(analysisFigureValue(QStringLiteral("hb"), { noOxi })));
 }
 
 void AnalysisPanelTests::testStatisticsFigureValues()

@@ -68,6 +68,8 @@ class gAnalysisChart : public gSummaryChart
     static QString units(Kind kind);
     //! The target drawn as a dashed line on a kind's chart; 0 for none.
     static float target(Kind kind);
+    //! Every line drawn on a kind's chart: the hypoxic burden's grades, else the one target.
+    static QList<float> targets(Kind kind);
     //! Every kind, in the Overview's order.
     static QList<Kind> kinds();
 
@@ -80,6 +82,7 @@ class gAnalysisChart : public gSummaryChart
     virtual float overlayPeak(int idx);
     //! An AHI of 5 on the analysis' AHI, as a line.
     virtual float targetValue() { return target(m_kind); }
+    virtual QList<float> targetValues() { return targets(m_kind); }
 
     virtual Layer *Clone() {
         gAnalysisChart *sc = new gAnalysisChart(m_kind);

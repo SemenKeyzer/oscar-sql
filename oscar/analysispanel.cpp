@@ -24,6 +24,7 @@
 #include "Graphs/gAnalysisCharts.h"
 #include "SleepLib/day.h"
 #include "SleepLib/machine_common.h"
+#include "SleepLib/oximetry_summary.h"
 #include "SleepLib/schema.h"
 
 using namespace analysis;
@@ -248,8 +249,13 @@ QString AnalysisPanel::sidebarHtml(Day *day, const DayResult &r, const QString &
         html += kTable;
         html += row(HelpTips::term(tr("Problem zones"), QStringLiteral("oxi_zones")), o.zones.isEmpty() ? tr("none")
                     : tr("%1, %2 (marked %3)").arg(o.zones.size()).arg(duration(1000LL * o.zoneSeconds(1)), duration(1000LL * o.zoneSeconds(2))));
+        // from the oximeter alone (every desaturation), graded as Braebon grades its MediOX
+        const double hb = hypoxicBurden(o.desaturationArea(), o.spo2Seconds);
+        html += row(HelpTips::term(tr("Hypoxic burden (approx.)"), QStringLiteral("hypoxic_burden")), std::isnan(hb)
+                    ? QStringLiteral("&mdash;")
+                    : QStringLiteral("%1 %&middot;min/h (%2)").arg(number(hb), hypoxicBurdenGradeName(hypoxicBurdenGrade(hb)).toHtmlEscaped()));
         if (r.hasCpap && r.hasFlow) {
-            html += row(HelpTips::term(tr("Hypoxic burden (approx.)"), QStringLiteral("hypoxic_burden")), analysisHours > 0
+            html += row(tr("&nbsp;&nbsp;linked to breathing events"), analysisHours > 0
                         ? QStringLiteral("%1 %&middot;min/h").arg(number(r.linkedDesatArea / 60.0 / analysisHours)) : QStringLiteral("&mdash;"));
             html += row(HelpTips::term(tr("Unexplained desaturations"), QStringLiteral("unexplained_desat")), QString::number(r.unexplained.size()));
         }

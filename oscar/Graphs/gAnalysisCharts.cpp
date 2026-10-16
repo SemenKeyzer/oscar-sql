@@ -15,6 +15,7 @@
 #include "SleepLib/analysis/analysis_channels.h"
 #include "SleepLib/analysis/analysis_service.h"
 #include "SleepLib/analysis/oxi_analyzer.h"
+#include "SleepLib/oximetry_summary.h"
 #include "SleepLib/profiles.h"
 
 extern MainWindow *mainwin;
@@ -51,7 +52,7 @@ QString num(double v, int decimals = 1)
 } // namespace
 
 gAnalysisChart::gAnalysisChart(Kind kind)
-    : gSummaryChart(code(kind), kind == Ahi || kind == HypoxicBurden || kind == FlowLimitation || kind == FlowLimitationMinutes
+    : gSummaryChart(code(kind), kind == Ahi || kind == FlowLimitation || kind == FlowLimitationMinutes
                                     || kind == Glasgow ? MT_CPAP : MT_UNKNOWN),
       m_kind(kind),
       m_deviceCalc(NoChannel, ST_CNT, Qt::black)
@@ -205,11 +206,15 @@ void gAnalysisChart::populate(Day *day, int idx)
         break;
     }
     case HypoxicBurden: {
-        if (!r.hasFlow || !r.hasOximetry || !r.hasCpap || r.flowSeconds <= 0) return;
-        weight = r.flowSeconds / 3600.0f;
-        const float hb = r.linkedDesatArea / 60.0 / weight;
+        // from the oximeter alone, so that a night without CPAP has one too
+        if (!r.hasOximetry || r.oxiSeconds <= 0) return;
+        weight = r.oxiSeconds / 3600.0f;
+        const float hb = hypoxicBurden(r.desatArea, r.oxiSeconds);
         slices.append(SummaryChartSlice(calc, hb, hb, title(HypoxicBurden), QColor(0x90, 0x50, 0xa0)));
-        tip = QObject::tr("\nHypoxic burden (approx.): %1 %·min/h").arg(num(hb));
+        tip = QObject::tr("\nHypoxic burden (approx.): %1 %·min/h (%2)").arg(num(hb), hypoxicBurdenGradeName(hypoxicBurdenGrade(hb)));
+        if (r.hasCpap && r.hasFlow && r.flowSeconds > 0) {
+            tip += QObject::tr("\nlinked to breathing events: %1 %·min/h").arg(num(r.linkedDesatArea / 60.0 / (r.flowSeconds / 3600.0)));
+        }
         break;
     }
     case FlowLimitation: {
@@ -373,6 +378,17 @@ float gAnalysisChart::target(Kind kind)
     case Odi: return 5;   // ODI 3 % (the bar's top)
     default: return 0;
     }
+}
+
+QList<float> gAnalysisChart::targets(Kind kind)
+{
+    if (kind == HypoxicBurden) {
+        QList<float> grades;
+        for (double b : kHypoxicGradeBounds) grades.append(float(b));
+        return grades;
+    }
+    const float t = target(kind);
+    return t > 0 ? QList<float> { t } : QList<float>();
 }
 
 

@@ -34,6 +34,7 @@ private slots:
     void testOximetryNightSummary();
     void testNightSummaryForAnyDate();
     void testOximetryNightFromAnalysis();
+    void testHypoxicBurdenGrades();
     void cleanupTestCase();
 private:
     QCoreApplication *m_app = nullptr;

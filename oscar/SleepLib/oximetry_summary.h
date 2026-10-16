@@ -10,6 +10,7 @@
 #define OXIMETRY_SUMMARY_H
 
 #include <QString>
+#include <limits>
 #include "SleepLib/machine_common.h"
 
 class Day;
@@ -36,7 +37,23 @@ struct OximetryNight {
     double zoneMinutes = 0;
     double dropPercent = 0, dropSeconds = 0;   //!< classic: the SpO2 drop thresholds
     double pulseAvg = 0, pulseMin = 0, pulseMax = 0;
+    //! analysis: the hypoxic burden (%·min/h) from every desaturation; NaN without the analysis
+    double hypoxicBurden = std::numeric_limits<double>::quiet_NaN();
 };
+
+//! \brief The hypoxic burden from the oximeter alone: the area of every desaturation below
+//! its own baseline (\a desatArea, %·s) per hour of \a seconds with SpO2, in %·min/h, as in
+//! Esmaeili et al. 2023 (desaturations found automatically). NaN without time with SpO2.
+double hypoxicBurden(double desatArea, int seconds);
+
+//! The grades Braebon gives for its MediOX oximeter's hypoxic burden index.
+enum class HypoxicGrade { Normal, Mild, Moderate, Severe };
+//! Normal below 13, mild below 32, moderate up to 71, severe above 71 (%·min/h).
+HypoxicGrade hypoxicBurdenGrade(double hb);
+//! "normal", "mild", "moderate" or "severe", translated.
+QString hypoxicBurdenGradeName(HypoxicGrade grade);
+//! The upper bounds of the normal, mild and moderate grades: 13, 32, 71.
+constexpr double kHypoxicGradeBounds[] = { 13, 32, 71 };
 
 //! \brief Summarises the oximetry of \a day recorded by its \a source machine type
 //! (MT_OXIMETER, or MT_CPAP for a device with a built-in oximeter), from the samples,

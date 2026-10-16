@@ -7,6 +7,7 @@
  * for more details. */
 
 #include "contecbleimporttests.h"
+#include <cmath>
 #include "SleepLib/machine.h"
 #include "SleepLib/oximetry_session_builder.h"
 #include "SleepLib/schema.h"
@@ -363,6 +364,7 @@ void ContecBleImportTests::testOximetryNightSummary()
     QCOMPARE(n.desaturations, int(day->count(OXI_SPO2Drop)));
     QCOMPARE(n.dropPercent, p_profile->oxi->spO2DropPercentage());
     QCOMPARE(n.dropSeconds, p_profile->oxi->spO2DropDuration());
+    QVERIFY(std::isnan(n.hypoxicBurden));   // the classic count has no desaturation areas
 }
 
 // With an analysed night the start screen shows the analysis' own figures: ODI 3 %, the time
@@ -393,9 +395,12 @@ void ContecBleImportTests::testOximetryNightFromAnalysis()
     row.pulseMin = 51;
     row.pulseMax = 98;
 
+    row.desatArea = 2400;                     // 40 %·min over 2 h
+
     const OximetryNight n = summarizeOximetry(row);
     QVERIFY(n.valid);
     QVERIFY(n.fromAnalysis);
+    QCOMPARE(n.hypoxicBurden, 20.0);
     QCOMPARE(n.device, QStringLiteral("Contec CMS50FW"));
     QCOMPARE(n.hours, 2.0);
     QCOMPARE(n.spo2Min, 86.0);
@@ -459,4 +464,21 @@ void ContecBleImportTests::testScannerTakesLateName()
     QCOMPARE(scanner.found().first().model, QStringLiteral("CMS50FW"));
     scanner.consider(bleDevice(QStringLiteral("SpO202"), QBluetoothDeviceInfo::LowEnergyCoreConfiguration));
     QCOMPARE(scanner.found().size(), 1);   // the same device once
+}
+
+// MediOX (Braebon) grades of the hypoxic burden: normal below 13, mild below 32, moderate up to 71,
+// severe above 71. Without time with SpO2 there is no burden.
+void ContecBleImportTests::testHypoxicBurdenGrades()
+{
+    QCOMPARE(hypoxicBurden(2400, 7200), 20.0);
+    QVERIFY(std::isnan(hypoxicBurden(2400, 0)));
+    QCOMPARE(hypoxicBurdenGrade(0), HypoxicGrade::Normal);
+    QCOMPARE(hypoxicBurdenGrade(12.9), HypoxicGrade::Normal);
+    QCOMPARE(hypoxicBurdenGrade(13), HypoxicGrade::Mild);
+    QCOMPARE(hypoxicBurdenGrade(31.9), HypoxicGrade::Mild);
+    QCOMPARE(hypoxicBurdenGrade(32), HypoxicGrade::Moderate);
+    QCOMPARE(hypoxicBurdenGrade(71), HypoxicGrade::Moderate);
+    QCOMPARE(hypoxicBurdenGrade(71.1), HypoxicGrade::Severe);
+    QCOMPARE(hypoxicBurdenGradeName(HypoxicGrade::Normal), QStringLiteral("normal"));
+    QCOMPARE(hypoxicBurdenGradeName(HypoxicGrade::Severe), QStringLiteral("severe"));
 }

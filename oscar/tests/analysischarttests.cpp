@@ -127,3 +127,11 @@ void AnalysisChartTests::testAhiTargetLines()
         AppSetting->setShowTargetLines(was);
     }
 }
+
+// The hypoxic burden chart draws the MediOX grades 13, 32 and 71; the other kinds keep their one target.
+void AnalysisChartTests::testHypoxicBurdenTargetLines()
+{
+    QCOMPARE(gAnalysisChart::targets(gAnalysisChart::HypoxicBurden), (QList<float> { 13, 32, 71 }));
+    QCOMPARE(gAnalysisChart::targets(gAnalysisChart::Odi), (QList<float> { 5 }));
+    QVERIFY(gAnalysisChart::targets(gAnalysisChart::PulseRises).isEmpty());
+}

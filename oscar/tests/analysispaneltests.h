@@ -33,6 +33,7 @@ private slots:
     void testTabTellsTheFlowGraphWhichDifference();
     void testStatisticsFigures();
     void testStatisticsFigureValues();
+    void testStatisticsHypoxicBurden();
     void testPreferencesPage();
     void testPreferencesRecalculationNote();
     void testNotComputedHint();
