@@ -868,9 +868,11 @@ DISTFILES += help/default.css \
 
 message("CXXFLAGS pre-mods $$QMAKE_CXXFLAGS ")
 
-# Always treat warnings as errors, even (especially!) in release
-QMAKE_CFLAGS += -Werror
-QMAKE_CXXFLAGS += -Werror
+# Always treat warnings as errors, even (especially!) in release (GCC and clang; MSVC has its own flags)
+!msvc {
+    QMAKE_CFLAGS += -Werror
+    QMAKE_CXXFLAGS += -Werror
+}
 
 gcc | clang {
     COMPILER_VERSION = $$system($$QMAKE_CXX " -dumpversion")
@@ -882,8 +884,10 @@ gcc | clang {
 
 # Qt deprecates more API with every minor release, so a newer Qt than the one the
 # code was last built with must not break the build: deprecations stay warnings.
-QMAKE_CFLAGS += -Wno-error=deprecated-declarations
-QMAKE_CXXFLAGS += -Wno-error=deprecated-declarations
+!msvc {
+    QMAKE_CFLAGS += -Wno-error=deprecated-declarations
+    QMAKE_CXXFLAGS += -Wno-error=deprecated-declarations
+}
 
 message("CXXFLAGS post-mods $$QMAKE_CXXFLAGS ")
 message("CXXFLAGS_WARN_ON $$QMAKE_CXXFLAGS_WARN_ON")
