@@ -201,7 +201,8 @@ macx  {
     # (include/zlib.h, lib/zlib.lib; the Windows workflow takes it from vcpkg)
     *-msvc*:!isEmpty(ZLIB_DIR) {
         INCLUDEPATH += $$ZLIB_DIR/include
-        LIBS += $$ZLIB_DIR/lib/zlib.lib
+        isEmpty(ZLIB_LIB): ZLIB_LIB = $$ZLIB_DIR/lib/zlib.lib
+        LIBS += $$ZLIB_LIB
     } else {
         INCLUDEPATH += $$[QT_INSTALL_PREFIX]/../src/qtbase/src/3rdparty/zlib
     }

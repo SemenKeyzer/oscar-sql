@@ -39,11 +39,17 @@ jobs:
           arch: x64
 
       - name: Install zlib (vcpkg)
-        shell: cmd
+        shell: pwsh
         run: |
-          rem Qt 6 does not export zlib's gz* functions: a static zlib with the shared C runtime (/MD)
-          "%VCPKG_INSTALLATION_ROOT%\vcpkg" install zlib:x64-windows-static-md
-          if errorlevel 1 exit /b 1
+          # Qt 6 does not export zlib's gz* functions: a static zlib with the shared C runtime (/MD)
+          & "$env:VCPKG_INSTALLATION_ROOT\vcpkg.exe" install zlib:x64-windows-static-md --classic
+          if ($LASTEXITCODE -ne 0) { throw "vcpkg failed" }
+          $root = "$env:VCPKG_INSTALLATION_ROOT\installed\x64-windows-static-md"
+          Get-ChildItem -Recurse $root -Include *.lib, zlib.h | ForEach-Object { $_.FullName }
+          $lib = Get-ChildItem -Recurse "$root\lib" -Filter 'z*.lib' | Select-Object -First 1
+          if (-not $lib) { throw "zlib library not found under $root" }
+          "ZLIB_DIR=$($root -replace '\\','/')" >> $env:GITHUB_ENV
+          "ZLIB_LIB=$($lib.FullName -replace '\\','/')" >> $env:GITHUB_ENV
 
       - name: Build OSCAR
         shell: cmd
@@ -52,7 +58,7 @@ jobs:
           set CL=/MP /utf-8
           mkdir build
           cd build
-          qmake ..\oscar\oscar.pro CONFIG+=release CONFIG-=debug_and_release "ZLIB_DIR=%VCPKG_INSTALLATION_ROOT:\=/%/installed/x64-windows-static-md"
+          qmake ..\oscar\oscar.pro CONFIG+=release CONFIG-=debug_and_release "ZLIB_DIR=%ZLIB_DIR%" "ZLIB_LIB=%ZLIB_LIB%"
           if errorlevel 1 exit /b 1
           nmake
           if errorlevel 1 exit /b 1
