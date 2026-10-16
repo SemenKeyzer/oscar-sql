@@ -239,3 +239,18 @@ QString ScoringMenus::excludedText(qint64 ms)
     const qint64 seconds = ms / 1000;
     return seconds < 120 ? tr("excluded %1 s").arg(seconds) : tr("excluded %1 min").arg(qRound(seconds / 60.0));
 }
+
+ChannelID ScoringMenus::repeatableType(const QVariantMap &choice)
+{
+    return choice.value(QStringLiteral("action")).toString() == QLatin1String("add") ? choice.value(QStringLiteral("channel")).toUInt() : 0;
+}
+
+QVariantMap ScoringMenus::repeatChoice(ChannelID type)
+{
+    return data("add", type);
+}
+
+QString ScoringMenus::repeatText(ChannelID type)
+{
+    return tr("Repeat: %1").arg(typeName(type));
+}

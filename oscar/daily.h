@@ -235,6 +235,8 @@ private slots:
 
     void onAlignButtonClicked(bool checked);
     // Manual scoring mode
+    //! Each new selection takes \a type at once (0: the menu asks).
+    void setRepeatType(ChannelID type);
     void onScoringButtonToggled(bool on);
     void onScoringRange(gGraph *graph, qint64 startMs, qint64 endMs, QPoint globalPos);
     void onScoringContext(gGraph *graph, qint64 timeMs, QPoint globalPos);
@@ -497,6 +499,9 @@ private:
     QPushButton *analysisButton = nullptr;   //!< the "OSCAR analysis" switch
     class MyTextBrowser *m_manualView = nullptr;   //!< the Manual analysis page
     class TabButtons *m_tabButtons = nullptr;      //!< the left panel's pages as buttons
+    ChannelID m_repeatType = 0;          //!< the scoring type repeated for new selections
+    QLabel *m_repeatLabel = nullptr;
+    QToolButton *m_repeatReset = nullptr;
     QWidget *m_scoringBanner = nullptr;   //!< the hint and the navigation through the events
     QComboBox *m_scoringType = nullptr;   //!< which events ◀ ▶ step through
     QComboBox *m_scoringWindow = nullptr; //!< how much of the night a step shows

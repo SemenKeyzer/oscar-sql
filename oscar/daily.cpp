@@ -804,9 +804,19 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
         for (int minutes : { 1, 3, 5, 10 }) m_scoringWindow->addItem(tr("%1 min").arg(minutes), minutes);
         m_scoringWindow->setCurrentIndex(1);   // 3 minutes, as six 30-second epochs
         row->addWidget(m_scoringWindow);
+        // the type repeated for each new selection, and the button that stops repeating it
+        m_repeatLabel = new QLabel(m_scoringBanner);
+        m_repeatLabel->setObjectName(QStringLiteral("scoringRepeat"));
+        row->addWidget(m_repeatLabel);
+        m_repeatReset = new QToolButton(m_scoringBanner);
+        m_repeatReset->setObjectName(QStringLiteral("scoringRepeatReset"));
+        m_repeatReset->setText(tr("Stop repeating"));
+        row->addWidget(m_repeatReset);
+        connect(m_repeatReset, &QToolButton::clicked, this, [this]() { setRepeatType(0); });
         connect(prev, &QToolButton::clicked, this, [this]() { stepScoring(false); });
         connect(next, &QToolButton::clicked, this, [this]() { stepScoring(true); });
     }
+    setRepeatType(0);
     m_scoringBanner->hide();
     ui->verticalLayout_3->insertWidget(ui->verticalLayout_3->indexOf(ui->graphMainArea), m_scoringBanner);
 
@@ -4520,6 +4530,7 @@ void Daily::onScoringButtonToggled(bool on)
 {
     GraphView->setScoringMode(on);
     m_scoringBanner->setVisible(on);
+    if (!on) setRepeatType(0);   // the repeat lasts while scoring is on
     if (on) GraphView->setFocus();
 }
 
@@ -4614,11 +4625,19 @@ void Daily::scoringChanged()
 void Daily::onScoringRange(gGraph *graph, qint64 startMs, qint64 endMs, QPoint globalPos)
 {
     Q_UNUSED(graph)
+    if (m_repeatType) {   // the type chosen last is put at once; right-click the event (or T) to change it
+        applyScoring(ScoringMenus::repeatChoice(m_repeatType), startMs, endMs);
+        return;
+    }
     QScopedPointer<QMenu> menu(ScoringMenus::forRange(endMs - startMs, this));
     QAction *title = new QAction(menu->title(), menu.data());
     title->setEnabled(false);
     menu->insertAction(menu->actions().value(0), title);
-    if (QAction *chosen = menu->exec(globalPos)) applyScoring(chosen->data().toMap(), startMs, endMs);
+    if (QAction *chosen = menu->exec(globalPos)) {
+        const QVariantMap choice = chosen->data().toMap();
+        setRepeatType(ScoringMenus::repeatableType(choice));
+        applyScoring(choice, startMs, endMs);
+    }
 }
 
 void Daily::onScoringContext(gGraph *graph, qint64 timeMs, QPoint globalPos)
@@ -4810,4 +4829,13 @@ void Daily::stepScoring(bool forward)
     m_stepIndex = i;
     m_stepMin = flow->min_x;
     m_stepMax = flow->max_x;
+}
+
+void Daily::setRepeatType(ChannelID type)
+{
+    m_repeatType = type;
+    if (!m_repeatLabel) return;
+    m_repeatLabel->setText(type ? ScoringMenus::repeatText(type) : QString());
+    m_repeatLabel->setVisible(type != 0);
+    m_repeatReset->setVisible(type != 0);
 }

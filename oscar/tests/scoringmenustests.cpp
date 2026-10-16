@@ -248,3 +248,15 @@ void ScoringMenusTests::testMixedApneaCounts()
     QVERIFY(ManualScoring::scoredChannels().contains(CPAP_Hypopnea));    // a device's H stays editable ...
     QVERIFY(!ManualScoring::menuChannels().contains(CPAP_Hypopnea));     // ... but the menus offer OH and CH instead
 }
+
+// After a type is chosen for a selection, the next selections take that type at once.
+void ScoringMenusTests::testRepeatType()
+{
+    QScopedPointer<QMenu> m(ScoringMenus::forRange(15000, nullptr));
+    const QVariantMap oh = find(m.data(), QStringLiteral("Obstructive hypopnea"))->data().toMap();
+    QCOMPARE(ScoringMenus::repeatableType(oh), CPAP_ObstructiveHypopnea);
+    QCOMPARE(ScoringMenus::repeatableType(find(m.data(), QStringLiteral("Artifact"))->data().toMap()), ChannelID(0));   // not repeated
+    const QVariantMap again = ScoringMenus::repeatChoice(CPAP_ObstructiveHypopnea);
+    QCOMPARE(again, oh);   // the same as choosing it in the menu
+    QCOMPARE(ScoringMenus::repeatText(CPAP_ObstructiveHypopnea), QStringLiteral("Repeat: Obstructive hypopnea"));
+}
