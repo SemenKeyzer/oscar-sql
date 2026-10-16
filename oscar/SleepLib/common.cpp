@@ -41,7 +41,11 @@
 #include "cprogressbar.h"
 
 #ifdef _MSC_VER
+#ifdef OSCAR_EXTERNAL_ZLIB   // MSVC with a zlib of its own (gz* functions)
+#include <zlib.h>
+#else
 #include <QtZlib/zlib.h>
+#endif
 #else
 #include <unistd.h>
 #include <zlib.h>
