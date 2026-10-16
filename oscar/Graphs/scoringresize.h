@@ -22,10 +22,10 @@ constexpr int kGrabPx = 4;       //!< how near an edge the mouse grabs it
 constexpr qint64 kMinMs = 1000;  //!< the shortest event or stretch
 
 struct Target {
-    enum Kind { None, Event, Excluded };
+    enum Kind { None, Event, Excluded, Marked };   //!< Marked: a flow limitation stretch
     Kind kind = None;
     int eventIndex = -1;   //!< Event: its index in the result's events
-    qint64 editId = 0;     //!< Excluded: its Exclude edit
+    qint64 editId = 0;     //!< Excluded / Marked: its Exclude or Mark edit
     bool leftEdge = false;
     qint64 startMs = 0, endMs = 0;   //!< the bounds when grabbed
 };

@@ -27,7 +27,7 @@ class gManualScoringLayer : public Layer
     Q_DECLARE_TR_FUNCTIONS(gManualScoringLayer)
   public:
     struct Item {
-        enum Kind { Added, Removed, Retyped, Excluded, Event };   //!< Event: a device event shown as a box
+        enum Kind { Added, Removed, Retyped, Excluded, Event, Marked };   //!< Event: a device event shown as a box; Marked: flow limitation marked by hand
         Kind kind;
         qint64 start, end;
         ChannelID channel;

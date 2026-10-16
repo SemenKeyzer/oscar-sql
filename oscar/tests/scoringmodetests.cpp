@@ -229,3 +229,37 @@ void ScoringModeTests::testStaleTargetIgnored()
     r.events.clear();
     QVERIFY(!ScoringResize::stillTargets(r, t));
 }
+
+// A marked flow limitation stretch is drawn as one item with its length, at any zoom.
+void ScoringModeTests::testMarkedItems()
+{
+    using Item = gManualScoringLayer::Item;
+    ManualScoring::Result r;
+    r.markEdits = { { 7, CPAP_ManualFlowLimit, 100000, 230000 } };
+    r.flowLimitedSpans = { { 100000, 230000 } };
+    int marked = 0;
+    for (const Item &it : gManualScoringLayer::items(r, 0, 1000000, true)) {
+        if (it.kind != Item::Marked) continue;
+        ++marked;
+        QCOMPARE(it.start, qint64(100000));
+        QCOMPARE(it.end, qint64(230000));
+        QCOMPARE(it.label, QStringLiteral("FL 2:10"));
+    }
+    QCOMPARE(marked, 1);
+}
+
+// Its edges drag like an excluded stretch's.
+void ScoringModeTests::testDragMarkEdge()
+{
+    using ScoringResize::Target;
+    ManualScoring::Result r;
+    r.markEdits = { { 7, CPAP_ManualFlowLimit, 100000, 230000 } };
+    Target t = ScoringResize::hit(r, 0, 600000, 600, 230, false);
+    QCOMPARE(t.kind, Target::Marked);
+    QCOMPARE(t.editId, qint64(7));
+    QVERIFY(!t.leftEdge);
+    QVERIFY(ScoringResize::stillTargets(r, t));
+    QCOMPARE(ScoringResize::dragTo(t, 300000, 0, 3600000), qMakePair(qint64(100000), qint64(300000)));
+    r.markEdits[0].endMs = 300000;
+    QVERIFY(!ScoringResize::stillTargets(r, t));   // moved meanwhile
+}

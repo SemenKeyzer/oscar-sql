@@ -16,6 +16,8 @@ class ScoringModeTests : public QObject
 {
     Q_OBJECT
 private slots:
+    void testMarkedItems();
+    void testDragMarkEdge();
     void testDragSelectsInScoringMode();
     void testDragZoomsOutsideScoringMode();
     void testRightClickRequestsMenu();

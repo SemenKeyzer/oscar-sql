@@ -2788,3 +2788,27 @@ void AnalysisIntegrationTests::testMarkMoveAndUndo()
     ManualScoringRepository::removeAllForSession(ManualScoring::keyOf(s));
     ManualScoring::refresh(s);
 }
+
+// The Manual analysis page: the share of the night and the minutes marked as flow limitation.
+void AnalysisIntegrationTests::testManualFlowLine()
+{
+    Machine cpap(p_profile, 86);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    Session *s = scoredSession(&cpap, 861, m_machineRow);   // one hour
+    day.addSession(s);
+    QVERIFY(Daily::manualFlowHtml(&day).isEmpty());
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Mark, CPAP_ManualFlowLimit, 600, 1140)));   // 9 min
+    const QString html = Daily::manualFlowHtml(&day);
+    QVERIFY2(html.contains(QStringLiteral("Flow limitation (manual scoring): 15% of the night, 9 min")), qPrintable(html));
+    ManualScoringRepository::removeAllForSession(ManualScoring::keyOf(s));
+    ManualScoring::refresh(s);
+}
+
+void AnalysisIntegrationTests::testManualFlowLineWithoutHours()
+{
+    Day day;
+    QVERIFY(Daily::manualFlowHtml(&day).isEmpty());
+    QVERIFY(Daily::manualFlowHtml(nullptr).isEmpty());
+}

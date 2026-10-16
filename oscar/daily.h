@@ -132,6 +132,8 @@ public:
                                       bool cpapData = true, const QString &countsTable = QString());
     //! "type: device → after manual scoring" per hour, for the event types manual scoring changed; empty if none.
     static QString manualCountsHtml(Day *day);
+    //! "Flow limitation (manual scoring): X% of the night, Y min" when stretches are marked; else empty.
+    static QString manualFlowHtml(Day *day);
     //! The index table: the device's own figures, then OSCAR's analysis under its heading (when \a analysisShown).
     static QString indicesHtml(Day *day, bool analysisShown, QHash<ChannelID, EventDataType> &values);
     //! A left-sidebar section heading: \a name links to folding the section; \a afterLink (e.g. a mark) follows it.

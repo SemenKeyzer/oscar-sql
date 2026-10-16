@@ -42,6 +42,17 @@ Target hit(const ManualScoring::Result &r, qint64 minX, qint64 maxX, int plotWid
             consider(t, t.endMs);
         }
     }
+    for (const ManualScoring::MarkEdit &m : r.markEdits) {   // flow limitation stretches, at any zoom
+        Target t;
+        t.kind = Target::Marked;
+        t.editId = m.editId;
+        t.startMs = m.startMs;
+        t.endMs = m.endMs;
+        t.leftEdge = true;
+        consider(t, t.startMs);
+        t.leftEdge = false;
+        consider(t, t.endMs);
+    }
     for (const ManualScoring::ExcludeEdit &x2 : r.excludeEdits) {
         Target t;
         t.kind = Target::Excluded;
@@ -66,6 +77,11 @@ bool stillTargets(const ManualScoring::Result &r, const Target &t)
     if (t.kind == Target::Excluded) {
         for (const ManualScoring::ExcludeEdit &x : r.excludeEdits) {
             if (x.editId == t.editId) return x.startMs == t.startMs && x.endMs == t.endMs;
+        }
+    }
+    if (t.kind == Target::Marked) {
+        for (const ManualScoring::MarkEdit &m : r.markEdits) {
+            if (m.editId == t.editId) return m.startMs == t.startMs && m.endMs == t.endMs;
         }
     }
     return false;

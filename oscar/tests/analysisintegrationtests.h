@@ -16,6 +16,8 @@ class AnalysisIntegrationTests : public QObject
 {
     Q_OBJECT
 private slots:
+    void testManualFlowLine();
+    void testManualFlowLineWithoutHours();
     void testMarkMoveAndUndo();
     void testNightScroll();
     void testDeviceOahiCahi();

@@ -57,6 +57,12 @@ QList<gManualScoringLayer::Item> gManualScoringLayer::items(const ManualScoring:
     for (const auto &span : result.excludedSpans) {
         if (span.second >= minX && span.first <= maxX) out.append({ Item::Excluded, span.first, span.second, 0, QString(), QString() });
     }
+    for (const auto &span : result.flowLimitedSpans) {   // flow limitation marked by hand, at any zoom
+        if (span.second < minX || span.first > maxX) continue;
+        const qint64 seconds = (span.second - span.first + 500) / 1000;
+        const QString length = QStringLiteral("%1:%2").arg(seconds / 60).arg(seconds % 60, 2, 10, QLatin1Char('0'));
+        out.append({ Item::Marked, span.first, span.second, CPAP_ManualFlowLimit, tr("FL %1").arg(length), QString() });
+    }
     return out;
 }
 
@@ -111,6 +117,14 @@ void gManualScoringLayer::paint(QPainter &painter, gGraph &w, const QRegion &reg
             painter.drawLine(QPointF(x2, r.top()), QPointF(x2, r.bottom()));
             if (m_markers) painter.fillRect(QRectF(x1, r.top(), x2 - x1, 5), QColor(90, 90, 90));   // a tab on top
             break;
+        case Item::Marked:
+            painter.fillRect(box, QColor(0x2e, 0x8b, 0x57, 70));
+            painter.setPen(QPen(QColor(0x2e, 0x8b, 0x57, 200), 1));
+            painter.drawLine(QPointF(x1, r.top()), QPointF(x1, r.bottom()));
+            painter.drawLine(QPointF(x2, r.top()), QPointF(x2, r.bottom()));
+            painter.setPen(QColor(0x1f, 0x5f, 0x3b));
+            labels(box, it.label, QString(), 3, 2);
+            break;
         case Item::Event:
             painter.fillRect(box, QColor(color.red(), color.green(), color.blue(), 55));
             painter.setPen(QPen(QColor(color.red(), color.green(), color.blue(), 170), 1));
@@ -156,6 +170,22 @@ ManualScoring::Result gManualScoringLayer::withDrag(const ManualScoring::Result 
     if (t.kind == ScoringResize::Target::Event && t.eventIndex >= 0 && t.eventIndex < out.events.size()) {
         out.events[t.eventIndex].endMs = live.second;
         out.events[t.eventIndex].durationSec = (live.second - live.first) / 1000.0;
+    } else if (t.kind == ScoringResize::Target::Marked) {
+        // the marked stretches again, with the dragged one where it is now (merged; excluded time not taken out while dragging)
+        QList<QPair<qint64, qint64>> spans;
+        for (const ManualScoring::MarkEdit &m : out.markEdits) {
+            const bool dragged = m.editId == t.editId || (m.startMs == t.startMs && m.endMs == t.endMs);
+            spans.append(dragged ? live : qMakePair(m.startMs, m.endMs));
+        }
+        std::sort(spans.begin(), spans.end());
+        out.flowLimitedSpans.clear();
+        for (const auto &s : spans) {
+            if (!out.flowLimitedSpans.isEmpty() && s.first <= out.flowLimitedSpans.last().second) {
+                out.flowLimitedSpans.last().second = qMax(out.flowLimitedSpans.last().second, s.second);
+            } else {
+                out.flowLimitedSpans.append(s);
+            }
+        }
     } else if (t.kind == ScoringResize::Target::Excluded) {
         // the stretches again, with the dragged one where it is now
         QList<QPair<qint64, qint64>> spans;

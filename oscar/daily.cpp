@@ -2257,7 +2257,7 @@ void Daily::updateManualPage(Day *day)
     }
     double corrected = 0, device = 0;
     ahiValues(day, &corrected, &device);
-    m_manualView->setHtml(manualAnalysisHtml(getManualScoring(day), corrected, device, name, true, manualCountsHtml(day)));
+    m_manualView->setHtml(manualAnalysisHtml(getManualScoring(day), corrected, device, name, true, manualFlowHtml(day) + manualCountsHtml(day)));
 }
 
 QString Daily::getAHI(Day * day, bool isBrick, double analysisAhi) {
@@ -4767,7 +4767,7 @@ void Daily::onScoringResized(const ScoringResize::Target &t, qint64 startMs, qin
     Day *day = p_profile ? p_profile->GetDay(previous_date, MT_CPAP) : nullptr;
     if (!day || !m_scoringDrawn) return;
     if (!ScoringResize::stillTargets(*m_scoringDrawn, t)) return;   // the night was rebuilt during the drag
-    if (t.kind == ScoringResize::Target::Excluded) {
+    if (t.kind == ScoringResize::Target::Excluded || t.kind == ScoringResize::Target::Marked) {
         ManualScoring::updateEdit(day, t.editId, startMs, endMs);
     } else if (t.kind == ScoringResize::Target::Event && t.eventIndex >= 0 && t.eventIndex < m_scoringDrawn->events.size()) {
         const ManualScoring::EffectiveEvent ev = m_scoringDrawn->events.at(t.eventIndex);
@@ -4794,6 +4794,8 @@ void Daily::updateScoringLayer(Day *day)
         m_scoringDrawn->events += r.events;
         m_scoringDrawn->excludedSpans += r.excludedSpans;
         m_scoringDrawn->excludeEdits += r.excludeEdits;
+        m_scoringDrawn->markEdits += r.markEdits;
+        m_scoringDrawn->flowLimitedSpans += r.flowLimitedSpans;
     }
     updateScoringTypes();
 }
@@ -4885,4 +4887,15 @@ void Daily::updateNightScroll(qint64 from, qint64 to)
     m_nightScroll->setPageStep(qMax(1, s.pageStep));
     m_nightScroll->setSingleStep(qMax(1, s.pageStep / 10));
     m_nightScroll->setValue(s.value);
+}
+
+QString Daily::manualFlowHtml(Day *day)
+{
+    if (!day) return QString();
+    const qint64 ms = ManualScoring::flowLimitedMs(day);
+    const double hours = day->ahiHours();
+    if (ms <= 0 || hours <= 0) return QString();
+    const QString percent = QString::number(qRound(100.0 * ms / (hours * 3600000.0)));
+    const QString minutes = QString::number(qRound(ms / 60000.0));
+    return QStringLiteral("<p>%1</p>\n").arg(tr("Flow limitation (manual scoring): %1% of the night, %2 min").arg(percent, minutes).toHtmlEscaped());
 }
