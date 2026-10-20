@@ -2421,6 +2421,8 @@ QString Daily::indicesHtml(Day *day, bool analysisShown, QHash<ChannelID, EventD
         tooltip.replace("'", "&apos;");
         QColor altcolor = (brightness(chan.defaultColor()) < 0.3) ? Qt::white : Qt::black; // pick a contrasting color
         const bool computed = chan.isComputed();
+        // a type only manual scoring has (OH, CH on a device that records none): under «Manual analysis»
+        if (!computed && chan.machtype() == MT_CPAP && day->deviceCount(code) == 0 && day->count(code) != 0) continue;
         (computed ? analysisHtml : html) += QString("<tr><td align='left' bgcolor='%1'><b>%7<font color='%2'><a href='event=%5' style='text-decoration:none;color:%2' title='<p>%6</p>'>%3</a></font></b></td><td width=20% bgcolor='%1'><b><font color='%2'>%4</font></b></td></tr>")
                 .arg(chan.defaultColor().name())
                 .arg(altcolor.name())
@@ -2542,6 +2544,19 @@ QString Daily::indicesHtml(Day *day, bool analysisShown, QHash<ChannelID, EventD
                 .arg(tooltip);
     }
 
+    // the types changed by hand, after manual scoring, under their own mark (the device's rows above
+    // keep the device's own figures)
+    QString manualHtml;
+    for (ChannelID code : ManualScoring::countedChannels()) {
+        if (day->deviceCount(code) == day->count(code)) continue;
+        schema::Channel &chan = schema::channel[code];
+        const QColor altcolor = (brightness(chan.defaultColor()) < 0.3) ? Qt::white : Qt::black;
+        manualHtml += QString("<tr><td align='left' bgcolor='%1'><b>%5<font color='%2'>%3</font></b></td>"
+                              "<td width=20% bgcolor='%1'><b><font color='%2'>%4</font></b></td></tr>")
+                          .arg(chan.defaultColor().name(), altcolor.name(), chan.fullname().toHtmlEscaped(),
+                               QString::number(day->perHour(code), 'f', 2), ManualMark::barMark());
+    }
+    if (!manualHtml.isEmpty()) html += ManualMark::headingRow(tr("Manual analysis"), 2) + manualHtml;
     if (analysisShown && !analysisHtml.isEmpty()) html += AnalysisMark::headingRow(tr("OSCAR analysis"), 2) + analysisHtml;
     html+="</table><hr/>";
     return html;
@@ -4790,7 +4805,8 @@ QString Daily::getManualScoring(Day *day)
                          scoringLink(QStringLiteral("undo"), r.editId), tr("Undo this change").toHtmlEscaped());
     }
     QString html = QStringLiteral("<table cellspacing=0 cellpadding=1 border=0 width='100%'>\n");
-    html += QStringLiteral("<tr><td colspan=5 align=center><b>%1</b></td></tr>\n").arg(HelpTips::term(tr("Manual scoring"), QStringLiteral("manual_scoring")));
+    html += QStringLiteral("<tr><td colspan=5 align=center>%1<b>%2</b> %3</td></tr>\n")
+                .arg(ManualMark::barMark(), HelpTips::term(tr("Manual scoring"), QStringLiteral("manual_scoring")), ManualMark::pill());
     html += QStringLiteral("<tr><td colspan=5>%1</td></tr>\n")
                 .arg(tr("added %1, removed %2, type changed %3, bounds changed %4, %5 (%6 stretches)")
                          .arg(added).arg(removed).arg(retyped).arg(resized).arg(ScoringMenus::excludedText(excludedMs)).arg(stretches.size())

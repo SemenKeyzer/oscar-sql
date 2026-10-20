@@ -123,6 +123,7 @@ private slots:
     void testDeviceCounts();
     void testDeviceCountSkipsDisabled();
     void testIndicesDeviceThenAnalysis();
+    void testIndicesManualGroup();
     void testIndicesWithoutCpap();
     void testManualCountsHtml();
     void testManualPageCounts();

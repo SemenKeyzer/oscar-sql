@@ -44,4 +44,14 @@ QTreeWidgetItem *treeHeading(const QString &text, bool analysis);
 
 } // namespace AnalysisMark
 
+//! The mark of manual scoring: like the analysis' (a bar and a pill), in green.
+namespace ManualMark {
+//! The small pill «ручн.» with its hover text.
+QString pill();
+//! A green bar before a row's name.
+QString barMark();
+//! A table heading row: the bar, the title in bold, the pill.
+QString headingRow(const QString &title, int colspan);
+} // namespace ManualMark
+
 #endif // ANALYSISMARK_H

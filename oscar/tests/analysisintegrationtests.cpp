@@ -2612,6 +2612,30 @@ void AnalysisIntegrationTests::testIndicesDeviceThenAnalysis()
     s->setManualScoring({}, 0, 0, false);
 }
 
+// Manual scoring in the index table: the device's rows only for what it records, the types
+// scored by hand under a «Manual analysis» heading with its own mark (doctor 2026-10-16).
+void AnalysisIntegrationTests::testIndicesManualGroup()
+{
+    Machine cpap(p_profile, 96);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    Session *s = scoredSession(&cpap, 961, m_machineRow);
+    day.addSession(s);
+    QHash<ChannelID, EventDataType> values;
+    QVERIFY(!Daily::indicesHtml(&day, false, values).contains(QStringLiteral("Manual analysis")));
+
+    s->setManualScoring({ { CPAP_Obstructive, -1 }, { CPAP_ObstructiveHypopnea, 2 } }, 0, 0, true);
+    const QString html = Daily::indicesHtml(&day, false, values);
+    const int heading = html.indexOf(QStringLiteral("Manual analysis"));
+    QVERIFY2(heading > 0, qPrintable(html));
+    QVERIFY(html.contains(ManualMark::pill()));
+    const QString oh = schema::channel[CPAP_ObstructiveHypopnea].fullname();
+    QVERIFY2(html.indexOf(oh) > heading, qPrintable(html));   // OH only under the heading: the device records none
+    QVERIFY(html.indexOf(schema::channel[CPAP_Obstructive].fullname(), heading) > heading);   // OA changed by hand
+    s->setManualScoring({}, 0, 0, false);
+}
+
 void AnalysisIntegrationTests::testIndicesWithoutCpap()
 {
     const qint64 oxiRow = insertRow(QStringLiteral("INSERT INTO machines (profile_id, machine_id, loader_name, machine_type, serial_number) "

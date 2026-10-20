@@ -124,3 +124,13 @@ void AnalysisMarkTests::testOldNamesGone()
     QVERIFY2(!e->term.contains(QStringLiteral("(analysis)")), qPrintable(e->term));
     QVERIFY(!gAnalysisChart::units(gAnalysisChart::Ahi).contains(QStringLiteral("(analysis)")));
 }
+
+// Manual scoring has a mark of its own, like the analysis' but green (doctor 2026-10-16).
+void AnalysisMarkTests::testManualMark()
+{
+    QVERIFY(ManualMark::pill().contains(QStringLiteral("manual")));
+    QVERIFY(ManualMark::pill() != AnalysisMark::pill());
+    QVERIFY(ManualMark::barMark().contains(QStringLiteral("#2E8B57"), Qt::CaseInsensitive));
+    const QString row = ManualMark::headingRow(QStringLiteral("Manual analysis"), 2);
+    QVERIFY(row.contains(ManualMark::pill()) && row.contains(ManualMark::barMark()));
+}

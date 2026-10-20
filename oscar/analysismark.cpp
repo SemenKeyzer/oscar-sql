@@ -77,3 +77,29 @@ QTreeWidgetItem *treeHeading(const QString &text, bool analysis)
 }
 
 } // namespace AnalysisMark
+
+namespace ManualMark {
+
+const char *const BarColor = "#2E8B57";
+const char *const PillBackground = "#E3F4EA";
+const char *const PillText = "#1F5F3B";
+
+QString pill()
+{
+    const QString hover = QCoreApplication::translate("ManualMark", "Scored by hand on the Daily page");
+    return QStringLiteral("<span title='%1' style='background-color:%2; color:%3; font-size:small;'>&nbsp;%4&nbsp;</span>")
+        .arg(hover.toHtmlEscaped().replace(QLatin1Char('\''), QStringLiteral("&#39;")), QLatin1String(PillBackground),
+             QLatin1String(PillText), QCoreApplication::translate("ManualMark", "manual").toHtmlEscaped());
+}
+
+QString barMark()
+{
+    return QStringLiteral("<font color='%1'>%2</font>&nbsp;").arg(QLatin1String(BarColor), QString(QChar(0x258C)));
+}
+
+QString headingRow(const QString &title, int colspan)
+{
+    return QStringLiteral("<tr><td colspan=%1>%2<b>%3</b> %4</td></tr>\n").arg(colspan).arg(barMark(), title, pill());
+}
+
+} // namespace ManualMark
