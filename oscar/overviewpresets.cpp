@@ -127,6 +127,14 @@ QString OverviewPresets::buttonStyle(const QString &c)
                           "%1:checked { background: #2f6fd0; border-color: #2f6fd0; color: white; }").arg(c);
 }
 
+QString OverviewPresets::tabBarStyle()
+{
+    return QStringLiteral("QTabBar::tab { border: 1px solid #b8b8b8; border-radius: 4px; padding: 3px 12px; margin: 2px 2px;"
+                          " background: #f6f6f6; color: black; }"
+                          "QTabBar::tab:hover { background: #e6edf8; }"
+                          "QTabBar::tab:selected { background: #2f6fd0; border-color: #2f6fd0; color: white; }");
+}
+
 QList<OverviewPresets::Preset> OverviewPresets::presets(bool analysisShown)
 {
     QList<Preset> out = presets();

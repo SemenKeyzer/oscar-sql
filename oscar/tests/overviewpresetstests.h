@@ -17,6 +17,7 @@ class OverviewPresetsTests : public QObject
     Q_OBJECT
 private slots:
     void testKeys();
+    void testTabBarStyle();
     void testPresetGraphs();
     void testVisibility();
     void testLeavingPresetRestoresOwnChoice();

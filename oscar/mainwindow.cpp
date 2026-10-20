@@ -78,6 +78,7 @@
 
 #include "logger.h"
 #include "mainwindow.h"
+#include "overviewpresets.h"
 #include "ui_mainwindow.h"
 #include "devicetimecorrectiondialog.h"
 #include "timealignmentwelcomedialog.h"
@@ -857,7 +858,19 @@ bool MainWindow::OpenProfile(QString profileName)
     sc.check("created Daily page");
     PERF_TIMER_STOP("MW::OP::Daily");
 
+    // the main tabs light up like the Daily page's buttons
+    ui->tabWidget->tabBar()->setStyleSheet(OverviewPresets::tabBarStyle());
     connect(daily, &Daily::analysisToggled, this, &MainWindow::setAnalysisShown);
+    // View → Scoring, like «Анализ OSCAR»: the same switch as the Daily button
+    connect(ui->actionScoringMode, &QAction::toggled, this, [this](bool on) {
+        if (!daily) return;
+        if (on) on_dailyButton_clicked();
+        daily->setScoringMode(on);
+    });
+    connect(daily, &Daily::scoringModeChanged, this, [this](bool on) {
+        const QSignalBlocker block(ui->actionScoringMode);
+        ui->actionScoringMode->setChecked(on);
+    });
     {   // the profile's own "OSCAR analysis" switch
         const QSignalBlocker block(ui->actionShowAnalysis);
         ui->actionShowAnalysis->setChecked(analysis::analysisShown());

@@ -38,6 +38,8 @@ Preset shownPreset(Preset preset, bool analysisShown);
 QString title(Preset preset);
 //! The look of a set's button: lit in blue while its set is the one in use (also used by the PDF dialog).
 QString buttonStyle(const QString &buttonClass = QStringLiteral("QToolButton"));
+//! The main tab bar in the same look: the chosen tab in blue, like a checked button.
+QString tabBarStyle();
 //! The name the profile stores the preset under.
 QString key(Preset preset);
 //! The preset stored as \a key; All for anything unknown.

@@ -770,12 +770,14 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
         bar->insertWidget(bar->indexOf(ui->graphHelp), analysisButton);
     }
     connect(analysisButton, &QPushButton::toggled, this, &Daily::analysisToggled);
+    analysisButton->setMinimumWidth(analysisButton->sizeHint().width());   // never "OSC/R" (Windows)
 
     // Manual scoring: the button next to Align, a banner above the graphs while it is on
     scoringButton = new QPushButton(tr("Scoring"), this);
     scoringButton->setObjectName(QStringLiteral("scoringButton"));
     scoringButton->setCheckable(true);
     scoringButton->setToolTip(tr("Correct the device's apneas and hypopneas by hand"));
+    scoringButton->setMinimumWidth(scoringButton->sizeHint().width());
     if (auto *bar = qobject_cast<QBoxLayout *>(ui->frame->layout())) {
         bar->insertWidget(bar->indexOf(ui->graphHelp), scoringButton);
     }
@@ -4541,8 +4543,14 @@ QPair<qint64, qint64> Daily::shownRange() const
 
 // ---- Manual scoring
 
+void Daily::setScoringMode(bool on)
+{
+    if (scoringButton) scoringButton->setChecked(on);
+}
+
 void Daily::onScoringButtonToggled(bool on)
 {
+    emit scoringModeChanged(on);
     GraphView->setScoringMode(on);
     m_scoringBanner->setVisible(on);
     if (!on) setRepeatType(0);   // the repeat lasts while scoring is on

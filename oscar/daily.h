@@ -152,6 +152,8 @@ public:
     void applyAnalysisShown();
     //! Sets the "OSCAR analysis" button without emitting analysisToggled().
     void setAnalysisButtonChecked(bool on);
+    //! Switches scoring mode on or off, as the "Scoring" button does (the View menu's item).
+    void setScoringMode(bool on);
     //! A link of the manual scoring list: \a what ("jump", "undo") of the edit \a id.
     static QString scoringLink(const QString &what, qint64 id);
     //! The parts of a scoringLink(); false for another link.
@@ -237,6 +239,8 @@ public:
 signals:
     //! The "OSCAR analysis" button was switched by the user.
     void analysisToggled(bool on);
+    //! Scoring mode went on or off (the button, the banner's close, Esc).
+    void scoringModeChanged(bool on);
     void dateLoaded(QDate date);
 
 public slots:

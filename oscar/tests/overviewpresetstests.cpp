@@ -139,3 +139,13 @@ void OverviewPresetsTests::testReloadKeepsPreset()
     State all;
     QCOMPARE(all.reload(rebuilt), rebuilt);
 }
+
+// The main tabs (Profile, Welcome, Daily, ...) light up like the Daily page's buttons: the chosen one
+// in the same blue (doctor 2026-10-16).
+void OverviewPresetsTests::testTabBarStyle()
+{
+    const QString tabs = OverviewPresets::tabBarStyle();
+    QVERIFY(tabs.contains(QStringLiteral("QTabBar::tab:selected")));
+    QVERIFY(OverviewPresets::buttonStyle().contains(QStringLiteral("#2f6fd0")));
+    QVERIFY(tabs.contains(QStringLiteral("#2f6fd0")));
+}

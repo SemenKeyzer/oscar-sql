@@ -2162,6 +2162,7 @@ p, li { white-space: pre-wrap; }
     <addaction name="actionLine_Cursor"/>
     <addaction name="actionPie_Chart"/>
     <addaction name="actionShowAnalysis"/>
+    <addaction name="actionScoringMode"/>
     <addaction name="actionLeft_Daily_Sidebar"/>
     <addaction name="actionDaily_Calendar"/>
     <addaction name="action_Sidebar_Toggle"/>
@@ -2734,6 +2735,17 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="toolTip">
     <string>Show or hide OSCAR's own analysis on every page</string>
+   </property>
+  </action>
+  <action name="actionScoringMode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Scoring</string>
+   </property>
+   <property name="toolTip">
+    <string>Correct the device's apneas and hypopneas by hand, on the Daily page</string>
    </property>
   </action>
   <action name="actionPie_Chart">
