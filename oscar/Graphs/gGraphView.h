@@ -386,8 +386,12 @@ class gGraphView
     //! \brief Add gGraph g to this gGraphView, in the requested graph-linkage group
     void addGraph(gGraph *g, short group = 0);
 
-    //! \brief The width of the vertical text Title area for all graphs
-    static const int titleWidth = 30;
+    //! \brief The width of the Title area for all graphs (vertical text; wider when horizontal)
+    int titleWidth = 30;
+    //! Titles written across, on one or two lines, in a wider column (the Overview: long names
+    //! were too small to read turned on their side, doctor 2026-10-16).
+    void setHorizontalTitles(bool on) { m_horizontalTitles = on; titleWidth = on ? 130 : 30; }
+    bool horizontalTitles() const { return m_horizontalTitles; }
 
     //! \brief The splitter is drawn inside this gap
     static const int graphSpacer = 4;
@@ -770,6 +774,7 @@ class gGraphView
     bool m_alignEscPressed = false;                  //!< Esc went down on this view (not in a dialog)
     bool m_alignDragging = false;
     qint64 m_ignoreMouseUntilMs = 0;   //!< see ignoreMouseFor()
+    bool m_horizontalTitles = false;
     int m_alignDragStartX = 0;
     double m_alignMsPerPx = 0.0;
     std::function<bool(gGraph*)> m_alignMenuPredicate;

@@ -345,6 +345,7 @@ void Overview::CreateAllGraphs() {
     TTIA->AddLayer(ttia);
     //chartsToBeMonitored.insert(ttia,TTIA);
 
+    GraphView->setHorizontalTitles(true);   // long names readable across (Overview only)
     // OSCAR's own analysis, from the analysis_daily rows; charts without data hide
     for (gAnalysisChart::Kind kind : gAnalysisChart::kinds()) {
         gGraph *G = createGraph(gAnalysisChart::code(kind), gAnalysisChart::title(kind), gAnalysisChart::units(kind));

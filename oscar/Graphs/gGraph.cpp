@@ -406,7 +406,25 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
     //int x;
     int y;
 
-    if (m_showTitle) {
+    if (m_showTitle && graphView()->horizontalTitles()) {
+        // across, wrapped on up to two lines, shrunk to fit the title column
+        m_titleFont = *mediumfont;
+        const QString &txt = title();
+        const int w = int(graphView()->titleWidth * printScaleX()) - 6;
+        QRect box;
+        for (;;) {
+            QFontMetrics fm(m_titleFont);
+            box = fm.boundingRect(QRect(0, 0, w, height), Qt::TextWordWrap | Qt::AlignLeft, txt);
+            if ((box.width() <= w && box.height() <= 2 * fm.height() + 2) || m_titleFont.pointSize() <= 7) break;
+            m_titleFont.setPointSize(m_titleFont.pointSize() - 1);
+        }
+        painter.save();
+        painter.setFont(m_titleFont);
+        painter.setPen(Qt::black);
+        painter.drawText(QRect(marginLeft() + 4, originY, w, height), Qt::TextWordWrap | Qt::AlignLeft | Qt::AlignVCenter, txt);
+        painter.restore();
+        left += graphView()->titleWidth*printScaleX();
+    } else if (m_showTitle) {
         int title_x, yh;
 
         // Start with mediumfont; shrink if the title (rotated 90°) is taller than the graph.
