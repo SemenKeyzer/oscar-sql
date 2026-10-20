@@ -307,6 +307,16 @@ class gGraph : public QObject
     bool isPinned() { return m_pinned; }
     void setPinned(bool b) { m_pinned = b; }
 
+    //! Computed by OSCAR (its analysis, manual scoring), not reported by the device: drawn on a
+    //! sand background and marked in the graph lists (a pinned graph keeps the pinned look).
+    bool isComputed() const { return m_computed; }
+    void setComputed(bool b) { m_computed = b; }
+    //! The sand of computed graphs.
+    static QColor computedBackground() { return QColor(0xFB, 0xF1, 0xD9); }
+    //! The name in the graph lists: the full name where the graph's own title is short (aGI).
+    QString listName() const { return m_listName.isEmpty() ? m_title : m_listName; }
+    void setListName(const QString &name) { m_listName = name; }
+
     bool isSnapshot() { return m_snapshot; }
     void setSnapshot(bool b) { m_snapshot = b; }
 
@@ -412,6 +422,8 @@ class gGraph : public QObject
     bool m_showTitle;
     bool m_printing;
     bool m_pinned;
+    bool m_computed = false;
+    QString m_listName;
     //! \brief Cached font for vertical title; shrunk when title is too long for the graph height
     QFont m_titleFont;
     ZoomyScaling m_zoomY;

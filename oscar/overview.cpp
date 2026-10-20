@@ -348,6 +348,7 @@ void Overview::CreateAllGraphs() {
     // OSCAR's own analysis, from the analysis_daily rows; charts without data hide
     for (gAnalysisChart::Kind kind : gAnalysisChart::kinds()) {
         gGraph *G = createGraph(gAnalysisChart::code(kind), gAnalysisChart::title(kind), gAnalysisChart::units(kind));
+        G->setComputed(true);
         gAnalysisChart *ac = new gAnalysisChart(kind);
         G->AddLayer(ac);
         chartsToBeMonitored.insert(ac, G);
@@ -655,11 +656,14 @@ void Overview::updateGraphCombo()
         if (g->isEmpty()) { continue; }
 
         bool vis = g->visible();
-        ui->graphCombo->addItem(vis ? *icon_on : *icon_off, g->title(), vis);
+        ui->graphCombo->addItem(vis ? *icon_on : *icon_off, g->listName(), vis);
         int idx = ui->graphCombo->count() - 1;
         ui->graphCombo->model()->setData(
             ui->graphCombo->model()->index(idx, 0),
             vis ? Qt::Checked : Qt::Unchecked, Qt::CheckStateRole);
+        if (g->isComputed()) {   // OSCAR's own graphs stand out in the list as on the page
+            ui->graphCombo->model()->setData(ui->graphCombo->model()->index(idx, 0), gGraph::computedBackground(), Qt::BackgroundRole);
+        }
     }
     ui->graphCombo->addItem(*icon_on,STR_HIDE_ALL_GRAPHS,true);
     ui->graphCombo->setCurrentIndex(0);

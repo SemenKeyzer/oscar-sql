@@ -33,6 +33,8 @@ public:
         // Full-width background
         if (opt.state & QStyle::State_Selected)
             painter->fillRect(opt.rect, opt.palette.highlight());
+        else if (index.data(Qt::BackgroundRole).canConvert<QColor>())   // a computed graph's sand
+            painter->fillRect(opt.rect, index.data(Qt::BackgroundRole).value<QColor>());
         else
             painter->fillRect(opt.rect, opt.palette.base());
 

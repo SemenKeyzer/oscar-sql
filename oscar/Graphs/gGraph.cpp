@@ -532,6 +532,9 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
     if (isPinned()) {
         // Fill the background on pinned graphs
         painter.fillRect(originX + left, originY + top, width - right, height - bottom - top, QBrush(QColor(Qt::white)));
+    } else if (m_computed && !printing()) {
+        // computed by OSCAR, not the device's: a sand background (doctor 2026-10-16)
+        painter.fillRect(originX + left, originY + top, width - right, height - bottom - top, QBrush(computedBackground()));
     }
 
     for (const auto & layer : m_layers) {

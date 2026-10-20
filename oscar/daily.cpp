@@ -361,6 +361,7 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     gGraph *AF;
     graphlist[STR_GRAPH_AnalysisFlags] = AF = new gGraph(STR_GRAPH_AnalysisFlags, GraphView, AnalysisMark::title(tr("Flags")),
                                                          tr("Events found by OSCAR's own analysis (experimental)"), default_height);
+    AF->setComputed(true);
 
     // Build union of channels with actual data across all loaded machines.
     // Empty set (no machines/data loaded) means all channel graphs will be created.
@@ -406,7 +407,11 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
             qDebug() << "Ignoring duplicate code at offset" << i << code << cpap_label;
             continue;
         }
-        graphlist[schema::channel[code].code()] = new gGraph(schema::channel[code].code(), GraphView, schema::channel[code].label(), channelInfo(code), default_height);
+        gGraph *made = graphlist[schema::channel[code].code()] = new gGraph(schema::channel[code].code(), GraphView, schema::channel[code].label(), channelInfo(code), default_height);
+        if (schema::channel[code].isComputed()) {   // OSCAR's own: marked, and named in full in the list
+            made->setComputed(true);
+            made->setListName(schema::channel[code].fullname());
+        }
 //        qDebug() << "Creating graph for code" << code << schema::channel[code].code();
     }
 
@@ -421,7 +426,11 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     for (int i=0; i < oxisize; ++i) {
         ChannelID code = oximetercodes[i];
         if (!availableChannels.isEmpty() && !availableChannels.contains(code)) continue;
-        graphlist[schema::channel[code].code()] = new gGraph(schema::channel[code].code(), GraphView, schema::channel[code].label(), channelInfo(code), default_height);
+        gGraph *made = graphlist[schema::channel[code].code()] = new gGraph(schema::channel[code].code(), GraphView, schema::channel[code].label(), channelInfo(code), default_height);
+        if (schema::channel[code].isComputed()) {   // OSCAR's own: marked, and named in full in the list
+            made->setComputed(true);
+            made->setListName(schema::channel[code].fullname());
+        }
     }
 
     // Check for some impossible conditions
@@ -4154,11 +4163,14 @@ void Daily::updateGraphCombo()
         if (g->isEmpty()) continue;
 
         bool vis = g->visible();
-        ui->graphCombo->addItem(vis ? *icon_on : *icon_off, g->title(), vis);
+        ui->graphCombo->addItem(vis ? *icon_on : *icon_off, g->listName(), vis);
         int idx = ui->graphCombo->count() - 1;
         ui->graphCombo->model()->setData(
             ui->graphCombo->model()->index(idx, 0),
             vis ? Qt::Checked : Qt::Unchecked, Qt::CheckStateRole);
+        if (g->isComputed()) {   // OSCAR's own graphs stand out in the list as on the page
+            ui->graphCombo->model()->setData(ui->graphCombo->model()->index(idx, 0), gGraph::computedBackground(), Qt::BackgroundRole);
+        }
     }
     ui->graphCombo->addItem(*icon_on,STR_HIDE_ALL_GRAPHS,true);
     ui->graphCombo->setCurrentIndex(0);
