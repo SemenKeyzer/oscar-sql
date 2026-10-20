@@ -365,6 +365,11 @@ void MainWindow::SetupGUI()
     // Bookmarks  has offset 1
     // Records    has offset 2
     ui->toolBox->setCurrentIndex(AppSetting->rightSidebarPanel());
+    {   // never narrower than its widest page: squeezed, its items lay over one another (doctor 2026-10-16)
+        int widest = 0;
+        for (int i = 0; i < ui->toolBox->count(); ++i) widest = qMax(widest, ui->toolBox->widget(i)->minimumSizeHint().width());
+        ui->toolBox->setMinimumWidth(qMax(widest, 120) + 8);
+    }
     bool b = AppSetting->rightSidebarVisible();
     ui->action_Sidebar_Toggle->setChecked(b);
     ui->toolBox->setVisible(b);
