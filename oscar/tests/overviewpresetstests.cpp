@@ -53,9 +53,11 @@ void OverviewPresetsTests::testPresetGraphs()
         QVERIFY2(therapy.contains(name), qPrintable(name));
 
     const QStringList mask = graphNames(MaskLeaks);
-    for (const QString &name : { STR_GRAPH_LeakRate, QStringLiteral("LeakTotal"), QStringLiteral("LeakSpan"),
-                                 QStringLiteral("Pressure Settings"), STR_GRAPH_Usage })
+    for (const QString &name : { STR_GRAPH_LeakRate, QStringLiteral("LeakTotal"), QStringLiteral("LeakSpan") })
         QVERIFY2(mask.contains(name), qPrintable(name));
+    // the leaks only: usage and pressure are in Therapy (doctor 2026-10-09)
+    QVERIFY(!mask.contains(QStringLiteral("Pressure Settings")));
+    QVERIFY(!mask.contains(STR_GRAPH_Usage));
 
     const QStringList oxygen = graphNames(Oxygen);
     for (gAnalysisChart::Kind kind : { gAnalysisChart::Odi, gAnalysisChart::Spo2Ranges, gAnalysisChart::ProblemZones,
@@ -64,6 +66,7 @@ void OverviewPresetsTests::testPresetGraphs()
     QVERIFY(oxygen.contains(STR_GRAPH_Oxi_SPO2));
     QVERIFY(oxygen.contains(STR_GRAPH_Oxi_Pulse));
     QVERIFY(!oxygen.contains(QStringLiteral("AHIBreakdown")));
+    QCOMPARE(OverviewPresets::title(Oxygen), QStringLiteral("Pulse oximetry"));   // "Oxygen" read as oxygen therapy
 
     // every analysis graph, with the device's AHI to compare against
     const QStringList analysis = graphNames(Analysis);

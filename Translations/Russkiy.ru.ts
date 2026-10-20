@@ -2046,12 +2046,12 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
     <message>
         <location filename="../oscar/daily.cpp" line="995"/>
         <source>Clinical Mode</source>
-        <translation>Клинический режим</translation>
+        <translation>Стандартный режим</translation>
     </message>
     <message>
         <location filename="../oscar/daily.cpp" line="995"/>
         <source> Disabling Sessions requires Permissive Mode be set in OSCAR Preferences in the Clinical tab.</source>
-        <translation> Для отключения сеансов необходимо установить разрешительный режим в настройках OSCAR на вкладке «Клинический».</translation>
+        <translation> Для отключения сеансов необходимо установить расширенный режим в настройках OSCAR на вкладке «Клинический».</translation>
     </message>
     <message>
         <location filename="../oscar/daily.cpp" line="913"/>
@@ -9533,7 +9533,7 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
     <message>
         <location filename="../oscar/uiglossary.cpp" line="1123"/>
         <source>Marks stretches of steady, even breathing; needs Permissive Mode on the Clinical tab.</source>
-        <translation>Отмечает участки ровного, спокойного дыхания; нужен разрешительный режим на вкладке «Клинический».</translation>
+        <translation>Отмечает участки ровного, спокойного дыхания; нужен расширенный режим на вкладке «Клинический».</translation>
     </message>
     <message>
         <location filename="../oscar/uiglossary.cpp" line="1126"/>
@@ -9679,7 +9679,7 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
     <message>
         <location filename="../oscar/uiglossary.cpp" line="1186"/>
         <source>Clinical mode</source>
-        <translation>Клинический режим</translation>
+        <translation>Стандартный режим</translation>
     </message>
     <message>
         <location filename="../oscar/uiglossary.cpp" line="1187"/>
@@ -9789,7 +9789,7 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
     <message>
         <location filename="../oscar/uiglossary.cpp" line="1191"/>
         <source>Permissive mode</source>
-        <translation>Разрешительный режим</translation>
+        <translation>Расширенный режим</translation>
     </message>
     <message>
         <location filename="../oscar/uiglossary.cpp" line="1193"/>
@@ -16703,7 +16703,7 @@ If you&apos;ve got a new computer with a small solid state disk, this is a good 
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1405"/>
         <source>Permissive Mode MUST be enabled.  See Clinical Tab </source>
-        <translation>Необходимо включить разрешительный режим. См. вкладку «Клинический» </translation>
+        <translation>Необходимо включить расширенный режим. См. вкладку «Клинический» </translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1408"/>
@@ -16758,14 +16758,14 @@ Works only when Steady Breathing is enabled and CPAP data is (re)imported.  </so
         <location filename="../oscar/preferencesdialog.ui" line="1634"/>
         <source>Clinical Mode does not allow disabled sessions.
 Disabled Session are not used for graphing or Statistics.</source>
-        <translation>Клинический режим не допускает отключённых сеансов.
+        <translation>Стандартный режим не допускает отключённых сеансов.
 Отключённые сеансы не используются для построения графиков и статистики.</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1651"/>
         <source>Permissive Mode allows disabled sessions.
 Disabled Sessions are used for graphing and Statistics.</source>
-        <translation>Разрешительный режим допускает отключённые сеансы.
+        <translation>Расширенный режим допускает отключённые сеансы.
 Отключённые сеансы используются для построения графиков и статистики.</translation>
     </message>
     <message>
@@ -17069,7 +17069,7 @@ OSCAR может импортировать из этого сжатого ка�
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1007"/>
         <source>Custom flagging is an experimental method of detecting events missed by the device. They are not included in AHI. They are also displayed in the Statistics Tab using the Permissive mode (see Clinical tab).</source>
-        <translation>Пользовательские отметки событий — экспериментальный метод обнаружения событий, пропущенных аппаратом. Они не учитываются в AHI. Они также отображаются на вкладке «Статистика» в разрешительном режиме (см. вкладку «Клинический»).</translation>
+        <translation>Пользовательские отметки событий — экспериментальный метод обнаружения событий, пропущенных аппаратом. Они не учитываются в AHI. Они также отображаются на вкладке «Статистика» в расширенном режиме (см. вкладку «Клинический»).</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1206"/>
@@ -17107,12 +17107,12 @@ OSCAR может импортировать из этого сжатого ка�
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1638"/>
         <source>Clinical Mode</source>
-        <translation>Клинический режим</translation>
+        <translation>Стандартный режим</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1655"/>
         <source>Permissive Mode</source>
-        <translation>Разрешительный режим</translation>
+        <translation>Расширенный режим</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="1665"/>
@@ -17341,7 +17341,7 @@ OSCAR может импортировать из этого сжатого ка�
     <message>
         <location filename="../oscar/preferencesdialog.cpp" line="307"/>
         <source>Must enable Permissive Mode (see Clinical Tab)</source>
-        <translation>Необходимо включить разрешительный режим (см. вкладку «Клинический»)</translation>
+        <translation>Необходимо включить расширенный режим (см. вкладку «Клинический»)</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.cpp" line="465"/>
@@ -17529,12 +17529,12 @@ Would you like do this now?</source>
     <message>
         <location filename="../oscar/preferencesdialog.cpp" line="61"/>
         <source>Clinical Mode:</source>
-        <translation>Клинический режим:</translation>
+        <translation>Стандартный режим:</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.cpp" line="62"/>
         <source>Reports what is on the data card, all of it including any and all data deselected in the Permissive mode.</source>
-        <translation>Отображает все данные с карты памяти аппарата, включая любые данные, исключённые в разрешительном режиме.</translation>
+        <translation>Отображает все данные с карты памяти аппарата, включая любые данные, исключённые в расширенном режиме.</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.cpp" line="63"/>
@@ -17554,7 +17554,7 @@ Would you like do this now?</source>
     <message>
         <location filename="../oscar/preferencesdialog.cpp" line="67"/>
         <source>Permissive Mode:</source>
-        <translation>Разрешительный режим:</translation>
+        <translation>Расширенный режим:</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.cpp" line="68"/>
@@ -23964,7 +23964,7 @@ popout window, delete it, then pop out this graph again.</source>
     <message>
         <location filename="../oscar/statistics.cpp" line="534"/>
         <source>Permissive Mode</source>
-        <translation>Разрешительный режим</translation>
+        <translation>Расширенный режим</translation>
     </message>
     <message>
         <location filename="../oscar/statistics.cpp" line="537"/>

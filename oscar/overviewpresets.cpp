@@ -39,7 +39,7 @@ QString title(Preset preset)
     case All: return QCoreApplication::translate("OverviewPresets", "All");
     case Therapy: return QCoreApplication::translate("OverviewPresets", "Therapy");
     case MaskLeaks: return QCoreApplication::translate("OverviewPresets", "Mask & Leaks");
-    case Oxygen: return QCoreApplication::translate("OverviewPresets", "Oxygen");
+    case Oxygen: return QCoreApplication::translate("OverviewPresets", "Pulse oximetry");
     case Analysis: break;
     }
     return QCoreApplication::translate("OverviewPresets", "Analysis");
@@ -73,8 +73,7 @@ QStringList graphNames(Preset preset)
         return { kDeviceAhi, STR_GRAPH_Usage, kSessionTimes, kPressure, kTimeInApnea,
                  analysis(gAnalysisChart::Ahi) };
     case MaskLeaks:
-        return { STR_GRAPH_LeakRate, QStringLiteral("LeakTotal"), QStringLiteral("LeakSpan"), kPressure,
-                 STR_GRAPH_Usage };
+        return { STR_GRAPH_LeakRate, QStringLiteral("LeakTotal"), QStringLiteral("LeakSpan") };   // the leaks only
     case Oxygen:
         return { analysis(gAnalysisChart::Odi), analysis(gAnalysisChart::Spo2Ranges),
                  analysis(gAnalysisChart::ProblemZones), analysis(gAnalysisChart::HypoxicBurden),
