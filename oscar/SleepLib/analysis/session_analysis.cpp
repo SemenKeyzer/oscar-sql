@@ -138,6 +138,7 @@ void runOximetry(Session *s, const AnalysisParams &p)
         addSpanEvent(lists.get(AN_Desaturation, true), d.start, d.end, d.depth());
     }
     for (const Span &sp : r.cyclic) addSpanEvent(lists.get(AN_CyclicDesaturation, true), sp.start, sp.end, sp.value);
+    for (const OxiArtifact &a : r.artifacts) addSpanEvent(lists.get(AN_OxiArtifact, true), a.start, a.end, int(a.reason));
     for (const PulseRise &pr : r.pulseRises) addSpanEvent(lists.get(AN_PulseRise, true), pr.start, pr.end, pr.amplitude);
     for (const Span &sp : r.bradycardia) addSpanEvent(lists.get(AN_Bradycardia), sp.start, sp.end);
     for (const Span &sp : r.tachycardia) addSpanEvent(lists.get(AN_Tachycardia), sp.start, sp.end);

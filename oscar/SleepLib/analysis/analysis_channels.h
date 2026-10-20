@@ -20,7 +20,7 @@ extern ChannelID AN_ObstructiveApnea, AN_CentralApnea, AN_Apnea, AN_FlowReductio
        AN_FlowLimitation, AN_PeriodicBreathing, AN_Unscoreable, AN_FLScore, AN_GlasgowIndex, AN_GlasgowAdapted,
        AN_ObstructiveHypopnea, AN_CentralHypopnea, AN_Hypopnea,
        AN_Desaturation, AN_CyclicDesaturation, AN_PulseRise, AN_Bradycardia, AN_Tachycardia,
-       AN_OxiProblemZone, AN_Stamp;
+       AN_OxiProblemZone, AN_OxiArtifact, AN_Stamp;
 
 const QString GRP_ANALYSIS = "ANALYSIS";
 

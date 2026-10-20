@@ -19,7 +19,7 @@ ChannelID AN_ObstructiveApnea, AN_CentralApnea, AN_Apnea, AN_FlowReduction, AN_R
           AN_FlowLimitation, AN_PeriodicBreathing, AN_Unscoreable, AN_FLScore, AN_GlasgowIndex, AN_GlasgowAdapted,
           AN_ObstructiveHypopnea, AN_CentralHypopnea, AN_Hypopnea,
           AN_Desaturation, AN_CyclicDesaturation, AN_PulseRise, AN_Bradycardia, AN_Tachycardia,
-          AN_OxiProblemZone, AN_Stamp;
+          AN_OxiProblemZone, AN_OxiArtifact, AN_Stamp;
 
 namespace analysis {
 
@@ -129,6 +129,9 @@ void registerChannels()
     add(AN_OxiProblemZone, 0x1A25, SPAN, MT_OXIMETER, "AnOxiProblemZone",
         QObject::tr("Oximetry Problem Zone"), QObject::tr("A stretch of the night with repeated desaturations or low SpO2 worth a look"),
         QObject::tr("aPZ"), STR_UNIT_Percentage, QColor(0xf0, 0xb0, 0x60));
+    add(AN_OxiArtifact, 0x1A26, SPAN, MT_OXIMETER, "AnOxiArtifact",
+        QObject::tr("Oximeter Artifact"), QObject::tr("A stretch of SpO2 the analysis leaves out: the probe moved, slipped, froze or was being put on"),
+        QObject::tr("aAR"), STR_UNIT_Percentage, QColor(0x90, 0x90, 0x90));
 
     // stage 1 bookkeeping: which parameters and algorithm version produced the session's channels
     add(AN_Stamp, 0x1A30, SETTING, MT_UNKNOWN, "AnStamp",
@@ -151,7 +154,7 @@ QList<ChannelID> hypopneaChannels()
 QList<ChannelID> oximetryChannels()
 {
     return { AN_Desaturation, AN_CyclicDesaturation, AN_PulseRise, AN_Bradycardia, AN_Tachycardia,
-             AN_OxiProblemZone };
+             AN_OxiProblemZone, AN_OxiArtifact };
 }
 
 bool isAnalysisChannel(ChannelID code)

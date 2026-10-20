@@ -60,6 +60,7 @@ private slots:
     void testAnalysisChannelsAreNotInAhi();
     void testStageOneWritesFlowChannelsAndStamp();
     void testStageOneOximetry();
+    void testStageOneWritesOxiArtifacts();
     void testStageOneSkipsSessionWithoutEvents();
     void testStageOneOffDoesNothing();
     void testStoreChannelEventsLeavesWaveform();

@@ -177,7 +177,7 @@ void AnalysisIntegrationTests::testAnalysisChannelsAreComputed()
 {
     QList<ChannelID> all = flowChannels() + hypopneaChannels() + oximetryChannels();
     all << AN_Stamp;
-    QCOMPARE(all.size(), 21);
+    QCOMPARE(all.size(), 22);   // + aAR, the oximeter artefacts
     for (ChannelID code : all) {
         const schema::Channel &ch = schema::channel[code];
         QVERIFY2(!schema::channel[code].isNull() && ch.id() == code, qPrintable(QString::number(code, 16)));
@@ -278,6 +278,30 @@ void AnalysisIntegrationTests::testStageOneOximetry()
     QCOMPARE(el->data2(0), 5.0f);     // depth
     QVERIFY(el->data(0) >= 28);       // duration, s
     QCOMPARE(sess.count(AN_Desaturation), 1.0f);
+}
+
+// Stage 1 writes the oximeter's artefacts as an analysis span channel, "aAR".
+void AnalysisIntegrationTests::testStageOneWritesOxiArtifacts()
+{
+    Machine mach(p_profile, 25);
+    mach.info.type = MT_OXIMETER;
+    Session sess(&mach, 1);
+    EventList *el = sess.AddEventList(OXI_SPO2, EVL_Event);
+    const qint64 t0 = synth::kStart;
+    el->AddEvent(t0, 96);
+    el->AddEvent(t0 + 300000, 91);   // 5 points in a second ...
+    el->AddEvent(t0 + 310000, 96);   // ... and back 10 s later: the probe
+    el->AddEvent(t0 + 900000, 96);
+    sess.really_set_first(t0);
+    sess.really_set_last(t0 + 900000);
+    analyzeSession(&sess, AnalysisParams());
+    QCOMPARE(eventCount(sess, AN_OxiArtifact), 1);
+    EventList *a = sess.eventlist.value(AN_OxiArtifact).first();
+    QCOMPARE(a->data2(0), float(int(analysis::OxiArtifactReason::FastFall)));
+    QCOMPARE(eventCount(sess, AN_Desaturation), 0);
+    QVERIFY(analysis::isAnalysisChannel(AN_OxiArtifact));
+    QVERIFY(analysis::oximetryChannels().contains(AN_OxiArtifact));
+    QCOMPARE(schema::channel[AN_OxiArtifact].label(), QStringLiteral("aAR"));
 }
 
 void AnalysisIntegrationTests::testStageOneSkipsSessionWithoutEvents()
