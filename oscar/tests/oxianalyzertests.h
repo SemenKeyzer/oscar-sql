@@ -34,6 +34,14 @@ private slots:
     void testSingleDesaturationMakesNoZone();
     void testOximetryWithoutPulse();
     void testDesaturationAreaIsWindowed();
+    void testFastFallIsArtifact();
+    void testFallWithPulseJumpIsArtifact();
+    void testSpo2WithoutPulseHasNoPulseArtifacts();
+    void testFrozenSignalIsArtifact();
+    void testProbeOnOffTrimmed();
+    void testProbeOnOffAtMostFiveMinutes();
+    void testBasicCleaningIsReported();
+    void testArtifactsLeaveTheFigures();
 };
 DECLARE_TEST(OxiAnalyzerTests)
 

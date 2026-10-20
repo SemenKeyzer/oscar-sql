@@ -32,7 +32,7 @@ DayInput night(bool withOximetry = true)
     in.cpap.append(s);
     if (withOximetry) {
         in.spo2 = synth::flat(kNight, 96);
-        in.pulse = synth::flat(kNight, 60);
+        in.pulse = synth::livePulse(kNight);
         in.oxiFromSeparateDevice = true;
     }
     return in;

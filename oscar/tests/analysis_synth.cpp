@@ -25,6 +25,13 @@ Grid flat(int seconds, float value, qint64 start)
     return g;
 }
 
+analysis::Grid livePulse(int seconds, float bpm, qint64 start)
+{
+    analysis::Grid g = flat(seconds, bpm, start);
+    for (int i = 0; i < seconds; ++i) g.v[i] = (i / 7) % 2 ? bpm + 1 : bpm;
+    return g;
+}
+
 void fill(Grid &g, int from, int to, float value)
 {
     for (int i = qMax(0, from); i < qMin(g.size(), to); ++i) g.v[i] = value;

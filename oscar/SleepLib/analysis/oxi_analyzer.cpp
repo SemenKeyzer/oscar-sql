@@ -8,7 +8,9 @@
 
 #include "oxi_analyzer.h"
 
+#include <QMap>
 #include <algorithm>
+#include <cmath>
 #include <deque>
 
 namespace analysis {
@@ -418,14 +420,240 @@ Grid cleanPulse(const Grid &raw)
     return g;
 }
 
+namespace {
+
+// Oximeter artefacts (spec: oximetry artefacts, R3-R6)
+constexpr float kFastFallPoints = 4;     // R3: a fall this deep ...
+constexpr int kFastFallSec = 2;          // ... within this long ...
+constexpr int kFastReturnSec = 30;       // ... that comes back within this long ...
+constexpr float kFastReturnPoints = 2;   // ... to within this of the level before it
+constexpr float kFallPoints = 3;         // R4: a fall this deep below the last 10 s ...
+constexpr int kFallLookbackSec = 10;
+constexpr int kRecoverMaxSec = 120;
+constexpr int kDisturbedNearSec = 5;     // ... starting this close to ...
+constexpr float kPulseJumpBpm = 30;      // ... a pulse jump this big ...
+constexpr int kPulseJumpSec = 2;         // ... within this long, or a gap in the pulse
+constexpr int kFrozenSec = 180;          // R5: SpO2 and pulse exactly constant this long
+constexpr int kStableSec = 60;           // R6: the first and last minute ...
+constexpr float kStableRange = 3;        // ... in which SpO2 varies by at most this much
+constexpr int kProbeMaxSec = 300;        // ... trimming at most this much at each end
+
+struct Piece { int first; int last; OxiArtifactReason reason; };   // inclusive indices
+
+// The runs where \a before had data and \a after has none.
+void diffPieces(const QVector<float> &before, const QVector<float> &after, OxiArtifactReason reason, QVector<Piece> &out)
+{
+    const int n = before.size();
+    for (int i = 0; i < n; ++i) {
+        if (!hasData(before[i]) || hasData(after[i])) continue;
+        int j = i;
+        while (j + 1 < n && hasData(before[j + 1]) && !hasData(after[j + 1])) ++j;
+        out.append({ i, j, reason });
+        i = j;
+    }
+}
+
+// R3: a fall of 4 points or more within 2 s that comes back within 30 s.
+void fastFalls(const QVector<float> &v, QVector<Piece> &out)
+{
+    const int n = v.size();
+    for (int i = 1; i < n; ++i) {
+        if (!hasData(v[i])) continue;
+        float level = kNoData;
+        for (int k = 1; k <= kFastFallSec && i - k >= 0; ++k) {
+            if (hasData(v[i - k]) && (!hasData(level) || v[i - k] > level)) level = v[i - k];
+        }
+        if (!hasData(level) || v[i] > level - kFastFallPoints) continue;
+        int back = -1;
+        for (int j = i + 1; j <= i + kFastReturnSec && j < n; ++j) {
+            if (hasData(v[j]) && v[j] >= level - kFastReturnPoints) { back = j; break; }
+        }
+        if (back < 0) continue;
+        out.append({ i, back - 1, OxiArtifactReason::FastFall });
+        i = back;
+    }
+}
+
+// Whether the pulse is disturbed at \a t: a gap where the pulse is recorded, or a jump of
+// 30 bpm or more within 2 s.
+bool pulseDisturbed(const Grid &pulse, qint64 t)
+{
+    if (t < pulse.start || t >= pulse.end()) return false;
+    const float now = pulse.at(t);
+    if (!hasData(now)) return true;
+    for (int k = 1; k <= kPulseJumpSec; ++k) {
+        const float before = pulse.at(t - k * pulse.stepMs);
+        if (hasData(before) && std::fabs(now - before) >= kPulseJumpBpm) return true;
+    }
+    return false;
+}
+
+// R4: a fall of 3 points or more that starts within 5 s of a disturbed pulse; the fall to its recovery.
+void disturbedFalls(const Grid &spo2, const QVector<float> &v, const Grid &pulse, QVector<Piece> &out)
+{
+    if (std::none_of(pulse.v.begin(), pulse.v.end(), [](float x) { return hasData(x); })) return;
+    const int n = v.size();
+    for (int i = 1; i < n; ++i) {
+        if (!hasData(v[i])) continue;
+        int peak = -1;
+        for (int k = qMax(0, i - kFallLookbackSec); k < i; ++k) {
+            if (hasData(v[k]) && (peak < 0 || v[k] >= v[peak])) peak = k;
+        }
+        if (peak < 0 || v[i] > v[peak] - kFallPoints) continue;
+        int end = qMin(n - 1, i + kRecoverMaxSec);
+        for (int j = i + 1; j <= end; ++j) {
+            if (hasData(v[j]) && v[j] >= v[peak] - 1) { end = j; break; }
+        }
+        bool disturbed = false;
+        for (int k = peak - kDisturbedNearSec; k <= i + kDisturbedNearSec && !disturbed; ++k) {
+            disturbed = pulseDisturbed(pulse, spo2.timeAt(k));
+        }
+        if (disturbed) out.append({ peak, end - 1, OxiArtifactReason::PulseDisturbed });
+        i = end;
+    }
+}
+
+// R5: SpO2 and pulse both exactly constant for 3 min or more, while the pulse varies elsewhere.
+void frozen(const Grid &spo2, const QVector<float> &v, const Grid &pulse, QVector<Piece> &out)
+{
+    float first = kNoData;
+    bool varies = false;
+    for (float x : pulse.v) {
+        if (!hasData(x)) continue;
+        if (!hasData(first)) first = x;
+        else if (x != first) { varies = true; break; }
+    }
+    if (!varies) return;
+    const int n = v.size();
+    for (int i = 0; i < n; ++i) {
+        const float p = pulse.at(spo2.timeAt(i));
+        if (!hasData(v[i]) || !hasData(p)) continue;
+        int j = i;
+        while (j + 1 < n && v[j + 1] == v[i] && pulse.at(spo2.timeAt(j + 1)) == p) ++j;
+        if (j - i + 1 >= kFrozenSec) out.append({ i, j, OxiArtifactReason::Frozen });
+        i = j;
+    }
+}
+
+bool stableFrom(const QVector<float> &v, int from)
+{
+    float lo = v[from], hi = v[from];
+    for (int k = from; k < from + kStableSec; ++k) {
+        if (!hasData(v[k])) return false;
+        lo = qMin(lo, v[k]);
+        hi = qMax(hi, v[k]);
+    }
+    return hi - lo <= kStableRange;
+}
+
+// R6: at each end of each recording, the stretch before the first (after the last) stable
+// minute, at most 5 min (and a quarter of the recording).
+void probeOnOff(const QVector<float> &v, QVector<Piece> &out)
+{
+    for (const Range &seg : segments(v)) {
+        const int len = seg.last - seg.first + 1;
+        const int cap = qMin(kProbeMaxSec, len / 4);
+        if (cap <= 0) continue;
+        int on = -1, off = -1;
+        for (int k = seg.first; k + kStableSec - 1 <= seg.last; ++k) {
+            if (stableFrom(v, k)) { on = k; break; }
+        }
+        for (int k = seg.last - kStableSec + 1; k >= seg.first; --k) {
+            if (stableFrom(v, k)) { off = k + kStableSec - 1; break; }
+        }
+        const int head = on < 0 ? cap : qMin(cap, on - seg.first);
+        const int tail = off < 0 ? cap : qMin(cap, seg.last - off);
+        if (head > 0) out.append({ seg.first, seg.first + head - 1, OxiArtifactReason::ProbeOnOff });
+        if (tail > 0) out.append({ seg.last - tail + 1, seg.last, OxiArtifactReason::ProbeOnOff });
+    }
+}
+
+// Overlapping or touching pieces become one, with the reason of the longest of them.
+QVector<OxiArtifact> merged(QVector<Piece> pieces, const Grid &g)
+{
+    std::sort(pieces.begin(), pieces.end(), [](const Piece &a, const Piece &b) { return a.first < b.first; });
+    QVector<OxiArtifact> out;
+    int i = 0;
+    while (i < pieces.size()) {
+        int last = pieces[i].last;
+        QMap<int, int> length;   // by reason
+        int j = i;
+        for (; j < pieces.size() && pieces[j].first <= last + 1; ++j) {
+            last = qMax(last, pieces[j].last);
+            length[int(pieces[j].reason)] += pieces[j].last - pieces[j].first + 1;
+        }
+        int reason = length.firstKey();
+        for (auto it = length.cbegin(); it != length.cend(); ++it) {
+            if (it.value() > length.value(reason)) reason = it.key();
+        }
+        out.append({ g.timeAt(pieces[i].first), g.timeAt(last + 1), OxiArtifactReason(reason) });
+        i = j;
+    }
+    return out;
+}
+
+} // namespace
+
+QVector<OxiArtifact> findOxiArtifacts(const Grid &spo2Raw, const Grid &pulseRaw)
+{
+    QVector<Piece> pieces;
+    QVector<float> v = spo2Raw.v;
+    QVector<float> step = v;
+    keepRange(step, kSpo2Low, kSpo2High);
+    diffPieces(v, step, OxiArtifactReason::OutOfRange, pieces);
+    v = step;
+    const QVector<float> inRange = v;   // the probe rule looks at the unsettled values too
+    removeSpikes(step);
+    diffPieces(v, step, OxiArtifactReason::Spike, pieces);
+    v = step;
+
+    const int from = pieces.size();
+    fastFalls(v, pieces);
+    disturbedFalls(spo2Raw, v, pulseRaw, pieces);
+    frozen(spo2Raw, v, pulseRaw, pieces);
+    probeOnOff(inRange, pieces);
+    for (int k = from; k < pieces.size(); ++k) {
+        for (int i = pieces[k].first; i <= pieces[k].last; ++i) v[i] = kNoData;
+    }
+    step = v;
+    dropShortSegments(step);
+    diffPieces(v, step, OxiArtifactReason::ShortFragment, pieces);
+    return merged(pieces, spo2Raw);
+}
+
+void maskArtifacts(Grid &g, const QVector<OxiArtifact> &artifacts)
+{
+    for (const OxiArtifact &a : artifacts) {
+        const int from = qMax(0, g.indexOf(a.start));
+        const int to = qMin(g.size(), g.indexOf(a.end));
+        for (int i = from; i < to; ++i) g.v[i] = kNoData;
+    }
+}
+
+int OxiResult::artifactSeconds() const
+{
+    qint64 ms = 0;
+    for (const OxiArtifact &a : artifacts) ms += a.end - a.start;
+    return int(ms / 1000);
+}
+
 OxiResult analyzeOximetry(const Grid &spo2Raw, const Grid &pulseRaw, const OxiParams &params)
 {
     OxiResult r;
     r.spo2Hist.fill(0, kSpo2HistMax - kSpo2HistMin + 1);
     r.pulseHist.fill(0, kPulseHistMax - kPulseHistMin + 1);
 
-    const Grid spo2 = cleanSpo2(spo2Raw);
-    const Grid pulse = cleanPulse(pulseRaw);
+    // artefacts are left out of everything; the pulse too where the whole probe was off or stuck
+    r.artifacts = findOxiArtifacts(spo2Raw, pulseRaw);
+    Grid spo2In = spo2Raw, pulseIn = pulseRaw;
+    maskArtifacts(spo2In, r.artifacts);
+    QVector<OxiArtifact> probe;
+    for (const OxiArtifact &a : r.artifacts) {
+        if (a.reason == OxiArtifactReason::Frozen || a.reason == OxiArtifactReason::ProbeOnOff) probe.append(a);
+    }
+    maskArtifacts(pulseIn, probe);
+    const Grid spo2 = cleanSpo2(spo2In);
+    const Grid pulse = cleanPulse(pulseIn);
 
     QVector<float> values;
     values.reserve(spo2.size());

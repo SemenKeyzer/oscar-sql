@@ -25,6 +25,16 @@ struct Span {
 };
 
 //! A fall of SpO2 from a peak to a nadir and back (spec §3.2.1).
+//! Why a stretch of SpO2 was left out of the analysis (spec: oximetry artefacts R1-R7).
+enum class OxiArtifactReason { OutOfRange, Spike, FastFall, PulseDisturbed, Frozen, ProbeOnOff, ShortFragment, Manual };
+
+//! A stretch of SpO2 the analysis leaves out.
+struct OxiArtifact {
+    qint64 start = 0;
+    qint64 end = 0;
+    OxiArtifactReason reason = OxiArtifactReason::OutOfRange;
+};
+
 //! The hypoxic burden counts a desaturation's area only within this many seconds around its nadir.
 constexpr int kBurdenWindowSec = 60;
 
@@ -87,7 +97,10 @@ struct OxiResult {
     float pulseMin = kNoData;
     float pulseMax = kNoData;
 
+    QVector<OxiArtifact> artifacts; //!< left out of everything below, in time order
+
     int countDesaturations(double minDepth) const;
+    int artifactSeconds() const;
     double desaturationArea() const;           //!< %·s, all desaturations
     int cyclicSeconds() const;
     int zoneSeconds(int minSeverity = 1) const;
@@ -100,6 +113,14 @@ struct OxiResult {
 //! SpO2 ready for scoring (spec §3.1.3-5): out-of-range values dropped, spikes of
 //! >= 10 points that return within 5 s removed, 5 s median, and stretches of data
 //! shorter than 60 s (between gaps of >= 10 s) dropped.
+//! The stretches of \a spo2Raw that are artefacts (out of range, spikes, too fast a fall,
+//! a fall with a disturbed pulse, a frozen signal, the probe going on or off, short
+//! fragments), merged: overlapping or touching stretches become one, with the reason of the
+//! longest of them (the first reason on a tie). In time order.
+QVector<OxiArtifact> findOxiArtifacts(const Grid &spo2Raw, const Grid &pulseRaw);
+//! Sets the seconds \a artifacts cover to no data.
+void maskArtifacts(Grid &g, const QVector<OxiArtifact> &artifacts);
+
 Grid cleanSpo2(const Grid &raw);
 //! The pulse counterpart of cleanSpo2() (no spike rule).
 Grid cleanPulse(const Grid &raw);

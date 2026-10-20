@@ -22,6 +22,9 @@ constexpr qint64 kStart = 1700000000000LL;   // an arbitrary night, in ms
 
 //! \a seconds samples of \a value.
 analysis::Grid flat(int seconds, float value, qint64 start = kStart);
+//! A living pulse: \a bpm and \a bpm + 1 alternating every 7 s (a real pulse is never exactly
+//! constant for minutes; a frozen one is an artefact).
+analysis::Grid livePulse(int seconds, float bpm = 60, qint64 start = kStart);
 //! Sets seconds [from, to) to \a value.
 void fill(analysis::Grid &g, int from, int to, float value);
 //! Linear change from \a a at \a from to \a b at \a to (exclusive).
