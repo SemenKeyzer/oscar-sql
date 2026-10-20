@@ -34,6 +34,8 @@ struct Period {
     double hours = 0;
     double ahiHours = -1;   //!< hours the AHI counts over (less manually excluded stretches); <0: the same as hours
     double events = 0;      //!< the device's AHI (or RDI) events
+    double obstructive = 0; //!< the device's obstructive events (OA and the like), for OAI
+    double central = 0;     //!< the device's central events, for CAI
 };
 
 //! All periods with the same settings on the same device, wherever they fall in the history.
@@ -47,12 +49,16 @@ struct Group {
     double hours = 0;
     double ahiHours = -1;   //!< hours the AHI counts over; <0: the same as hours
     double events = 0;
+    double obstructive = 0; //!< the device's obstructive events (OA and the like), for OAI
+    double central = 0;     //!< the device's central events, for CAI
 };
 
 //! Merges \a periods with equal settings and device; the group used last comes first.
 QList<Group> group(const QList<Period> &periods);
 
-enum Column { Nights, Usage, DeviceAhi, AnalysisAhi, Leak, Pressure, FlowLimitation, Glasgow, Odi3, Below90, ColumnCount };
+enum Column { Nights, Usage, DeviceAhi, DeviceOai, DeviceCai, AnalysisAhi, Leak, Pressure, FlowLimitation, Glasgow, Odi3, Below90, ColumnCount };
+//! The columns of the comparison table, in order.
+QList<Column> tableColumns();
 
 //! A table row: its group and one value per column, NaN where there is no data.
 struct Row {

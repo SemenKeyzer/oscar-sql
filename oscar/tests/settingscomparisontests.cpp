@@ -95,6 +95,15 @@ void SettingsComparisonTests::testRowFigures()
     QCOMPARE(r.values[Usage], 7.0);
     QCOMPARE(r.values[DeviceAhi], 3.5);
     QVERIFY(std::isnan(r.values[AnalysisAhi]));       // filled in by Statistics
+
+    // the AHI split: obstructive and central events per hour as well (doctor 2026-10-09)
+    Group split = g;
+    split.obstructive = 56;   // over 28 hours
+    split.central = 14;
+    const Row s = row(split);
+    QCOMPARE(s.values[DeviceOai], 2.0);
+    QCOMPARE(s.values[DeviceCai], 0.5);
+    QVERIFY(tableColumns().indexOf(DeviceOai) == tableColumns().indexOf(DeviceAhi) + 1);
     QVERIFY(reliable(r));
     QVERIFY(!reliable(row(group({ period(QStringLiteral("6-9"), QDate(2026, 9, 1), 2, 7, 1) }).first())));
 

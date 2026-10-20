@@ -50,6 +50,8 @@ QList<Group> group(const QList<Period> &periods)
         if (g.ahiHours < 0) g.ahiHours = 0;
         g.ahiHours += p.ahiHours < 0 ? p.hours : p.ahiHours;
         g.events += p.events;
+        g.obstructive += p.obstructive;
+        g.central += p.central;
     }
     for (Group &g : groups) {
         std::sort(g.dates.begin(), g.dates.end());
@@ -68,7 +70,11 @@ Row row(const Group &group)
     r.values[Nights] = nights;
     if (nights > 0 && group.hours > 0) r.values[Usage] = group.hours / nights;
     const double ahiHours = group.ahiHours < 0 ? group.hours : group.ahiHours;
-    if (group.hours > 0 && ahiHours > 0) r.values[DeviceAhi] = group.events / ahiHours;
+    if (group.hours > 0 && ahiHours > 0) {
+        r.values[DeviceAhi] = group.events / ahiHours;
+        r.values[DeviceOai] = group.obstructive / ahiHours;
+        r.values[DeviceCai] = group.central / ahiHours;
+    }
     return r;
 }
 
@@ -132,6 +138,8 @@ int decimals(Column column)
         return 0;
     case Usage:
     case DeviceAhi:
+    case DeviceOai:
+    case DeviceCai:
     case AnalysisAhi:
     case Glasgow:
     case Odi3:
@@ -148,7 +156,7 @@ int decimals(Column column)
 
 namespace {
 
-const QList<Column> kTableColumns { Nights, Usage, DeviceAhi, AnalysisAhi, Leak, Pressure, FlowLimitation, Glasgow, Odi3, Below90 };
+const QList<Column> kTableColumns { Nights, Usage, DeviceAhi, DeviceOai, DeviceCai, AnalysisAhi, Leak, Pressure, FlowLimitation, Glasgow, Odi3, Below90 };
 
 QString columnHelpKey(Column column)
 {
@@ -156,6 +164,8 @@ QString columnHelpKey(Column column)
     case Nights: return QStringLiteral("nights_with_data");
     case Usage: return QStringLiteral("usage");
     case DeviceAhi: return QStringLiteral("ahi");
+    case DeviceOai: return QStringLiteral("oai");
+    case DeviceCai: return QStringLiteral("cai");
     case AnalysisAhi: return QStringLiteral("an_ahi");
     case Leak: return QStringLiteral("leak");
     case Pressure: return QStringLiteral("p95");
@@ -175,6 +185,8 @@ QString columnTitle(Column column, const Options &options)
     case Nights: return QCoreApplication::translate("SettingsComparison", "Nights");
     case Usage: return QCoreApplication::translate("SettingsComparison", "Usage, h");
     case DeviceAhi: return QCoreApplication::translate("SettingsComparison", "Device %1").arg(options.ahiName);
+    case DeviceOai: return QCoreApplication::translate("SettingsComparison", "OAI");
+    case DeviceCai: return QCoreApplication::translate("SettingsComparison", "CAI");
     case AnalysisAhi: return QCoreApplication::translate("SettingsComparison", "Analysis AHI");
     case Leak: return QCoreApplication::translate("SettingsComparison", "Leak");
     case Pressure:
@@ -278,5 +290,7 @@ QString html(const QList<Row> &rows, const Options &options)
     html += QStringLiteral("</table>");
     return html;
 }
+
+QList<Column> tableColumns() { return kTableColumns; }
 
 } // namespace SettingsComparison

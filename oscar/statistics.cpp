@@ -1767,6 +1767,8 @@ QList<SettingsComparison::Row> Statistics::settingsComparisonRows(const QDate &f
             p.hours += h;
             p.ahiHours += day->ahiHours();
             p.events += day->count(AllAhiChannels) + (rdi ? day->count(CPAP_RERA) : 0);
+            p.obstructive += day->count(AllOahiChannels);   // the AHI split for the comparison (doctor 2026-10-09)
+            p.central += day->count(AllCahiChannels);
         }
         if (p.dates.isEmpty()) continue;
         periods << p;
