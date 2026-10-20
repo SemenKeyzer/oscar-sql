@@ -45,6 +45,10 @@ private slots:
     void testManualExcludeRemovesDesaturation();
     void testKeepCancelsAutomaticArtifact();
     void testKeepDoesNotCancelSpike();
+    void testFourSecondDataHasNoFastFall();
+    void testPulseGapOnlyInsideRecordedPulse();
+    void testProbeTrimOnlyAtRecordingEdges();
+    void testDisturbedFallEndsAtRecovery();
 };
 DECLARE_TEST(OxiAnalyzerTests)
 

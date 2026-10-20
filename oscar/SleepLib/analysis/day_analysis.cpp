@@ -177,6 +177,32 @@ bool storeHypopneas(const QList<Session *> &cpap, const DayResult &result)
     return ok;
 }
 
+// Replaces the oximeter artefacts of the SpO2 source's sessions with the day's: these follow the
+// user's «Артефакт» / «Не артефакт» stretches, which stage 1 does not see.
+bool storeOxiArtifacts(const QList<Session *> &sessions, const DayResult &result)
+{
+    Machine *source = bestSource(sessions, OXI_SPO2, 50, 100);
+    if (!source) return true;
+    bool ok = true;
+    for (Session *s : sessions) {
+        if (s->machine() != source) continue;
+        s->destroyEvent(AN_OxiArtifact);
+        const qint64 shift = s->correctionMs();
+        EventList *el = nullptr;
+        for (const OxiArtifact &a : result.oxi.artifacts) {
+            if (a.end <= s->first() || a.start >= s->last()) continue;   // first/last: graph time
+            if (!el) el = s->AddEventList(AN_OxiArtifact, EVL_Event, 1.0, 0, 0, 0, 0, true);
+            addSpanEvent(el, a.start - shift, a.end - shift, int(a.reason));
+        }
+        if (el) {
+            s->updateChannelSummary(AN_OxiArtifact);
+            if (!s->m_availableChannels.contains(AN_OxiArtifact)) s->m_availableChannels.push_back(AN_OxiArtifact);
+        }
+        if (s->sessionRowId() > 0) ok = s->StoreChannelEvents({ AN_OxiArtifact }) && ok;
+    }
+    return ok;
+}
+
 QString extraJson(const DayResult &r)
 {
     QJsonObject o;
@@ -451,6 +477,7 @@ DayAnalysis analyzeDay(Day *day, const AnalysisParams &params, bool onlyIfOutdat
         if (s->type() == MT_CPAP) cpap.append(s);
     }
     bool ok = storeHypopneas(cpap, out.result);
+    ok = storeOxiArtifacts(sessions, out.result) && ok;
     if (profileId > 0) {
         AnalysisDailyData row = toDailyRow(out.result, params, inputs, out.oxiSource);
         row.profileId = profileId;

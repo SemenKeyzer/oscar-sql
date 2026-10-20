@@ -119,7 +119,8 @@ Result apply(const QList<DeviceEvent> &device, const QList<Edit> &edits, const Q
         case Kind::Mark:
             r.markEdits.append({ e.id, e.channel, e.startMs, e.endMs });
             break;
-        case Kind::Keep:   // for the oximetry analysis only
+        case Kind::Keep:   // for the oximetry analysis; only drawn here
+            r.keptSpans.append({ e.startMs, e.endMs });
             break;
         case Kind::Remove:
         case Kind::Retype:
@@ -313,6 +314,10 @@ Result resultFor(Session *s)
         m.startMs += c;
         m.endMs += c;
     }
+    for (auto &span : r.keptSpans) {
+        span.first += c;
+        span.second += c;
+    }
     for (auto &span : r.flowLimitedSpans) {
         span.first += c;
         span.second += c;
@@ -323,10 +328,11 @@ Result resultFor(Session *s)
 void refresh(Session *s)
 {
     const SessionKey key = keyOf(s);
-    // marks (flow limitation) change no count: a session with only marks is not corrected by hand
+    // marks (flow limitation) and «Не артефакт» change no count, nor does anything on an oximeter's
+    // session: such a session is not corrected by hand
     bool counts = false;
-    if (ManualScoringRepository::hasScoring(key)) {
-        for (const Edit &e : ManualScoringRepository::editsForSession(key)) counts = counts || e.kind != Kind::Mark;
+    if (s->type() == MT_CPAP && ManualScoringRepository::hasScoring(key)) {
+        for (const Edit &e : ManualScoringRepository::editsForSession(key)) counts = counts || (e.kind != Kind::Mark && e.kind != Kind::Keep);
     }
     if (!counts) {
         ManualScoringRepository::removeSummary(key);
@@ -398,20 +404,23 @@ bool removeEdit(Session *s, qint64 id)
 namespace {
 //! An excluded stretch moved to startMs–endMs (graph time): stored with every session it touches now,
 //! and no longer with those it left (unless it touches none, then it stays where it was).
-bool moveStretch(Day *day, const Edit &target, qint64 startMs, qint64 endMs)
+bool moveStretch(Day *day, const Edit &target, qint64 targetC, qint64 startMs, qint64 endMs)
 {
+    // a flow limitation mark lives on the CPAP's sessions, «Артефакт» / «Не артефакт» on the oximeter's too
     QList<Session *> touched;
     for (Session *s : day->sessions) {
-        if (s->type() != MT_CPAP || !s->enabled()) continue;
-        const qint64 c = s->correctionMs();
-        if (startMs < s->last() + c && endMs > s->first() + c) touched.append(s);
+        const bool takes = target.kind == Kind::Mark ? s->type() == MT_CPAP && s->enabled() : isStretchSession(s);
+        if (takes && startMs < s->last() && endMs > s->first()) touched.append(s);   // first/last: graph time
     }
     bool ok = true;
     for (Session *s : day->sessions) {
         const qint64 c = s->correctionMs();
         bool stored = false, changed = false;
         for (const Edit &e : ManualScoringRepository::editsForSession(keyOf(s))) {
-            if (e.kind != target.kind || (e.id != target.id && (e.startMs != target.startMs || e.endMs != target.endMs))) continue;
+            // its copies, in graph time (each session's own clock correction)
+            const bool same = e.id == target.id
+                              || (e.startMs + c == target.startMs + targetC && e.endMs + c == target.endMs + targetC);
+            if (e.kind != target.kind || !same) continue;
             stored = true;
             changed = true;
             if (touched.isEmpty() || touched.contains(s)) ok = ManualScoringRepository::update(e.id, startMs - c, endMs - c) && ok;
@@ -455,17 +464,20 @@ bool updateEdit(Day *day, qint64 id, qint64 startMs, qint64 endMs)
 {
     if (!day || endMs - startMs < 1000) return false;
     Edit target;
+    qint64 targetC = 0;
     bool found = false;
     for (Session *s : day->sessions) {
         for (const Edit &e : ManualScoringRepository::editsForSession(keyOf(s))) {
             if (e.id == id) {
                 target = e;
+                targetC = s->correctionMs();
                 found = true;
             }
         }
     }
-    if (!found || (target.kind != Kind::Add && target.kind != Kind::Exclude && target.kind != Kind::Mark)) return false;
-    if (target.kind == Kind::Exclude || target.kind == Kind::Mark) return moveStretch(day, target, startMs, endMs);
+    const bool stretch = target.kind == Kind::Exclude || target.kind == Kind::Mark || target.kind == Kind::Keep;
+    if (!found || (target.kind != Kind::Add && !stretch)) return false;
+    if (stretch) return moveStretch(day, target, targetC, startMs, endMs);
     bool ok = true;
     for (Session *s : day->sessions) {
         bool changed = false;
@@ -487,11 +499,13 @@ bool undoEdit(Day *day, qint64 id)
 {
     // find the edit
     Edit target;
+    qint64 targetC = 0;
     bool found = false;
     for (Session *s : day->sessions) {
         for (const Edit &e : ManualScoringRepository::editsForSession(keyOf(s))) {
             if (e.id == id) {
                 target = e;
+                targetC = s->correctionMs();
                 found = true;
             }
         }
@@ -499,11 +513,14 @@ bool undoEdit(Day *day, qint64 id)
     if (!found) return false;
     for (Session *s : day->sessions) {
         bool changed = false;
+        const qint64 c = s->correctionMs();
         for (const Edit &e : ManualScoringRepository::editsForSession(keyOf(s))) {
-            // a stretch (excluded or marked) is stored once per session it touches: all of them go
-            const bool stretch = target.kind == Kind::Exclude || target.kind == Kind::Mark;
+            // a stretch (excluded, marked, «не артефакт») is stored once per session it touches, each in
+            // its own device time: all copies go
+            const bool stretch = target.kind == Kind::Exclude || target.kind == Kind::Mark || target.kind == Kind::Keep;
             const bool same = e.id == id
-                              || (stretch && e.kind == target.kind && e.startMs == target.startMs && e.endMs == target.endMs);
+                              || (stretch && e.kind == target.kind && e.startMs + c == target.startMs + targetC
+                                  && e.endMs + c == target.endMs + targetC);
             if (same) changed = ManualScoringRepository::remove(e.id) || changed;
         }
         if (changed) refresh(s);

@@ -93,6 +93,7 @@ struct Result {
     QList<EffectiveEvent> events;  //!< every device and added event of the scored channels
     QList<ExcludeEdit> excludeEdits;   //!< every Exclude edit, unmerged
     QList<MarkEdit> markEdits;         //!< every Mark edit (flow limitation), unmerged
+    QList<QPair<qint64, qint64>> keptSpans;   //!< «Не артефакт» stretches, as stored
     QList<QPair<qint64, qint64>> flowLimitedSpans;   //!< the marked flow limitation, merged, in the sessions, less excluded time
     qint64 flowLimitedMs = 0;
 };

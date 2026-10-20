@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <cmath>
 #include <deque>
+#include <numeric>
 
 namespace analysis {
 
@@ -437,6 +438,22 @@ constexpr int kFrozenSec = 180;          // R5: SpO2 and pulse exactly constant 
 constexpr int kStableSec = 60;           // R6: the first and last minute ...
 constexpr float kStableRange = 3;        // ... in which SpO2 varies by at most this much
 constexpr int kProbeMaxSec = 300;        // ... trimming at most this much at each end
+constexpr int kRecordingGapSec = 300;    // a break this long starts a new recording (the probe went back on)
+constexpr int kPulseGapContextSec = 30;  // a missing pulse counts as lost only with pulse this close on both sides
+constexpr int kMinChangesForStep = 20;   // value changes needed to tell the device's sample interval
+
+// The device's sample interval in whole seconds, from where a held 1 Hz grid changes value
+// (O2Ring / ViHealth: 4 s); 1 when there are too few changes to tell.
+int nativeStepSec(const QVector<float> &v)
+{
+    int g = 0, changes = 0;
+    for (int i = 1; i < v.size(); ++i) {
+        if (!hasData(v[i]) || !hasData(v[i - 1]) || v[i] == v[i - 1]) continue;
+        g = std::gcd(g, i);
+        ++changes;
+    }
+    return changes < kMinChangesForStep || g < 1 ? 1 : qMin(g, 10);
+}
 
 struct Piece { int first; int last; OxiArtifactReason reason; };   // inclusive indices
 
@@ -453,9 +470,11 @@ void diffPieces(const QVector<float> &before, const QVector<float> &after, OxiAr
     }
 }
 
-// R3: a fall of 4 points or more within 2 s that comes back within 30 s.
+// R3: a fall of 4 points or more within 2 s that comes back within 30 s. Not on a device that
+// samples less often than that (a held 4 s step is a fall of 1 %/s).
 void fastFalls(const QVector<float> &v, QVector<Piece> &out)
 {
+    if (nativeStepSec(v) > kFastFallSec) return;
     const int n = v.size();
     for (int i = 1; i < n; ++i) {
         if (!hasData(v[i])) continue;
@@ -476,11 +495,20 @@ void fastFalls(const QVector<float> &v, QVector<Piece> &out)
 
 // Whether the pulse is disturbed at \a t: a gap where the pulse is recorded, or a jump of
 // 30 bpm or more within 2 s.
-bool pulseDisturbed(const Grid &pulse, qint64 t)
+bool pulseDisturbed(const Grid &pulse, qint64 t, bool judgeJumps)
 {
     if (t < pulse.start || t >= pulse.end()) return false;
     const float now = pulse.at(t);
-    if (!hasData(now)) return true;
+    if (!hasData(now)) {
+        // lost: recorded shortly before and after, not where no pulse was recorded at all
+        bool before = false, after = false;
+        for (int k = 1; k <= kPulseGapContextSec && !(before && after); ++k) {
+            before = before || hasData(pulse.at(t - k * pulse.stepMs));
+            after = after || hasData(pulse.at(t + k * pulse.stepMs));
+        }
+        return before && after;
+    }
+    if (!judgeJumps) return false;   // samples further apart than the jump's time: no telling
     for (int k = 1; k <= kPulseJumpSec; ++k) {
         const float before = pulse.at(t - k * pulse.stepMs);
         if (hasData(before) && std::fabs(now - before) >= kPulseJumpBpm) return true;
@@ -492,6 +520,7 @@ bool pulseDisturbed(const Grid &pulse, qint64 t)
 void disturbedFalls(const Grid &spo2, const QVector<float> &v, const Grid &pulse, QVector<Piece> &out)
 {
     if (std::none_of(pulse.v.begin(), pulse.v.end(), [](float x) { return hasData(x); })) return;
+    const bool judgeJumps = nativeStepSec(pulse.v) <= kPulseJumpSec;
     const int n = v.size();
     for (int i = 1; i < n; ++i) {
         if (!hasData(v[i])) continue;
@@ -500,16 +529,27 @@ void disturbedFalls(const Grid &spo2, const QVector<float> &v, const Grid &pulse
             if (hasData(v[k]) && (peak < 0 || v[k] >= v[peak])) peak = k;
         }
         if (peak < 0 || v[i] > v[peak] - kFallPoints) continue;
-        int end = qMin(n - 1, i + kRecoverMaxSec);
-        for (int j = i + 1; j <= end; ++j) {
-            if (hasData(v[j]) && v[j] >= v[peak] - 1) { end = j; break; }
+        const float top = v[peak];
+        // its recovery as the desaturation detector finds it: back near the peak, or 2/3 of the way
+        int end = -1;
+        float nadir = v[i];
+        for (int j = i + 1; j < n && j - i <= kRecoverMaxSec; ++j) {
+            if (!hasData(v[j])) continue;
+            if (v[j] < nadir) nadir = v[j];
+            else if (v[j] >= top - 1 || v[j] >= nadir + (2.0f / 3.0f) * (top - nadir)) { end = j; break; }
         }
         bool disturbed = false;
         for (int k = peak - kDisturbedNearSec; k <= i + kDisturbedNearSec && !disturbed; ++k) {
-            disturbed = pulseDisturbed(pulse, spo2.timeAt(k));
+            disturbed = pulseDisturbed(pulse, spo2.timeAt(k), judgeJumps);
         }
-        if (disturbed) out.append({ peak, end - 1, OxiArtifactReason::PulseDisturbed });
-        i = end;
+        if (disturbed && end > 0) out.append({ peak, end - 1, OxiArtifactReason::PulseDisturbed });
+        // on to the next fall: past the recovery, or past where SpO2 climbs out of this one
+        int next = end;
+        if (next < 0) {
+            next = i + 1;
+            while (next < n && !(hasData(v[next]) && v[next] > top - kFallPoints)) ++next;
+        }
+        i = next;
     }
 }
 
@@ -548,9 +588,26 @@ bool stableFrom(const QVector<float> &v, int from)
 
 // R6: at each end of each recording, the stretch before the first (after the last) stable
 // minute, at most 5 min (and a quarter of the recording).
+// The recordings: runs of data with no break as long as kRecordingGapSec.
+QVector<Range> recordings(const QVector<float> &v)
+{
+    QVector<Range> out;
+    for (int i = 0; i < v.size(); ++i) {
+        if (!hasData(v[i])) continue;
+        Range r { i, i };
+        int gap = 0;
+        for (int j = i + 1; j < v.size() && gap < kRecordingGapSec; ++j) {
+            if (hasData(v[j])) { r.last = j; gap = 0; } else ++gap;
+        }
+        out.append(r);
+        i = r.last;
+    }
+    return out;
+}
+
 void probeOnOff(const QVector<float> &v, QVector<Piece> &out)
 {
-    for (const Range &seg : segments(v)) {
+    for (const Range &seg : recordings(v)) {
         const int len = seg.last - seg.first + 1;
         const int cap = qMin(kProbeMaxSec, len / 4);
         if (cap <= 0) continue;

@@ -854,7 +854,7 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     ui->treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->treeWidget, &QTreeWidget::customContextMenuRequested, this, [this](const QPoint &pos) {
         QTreeWidgetItem *item = ui->treeWidget->itemAt(pos);
-        Day *day = p_profile->GetDay(previous_date, MT_CPAP);
+        Day *day = p_profile->GetDay(previous_date);   // an oximeter-only night has stretches too
         if (!item || !day) return;
         QMenu menu(this);
         const bool isNode = item->type() == ScoringMenus::kTreeNodeType;
@@ -970,7 +970,7 @@ void Daily::Link_clicked(const QUrl &url)
     Day *day=nullptr;
 
     if (code == "scoring") {   // the manual scoring block: jump to, undo one, or clear all
-        Day *sday = p_profile->GetDay(previous_date, MT_CPAP);
+        Day *sday = p_profile->GetDay(previous_date);   // an oximeter-only night has stretches too
         if (!sday) return;
         QString what = data;   // "clear", or an edit's link
         qint64 id = 0;
@@ -2738,7 +2738,7 @@ QString Daily::eventTreeName(ChannelID code)
 
 void Daily::Load(QDate date)
 {
-    updateScoringLayer(nullptr);   // a night without CPAP hours draws no scoring
+    updateScoringLayer(nullptr);   // cleared until the night is loaded
     updateManualPage(nullptr);
     PERF_TIMER_SCOPE("Daily::Load()");
 
@@ -2810,6 +2810,7 @@ void Daily::Load(QDate date)
         day->OpenEvents();
     }
     loadAnalysis(day);   // may add or replace analysis channels: before the graphs get the day
+    updateScoringLayer(day);   // CPAP events, and stretches on an oximeter-only night too
     GraphView->setDay(day);
     PERF_TIMER_STOP("Daily::Load::OpenEvents");
 
@@ -2872,7 +2873,6 @@ void Daily::Load(QDate date)
         modestr=schema::channel[CPAP_Mode].m_options[mode];
         if (hours>0) {
             htmlLeftAHI= getAHI(day,isBrick, figures.hasAnalysisAhi ? figures.analysisAhi : -1);
-            updateScoringLayer(day);
             updateManualPage(day);
 
             htmlLeftMachineInfo = getCPAPInformation(day);
@@ -4751,7 +4751,7 @@ QString Daily::getManualScoring(Day *day)
 
 QPair<qint64, qint64> Daily::scoringLimits(const ScoringResize::Target &t)
 {
-    Day *day = p_profile ? p_profile->GetDay(previous_date, MT_CPAP) : nullptr;
+    Day *day = p_profile ? p_profile->GetDay(previous_date) : nullptr;   // stretches on an oximeter-only night too
     QPair<qint64, qint64> out(std::numeric_limits<qint64>::min() / 2, std::numeric_limits<qint64>::max() / 2);
     if (!day || !m_scoringDrawn) return out;
     // on the graphs' clock: the device time plus its correction
@@ -4772,7 +4772,7 @@ QPair<qint64, qint64> Daily::scoringLimits(const ScoringResize::Target &t)
 
 void Daily::onScoringResized(const ScoringResize::Target &t, qint64 startMs, qint64 endMs)
 {
-    Day *day = p_profile ? p_profile->GetDay(previous_date, MT_CPAP) : nullptr;
+    Day *day = p_profile ? p_profile->GetDay(previous_date) : nullptr;   // stretches on an oximeter-only night too
     if (!day || !m_scoringDrawn) return;
     if (!ScoringResize::stillTargets(*m_scoringDrawn, t)) return;   // the night was rebuilt during the drag
     if (t.kind == ScoringResize::Target::Excluded || t.kind == ScoringResize::Target::Marked) {
@@ -4795,15 +4795,30 @@ void Daily::updateScoringLayer(Day *day)
     if (!m_scoringDrawn) return;
     *m_scoringDrawn = ManualScoring::Result();
     m_stepIndex = -1;   // the events are new
-    // every CPAP session: the events are drawn as boxes and stepped through, scored or not
+    // every CPAP session: the events are drawn as boxes and stepped through, scored or not;
+    // an oximeter's session adds its «Артефакт» / «Не артефакт» stretches (once, if a CPAP has them too)
+    QSet<QPair<qint64, qint64>> excluded, kept;
     for (Session *s : day ? day->sessions : QList<Session *>()) {
-        if (s->type() != MT_CPAP || !s->enabled()) continue;
+        if (!ManualScoring::isStretchSession(s)) continue;
         const ManualScoring::Result r = ManualScoring::resultFor(s);
-        m_scoringDrawn->events += r.events;
-        m_scoringDrawn->excludedSpans += r.excludedSpans;
-        m_scoringDrawn->excludeEdits += r.excludeEdits;
-        m_scoringDrawn->markEdits += r.markEdits;
-        m_scoringDrawn->flowLimitedSpans += r.flowLimitedSpans;
+        if (s->type() == MT_CPAP) {
+            m_scoringDrawn->events += r.events;
+            m_scoringDrawn->markEdits += r.markEdits;
+            m_scoringDrawn->flowLimitedSpans += r.flowLimitedSpans;
+        }
+        for (const ManualScoring::ExcludeEdit &x : r.excludeEdits) {
+            if (excluded.contains({ x.startMs, x.endMs })) continue;
+            excluded.insert({ x.startMs, x.endMs });
+            m_scoringDrawn->excludeEdits.append(x);
+        }
+        for (const auto &span : r.excludedSpans) {
+            if (!m_scoringDrawn->excludedSpans.contains(span)) m_scoringDrawn->excludedSpans.append(span);
+        }
+        for (const auto &span : r.keptSpans) {
+            if (kept.contains(span)) continue;
+            kept.insert(span);
+            m_scoringDrawn->keptSpans.append(span);
+        }
     }
     updateScoringTypes();
 }

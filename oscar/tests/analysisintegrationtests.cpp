@@ -2916,3 +2916,93 @@ void AnalysisIntegrationTests::testMarksOnlyNotCorrected()
     ManualScoringRepository::removeAllForSession(ManualScoring::keyOf(s));
     ManualScoring::refresh(s);
 }
+
+// «Артефакт» / «Не артефакт» on a night with a CPAP and an aligned oximeter (its clock corrected):
+// one stretch, one row, one undo, one move, and no "corrected by hand" for the CPAP's figures.
+void AnalysisIntegrationTests::testStretchAcrossCpapAndCorrectedOximeter()
+{
+    Machine cpap(p_profile, 83);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Machine oxi(p_profile, 84);
+    oxi.info.type = MT_OXIMETER;
+    oxi.rebuildCorrections({ TimeCorrectionRow { kNightDate.addDays(-10), QDate(), QStringLiteral("offset"), -420000, 0, 0.0 } });
+    Day day;
+    day.setDate(kNightDate);
+    Session *cs = scoredSession(&cpap, 831, m_machineRow);
+    day.addSession(cs);
+    Session *os = new Session(&oxi, 841);
+    EventList *el = os->AddEventList(OXI_SPO2, EVL_Event);
+    el->AddEvent(synth::kStart, 96);
+    el->AddEvent(synth::kStart + 4000000, 96);
+    os->really_set_first(synth::kStart);
+    os->really_set_last(synth::kStart + 4000000);
+    day.addSession(os);
+    QCOMPARE(os->correctionMs(), qint64(-420000));
+    auto onBoth = [&](ManualScoring::Kind kind, qint64 from, qint64 to) {
+        ManualScoring::Edit e;
+        e.kind = kind;
+        e.startMs = synth::kStart + from;
+        e.endMs = synth::kStart + to;
+        for (Session *s : { cs, os }) QVERIFY(ManualScoring::addEdit(s, e));
+    };
+    auto idOf = [&](ManualScoring::Kind kind) {
+        for (const ManualScoring::Edit &e : ManualScoringRepository::editsForSession(ManualScoring::keyOf(cs))) {
+            if (e.kind == kind) return e.id;
+        }
+        return qint64(0);
+    };
+    auto rowsOf = [&](const QString &prefix) {
+        int n = 0;
+        for (const ScoringMenus::EditRow &r : ScoringMenus::editRows(&day)) n += r.text.startsWith(prefix) ? 1 : 0;
+        return n;
+    };
+
+    onBoth(ManualScoring::Kind::Keep, 1000000, 1100000);
+    QVERIFY(!day.hasManualScoring());   // «Не артефакт» changes no event count
+    QCOMPARE(ManualScoring::oximetryOverrides(&day).keep.size(), 1);
+    QCOMPARE(rowsOf(QStringLiteral("not an artifact")), 1);
+    QVERIFY(ManualScoring::undoEdit(&day, idOf(ManualScoring::Kind::Keep)));
+    QVERIFY(ManualScoring::oximetryOverrides(&day).keep.isEmpty());   // every copy went
+
+    onBoth(ManualScoring::Kind::Exclude, 1500000, 1600000);
+    QCOMPARE(rowsOf(QStringLiteral("excluded")), 1);
+    QVERIFY(ManualScoring::updateEdit(&day, idOf(ManualScoring::Kind::Exclude), synth::kStart + 1500000, synth::kStart + 1700000));
+    const OxiOverrides moved = ManualScoring::oximetryOverrides(&day);
+    QCOMPARE(moved.exclude.size(), 1);   // both copies moved together
+    QCOMPARE(moved.exclude[0].end, synth::kStart + 1700000);
+    QVERIFY(ManualScoring::undoEdit(&day, idOf(ManualScoring::Kind::Exclude)));
+    QVERIFY(ManualScoring::oximetryOverrides(&day).exclude.isEmpty());
+    ManualScoring::clearDay(&day);
+}
+
+// The grey aAR band on the SpO2 graph follows the day's analysis: «Не артефакт» takes it away.
+void AnalysisIntegrationTests::testDayArtifactsDrawnAfterCorrections()
+{
+    Machine mach(p_profile, 27);
+    mach.info.type = MT_OXIMETER;
+    Session *sess = new Session(&mach, 8);
+    EventList *el = sess->AddEventList(OXI_SPO2, EVL_Event);
+    const qint64 t0 = synth::kStart;
+    el->AddEvent(t0, 96);
+    el->AddEvent(t0 + 300000, 91);   // the probe: 5 points in a second, back 10 s later
+    el->AddEvent(t0 + 310000, 96);
+    el->AddEvent(t0 + 900000, 96);
+    sess->really_set_first(t0);
+    sess->really_set_last(t0 + 900000);
+    Day day;
+    day.setDate(QDate(2026, 3, 5));
+    day.addSession(sess);
+    const AnalysisParams params;
+    analyzeDay(&day, params);
+    QCOMPARE(eventCount(*sess, AN_OxiArtifact), 1);
+
+    ManualScoring::Edit e;
+    e.kind = ManualScoring::Kind::Keep;
+    e.startMs = t0 + 290000;
+    e.endMs = t0 + 330000;
+    QVERIFY(ManualScoring::addEdit(sess, e));
+    analyzeDay(&day, params);
+    QCOMPARE(eventCount(*sess, AN_OxiArtifact), 0);
+    ManualScoringRepository::removeAllForSession(ManualScoring::keyOf(sess));
+}

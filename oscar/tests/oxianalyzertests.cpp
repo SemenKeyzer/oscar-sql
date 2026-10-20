@@ -411,3 +411,61 @@ void OxiAnalyzerTests::testKeepDoesNotCancelSpike()
     o.keep.append(seconds(s, 490, 520));
     QCOMPARE(ofReason(analyzeOximetry(s, livePulse(900), OxiParams(), o), OxiArtifactReason::Spike).size(), 1);
 }
+
+// O2Ring / ViHealth record every 4 s: a held 4-point step is a real fall of 1 %/s, not the probe;
+// a 4 s pulse step is no sudden jump either.
+void OxiAnalyzerTests::testFourSecondDataHasNoFastFall()
+{
+    Grid s = synth::flat(1800, 96);
+    for (int i = 0; i < 1800; ++i) s.v[i] = (i / 4) % 2 ? 95 : 96;   // changes only every 4 s
+    synth::fill(s, 300, 316, 91);                                     // a 5-point fall, held 16 s
+    Grid p = synth::flat(1800, 60);
+    for (int i = 0; i < 1800; ++i) p.v[i] = (i / 4) % 2 ? 61 : 60;
+    synth::fill(p, 300, 304, 64);
+    synth::fill(p, 304, 308, 72);                                     // +12 bpm in 4 s
+    const OxiResult r = analyze(s, p);
+    QVERIFY(ofReason(r, OxiArtifactReason::FastFall).isEmpty());
+    QVERIFY(ofReason(r, OxiArtifactReason::PulseDisturbed).isEmpty());
+    QCOMPARE(r.countDesaturations(3), 1);
+}
+
+// A pulse recorded for only part of the night: SpO2 falls where there is no pulse at all are not
+// "a lost pulse"; a short dropout inside the recorded pulse is.
+void OxiAnalyzerTests::testPulseGapOnlyInsideRecordedPulse()
+{
+    Grid s = synth::flat(1800, 96);
+    synth::dip(s, 300, 4, 5, 10, 5);
+    synth::dip(s, 1300, 4, 5, 10, 5);
+    Grid p = synth::livePulse(1800);
+    synth::fill(p, 302, 305, kNoData);         // a 3 s dropout as the first fall starts
+    synth::fill(p, 1000, 1800, kNoData);       // no pulse recorded in the second half
+    const QVector<OxiArtifact> a = ofReason(analyze(s, p), OxiArtifactReason::PulseDisturbed);
+    QCOMPARE(a.size(), 1);
+    QVERIFY(secondsOf(s.start, a[0].start) < 400);
+}
+
+// The probe rule trims the ends of a recording, not both sides of every short dropout.
+void OxiAnalyzerTests::testProbeTrimOnlyAtRecordingEdges()
+{
+    Grid s = synth::flat(3600, 96);
+    for (int i = 800; i < 1100; ++i) s.v[i] = 92 + qAbs(i % 10 - 5);   // 5 min that never settle ...
+    synth::fill(s, 950, 965, kNoData);                                 // ... with a 15 s dropout
+    QVERIFY(ofReason(analyze(s, synth::livePulse(3600)), OxiArtifactReason::ProbeOnOff).isEmpty());
+
+    synth::fill(s, 950, 1550, kNoData);                                // a 10 min break: a new recording
+    QVERIFY(!ofReason(analyze(s, synth::livePulse(3600)), OxiArtifactReason::ProbeOnOff).isEmpty());
+}
+
+// A disturbed fall ends where the desaturation detector would end it (2/3 recovered), not 2 min later.
+void OxiAnalyzerTests::testDisturbedFallEndsAtRecovery()
+{
+    Grid s = synth::flat(1800, 96);
+    synth::ramp(s, 300, 305, 96, 90);
+    synth::fill(s, 305, 315, 90);
+    synth::fill(s, 315, 600, 94);              // back to 94 only: 2/3 of the way
+    Grid p = synth::livePulse(1800);
+    synth::fill(p, 301, 320, 95);              // the pulse jumps as it falls
+    const QVector<OxiArtifact> a = ofReason(analyze(s, p), OxiArtifactReason::PulseDisturbed);
+    QCOMPARE(a.size(), 1);
+    QVERIFY2(secondsOf(s.start, a[0].end) <= 320, qPrintable(QString::number(secondsOf(s.start, a[0].end))));
+}

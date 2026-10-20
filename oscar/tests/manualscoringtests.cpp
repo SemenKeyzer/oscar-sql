@@ -645,6 +645,7 @@ void ManualScoringTests::testKeepRoundTrip()
     const Result r = apply(deviceEvents(), { e }, oneSession());
     QVERIFY(r.delta.isEmpty());
     QCOMPARE(r.excludedMs, qint64(0));
+    QCOMPARE(r.keptSpans, (QList<QPair<qint64, qint64>> { { 120 * kSec, 250 * kSec } }));   // drawn on the graphs
 }
 
 // The oximetry analysis gets the «Артефакт» and «Не артефакт» stretches of every session, in the

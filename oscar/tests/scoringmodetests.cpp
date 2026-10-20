@@ -88,6 +88,13 @@ void ScoringModeTests::testLayerItems()
     const QList<Item> hatch = gManualScoringLayer::items(r, 0, 1000000, false);
     QCOMPARE(hatch.size(), 1);
     QCOMPARE(int(hatch[0].kind), int(Item::Excluded));
+
+    // «Не артефакт» is drawn on every graph, in a style of its own
+    ManualScoring::Result kept = r;
+    kept.keptSpans = { { 600000, 650000 } };
+    bool found = false;
+    for (const Item &it : gManualScoringLayer::items(kept, 0, 1000000, false)) found = found || (it.kind == Item::Kept && it.start == 600000);
+    QVERIFY(found);
 }
 
 // the event flags and analysis flags graphs always show the whole night (block zoom): the

@@ -209,8 +209,8 @@ QList<ScoringMenus::EditRow> ScoringMenus::editRows(Day *day)
                 text = tr("%1: %2 → %3 s").arg(schema::channel[e.channel].label(), before, after);
                 break;
             }
-            case Kind::Exclude: {
-                const QPair<qint64, qint64> span(e.startMs, e.endMs);
+            case Kind::Exclude: {   // one row however many sessions it is on (each copy in its device time)
+                const QPair<qint64, qint64> span(e.startMs + c, e.endMs + c);
                 if (stretches.contains(span)) continue;
                 stretches.insert(span);
                 at = e.startMs + c;

@@ -62,6 +62,8 @@ private slots:
     void testStageOneOximetry();
     void testStageOneWritesOxiArtifacts();
     void testOverridesOnOximeterOnlyNight();
+    void testStretchAcrossCpapAndCorrectedOximeter();
+    void testDayArtifactsDrawnAfterCorrections();
     void testStageOneSkipsSessionWithoutEvents();
     void testStageOneOffDoesNothing();
     void testStoreChannelEventsLeavesWaveform();

@@ -57,6 +57,9 @@ QList<gManualScoringLayer::Item> gManualScoringLayer::items(const ManualScoring:
     for (const auto &span : result.excludedSpans) {
         if (span.second >= minX && span.first <= maxX) out.append({ Item::Excluded, span.first, span.second, 0, QString(), QString() });
     }
+    for (const auto &span : result.keptSpans) {   // «Не артефакт»: on every graph, like an excluded stretch
+        if (span.second >= minX && span.first <= maxX) out.append({ Item::Kept, span.first, span.second, 0, tr("not an artifact"), QString() });
+    }
     for (const auto &span : result.flowLimitedSpans) {   // flow limitation marked by hand: on the flow graph, at any zoom
         if (!flowGraph || span.second < minX || span.first > maxX) continue;
         const qint64 seconds = (span.second - span.first + 500) / 1000;
@@ -116,6 +119,14 @@ void gManualScoringLayer::paint(QPainter &painter, gGraph &w, const QRegion &reg
             painter.drawLine(QPointF(x1, r.top()), QPointF(x1, r.bottom()));
             painter.drawLine(QPointF(x2, r.top()), QPointF(x2, r.bottom()));
             if (m_markers) painter.fillRect(QRectF(x1, r.top(), x2 - x1, 5), QColor(90, 90, 90));   // a tab on top
+            break;
+        case Item::Kept:   // a dashed blue frame: the analysis' own artefact call is taken back here
+            painter.fillRect(box, QColor(0x30, 0x70, 0xc0, 25));
+            painter.setPen(QPen(QColor(0x30, 0x70, 0xc0, 200), 1, Qt::DashLine));
+            painter.drawLine(QPointF(x1, r.top()), QPointF(x1, r.bottom()));
+            painter.drawLine(QPointF(x2, r.top()), QPointF(x2, r.bottom()));
+            painter.setPen(QColor(0x20, 0x50, 0x90));
+            labels(box, it.label, QString(), 3, 2);
             break;
         case Item::Marked:
             painter.fillRect(box, QColor(0x2e, 0x8b, 0x57, 70));

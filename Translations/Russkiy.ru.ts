@@ -2203,7 +2203,7 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
         <translation>Общие</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4908"/>
+        <location filename="../oscar/daily.cpp" line="4923"/>
         <source>Flow limitation (manual scoring): %1% of the night, %2 min</source>
         <translation>Ограничение потока (ручная разметка): %1 % ночи, %2 мин</translation>
     </message>
@@ -2275,7 +2275,7 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
         <translation type="vanished">добавлено %1, убрано %2, сменён тип %3, %4 (участков: %5)</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4819"/>
+        <location filename="../oscar/daily.cpp" line="4834"/>
         <source>All events [%1]</source>
         <translation>Все события [%1]</translation>
     </message>
@@ -29455,14 +29455,14 @@ Click and drag to reorder graphs</source>
     <name>gManualScoringLayer</name>
     <message>
         <location filename="../oscar/Graphs/gManualScoringLayer.cpp" line="39"/>
-        <location filename="../oscar/tests/scoringmodetests.cpp" line="115"/>
+        <location filename="../oscar/tests/scoringmodetests.cpp" line="122"/>
         <source>s</source>
         <translation>с</translation>
     </message>
     <message>
         <location filename="../oscar/Graphs/gManualScoringLayer.cpp" line="46"/>
         <location filename="../oscar/Graphs/gManualScoringLayer.cpp" line="46"/>
-        <location filename="../oscar/tests/scoringmodetests.cpp" line="126"/>
+        <location filename="../oscar/tests/scoringmodetests.cpp" line="133"/>
         <source>manual</source>
         <translation>ручн.</translation>
     </message>
@@ -29472,7 +29472,12 @@ Click and drag to reorder graphs</source>
         <translation>было %1</translation>
     </message>
     <message>
-        <location filename="../oscar/Graphs/gManualScoringLayer.cpp" line="64"/>
+        <location filename="../oscar/Graphs/gManualScoringLayer.cpp" line="61"/>
+        <source>not an artifact</source>
+        <translation>не артефакт</translation>
+    </message>
+    <message>
+        <location filename="../oscar/Graphs/gManualScoringLayer.cpp" line="67"/>
         <source>FL %1</source>
         <translation>ОП %1</translation>
     </message>
