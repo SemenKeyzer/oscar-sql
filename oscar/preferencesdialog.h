@@ -118,6 +118,8 @@ class PreferencesDialog : public QDialog
     #endif
 
 private:
+    //! As large as its largest tab, within the screen.
+    void fitToContent();
     void InitChanInfo();
     void InitWaveInfo();
 

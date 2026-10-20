@@ -31,6 +31,7 @@
 #include <cmath>
 
 #include "preferencesdialog.h"
+#include <QScreen>
 #include "helptips.h"
 #include <QScrollArea>
 #include "analysisprefs.h"
@@ -510,6 +511,30 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
     ui->mainlayout->addWidget(buttons);
     // no help strip here: the explanations show on hover and in the help panel (the doctor found the strip redundant)
     HelpTips::attachAll(this, QStringLiteral("prefs"));
+    fitToContent();
+}
+
+// Big enough for its largest tab, so nothing is cut off and nobody has to enlarge it (doctor
+// 2026-10-16), but never larger than the screen: there the scroll area takes over.
+void PreferencesDialog::fitToContent()
+{
+    QSize page;
+    for (int i = 0; i < ui->tabWidget->count(); ++i) {
+        QWidget *w = ui->tabWidget->widget(i);
+        if (auto *scroll = qobject_cast<QScrollArea *>(w)) {
+            if (scroll->widget()) w = scroll->widget();
+        }
+        page = page.expandedTo(w->sizeHint());
+    }
+    const int bar = ui->tabWidget->tabBar()->sizeHint().height();
+    ui->tabWidget->setMinimumSize(page + QSize(24, bar + 24));
+    const QSize content = ui->content->sizeHint() + QSize(2 * ui->scrollArea->frameWidth(), 2 * ui->scrollArea->frameWidth());
+    QSize want = content + QSize(layout()->contentsMargins().left() + layout()->contentsMargins().right(),
+                                 layout()->contentsMargins().top() + layout()->contentsMargins().bottom()
+                                     + layout()->spacing() + 48);   // the button row
+    if (QScreen *sc = screen()) want = want.boundedTo(sc->availableGeometry().size() * 0.95);
+    setMinimumSize(want);
+    resize(want);
 }
 
 #include <QItemDelegate>
