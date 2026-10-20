@@ -26,6 +26,8 @@
 #include <limits>
 #include <QResizeEvent>
 #include <QScrollBar>
+#include <QFrame>
+#include <QSpinBox>
 #include <QSpacerItem>
 #include <QFontMetrics>
 #include <QLabel>
@@ -782,13 +784,17 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
         bar->insertWidget(bar->indexOf(ui->graphHelp), scoringButton);
     }
     // the banner: the hint, and stepping through the events of one type in a fixed window
-    m_scoringBanner = new QWidget(this);
+    // like the Align bar: a light fill with a border, the title in bold, the text black (doctor 2026-10-16)
+    m_scoringBanner = new QFrame(this);
     m_scoringBanner->setObjectName(QStringLiteral("scoringBanner"));
-    m_scoringBanner->setStyleSheet(QStringLiteral("#scoringBanner { background: #fff3cd; } QLabel { color: #664d03; }"));
+    m_scoringBanner->setStyleSheet(QStringLiteral("#scoringBanner { background: #E8F5E9; border: 1px solid #81C784; border-radius: 4px; }"
+                                                  " #scoringBanner QLabel { color: black; }"));
     {
         auto *row = new QHBoxLayout(m_scoringBanner);
-        row->setContentsMargins(6, 2, 6, 2);
-        auto *hint = new QLabel(tr("Scoring mode: drag across the flow graph to mark a stretch, drag an edge to change it, or right-click an event · Esc to leave"), m_scoringBanner);
+        row->setContentsMargins(6, 3, 6, 3);
+        auto *title = new QLabel(QStringLiteral("<b>%1</b>").arg(tr("Scoring mode").toHtmlEscaped()), m_scoringBanner);
+        row->addWidget(title);
+        auto *hint = new QLabel(tr("drag across the flow graph to mark a stretch, drag an edge to change it, or right-click an event · Esc to leave"), m_scoringBanner);
         hint->setWordWrap(true);
         row->addWidget(hint, 1);
         m_scoringType = new QComboBox(m_scoringBanner);
@@ -832,11 +838,37 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
         auto *row = new QHBoxLayout(eventWindowBar);
         row->setContentsMargins(6, 2, 6, 2);
         ui->label_7->setText(tr("Event window, min:"));
-        ui->evViewSlider->setMaximumWidth(220);
-        ui->evViewLCD->setMaximumHeight(22);
+        // a longer slider, a minute a click either side, and a box to type the minutes in
+        ui->evViewSlider->setMinimumWidth(300);
+        ui->evViewSlider->setMaximumWidth(600);
+        ui->evViewLCD->hide();
+        auto *less = new QToolButton(eventWindowBar);
+        less->setObjectName(QStringLiteral("eventWindowLess"));
+        less->setText(QStringLiteral("◀"));
+        less->setToolTip(tr("One minute less"));
+        auto *more = new QToolButton(eventWindowBar);
+        more->setObjectName(QStringLiteral("eventWindowMore"));
+        more->setText(QStringLiteral("▶"));
+        more->setToolTip(tr("One minute more"));
+        m_eventWindowBox = new QSpinBox(eventWindowBar);
+        m_eventWindowBox->setObjectName(QStringLiteral("eventWindowMinutes"));
+        m_eventWindowBox->setRange(ui->evViewSlider->minimum(), ui->evViewSlider->maximum());
+        m_eventWindowBox->setValue(ui->evViewSlider->value());
+        m_eventWindowBox->setButtonSymbols(QAbstractSpinBox::NoButtons);
+        m_eventWindowBox->setAlignment(Qt::AlignCenter);
+        m_eventWindowBox->setToolTip(tr("Type the minutes"));
         row->addWidget(ui->label_7);
-        row->addWidget(ui->evViewSlider);
-        row->addWidget(ui->evViewLCD);
+        row->addWidget(less);
+        row->addWidget(ui->evViewSlider, 2);
+        row->addWidget(more);
+        row->addWidget(m_eventWindowBox);
+        connect(less, &QToolButton::clicked, this, [this]() { ui->evViewSlider->setValue(ui->evViewSlider->value() - 1); });
+        connect(more, &QToolButton::clicked, this, [this]() { ui->evViewSlider->setValue(ui->evViewSlider->value() + 1); });
+        connect(m_eventWindowBox, &QSpinBox::valueChanged, ui->evViewSlider, &QSlider::setValue);
+        connect(ui->evViewSlider, &QSlider::valueChanged, m_eventWindowBox, [this](int v) {
+            const QSignalBlocker block(m_eventWindowBox);
+            m_eventWindowBox->setValue(v);
+        });
         // where the shown window sits in the night; drag it to move through the night
         m_nightScroll = new QScrollBar(Qt::Horizontal, eventWindowBar);
         m_nightScroll->setObjectName(QStringLiteral("nightScroll"));
@@ -851,7 +883,8 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
         });
         connect(GraphView, &gGraphView::XBoundsChanged, this, &Daily::updateNightScroll);
     }
-    ui->verticalLayout_3->insertWidget(ui->verticalLayout_3->indexOf(m_scoringBanner), eventWindowBar);
+    // always the first row above the graphs: the Align and scoring bars open under it
+    ui->verticalLayout_3->insertWidget(ui->verticalLayout_3->indexOf(m_alignBar), eventWindowBar);
     connect(scoringButton, &QPushButton::toggled, this, &Daily::onScoringButtonToggled);
     ui->treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->treeWidget, &QTreeWidget::customContextMenuRequested, this, [this](const QPoint &pos) {

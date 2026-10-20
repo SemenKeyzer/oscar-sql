@@ -522,7 +522,7 @@ private:
     ChannelID m_repeatType = 0;          //!< the scoring type repeated for new selections
     QLabel *m_repeatLabel = nullptr;
     QToolButton *m_repeatReset = nullptr;
-    QWidget *m_scoringBanner = nullptr;   //!< the hint and the navigation through the events
+    class QFrame *m_scoringBanner = nullptr;   //!< the hint and the navigation through the events
     QComboBox *m_scoringType = nullptr;   //!< which events ◀ ▶ step through
     QComboBox *m_scoringWindow = nullptr; //!< how much of the night a step shows
     void stepScoring(bool forward);
@@ -575,6 +575,7 @@ private:
     //! Remembers where the Details page is scrolled, for the reload after a session is switched.
     void keepSidebarScroll();
     int m_keepSidebarScroll = -1;
+    class QSpinBox *m_eventWindowBox = nullptr;   //!< the event window's minutes, to type in
     QDate m_keepSidebarDate;
     Day * lastcpapday;
 
