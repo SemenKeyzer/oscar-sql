@@ -238,8 +238,11 @@ void gAnalysisChart::populate(Day *day, int idx)
         if (std::isnan(gi)) return;
         weight = 1;
         slices.append(SummaryChartSlice(calc, gi, gi, title(Glasgow), QColor(0xb0, 0x30, 0x60)));
-        const double adapted = glasgowValue(r, true);
-        tip = QObject::tr("\nGlasgow Index: %1\nadapted: %2").arg(num(gi, 2), std::isnan(adapted) ? QStringLiteral("-") : num(adapted, 2));
+        tip = QObject::tr("\nGlasgow Index: %1").arg(num(gi, 2));
+        if (p_profile && p_profile->analysis->showGlasgowAdapted()) {
+            const double adapted = glasgowValue(r, true);
+            tip += QObject::tr("\nadapted: %1").arg(std::isnan(adapted) ? QStringLiteral("-") : num(adapted, 2));
+        }
         break;
     }
     case PulseRises: {

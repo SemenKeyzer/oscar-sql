@@ -45,6 +45,9 @@ class AnalysisPreferencesPage : public QWidget
     //! Shows under the switch how many nights the settings on the page would recalculate, as
     //! \a counter says; \a enabledNow: whether the analysis is on in the saved settings.
     void setRecalculationCounter(const std::function<int(const analysis::AnalysisParams &)> &counter, bool enabledNow);
+    //! The display choice "show the adapted Glasgow Index" (not a parameter: nothing recalculates).
+    bool showGlasgowAdapted() const;
+    void setShowGlasgowAdapted(bool show);
 
   private:
     void updateRecalculationNote();
@@ -67,6 +70,7 @@ class AnalysisPreferencesPage : public QWidget
     };
     QList<Field> m_fields;
     QDoubleSpinBox *m_zoneMinDesats;
+    QCheckBox *m_showAdapted;
     QLabel *m_recalcNote;
     QTimer *m_recalcTimer;
     std::function<int(const analysis::AnalysisParams &)> m_counter;

@@ -136,6 +136,9 @@ AnalysisPreferencesPage::AnalysisPreferencesPage(QWidget *parent)
     m_zoneMinDesats = number(1, 20, 1, 0, QString());
     m_zoneMinDesats->setObjectName(QStringLiteral("zoneMinDesats"));
     form->addRow(tr("Problem zones: desaturations in a window"), m_zoneMinDesats);
+    m_showAdapted = new QCheckBox(tr("Show the adapted Glasgow Index next to the original"), advancedContent);
+    m_showAdapted->setObjectName(QStringLiteral("showGlasgowAdapted"));
+    form->addRow(m_showAdapted);
     layout->addWidget(m_advanced);
 
     auto *reset = new QPushButton(tr("Reset to Defaults"), this);
@@ -166,6 +169,9 @@ void AnalysisPreferencesPage::setRecalculationCounter(const std::function<int(co
     m_enabledNow = enabledNow;
     m_recalcTimer->start();
 }
+
+bool AnalysisPreferencesPage::showGlasgowAdapted() const { return m_showAdapted->isChecked(); }
+void AnalysisPreferencesPage::setShowGlasgowAdapted(bool show) { m_showAdapted->setChecked(show); }
 
 void AnalysisPreferencesPage::updateRecalculationNote()
 {

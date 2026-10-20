@@ -83,7 +83,7 @@ QString eventLabel(RespEvent type)
 }
 
 // The Glasgow Index (DaveSkvn's), original and adapted, with its nine signs.
-QString glasgowHtml(const DayResult &r)
+QString glasgowHtml(const DayResult &r, bool adapted)
 {
     const QString dash = QStringLiteral("&mdash;");
     auto value = [&dash](double v) { return std::isnan(v) ? dash : number(v, 2); };
@@ -91,11 +91,19 @@ QString glasgowHtml(const DayResult &r)
         return QStringLiteral("<p><b>%1</b>: &mdash; <font size=-1>%2</font></p>")
             .arg(AnalysisPanel::tr("Glasgow Index"), AnalysisPanel::tr("Not computed: the flow is recorded below 10 Hz."));
     }
+    // the original index; the adapted one beside it only when asked for (Preferences → Analysis)
+    auto line = [adapted](const QString &label, const QString &a, const QString &b) {
+        return adapted ? row3(label, a, b) : row(label, a);
+    };
     QString html = kTable;
-    html += QStringLiteral("<tr><td><b>%1</b></td><td align=right>%2</td><td align=right>%3</td></tr>")
-                .arg(HelpTips::term(AnalysisPanel::tr("Glasgow Index"), QStringLiteral("glasgow")), AnalysisPanel::tr("original"),
-                     HelpTips::term(AnalysisPanel::tr("adapted"), QStringLiteral("glasgow_adapted")));
-    html += row3(AnalysisPanel::tr("Index"), value(r.glasgow.index()), value(r.glasgowAdapted.index()));
+    if (adapted) {
+        html += QStringLiteral("<tr><td><b>%1</b></td><td align=right>%2</td><td align=right>%3</td></tr>")
+                    .arg(HelpTips::term(AnalysisPanel::tr("Glasgow Index"), QStringLiteral("glasgow")), AnalysisPanel::tr("original"),
+                         HelpTips::term(AnalysisPanel::tr("adapted"), QStringLiteral("glasgow_adapted")));
+    } else {
+        html += wide(QStringLiteral("<b>%1</b>").arg(HelpTips::term(AnalysisPanel::tr("Glasgow Index"), QStringLiteral("glasgow"))));
+    }
+    html += line(AnalysisPanel::tr("Index"), value(r.glasgow.index()), value(r.glasgowAdapted.index()));
     if (!r.glasgow.isEmpty() || !r.glasgowAdapted.isEmpty()) {
         static const char *const kGlasgowKeys[GiComponentCount] = { "gi_skew", "gi_spike", "gi_flattop", "gi_topheavy",
             "gi_multipeak", "gi_nopause", "gi_inspirrate", "gi_multibreath", "gi_ampvar" };
@@ -105,7 +113,7 @@ QString glasgowHtml(const DayResult &r)
             AnalysisPanel::tr("Inspiration rate"), AnalysisPanel::tr("Double inspiration"), AnalysisPanel::tr("Variable amplitude"),
         };
         for (int k = 0; k < GiComponentCount; ++k) {
-            html += row3(QStringLiteral("<font size=-1>&nbsp;&nbsp;%1</font>").arg(HelpTips::term(names[k], QLatin1String(kGlasgowKeys[k]))),
+            html += line(QStringLiteral("<font size=-1>&nbsp;&nbsp;%1</font>").arg(HelpTips::term(names[k], QLatin1String(kGlasgowKeys[k]))),
                          QStringLiteral("<font size=-1>%1</font>").arg(value(r.glasgow.fraction(GlasgowComponent(k)))),
                          QStringLiteral("<font size=-1>%1</font>").arg(value(r.glasgowAdapted.fraction(GlasgowComponent(k)))));
         }
@@ -142,7 +150,7 @@ QString AnalysisPanel::offset(qint64 ms)
 }
 
 QString AnalysisPanel::sidebarHtml(Day *day, const DayResult &r, const QString &oxiSource,
-                                   const QList<double> &spo2Thresholds)
+                                   const QList<double> &spo2Thresholds, bool showGlasgowAdapted)
 {
     QString html;
     html += QStringLiteral("<p><i><font size=-1>%1</font></i></p>").arg(disclaimer().toHtmlEscaped());
@@ -190,7 +198,7 @@ QString AnalysisPanel::sidebarHtml(Day *day, const DayResult &r, const QString &
                 : tr("Flow limitation: %1, longest run %2").arg(duration(1000LL * r.flSeconds), duration(1000LL * r.flLongestSeconds)),
                 QStringLiteral("fl_time")));
         }
-        html += glasgowHtml(r);
+        html += glasgowHtml(r, showGlasgowAdapted);
 
         // the rule line in bold, the three values on the next one
         html += QStringLiteral("<p><b>%1</b><br>%2 = %3 | %4 = %5 | %6 = %7</p>")

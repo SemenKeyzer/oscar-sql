@@ -45,7 +45,7 @@ class AnalysisPanel
     //! the device and notes. Links: "analysis=differences" (the Analysis tab) and
     //! "align=oximeter" (align the oximeter by the suggested offset).
     static QString sidebarHtml(Day *day, const analysis::DayResult &result, const QString &oxiSource,
-                               const QList<double> &spo2Thresholds);
+                               const QList<double> &spo2Thresholds, bool showGlasgowAdapted = false);
 
     //! The disclaimer shown wherever the analysis is (spec §1).
     static QString disclaimer();

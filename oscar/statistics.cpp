@@ -1106,6 +1106,8 @@ Statistics::Statistics(QObject *parent) :
     for (const char *key : { "#breathing", "ahi", "oai", "cai", "uai", "hi", "rerai", "fl", "flmin", "fllong", "flbr",
                              "gi", "gia", "pb", "agreement",
                              "#oximetry", "odi3", "odi4" }) {
+        // the adapted Glasgow Index only when asked for (Preferences → Analysis)
+        if (qstrcmp(key, "gia") == 0 && !(p_profile && p_profile->analysis && p_profile->analysis->showGlasgowAdapted())) continue;
         rows.push_back(StatisticsRow(QString::fromLatin1(key), SC_ANALYSIS, MT_UNKNOWN));
     }
     if (p_profile && p_profile->analysis) {

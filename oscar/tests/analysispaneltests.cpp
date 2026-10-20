@@ -344,6 +344,10 @@ void AnalysisPanelTests::testPreferencesPage()
     p.oxi.zoneMinDesats = 5;
     page.load(p, { 92, 88 });
     const AnalysisParams back = page.params();
+    QCheckBox *adapted = page.findChild<QCheckBox *>(QStringLiteral("showGlasgowAdapted"));
+    QVERIFY(adapted && !page.showGlasgowAdapted());
+    page.setShowGlasgowAdapted(true);
+    QVERIFY(adapted->isChecked() && page.showGlasgowAdapted());
     // no switch on the page: the analysis always runs, «Анализ OSCAR» shows or hides it (doctor 2026-10-16)
     QVERIFY(!page.findChild<QCheckBox *>(QStringLiteral("analysisEnabled")));
     QCOMPARE(back.enabled, true);
@@ -488,7 +492,10 @@ void AnalysisPanelTests::testGlasgowRows()
     const QString html = AnalysisPanel::sidebarHtml(nullptr, r, QString(), {});
     QVERIFY(html.contains(AnalysisPanel::tr("Glasgow Index")));
     QVERIFY(html.contains(QStringLiteral("0.40")));   // original: flat top only
-    QVERIFY(html.contains(QStringLiteral("0.15")));   // adapted
+    // the adapted variant only when asked for (Preferences → Analysis): one index is clearer (doctor 2026-10-09)
+    QVERIFY(!html.contains(QStringLiteral("0.15")));
+    QVERIFY(!html.contains(AnalysisPanel::tr("adapted")));
+    QVERIFY(AnalysisPanel::sidebarHtml(nullptr, r, QString(), {}, true).contains(QStringLiteral("0.15")));
     for (const QString &name : { AnalysisPanel::tr("Skew"), AnalysisPanel::tr("Spike"), AnalysisPanel::tr("Flat top"),
                                  AnalysisPanel::tr("Top heavy (not in the sum)"), AnalysisPanel::tr("Double peak"),
                                  AnalysisPanel::tr("No pause"), AnalysisPanel::tr("Inspiration rate"),
@@ -544,7 +551,7 @@ void AnalysisPanelTests::testSidebarTerms()
     r.flBreaths = 1000;
     r.flLimitedBreaths = 300;
     r.glasgow.breaths = r.glasgowAdapted.breaths = 1000;
-    const QString html = AnalysisPanel::sidebarHtml(nullptr, r, QStringLiteral("CMS50F"), { 90 });
+    const QString html = AnalysisPanel::sidebarHtml(nullptr, r, QStringLiteral("CMS50F"), { 90 }, true);   // the adapted index too
     for (const char *key : { "an_ahi", "hypopnea_rule", "agreement", "fl_time", "glasgow", "glasgow_adapted", "gi_skew",
                              "gi_spike", "gi_flattop", "gi_topheavy", "gi_multipeak", "gi_nopause", "gi_inspirrate",
                              "gi_multibreath", "gi_ampvar", "odi3", "hypoxic_burden" }) {

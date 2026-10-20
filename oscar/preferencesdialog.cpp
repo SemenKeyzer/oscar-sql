@@ -186,6 +186,7 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
     m_searchResults->installEventFilter(this);
     QTimer::singleShot(0, m_search, [this]() { m_search->setFocus(); });
     m_analysisPage->load(profile->analysis->params(), profile->analysis->spo2Thresholds());
+    m_analysisPage->setShowGlasgowAdapted(profile->analysis->showGlasgowAdapted());
     if (mainwin && mainwin->analysisService()) {
         analysis::AnalysisService *service = mainwin->analysisService();
         m_analysisPage->setRecalculationCounter([service](const analysis::AnalysisParams &p) { return service->outdatedCountFor(p); },
@@ -1232,6 +1233,7 @@ bool PreferencesDialog::Save()
         && !m_analysisPage->spo2Thresholds().isEmpty();
     profile->analysis->setParams(newAnalysis);
     profile->analysis->setSpo2Thresholds(m_analysisPage->spo2Thresholds());
+    profile->analysis->setShowGlasgowAdapted(m_analysisPage->showGlasgowAdapted());
     // now, so that a reprocess below already runs the analysis with the new parameters
     if (analysisParamsChanged && mainwin && mainwin->analysisService()) mainwin->analysisService()->reloadSettings();
 

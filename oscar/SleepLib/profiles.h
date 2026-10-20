@@ -461,6 +461,7 @@ const QString STR_OS_baseSpO2Option = "baseSpO2Option";
 // AnalysisSettings Strings: the switches, then every parameter of analysis::AnalysisParams
 const QString STR_AN_Enabled = "AnEnabled";
 const QString STR_AN_ShowFlowDifferences = "AnShowFlowDifferences";
+const QString STR_AN_ShowGlasgowAdapted = "AnShowGlasgowAdapted";
 const QString STR_AN_Shown = "AnShown";
 const QString STR_AN_HypopneaRule = "AnHypopneaRule";
 const QString STR_AN_LimitOxiToCpap = "AnLimitOxiToCpap";
@@ -695,6 +696,9 @@ class AnalysisSettings : public PrefSettings
     //! not a parameter: resetToDefaults() leaves it).
     bool showFlowDifferences() const { return getPref(STR_AN_ShowFlowDifferences).toBool(); }
     void setShowFlowDifferences(bool show) { setPref(STR_AN_ShowFlowDifferences, show); }
+    //! Show the adapted Glasgow Index next to the original (a display choice, off: one index is clearer).
+    bool showGlasgowAdapted() const { return getPref(STR_AN_ShowGlasgowAdapted).toBool(); }
+    void setShowGlasgowAdapted(bool show) { setPref(STR_AN_ShowGlasgowAdapted, show); }
 
     //! The "OSCAR analysis" switch: whether the pages show the analysis at all (a display choice,
     //! off until switched on; the analysis itself is always computed).

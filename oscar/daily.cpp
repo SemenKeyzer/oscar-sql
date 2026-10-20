@@ -619,7 +619,7 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     }
     if (auto *g = graphlist.value(schema::channel[AN_GlasgowIndex].code())) {
         gLineChart *glasgow = new gLineChart(AN_GlasgowIndex, false);
-        glasgow->addPlot(AN_GlasgowAdapted, false);   // the adapted index on the same graph
+        if (p_profile && p_profile->analysis->showGlasgowAdapted()) glasgow->addPlot(AN_GlasgowAdapted, false);   // on request
         g->AddLayer(glasgow);
         g->setForceMinY(0);
     }
@@ -4601,7 +4601,8 @@ QString Daily::getAnalysisInformation(Day *day)
     if (!day || !m_analysisShown) return html;
     htmlLsbSectionHeader(html, tr("Analysis (second opinion)"), LSB_ANALYSIS, AnalysisMark::pill());
     if (!leftSideBarEnable[LSB_ANALYSIS]) return html;
-    html += AnalysisPanel::sidebarHtml(day, m_analysisResult, m_analysisSource, p_profile->analysis->spo2Thresholds());
+    html += AnalysisPanel::sidebarHtml(day, m_analysisResult, m_analysisSource, p_profile->analysis->spo2Thresholds(),
+                                       p_profile->analysis->showGlasgowAdapted());
     html += "<hr/>\n";
     return html;
 }
