@@ -1920,6 +1920,12 @@ void AnalysisIntegrationTests::testStatisticsFootnote()
     QVERIFY(banner.contains(QStringLiteral("#FFF3CD"), Qt::CaseInsensitive));
     QVERIFY(banner.contains(note.toHtmlEscaped()));
     QVERIFY(Statistics::manualScoringBanner(QString()).isEmpty());
+    // and the period's totals for the nights scored by hand (doctor 2026-10-09)
+    const QString table = Statistics::manualScoringTable(date.addDays(-3), date);
+    QVERIFY2(table.contains(Statistics::tr("Nights scored by hand")), qPrintable(table));
+    QVERIFY(table.contains(QString::number(day->deviceAHI(), 'f', 2)));
+    QVERIFY(table.contains(ManualMark::pill()));
+    QVERIFY(Statistics::manualScoringTable(date.addDays(-30), date.addDays(-20)).isEmpty());
     p_profile->daylist.remove(date);
     ManualScoring::clearDay(day);
     delete day;

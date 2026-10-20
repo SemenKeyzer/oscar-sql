@@ -2367,7 +2367,8 @@ QString Statistics::GenerateHTML()
     htmlUsage = GenerateCPAPUsage();
     if (!htmlUsage.isEmpty()) {
         const QString note = manualScoringNote(p_profile->FirstDay(MT_CPAP), p_profile->LastDay(MT_CPAP));
-        htmlUsage = manualScoringBanner(note) + htmlUsage;   // above the tables, where it is seen
+        htmlUsage = manualScoringBanner(note) + manualScoringTable(p_profile->FirstDay(MT_CPAP), p_profile->LastDay(MT_CPAP))
+                    + htmlUsage;   // above the tables, where it is seen
     }
 
     if (htmlUsage == "") {
@@ -2936,6 +2937,37 @@ QString Statistics::manualScoringBanner(const QString &note)
     return QStringLiteral("<div align=center><table cellpadding=6 cellspacing=0 style='background-color:#FFF3CD;"
                           " border:1px solid #E0B252;'><tr><td><font size='+1' color='#B26A00'>&#9888;</font></td>"
                           "<td><b>%1</b></td></tr></table></div><br/>").arg(note.toHtmlEscaped());
+}
+
+QString Statistics::manualScoringTable(const QDate &from, const QDate &to)
+{
+    if (!p_profile || !from.isValid() || !to.isValid()) return QString();
+    int nights = 0;
+    double hours = 0, ahiHours = 0, deviceEvents = 0, events = 0;
+    qint64 flMs = 0;
+    for (QDate date = from; date <= to; date = date.addDays(1)) {
+        Day *day = p_profile->GetDay(date, MT_CPAP);
+        if (!day || !day->hasManualScoring()) continue;
+        ++nights;
+        const double h = day->hours(MT_CPAP), ah = day->ahiHours();
+        hours += h;
+        ahiHours += ah;
+        deviceEvents += day->deviceAHI() * h;           // the device's own AHI, weighted by its hours
+        events += day->count(AllAhiChannels);           // after manual scoring, over the hours left
+        flMs += ManualScoring::flowLimitedMs(day);
+    }
+    if (nights == 0) return QString();
+    auto row = [](const QString &label, const QString &value) {
+        return QStringLiteral("<tr><td>%1</td><td align=right><b>%2</b></td></tr>").arg(label.toHtmlEscaped(), value);
+    };
+    QString html = QStringLiteral("<div align=center><table cellpadding=3 cellspacing=0 style='border:1px solid #81C784;'>");
+    html += QStringLiteral("<tr><td colspan=2>%1<b>%2</b> %3</td></tr>").arg(ManualMark::barMark(), tr("Manual analysis").toHtmlEscaped(), ManualMark::pill());
+    html += row(tr("Nights scored by hand"), QString::number(nights));
+    html += row(tr("AHI by the device on those nights"), QString::number(hours > 0 ? deviceEvents / hours : 0, 'f', 2));
+    html += row(tr("AHI after manual scoring"), QString::number(ahiHours > 0 ? events / ahiHours : 0, 'f', 2));
+    if (flMs > 0) html += row(tr("Flow limitation marked by hand, % time"), QString::number(hours > 0 ? 100.0 * flMs / 3600000.0 / hours : 0, 'f', 1));
+    html += QStringLiteral("</table></div><br/>");
+    return html;
 }
 
 void Statistics::forgetRXChanges()

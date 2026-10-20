@@ -243,6 +243,9 @@ class Statistics : public QObject
     static QString manualScoringNote(const QDate &from, const QDate &to);
     //! \a note as a bar that catches the eye: yellow, bordered, a warning sign; empty for no note.
     static QString manualScoringBanner(const QString &note);
+    //! The nights scored by hand from \a from to \a to: how many, the AHI by the device and after
+    //! manual scoring over those nights, the flow limitation marked by hand; empty without any.
+    static QString manualScoringTable(const QDate &from, const QDate &to);
 
     QString UpdateRecordsBox();
 
