@@ -10,6 +10,7 @@
 #include "helptips.h"
 #include "SleepLib/profiles.h"
 
+#include <QApplication>
 #include <QCheckBox>
 #include <QDateTime>
 #include <QHBoxLayout>
@@ -382,6 +383,17 @@ AnalysisTab::AnalysisTab(QWidget *parent)
     layout->addWidget(m_tree);
     connect(m_tree, &QTreeWidget::itemClicked, this, [this](QTreeWidgetItem *item) { onItemClicked(item); });
     connect(m_tree, &QTreeWidget::itemActivated, this, [this](QTreeWidgetItem *item) { onItemClicked(item); });
+    // the arrow keys move through the list and the graphs follow, as with a click (a mouse
+    // press changes the current item too: the click itself shows it)
+    connect(m_tree, &QTreeWidget::currentItemChanged, this, [this](QTreeWidgetItem *item) {
+        if (m_stepping || !item || QApplication::mouseButtons() != Qt::NoButton) return;
+        const int i = int(m_differences.indexOf(item));
+        if (i >= 0) {
+            m_current = i;
+            updateStepper();
+        }
+        onItemClicked(item);
+    });
     // an artefact the analysis got wrong can be given back
     m_tree->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_tree, &QTreeWidget::customContextMenuRequested, this, [this](const QPoint &pos) {
@@ -410,7 +422,9 @@ void AnalysisTab::stepDifference(int step)
     m_current = m_current < 0 ? (step > 0 ? 0 : int(m_differences.size()) - 1)
                               : qBound(0, m_current + step, int(m_differences.size()) - 1);
     QTreeWidgetItem *item = m_differences.at(m_current);
+    m_stepping = true;
     m_tree->setCurrentItem(item);
+    m_stepping = false;
     m_tree->scrollToItem(item);
     onItemClicked(item);
     updateStepper();

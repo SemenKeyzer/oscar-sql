@@ -98,6 +98,7 @@ class AnalysisTab : public QWidget
     class QLabel *m_position;
     QList<QTreeWidgetItem *> m_differences;   //!< in time order
     int m_current = -1;
+    bool m_stepping = false;   //!< Previous / Next is moving the current item
 };
 
 #endif // ANALYSISPANEL_H

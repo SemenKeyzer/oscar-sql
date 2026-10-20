@@ -177,6 +177,14 @@ void AnalysisPanelTests::testTabListsDifferences()
     emit tree->itemClicked(deviceOnly, 0);
     QCOMPARE(spy.count(), 1);
 
+    // the arrow keys move through the list and the graphs follow, as with a click (doctor 2026-10-16)
+    tree->setCurrentItem(deviceOnly);
+    QCOMPARE(spy.count(), 1);   // a group: nothing to show
+    tree->setFocus();
+    QTest::keyClick(tree, Qt::Key_Down);
+    QCOMPARE(tree->currentItem(), deviceOnly->child(0));
+    QCOMPARE(spy.count(), 2);
+
     tab.setResult(oximetryNight());
     QCOMPARE(tree->topLevelItemCount(), 1);   // the problem zone
     tab.clear();
