@@ -9,6 +9,8 @@
 #include "analysisintegrationtests.h"
 
 #include <QScopeGuard>
+#include "SleepLib/manual_scoring.h"
+#include "database/manual_scoring_repository.h"
 #include "daily.h"
 #include "analysismark.h"
 #include "overviewpresets.h"
@@ -302,6 +304,42 @@ void AnalysisIntegrationTests::testStageOneWritesOxiArtifacts()
     QVERIFY(analysis::isAnalysisChannel(AN_OxiArtifact));
     QVERIFY(analysis::oximetryChannels().contains(AN_OxiArtifact));
     QCOMPARE(schema::channel[AN_OxiArtifact].label(), QStringLiteral("aAR"));
+}
+
+// A night with only an oximeter: «Артефакт» and «Не артефакт» are kept on the oximeter's session,
+// reach the day's analysis, and change its inputs so that it is redone.
+void AnalysisIntegrationTests::testOverridesOnOximeterOnlyNight()
+{
+    Machine mach(p_profile, 26);
+    mach.info.type = MT_OXIMETER;
+    Session *sess = new Session(&mach, 7);
+    EventList *el = sess->AddEventList(OXI_SPO2, EVL_Event);
+    el->AddEvent(synth::kStart, 96);
+    el->AddEvent(synth::kStart + 900000, 96);
+    sess->really_set_first(synth::kStart);
+    sess->really_set_last(synth::kStart + 900000);
+    Day day;
+    day.setDate(QDate(2026, 3, 3));
+    day.addSession(sess);
+    QVERIFY(ManualScoring::isStretchSession(sess));
+
+    const AnalysisParams params;
+    const QString before = dayInputsHash(&day, params);
+    ManualScoring::Edit e;
+    e.kind = ManualScoring::Kind::Exclude;
+    e.startMs = synth::kStart + 100000;
+    e.endMs = synth::kStart + 200000;
+    QVERIFY(ManualScoring::addEdit(sess, e));
+    e.kind = ManualScoring::Kind::Keep;
+    e.startMs = synth::kStart + 400000;
+    e.endMs = synth::kStart + 500000;
+    QVERIFY(ManualScoring::addEdit(sess, e));
+
+    const OxiOverrides o = ManualScoring::oximetryOverrides(&day);
+    QCOMPARE(o.exclude.size(), 1);
+    QCOMPARE(o.keep.size(), 1);
+    QVERIFY(dayInputsHash(&day, params) != before);
+    ManualScoringRepository::removeAllForSession(ManualScoring::keyOf(sess));
 }
 
 void AnalysisIntegrationTests::testStageOneSkipsSessionWithoutEvents()

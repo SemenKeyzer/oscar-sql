@@ -35,6 +35,7 @@ QString kindName(Kind k)
     case Kind::Exclude: return QStringLiteral("exclude");
     case Kind::Resize: return QStringLiteral("resize");
     case Kind::Mark: return QStringLiteral("mark");
+    case Kind::Keep: return QStringLiteral("keep");
     }
     return QString();
 }
@@ -46,6 +47,7 @@ Kind kindOf(const QString &name)
     if (name == QLatin1String("exclude")) return Kind::Exclude;
     if (name == QLatin1String("resize")) return Kind::Resize;
     if (name == QLatin1String("mark")) return Kind::Mark;
+    if (name == QLatin1String("keep")) return Kind::Keep;
     return Kind::Add;
 }
 

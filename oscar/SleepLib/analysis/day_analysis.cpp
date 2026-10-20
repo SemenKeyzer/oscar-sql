@@ -6,6 +6,7 @@
  * License. See the file COPYING in the main directory of the source code
  * for more details. */
 
+#include "SleepLib/manual_scoring.h"
 #include "day_analysis.h"
 
 #include <QCryptographicHash>
@@ -227,6 +228,10 @@ QString dayInputsHash(Day *day, const AnalysisParams &params)
                      .arg(s->realFirst()).arg(s->realLast()).arg(s->correctionMs())
                      .arg(counts.join(QLatin1Char('/')), SessionStamp::read(s).toJson());
     }
+    // the user's «Артефакт» / «Не артефакт» stretches change what the oximetry counts
+    const OxiOverrides o = ManualScoring::oximetryOverrides(day);
+    for (const Span &sp : o.exclude) parts << QStringLiteral("x=%1-%2").arg(sp.start).arg(sp.end);
+    for (const Span &sp : o.keep) parts << QStringLiteral("k=%1-%2").arg(sp.start).arg(sp.end);
     const QByteArray text = parts.join(QLatin1Char(';')).toUtf8();
     return QString::fromLatin1(QCryptographicHash::hash(text, QCryptographicHash::Sha1).toHex().left(16));
 }
@@ -429,7 +434,9 @@ DayAnalysis analyzeDay(Day *day, const AnalysisParams &params, bool onlyIfOutdat
 
     const QSet<ChannelID> needed = dayScoringChannels();
     for (Session *s : sessions) s->LoadEventsFromDatabase(needed);
-    out.result = scoreDay(buildDayInput(sessions, &out.oxiSource), params);
+    DayInput in = buildDayInput(sessions, &out.oxiSource);
+    in.oxiOverrides = ManualScoring::oximetryOverrides(day);
+    out.result = scoreDay(in, params);
     out.scored = true;
 
     if (out.result.hasApneaOffset) {
@@ -466,7 +473,9 @@ DayResult scoreStoredDay(Day *day, const AnalysisParams &params, QString *oxiSou
     });
     const QSet<ChannelID> needed = dayScoringChannels();
     for (Session *s : sessions) s->LoadEventsFromDatabase(needed);
-    return scoreDay(buildDayInput(sessions, oxiSource), params);
+    DayInput in = buildDayInput(sessions, oxiSource);
+    in.oxiOverrides = ManualScoring::oximetryOverrides(day);
+    return scoreDay(in, params);
 }
 
 } // namespace analysis

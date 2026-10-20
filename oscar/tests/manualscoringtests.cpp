@@ -630,3 +630,37 @@ void ManualScoringTests::testMarkStored()
     QCOMPARE(loaded.first().channel, CPAP_ManualFlowLimit);
     ManualScoringRepository::removeAllForSession(key(102));
 }
+
+// «Не артефакт» is stored as its own kind and does not change any event count.
+void ManualScoringTests::testKeepRoundTrip()
+{
+    Edit e = edit(0, Kind::Keep, 0, 120 * kSec, 250 * kSec);
+    e.key = key(104);
+    e.id = ManualScoringRepository::add(e);
+    QVERIFY(e.id > 0);
+    const QList<Edit> loaded = ManualScoringRepository::editsForSession(key(104));
+    QCOMPARE(loaded.size(), 1);
+    QCOMPARE(int(loaded.first().kind), int(Kind::Keep));
+    ManualScoringRepository::removeAllForSession(key(104));
+    const Result r = apply(deviceEvents(), { e }, oneSession());
+    QVERIFY(r.delta.isEmpty());
+    QCOMPARE(r.excludedMs, qint64(0));
+}
+
+// The oximetry analysis gets the «Артефакт» and «Не артефакт» stretches of every session, in the
+// time of the graphs (each session's clock correction added), a stretch on several sessions once.
+void ManualScoringTests::testOverridesFromEdits()
+{
+    const QList<Edit> cpap { edit(1, Kind::Exclude, 0, 100 * kSec, 200 * kSec), edit(2, Kind::Add, CPAP_Hypopnea, 1, 2) };
+    const QList<Edit> oximeter { edit(3, Kind::Exclude, 0, 100 * kSec, 200 * kSec), edit(4, Kind::Keep, 0, 500 * kSec, 600 * kSec) };
+    const analysis::OxiOverrides o = ManualScoring::oximetryOverrides({ { cpap, 0 }, { oximeter, 95000 } });
+    QCOMPARE(o.exclude.size(), 2);   // the same stored stretch under two corrections is two stretches
+    QCOMPARE(o.exclude[0].start, 100 * kSec);
+    QCOMPARE(o.exclude[1].start, 100 * kSec + 95000);
+    QCOMPARE(o.keep.size(), 1);
+    QCOMPARE(o.keep[0].start, 500 * kSec + 95000);
+    QCOMPARE(o.keep[0].end, 600 * kSec + 95000);
+
+    const analysis::OxiOverrides twice = ManualScoring::oximetryOverrides({ { cpap, 0 }, { cpap, 0 } });
+    QCOMPARE(twice.exclude.size(), 1);
+}

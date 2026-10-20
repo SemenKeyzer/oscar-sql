@@ -16,12 +16,13 @@
 #include <QString>
 
 #include "SleepLib/machine_common.h"
+#include "SleepLib/analysis/oxi_analyzer.h"
 
 //! A doctor's corrections of the device's apneas and hypopneas, kept apart from the device data:
 //! events added, removed or retyped, and stretches excluded from scoring (noise, awake).
 namespace ManualScoring {
 
-enum class Kind { Add, Remove, Retype, Exclude, Resize, Mark };   //!< Mark: a stretch of a span type (flow limitation)
+enum class Kind { Add, Remove, Retype, Exclude, Resize, Mark, Keep };   //!< Mark: a stretch of a span type (flow limitation); Keep: «Не артефакт» over the oximetry
 
 //! Which session an edit belongs to. Kept by what survives a rebuild of the device's data
 //! (which deletes and re-creates the database rows): the profile, the device's serial number and
@@ -157,12 +158,21 @@ bool updateEdit(Day *day, qint64 id, qint64 startMs, qint64 endMs);
 bool undoEdit(Day *day, qint64 id);
 //! The flow limitation marked by hand in the day's enabled CPAP sessions, less excluded time.
 qint64 flowLimitedMs(Day *day);
-//! Whether any enabled CPAP session of \a day has edits of any kind (marks too).
+//! Whether any enabled CPAP or oximeter session of \a day has edits of any kind (marks and stretches too).
 bool hasEdits(Day *day);
 //! Stores the day's daily summary again (its AHI changed); the SQL reports read it.
 void storeDaySummary(Day *day);
 //! Removes every edit of the day's sessions.
 void clearDay(Day *day);
+
+//! Whether «Артефакт» / «Не артефакт» stretches are kept on \a s: an enabled CPAP or oximeter session.
+bool isStretchSession(Session *s);
+//! The «Артефакт» (Exclude) and «Не артефакт» (Keep) stretches of sessions given as their edits
+//! and clock corrections, in the time of the graphs; a stretch that comes out the same more
+//! than once is listed once.
+analysis::OxiOverrides oximetryOverrides(const QList<QPair<QList<Edit>, qint64>> &sessions);
+//! The same for the stretch sessions of \a day.
+analysis::OxiOverrides oximetryOverrides(Day *day);
 
 } // namespace ManualScoring
 

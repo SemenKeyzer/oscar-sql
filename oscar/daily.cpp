@@ -4570,7 +4570,7 @@ QString scoringTime(qint64 ms) { return QDateTime::fromMSecsSinceEpoch(ms).time(
 
 void Daily::applyScoring(const QVariantMap &choice, qint64 startMs, qint64 endMs)
 {
-    Day *day = p_profile->GetDay(previous_date, MT_CPAP);
+    Day *day = p_profile->GetDay(previous_date);   // a night with only an oximeter takes stretches too
     if (!day) return;
     using ManualScoring::Kind;
     const QString action = choice.value(QStringLiteral("action")).toString();
@@ -4583,12 +4583,15 @@ void Daily::applyScoring(const QVariantMap &choice, qint64 startMs, qint64 endMs
         e.startMs = startMs;
         e.endMs = endMs;
         if (Session *s = scoringSessionAt(day, endMs)) ManualScoring::addEdit(s, e);
-    } else if (action == QLatin1String("exclude") || action == QLatin1String("mark")) {
-        e.kind = action == QLatin1String("mark") ? Kind::Mark : Kind::Exclude;
+    } else if (action == QLatin1String("exclude") || action == QLatin1String("mark") || action == QLatin1String("keep")) {
+        e.kind = action == QLatin1String("mark") ? Kind::Mark : action == QLatin1String("keep") ? Kind::Keep : Kind::Exclude;
         e.startMs = startMs;
         e.endMs = endMs;
-        for (Session *s : day->sessions) {   // every session the stretch touches
-            if (s->type() == MT_CPAP && s->first() < endMs && s->last() > startMs) ManualScoring::addEdit(s, e);
+        // every session the stretch touches: a flow limitation mark on the CPAP's, «Артефакт» and
+        // «Не артефакт» on the oximeter's too (they change the oximetry)
+        for (Session *s : day->sessions) {
+            const bool takes = e.kind == Kind::Mark ? s->type() == MT_CPAP : ManualScoring::isStretchSession(s);
+            if (takes && s->first() < endMs && s->last() > startMs) ManualScoring::addEdit(s, e);
         }
     } else if (action == QLatin1String("remove") || action == QLatin1String("retype")) {
         e.kind = action == QLatin1String("remove") ? Kind::Remove : Kind::Retype;
@@ -4716,6 +4719,7 @@ QString Daily::getManualScoring(Day *day)
             case Kind::Exclude: stretches.insert({ e.startMs, e.endMs }); break;
             case Kind::Resize: ++resized; break;
             case Kind::Mark: break;   // listed with the edits; its total is on the page above
+            case Kind::Keep: break;   // listed with the edits; it changes only the oximetry
             }
         }
     }

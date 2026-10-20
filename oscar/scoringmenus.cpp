@@ -179,7 +179,7 @@ QList<ScoringMenus::EditRow> ScoringMenus::editRows(Day *day)
     if (!day) return rows;
     QSet<QPair<qint64, qint64>> stretches;
     for (Session *s : day->sessions) {
-        if (s->type() != MT_CPAP || !s->enabled()) continue;   // a switched-off session's edits do not count
+        if (!ManualScoring::isStretchSession(s)) continue;   // a switched-off session's edits do not count
         const qint64 c = s->correctionMs();   // stored in device time, listed in graph time
         QScopedPointer<ManualScoring::Result> result;   // for new bounds: the lengths before and after
         for (const ManualScoring::Edit &e : ManualScoringRepository::editsForSession(ManualScoring::keyOf(s))) {
@@ -204,6 +204,14 @@ QList<ScoringMenus::EditRow> ScoringMenus::editRows(Day *day)
                 stretches.insert(span);
                 at = e.startMs + c;
                 text = excludedText(e.endMs - e.startMs);
+                break;
+            }
+            case Kind::Keep: {   // «Не артефакт», one row however many sessions it is on
+                const QPair<qint64, qint64> span(e.startMs + c, -(e.endMs + c));   // apart from the other stretches
+                if (stretches.contains(span)) continue;
+                stretches.insert(span);
+                at = e.startMs + c;
+                text = keptText(e.endMs - e.startMs);
                 break;
             }
             case Kind::Mark: {   // a stretch across sessions is one row
@@ -252,6 +260,12 @@ QAction *ScoringMenus::actionForKey(QMenu *menu, const QString &text)
         if (a->property(kKeyProperty).toString() == QString(key)) return a;
     }
     return nullptr;
+}
+
+QString ScoringMenus::keptText(qint64 ms)
+{
+    const qint64 seconds = ms / 1000;
+    return seconds < 120 ? tr("not an artifact %1 s").arg(seconds) : tr("not an artifact %1 min").arg(qRound(seconds / 60.0));
 }
 
 QString ScoringMenus::excludedText(qint64 ms)

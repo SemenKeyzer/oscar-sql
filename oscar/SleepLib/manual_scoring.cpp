@@ -8,6 +8,7 @@
 
 #include "SleepLib/manual_scoring.h"
 
+#include <QSet>
 #include <algorithm>
 
 #include "SleepLib/day.h"
@@ -117,6 +118,8 @@ Result apply(const QList<DeviceEvent> &device, const QList<Edit> &edits, const Q
             break;
         case Kind::Mark:
             r.markEdits.append({ e.id, e.channel, e.startMs, e.endMs });
+            break;
+        case Kind::Keep:   // for the oximetry analysis only
             break;
         case Kind::Remove:
         case Kind::Retype:
@@ -522,7 +525,7 @@ bool hasEdits(Day *day)
 {
     if (!day) return false;
     for (Session *s : day->sessions) {
-        if (s->type() == MT_CPAP && s->enabled() && ManualScoringRepository::hasScoring(keyOf(s))) return true;
+        if (isStretchSession(s) && ManualScoringRepository::hasScoring(keyOf(s))) return true;   // oximeter stretches too
     }
     return false;
 }
@@ -539,6 +542,43 @@ void clearDay(Day *day)
         ManualScoringRepository::removeAllForSession(keyOf(s));
         refresh(s);
     }
+}
+
+} // namespace ManualScoring
+
+namespace ManualScoring {
+
+bool isStretchSession(Session *s)
+{
+    return s && s->enabled() && (s->type() == MT_CPAP || s->type() == MT_OXIMETER);
+}
+
+analysis::OxiOverrides oximetryOverrides(const QList<QPair<QList<Edit>, qint64>> &sessions)
+{
+    analysis::OxiOverrides o;
+    QSet<QPair<qint64, qint64>> excluded, kept;
+    for (const auto &s : sessions) {
+        for (const Edit &e : s.first) {
+            if (e.kind != Kind::Exclude && e.kind != Kind::Keep) continue;
+            const QPair<qint64, qint64> span(e.startMs + s.second, e.endMs + s.second);
+            QSet<QPair<qint64, qint64>> &seen = e.kind == Kind::Exclude ? excluded : kept;
+            if (seen.contains(span)) continue;
+            seen.insert(span);
+            (e.kind == Kind::Exclude ? o.exclude : o.keep).append(analysis::Span { span.first, span.second, 0 });
+        }
+    }
+    return o;
+}
+
+analysis::OxiOverrides oximetryOverrides(Day *day)
+{
+    QList<QPair<QList<Edit>, qint64>> sessions;
+    if (day) {
+        for (Session *s : day->sessions) {
+            if (isStretchSession(s)) sessions.append({ ManualScoringRepository::editsForSession(keyOf(s)), s->correctionMs() });
+        }
+    }
+    return oximetryOverrides(sessions);
 }
 
 } // namespace ManualScoring

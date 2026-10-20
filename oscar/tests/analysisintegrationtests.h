@@ -61,6 +61,7 @@ private slots:
     void testStageOneWritesFlowChannelsAndStamp();
     void testStageOneOximetry();
     void testStageOneWritesOxiArtifacts();
+    void testOverridesOnOximeterOnlyNight();
     void testStageOneSkipsSessionWithoutEvents();
     void testStageOneOffDoesNothing();
     void testStoreChannelEventsLeavesWaveform();

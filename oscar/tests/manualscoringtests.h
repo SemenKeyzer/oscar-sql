@@ -20,6 +20,8 @@ class ManualScoringTests : public QObject
 private slots:
     void testMarksMergedAndClipped();
     void testMarksLessArtifact();
+    void testKeepRoundTrip();
+    void testOverridesFromEdits();
     void testMarkStored();
     void initTestCase();
     // the calculation
