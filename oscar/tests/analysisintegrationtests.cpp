@@ -180,6 +180,9 @@ void AnalysisIntegrationTests::testAnalysisChannelsAreComputed()
     QList<ChannelID> all = flowChannels() + hypopneaChannels() + oximetryChannels();
     all << AN_Stamp;
     QCOMPARE(all.size(), 22);   // + aAR, the oximeter artefacts
+    // labelled like every analysis figure (aOA, aCA, ...): the doctor read "GI" as the device's
+    QCOMPARE(schema::channel[AN_GlasgowIndex].label(), QStringLiteral("aGI"));
+    QCOMPARE(schema::channel[AN_GlasgowAdapted].label(), QStringLiteral("aGIa"));
     for (ChannelID code : all) {
         const schema::Channel &ch = schema::channel[code];
         QVERIFY2(!schema::channel[code].isNull() && ch.id() == code, qPrintable(QString::number(code, 16)));

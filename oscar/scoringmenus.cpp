@@ -36,6 +36,7 @@ QChar keyOf(ChannelID c)
     if (c == CPAP_ClearAirway) return QLatin1Char('C');
     if (c == CPAP_MixedApnea) return QLatin1Char('M');
     if (c == CPAP_Apnea) return QLatin1Char('A');
+    if (c == CPAP_Hypopnea) return QLatin1Char('G');
     if (c == CPAP_ObstructiveHypopnea) return QLatin1Char('H');
     if (c == CPAP_CentralHypopnea) return QLatin1Char('Y');
     return QChar();
@@ -264,7 +265,7 @@ QAction *ScoringMenus::actionForKey(QMenu *menu, const QString &text)
         { QChar(0x0429), QLatin1Char('O') }, { QChar(0x0421), QLatin1Char('C') }, { QChar(0x0424), QLatin1Char('A') },
         { QChar(0x042C), QLatin1Char('M') }, { QChar(0x041D), QLatin1Char('Y') }, { QChar(0x0410), QLatin1Char('F') },
         { QChar(0x0420), QLatin1Char('H') }, { QChar(0x0427), QLatin1Char('X') }, { QChar(0x041A), QLatin1Char('R') },
-        { QChar(0x0415), QLatin1Char('T') }, { QChar(0x0413), QLatin1Char('U') }, { QChar(0x041B), QLatin1Char('K') },
+        { QChar(0x0415), QLatin1Char('T') }, { QChar(0x0413), QLatin1Char('U') }, { QChar(0x041B), QLatin1Char('K') }, { QChar(0x041F), QLatin1Char('G') },
     };
     key = russian.value(key, key);
     for (QAction *a : menu->actions()) {

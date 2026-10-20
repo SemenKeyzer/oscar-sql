@@ -32,10 +32,9 @@ QList<ChannelID> scoredChannels()
 
 QList<ChannelID> menuChannels()
 {
-    // what the doctor scores by hand: hypopneas by mechanism, not the plain H some devices report
-    QList<ChannelID> out = scoredChannels();
-    out.removeAll(CPAP_Hypopnea);
-    return out;
+    // what the doctor scores by hand: every apnea, then every hypopnea — plain H too, as the graph
+    // often cannot tell obstructive from central
+    return scoredChannels();
 }
 
 QList<ChannelID> countedChannels()

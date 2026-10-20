@@ -72,7 +72,7 @@ void ScoringMenusTests::testRangeMenu()
     QScopedPointer<QMenu> m(ScoringMenus::forRange(15000, nullptr));
     QCOMPARE(m->title(), QStringLiteral("Selected: 15 s"));
     QCOMPARE(texts(m.data()), QStringList({ QStringLiteral("Obstructive apnea"), QStringLiteral("Central apnea"),
-                                            QStringLiteral("Mixed apnea"), QStringLiteral("Apnea"),
+                                            QStringLiteral("Mixed apnea"), QStringLiteral("Apnea"), QStringLiteral("Hypopnea"),
                                             QStringLiteral("Obstructive hypopnea"), QStringLiteral("Central hypopnea"),
                                             QStringLiteral("Flow limitation"), QStringLiteral("Artifact"),
                                             QStringLiteral("Not an artifact") }));
@@ -107,6 +107,7 @@ void ScoringMenusTests::testEventMenu()
     QCOMPARE(remove.value(QStringLiteral("timeMs")).toLongLong(), qint64(300000));
     QMenu *types = find(m.data(), QStringLiteral("Change type"))->menu();
     QCOMPARE(texts(types), QStringList({ QStringLiteral("Obstructive apnea"), QStringLiteral("Mixed apnea"), QStringLiteral("Apnea"),
+                                         QStringLiteral("Hypopnea"),
                                          QStringLiteral("Obstructive hypopnea"), QStringLiteral("Central hypopnea") }));
     const QVariantMap retype = types->actions().first()->data().toMap();
     QCOMPARE(retype.value(QStringLiteral("action")).toString(), QStringLiteral("retype"));
@@ -166,6 +167,9 @@ void ScoringMenusTests::testLetterKeys()
     QCOMPARE(ScoringMenus::actionForKey(range.data(), QStringLiteral("ь")), find(range.data(), QStringLiteral("Mixed apnea")));
     QCOMPARE(ScoringMenus::actionForKey(range.data(), QStringLiteral("O")), find(range.data(), QStringLiteral("Obstructive apnea")));
     QCOMPARE(ScoringMenus::actionForKey(range.data(), QStringLiteral("x")), find(range.data(), QStringLiteral("Artifact")));
+    // plain hypopnea (often all the graph tells): G, on the Russian layout П
+    QCOMPARE(ScoringMenus::actionForKey(range.data(), QStringLiteral("g")), find(range.data(), QStringLiteral("Hypopnea")));
+    QCOMPARE(ScoringMenus::actionForKey(range.data(), QStringLiteral("п")), find(range.data(), QStringLiteral("Hypopnea")));
     QVERIFY(!ScoringMenus::actionForKey(range.data(), QStringLiteral("z")));
 
     QScopedPointer<QMenu> ev(ScoringMenus::forEvent(scoredEvent(Origin::Retyped, CPAP_Obstructive, CPAP_ClearAirway, 42), nullptr));
@@ -252,7 +256,7 @@ void ScoringMenusTests::testMixedApneaCounts()
     QCOMPARE(schema::channel[CPAP_MixedApnea].label(), QStringLiteral("MA"));
     QVERIFY(ManualScoring::scoredChannels().contains(CPAP_MixedApnea));
     QVERIFY(ManualScoring::scoredChannels().contains(CPAP_Hypopnea));    // a device's H stays editable ...
-    QVERIFY(!ManualScoring::menuChannels().contains(CPAP_Hypopnea));     // ... but the menus offer OH and CH instead
+    QVERIFY(ManualScoring::menuChannels().contains(CPAP_Hypopnea));      // ... and the menus offer it next to OH and CH (doctor 2026-10-16)
 }
 
 // After a type is chosen for a selection, the next selections take that type at once.

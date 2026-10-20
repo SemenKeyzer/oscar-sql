@@ -93,11 +93,11 @@ void registerChannels()
     add(AN_GlasgowIndex, 0x1A09, WAVEFORM, MT_CPAP, "AnGlasgowIndex",
         QObject::tr("Glasgow Index"),
         QObject::tr("Glasgow Index over the last 5 minutes: the share of breaths with each of 8 shape signs, summed (DaveSkvn's method)"),
-        QObject::tr("GI"), QString(), QColor(0xb0, 0x30, 0x60));
+        QObject::tr("aGI"), QString(), QColor(0xb0, 0x30, 0x60));
     add(AN_GlasgowAdapted, 0x1A0A, WAVEFORM, MT_CPAP, "AnGlasgowAdapted",
         QObject::tr("Glasgow Index, adapted"),
         QObject::tr("Glasgow Index over the last 5 minutes, with thresholds relative to the breath's size"),
-        QObject::tr("GIa"), QString(), QColor(0x30, 0x60, 0xb0));
+        QObject::tr("aGIa"), QString(), QColor(0x30, 0x60, 0xb0));
 
     // stage 2: hypopneas
     add(AN_ObstructiveHypopnea, 0x1A10, FLAG, MT_CPAP, "AnObstructiveHypopnea",
