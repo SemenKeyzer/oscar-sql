@@ -572,6 +572,10 @@ private:
     MyLabel * dateDisplay;
 
     MyTextBrowser * webView;
+    //! Remembers where the Details page is scrolled, for the reload after a session is switched.
+    void keepSidebarScroll();
+    int m_keepSidebarScroll = -1;
+    QDate m_keepSidebarDate;
     Day * lastcpapday;
 
     gLineChart *leakchart;

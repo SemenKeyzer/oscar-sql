@@ -1007,6 +1007,7 @@ void Daily::Link_clicked(const QUrl &url)
         if (rejectToggleSessionEnable( sess) ) return;
 
         // Reload day
+        keepSidebarScroll();   // the list stays where it was, not back at the top
         LoadDate(previous_date);
         mainwin->getOverview()->graphView()->dataChanged();
   //      webView->page()->mainFrame()->setScrollBarValue(Qt::Vertical, webView->page()->mainFrame()->scrollBarMaximum(Qt::Vertical)-i);
@@ -1018,6 +1019,7 @@ void Daily::Link_clicked(const QUrl &url)
         if (rejectToggleSessionEnable( sess) ) return;
 
         // Reload day
+        keepSidebarScroll();   // the list stays where it was, not back at the top
         LoadDate(previous_date);
         mainwin->getOverview()->graphView()->dataChanged();
   //      webView->page()->mainFrame()->setScrollBarValue(Qt::Vertical, webView->page()->mainFrame()->scrollBarMaximum(Qt::Vertical)-i);
@@ -1026,6 +1028,7 @@ void Daily::Link_clicked(const QUrl &url)
         if (!day) return;
         Session *sess=day->find(sid, MT_SLEEPSTAGE);
         if (rejectToggleSessionEnable( sess) ) return;
+        keepSidebarScroll();   // the list stays where it was, not back at the top
         LoadDate(previous_date);
         mainwin->getOverview()->graphView()->dataChanged();
     } else  if (code=="togglepositionsession") { // Enable/Disable Position session
@@ -1033,6 +1036,7 @@ void Daily::Link_clicked(const QUrl &url)
         if (!day) return;
         Session *sess=day->find(sid, MT_POSITION);
         if (rejectToggleSessionEnable( sess) ) return;
+        keepSidebarScroll();   // the list stays where it was, not back at the top
         LoadDate(previous_date);
         mainwin->getOverview()->graphView()->dataChanged();
     } else if (code=="cpap")  {
@@ -2987,6 +2991,11 @@ void Daily::Load(QDate date)
     // Note: Outputs to local file if debugging
     QString html = getLeftSidebar(true);
     webView->setHtml(html);
+    if (m_keepSidebarScroll >= 0 && m_keepSidebarDate == date) {   // a session switched on or off: stay put
+        const int at = m_keepSidebarScroll;
+        QTimer::singleShot(0, webView, [this, at]() { webView->verticalScrollBar()->setValue(at); });
+    }
+    m_keepSidebarScroll = -1;
     
 #if defined(DEBUG_DAILY_HTML) || defined(UNITTEST_MODE)
     QString name = GetAppData()+"/test.html";
@@ -4542,6 +4551,12 @@ QPair<qint64, qint64> Daily::shownRange() const
 }
 
 // ---- Manual scoring
+
+void Daily::keepSidebarScroll()
+{
+    m_keepSidebarScroll = webView->verticalScrollBar()->value();
+    m_keepSidebarDate = previous_date;
+}
 
 void Daily::setScoringMode(bool on)
 {
