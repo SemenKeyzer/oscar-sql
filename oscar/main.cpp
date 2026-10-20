@@ -21,6 +21,7 @@
 #include <QDebug>
 #include <QTranslator>
 #include <QSettings>
+#include <QFileInfo>
 #include <QFileDialog>
 #include <QFontDatabase>
 #include <QStandardPaths>
@@ -741,6 +742,13 @@ int main(int argc, char *argv[]) {
         Qt::HighDpiScaleFactorRoundingPolicy::RoundPreferFloor
         );
 
+    // Portable: an OSCAR_Data folder next to the program holds the data and the settings (an ini
+    // file there, not the registry), so a copy on a USB stick runs anywhere without installing.
+    const QString portableData = portableDataFolder(QFileInfo(QString::fromLocal8Bit(argv[0])).absolutePath());
+    if (!portableData.isEmpty()) {
+        QSettings::setDefaultFormat(QSettings::IniFormat);
+        QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, portableData);
+    }
     QSettings settings;
 
     ////////////////////////////////////////////////////////////////////////////////////////////
@@ -993,6 +1001,11 @@ int main(int argc, char *argv[]) {
     // Datafolder location Selection
     ////////////////////////////////////////////////////////////////////////////////////////////
     bool haveNewFolder = false;
+    if (dataDirArg.isEmpty() && !portableData.isEmpty()) {   // portable, unless --datadir says otherwise
+        dataDirArg = portableData;
+        SetAppData(portableData, false);
+        qDebug() << "Portable: data in" << portableData;
+    }
 
     // GetAppData() is now --datadir if given, else the folder recorded in settings, else
     // (first run) a fallback that is never used: the setup dialog decides. Nothing has been

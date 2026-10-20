@@ -439,3 +439,10 @@ void DataFolderCreateDialog::onCreate()
     qDebug() << "DataFolderCreateDialog: created data folder" << target;
     accept();
 }
+
+QString portableDataFolder(const QString& programDir)
+{
+    if (programDir.isEmpty()) return QString();
+    const QString folder = QDir(programDir).filePath(QStringLiteral("OSCAR_Data"));
+    return QFileInfo(folder).isDir() ? folder : QString();
+}

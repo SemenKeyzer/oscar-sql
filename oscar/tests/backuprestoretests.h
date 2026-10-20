@@ -15,6 +15,7 @@ class BackupRestoreTests : public QObject
 {
     Q_OBJECT
 private slots:
+    void testPortableDataFolder();
     void initTestCase();
     void testProfileNameProblem_data();
     void testProfileNameProblem();

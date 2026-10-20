@@ -86,6 +86,13 @@ jobs:
             'rem This test build keeps its data in Documents\OSCAR_Data_test, apart from an installed OSCAR.',
             'start "" "%~dp0OSCAR.exe" --datadir OSCAR_Data_test'
           )
+          # portable: data and settings in OSCAR_Data next to OSCAR.exe (a USB stick, no installing)
+          Set-Content -Path "OSCAR-Windows\Start OSCAR (portable).bat" -Encoding ascii -Value @(
+            '@echo off',
+            'rem Portable: keeps the data and the settings in the OSCAR_Data folder next to OSCAR.exe.',
+            'if not exist "%~dp0OSCAR_Data" mkdir "%~dp0OSCAR_Data"',
+            'start "" "%~dp0OSCAR.exe"'
+          )
           Get-ChildItem OSCAR-Windows | Format-Table Name, Length
 
       - name: Upload the zip

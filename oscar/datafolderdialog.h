@@ -41,6 +41,10 @@ enum class DataFolderStatus {
 /*! \brief Classify \a path as one of the DataFolderStatus values. */
 DataFolderStatus classifyDataFolder(const QString& path);
 
+/*! \brief The portable data folder: "OSCAR_Data" next to the program in \a programDir, when it
+    exists (a copy run from a USB stick keeps its data and settings there); else empty. */
+QString portableDataFolder(const QString& programDir);
+
 /*!
  * \brief Check whether \a name is usable as a data folder name on every platform OSCAR runs on.
  * \return An empty string if the name is acceptable, otherwise a translated explanation.

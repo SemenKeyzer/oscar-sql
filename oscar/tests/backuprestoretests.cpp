@@ -7,6 +7,9 @@
  * for more details. */
 
 #include "backuprestoretests.h"
+#include "datafolderdialog.h"
+#include <QTemporaryDir>
+#include <QDir>
 
 #include <QCoreApplication>
 #include <QDateTime>
@@ -398,4 +401,16 @@ void BackupRestoreTests::testExtractKeepsEntriesInsideRoot()
     QVERIFY(QDir().mkpath(root2));
     QVERIFY(!extract(evil, root2));
     QVERIFY(!QFile::exists(tmp.path() + QStringLiteral("/escaped.txt")));
+}
+
+// Portable mode: an OSCAR_Data folder next to the program holds its data (a copy on a USB stick,
+// no Documents, no installing, doctor 2026-10-16); without it, nothing changes.
+void BackupRestoreTests::testPortableDataFolder()
+{
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    QVERIFY(portableDataFolder(dir.path()).isEmpty());
+    QVERIFY(QDir(dir.path()).mkdir(QStringLiteral("OSCAR_Data")));
+    QCOMPARE(portableDataFolder(dir.path()), QDir(dir.path()).filePath(QStringLiteral("OSCAR_Data")));
+    QVERIFY(portableDataFolder(QString()).isEmpty());
 }
