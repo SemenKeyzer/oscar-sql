@@ -34,6 +34,8 @@ private slots:
     void testStatisticsFigures();
     void testStatisticsFigureValues();
     void testStatisticsHypoxicBurden();
+    void testSidebarShowsExcludedArtifacts();
+    void testTabListsArtifacts();
     void testPreferencesPage();
     void testPreferencesRecalculationNote();
     void testNotComputedHint();

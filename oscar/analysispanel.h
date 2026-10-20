@@ -49,6 +49,8 @@ class AnalysisPanel
 
     //! The disclaimer shown wherever the analysis is (spec §1).
     static QString disclaimer();
+    //! Why the analysis left a stretch of SpO2 out, in a few words.
+    static QString artifactReasonName(analysis::OxiArtifactReason reason);
     //! The Daily analysis section while the analysis is shown but not computed.
     static QString notComputedHtml();
 
@@ -84,6 +86,8 @@ class AnalysisTab : public QWidget
     void differenceShown(qint64 start, qint64 end);
     //! The "show on the flow graph" check box changed.
     void showOnFlowChanged(bool show);
+    //! «Не артефакт» chosen on an artefact (device-corrected times, as on the graphs).
+    void keepRequested(qint64 from, qint64 to);
 
   private:
     void onItemClicked(QTreeWidgetItem *item);

@@ -48,7 +48,7 @@ void GlossaryTests::testRequiredKeys()
         "median", "p95", "maximum", "wavg", "nights_with_data", "compliance_pct", "period",
         "spo2", "t90", "odi3", "odi4", "spo2_nadir", "pulse", "pulse_change", "perfusion", "plethy", "spo2_drop",
         "second_opinion", "an_ahi", "hypopnea_rule", "agreement", "hypoxic_burden", "oxi_zones", "unexplained_desat",
-        "pulse_response", "unscoreable", "an_flags", "fl_score", "fl_time", "fl_longest", "fl_breaths", "glasgow",
+        "oxi_artifact", "pulse_response", "unscoreable", "an_flags", "fl_score", "fl_time", "fl_longest", "fl_breaths", "glasgow",
         "glasgow_adapted", "gi_skew", "gi_spike", "gi_flattop", "gi_topheavy", "gi_multipeak", "gi_nopause",
         "gi_inspirrate", "gi_multibreath", "gi_ampvar", "best_value", "few_nights",
     };

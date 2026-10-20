@@ -74,12 +74,18 @@ void ScoringMenusTests::testRangeMenu()
     QCOMPARE(texts(m.data()), QStringList({ QStringLiteral("Obstructive apnea"), QStringLiteral("Central apnea"),
                                             QStringLiteral("Mixed apnea"), QStringLiteral("Apnea"),
                                             QStringLiteral("Obstructive hypopnea"), QStringLiteral("Central hypopnea"),
-                                            QStringLiteral("Flow limitation"), QStringLiteral("Artifact") }));
+                                            QStringLiteral("Flow limitation"), QStringLiteral("Artifact"),
+                                            QStringLiteral("Not an artifact") }));
     const QVariantMap oa = find(m.data(), QStringLiteral("Obstructive apnea"))->data().toMap();
     QCOMPARE(oa.value(QStringLiteral("action")).toString(), QStringLiteral("add"));
     QCOMPARE(oa.value(QStringLiteral("channel")).toUInt(), CPAP_Obstructive);
     const QVariantMap ex = find(m.data(), QStringLiteral("Artifact"))->data().toMap();
     QCOMPARE(ex.value(QStringLiteral("action")).toString(), QStringLiteral("exclude"));
+    // «Не артефакт» cancels the oximetry analysis' own artefact calls in the stretch
+    QCOMPARE(find(m.data(), QStringLiteral("Not an artifact"))->data().toMap().value(QStringLiteral("action")).toString(),
+             QStringLiteral("keep"));
+    QCOMPARE(ScoringMenus::actionForKey(m.data(), QStringLiteral("k")), find(m.data(), QStringLiteral("Not an artifact")));
+    QCOMPARE(ScoringMenus::actionForKey(m.data(), QStringLiteral("л")), find(m.data(), QStringLiteral("Not an artifact")));   // Russian layout
 }
 
 void ScoringMenusTests::testShortEventWarning()

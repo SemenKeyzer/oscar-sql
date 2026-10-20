@@ -549,3 +549,43 @@ void AnalysisPanelTests::testNotComputedHint()
     QVERIFY2(html.contains(QStringLiteral("not computed")), qPrintable(html));
     QVERIFY2(html.contains(QStringLiteral("Preferences → Analysis")), qPrintable(html));
 }
+
+namespace {
+
+// An hour of oximetry with one fall too fast for the blood.
+DayResult nightWithArtifact()
+{
+    DayInput in;
+    in.spo2 = synth::flat(3600, 96);
+    synth::fill(in.spo2, 1000, 1010, 90);
+    in.pulse = synth::livePulse(3600);
+    return scoreDay(in, AnalysisParams());
+}
+
+} // namespace
+
+// What the analysis left out is said in the sidebar, with the reasons; nothing when nothing was.
+void AnalysisPanelTests::testSidebarShowsExcludedArtifacts()
+{
+    const DayResult r = nightWithArtifact();
+    QCOMPARE(r.oxi.artifacts.size(), 1);
+    const QString html = AnalysisPanel::sidebarHtml(nullptr, r, QStringLiteral("CMS50F"), { 94, 90 });
+    QVERIFY2(html.contains(QStringLiteral("Excluded as artifact")), qPrintable(html));
+    QVERIFY(html.contains(AnalysisPanel::artifactReasonName(OxiArtifactReason::FastFall)));
+    QVERIFY(!AnalysisPanel::sidebarHtml(nullptr, oximetryNight(), QStringLiteral("CMS50F"), { 94, 90 })
+                 .contains(QStringLiteral("Excluded as artifact")));
+}
+
+// The tab lists every artefact, to be looked at (and undone) one by one.
+void AnalysisPanelTests::testTabListsArtifacts()
+{
+    AnalysisTab tab;
+    tab.setResult(nightWithArtifact());
+    auto *tree = tab.findChild<QTreeWidget *>();
+    QVERIFY(tree);
+    bool found = false;
+    for (int i = 0; i < tree->topLevelItemCount(); ++i) {
+        if (tree->topLevelItem(i)->text(0) == QStringLiteral("Oximeter artifacts (1)")) found = true;
+    }
+    QVERIFY(found);
+}

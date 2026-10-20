@@ -34,6 +34,8 @@ class ScoringMenus
     static QMenu *forEvent(const ManualScoring::EffectiveEvent &event, QWidget *parent, int countOfType = 0);
     //! For an excluded stretch right-clicked on the graphs.
     static QMenu *forExcluded(qint64 editId, QWidget *parent);
+    //! The menu inside a «Не артефакт» stretch: undo it.
+    static QMenu *forKept(qint64 editId, QWidget *parent);
     //! The menu of a marked flow limitation stretch: undo it.
     static QMenu *forMark(qint64 editId, QWidget *parent);
     //! The name of a scored channel in the menus: "Obstructive apnea", …

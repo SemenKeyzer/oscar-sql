@@ -15,6 +15,8 @@
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QLabel>
+#include <QMap>
+#include <QMenu>
 #include <QPushButton>
 #include <QTreeWidget>
 #include <QVBoxLayout>
@@ -31,6 +33,7 @@ using namespace analysis;
 
 namespace {
 
+constexpr int kArtifactRole = Qt::UserRole + 20;   // an item of the oximeter artefacts
 const QString kTable = QStringLiteral("<table cellspacing=0 cellpadding=1 border=0 width='100%'>");
 
 QString number(double v, int decimals = 1)
@@ -225,6 +228,18 @@ QString AnalysisPanel::sidebarHtml(Day *day, const DayResult &r, const QString &
             const int n = o.desaturations.size();
             html += row(tr("Mean desaturation"), QStringLiteral("%1 %, %2 s").arg(number(depth / n)).arg(number(ms / n / 1000.0, 0)));
         }
+        if (!o.artifacts.isEmpty()) {
+            // what was left out, and why
+            html += row(HelpTips::term(tr("Excluded as artifact"), QStringLiteral("oxi_artifact")),
+                        tr("%1 min (%n stretch(es))", nullptr, int(o.artifacts.size())).arg(number(o.artifactSeconds() / 60.0)));
+            QMap<int, qint64> byReason;
+            for (const OxiArtifact &a : o.artifacts) byReason[int(a.reason)] += a.end - a.start;
+            QStringList parts;
+            for (auto it = byReason.cbegin(); it != byReason.cend(); ++it) {
+                parts << tr("%1: %2 min").arg(artifactReasonName(OxiArtifactReason(it.key())), number(it.value() / 60000.0));
+            }
+            html += wide(QStringLiteral("<small>%1</small>").arg(parts.join(QStringLiteral(", ")).toHtmlEscaped()));
+        }
         html += QStringLiteral("</table>");
 
         // graded as on Braebon's MediOX report: the grade in its colour, the scale under it
@@ -367,6 +382,17 @@ AnalysisTab::AnalysisTab(QWidget *parent)
     layout->addWidget(m_tree);
     connect(m_tree, &QTreeWidget::itemClicked, this, [this](QTreeWidgetItem *item) { onItemClicked(item); });
     connect(m_tree, &QTreeWidget::itemActivated, this, [this](QTreeWidgetItem *item) { onItemClicked(item); });
+    // an artefact the analysis got wrong can be given back
+    m_tree->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_tree, &QTreeWidget::customContextMenuRequested, this, [this](const QPoint &pos) {
+        QTreeWidgetItem *it = m_tree->itemAt(pos);
+        if (!it || !it->data(0, kArtifactRole).toBool()) return;
+        QMenu menu(this);
+        QAction *keep = menu.addAction(tr("Not an artifact"));
+        if (menu.exec(m_tree->viewport()->mapToGlobal(pos)) == keep) {
+            emit keepRequested(it->data(0, Qt::UserRole).toLongLong(), it->data(0, Qt::UserRole + 1).toLongLong());
+        }
+    });
     updateStepper();
 }
 
@@ -459,6 +485,14 @@ void AnalysisTab::setResult(const DayResult &r)
                  d.start, d.end);
         }
     }
+    if (!o.artifacts.isEmpty()) {
+        QTreeWidgetItem *g = group(tr("Oximeter artifacts"), int(o.artifacts.size()));
+        for (const OxiArtifact &a : o.artifacts) {
+            QTreeWidgetItem *it = item(g, tr("%1, %2 s, %3").arg(clock(a.start)).arg((a.end - a.start) / 1000)
+                                              .arg(AnalysisPanel::artifactReasonName(a.reason)), a.start, a.end);
+            it->setData(0, kArtifactRole, true);
+        }
+    }
     if (m_tree->topLevelItemCount() == 0) {
         auto *none = new QTreeWidgetItem(m_tree, QStringList(tr("Nothing to show for this day.")));
         none->setFlags(Qt::NoItemFlags);
@@ -468,6 +502,21 @@ void AnalysisTab::setResult(const DayResult &r)
         return a->data(0, Qt::UserRole).toLongLong() < b->data(0, Qt::UserRole).toLongLong();
     });
     updateStepper();
+}
+
+QString AnalysisPanel::artifactReasonName(OxiArtifactReason reason)
+{
+    switch (reason) {
+    case OxiArtifactReason::OutOfRange: return tr("out of range");
+    case OxiArtifactReason::Spike: return tr("spike");
+    case OxiArtifactReason::FastFall: return tr("too fast a fall");
+    case OxiArtifactReason::PulseDisturbed: return tr("pulse disturbed");
+    case OxiArtifactReason::Frozen: return tr("frozen signal");
+    case OxiArtifactReason::ProbeOnOff: return tr("probe on or off");
+    case OxiArtifactReason::ShortFragment: return tr("short fragment");
+    case OxiArtifactReason::Manual: return tr("marked by hand");
+    }
+    return QString();
 }
 
 void AnalysisTab::onItemClicked(QTreeWidgetItem *item)

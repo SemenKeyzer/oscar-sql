@@ -289,6 +289,9 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     connect(m_analysisTab, &AnalysisTab::differenceShown, this, [this](qint64 start, qint64 end) {
         if (m_differenceOverlay) m_differenceOverlay->setCurrent(start, end);
     });
+    connect(m_analysisTab, &AnalysisTab::keepRequested, this, [this](qint64 from, qint64 to) {
+        applyScoring({ { QStringLiteral("action"), QStringLiteral("keep") } }, from, to);
+    });
     connect(m_analysisTab, &AnalysisTab::showOnFlowChanged, this, [this](bool) {
         updateDifferenceOverlay();
         GraphView->redraw();
@@ -4657,7 +4660,7 @@ void Daily::onScoringRange(gGraph *graph, qint64 startMs, qint64 endMs, QPoint g
 
 void Daily::onScoringContext(gGraph *graph, qint64 timeMs, QPoint globalPos)
 {
-    Day *day = p_profile->GetDay(previous_date, MT_CPAP);
+    Day *day = p_profile->GetDay(previous_date);   // stretches on an oximeter-only night too
     if (!day || !graph) return;
     // a few pixels' worth of slack around the mark
     const int plotWidth = qMax(1, graph->rect().width() - graph->left - graph->right);
@@ -4690,6 +4693,7 @@ void Daily::onScoringContext(gGraph *graph, qint64 timeMs, QPoint globalPos)
                 if (timeMs < e.startMs + c || timeMs > e.endMs + c) continue;
                 if (e.kind == ManualScoring::Kind::Exclude) menu.reset(ScoringMenus::forExcluded(e.id, this));
                 else if (e.kind == ManualScoring::Kind::Mark) menu.reset(ScoringMenus::forMark(e.id, this));
+                else if (e.kind == ManualScoring::Kind::Keep) menu.reset(ScoringMenus::forKept(e.id, this));
             }
         }
     }

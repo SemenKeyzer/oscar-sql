@@ -114,6 +114,7 @@ QMenu *ScoringMenus::forRange(qint64 durationMs, QWidget *parent)
     menu->addSeparator();
     keyed(menu, tr("Flow limitation"), QLatin1Char('F'))->setData(data("mark", CPAP_ManualFlowLimit));
     keyed(menu, tr("Artifact"), QLatin1Char('X'))->setData(data("exclude"));
+    keyed(menu, tr("Not an artifact"), QLatin1Char('K'))->setData(data("keep"));   // the oximetry's own calls
     installLetterKeys(menu);
     return menu;
 }
@@ -168,6 +169,16 @@ QMenu *ScoringMenus::forExcluded(qint64 editId, QWidget *parent)
     menu->setAttribute(Qt::WA_NoMouseReplay);   // the click that closes it must not zoom the graph (Windows)
     menu->setObjectName(QStringLiteral("scoringExcludedMenu"));
     keyed(menu, tr("Cancel exclusion"), QLatin1Char('U'))->setData(data("undo", 0, 0, 0, editId));
+    installLetterKeys(menu);
+    return menu;
+}
+
+QMenu *ScoringMenus::forKept(qint64 editId, QWidget *parent)
+{
+    auto *menu = new QMenu(parent);
+    menu->setAttribute(Qt::WA_NoMouseReplay);   // the click that closes it must not zoom the graph (Windows)
+    menu->setObjectName(QStringLiteral("scoringKeptMenu"));
+    keyed(menu, tr("Undo «not an artifact»"), QLatin1Char('U'))->setData(data("undo", 0, 0, 0, editId));
     installLetterKeys(menu);
     return menu;
 }
@@ -253,7 +264,7 @@ QAction *ScoringMenus::actionForKey(QMenu *menu, const QString &text)
         { QChar(0x0429), QLatin1Char('O') }, { QChar(0x0421), QLatin1Char('C') }, { QChar(0x0424), QLatin1Char('A') },
         { QChar(0x042C), QLatin1Char('M') }, { QChar(0x041D), QLatin1Char('Y') }, { QChar(0x0410), QLatin1Char('F') },
         { QChar(0x0420), QLatin1Char('H') }, { QChar(0x0427), QLatin1Char('X') }, { QChar(0x041A), QLatin1Char('R') },
-        { QChar(0x0415), QLatin1Char('T') }, { QChar(0x0413), QLatin1Char('U') },
+        { QChar(0x0415), QLatin1Char('T') }, { QChar(0x0413), QLatin1Char('U') }, { QChar(0x041B), QLatin1Char('K') },
     };
     key = russian.value(key, key);
     for (QAction *a : menu->actions()) {
