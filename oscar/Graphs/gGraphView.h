@@ -602,6 +602,8 @@ class gGraphView
     //!        (scoringRangeSelected) and a right click on the flow or event flags graph asks for
     //!        the event's menu (scoringContextRequested); Esc asks to leave the mode.
     void setScoringMode(bool on) { m_scoringMode = on; m_scoringEscPressed = false; m_scoringDragging = false; }
+    //! Ignores the mouse for \a ms (after a menu closed by a click on the graph).
+    void ignoreMouseFor(int ms);
     bool scoringMode() const { return m_scoringMode; }
     //! \brief In scoring mode the edges of the event boxes and excluded stretches of the flow
     //!        graph can be dragged (scoringResized at the end; Esc cancels): the scored night, and
@@ -767,6 +769,7 @@ class gGraphView
     int m_alignPinnedHeight = 0;                     //!< height of the pinned area in the last frame
     bool m_alignEscPressed = false;                  //!< Esc went down on this view (not in a dialog)
     bool m_alignDragging = false;
+    qint64 m_ignoreMouseUntilMs = 0;   //!< see ignoreMouseFor()
     int m_alignDragStartX = 0;
     double m_alignMsPerPx = 0.0;
     std::function<bool(gGraph*)> m_alignMenuPredicate;

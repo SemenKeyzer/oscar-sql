@@ -26,6 +26,7 @@
 #include <limits>
 #include <QResizeEvent>
 #include <QScrollBar>
+#include <QAbstractItemView>
 #include <QFrame>
 #include <QSpinBox>
 #include <QSpacerItem>
@@ -799,6 +800,7 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
         row->addWidget(hint, 1);
         m_scoringType = new QComboBox(m_scoringBanner);
         m_scoringType->setObjectName(QStringLiteral("scoringType"));
+        m_scoringType->view()->window()->installEventFilter(this);
         row->addWidget(m_scoringType);
         auto *prev = new QToolButton(m_scoringBanner);
         prev->setObjectName(QStringLiteral("scoringPrev"));
@@ -812,6 +814,7 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
         row->addWidget(next);
         m_scoringWindow = new QComboBox(m_scoringBanner);
         m_scoringWindow->setObjectName(QStringLiteral("scoringWindow"));
+        m_scoringWindow->view()->window()->installEventFilter(this);
         for (int minutes : { 1, 3, 5, 10 }) m_scoringWindow->addItem(tr("%1 min").arg(minutes), minutes);
         m_scoringWindow->setCurrentIndex(1);   // 3 minutes, as six 30-second epochs
         row->addWidget(m_scoringWindow);
@@ -3580,6 +3583,12 @@ void Daily::on_prevDayButton_clicked()
 
 bool Daily::eventFilter(QObject *object, QEvent *event)
 {
+    // a drop-down list of the scoring bar closed by a click on the graph: that click is not a zoom
+    if (event->type() == QEvent::Hide && ((m_scoringType && object == m_scoringType->view()->window())
+                                          || (m_scoringWindow && object == m_scoringWindow->view()->window()))) {
+        GraphView->ignoreMouseFor(400);
+        return false;
+    }
     if (object == ui->JournalNotes && event->type() == QEvent::FocusOut) {
         // Trigger immediate save of journal when we focus out from it so we never
         // lose any journal entry text...
@@ -4722,7 +4731,9 @@ void Daily::onScoringRange(gGraph *graph, qint64 startMs, qint64 endMs, QPoint g
     QAction *title = new QAction(menu->title(), menu.data());
     title->setEnabled(false);
     menu->insertAction(menu->actions().value(0), title);
-    if (QAction *chosen = menu->exec(globalPos)) {
+    QAction *chosen = menu->exec(globalPos);
+    GraphView->ignoreMouseFor(400);   // the click that closed it must not zoom (Windows)
+    if (chosen) {
         const QVariantMap choice = chosen->data().toMap();
         setRepeatType(ScoringMenus::repeatableType(choice));
         applyScoring(choice, startMs, endMs);
@@ -4772,7 +4783,9 @@ void Daily::onScoringContext(gGraph *graph, qint64 timeMs, QPoint globalPos)
         graph->zoomAround(1.33, timeMs);
         return;
     }
-    if (QAction *chosen = menu->exec(globalPos)) applyScoring(chosen->data().toMap(), 0, 0);
+    QAction *chosen = menu->exec(globalPos);
+    GraphView->ignoreMouseFor(400);   // the click that closed it must not zoom (Windows)
+    if (chosen) applyScoring(chosen->data().toMap(), 0, 0);
 }
 
 QString Daily::getManualScoring(Day *day)

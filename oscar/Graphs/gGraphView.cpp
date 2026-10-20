@@ -2960,6 +2960,11 @@ ScoringResize::Target gGraphView::scoringEdgeAt(const QPoint &pos, gGraph **grap
 
 void gGraphView::mousePressEvent(QMouseEvent *event)
 {
+    // the click that closed a scoring menu (Windows hands its press or release on) is not a zoom
+    if (QDateTime::currentMSecsSinceEpoch() < m_ignoreMouseUntilMs) {
+        event->accept();
+        return;
+    }
     #if QT_VERSION < QT_VERSION_CHECK(6,0,0)
         int x = event->x();
         int y = event->y();
@@ -3179,6 +3184,11 @@ void gGraphView::mousePressEvent(QMouseEvent *event)
 
 void gGraphView::mouseReleaseEvent(QMouseEvent *event)
 {
+    // the click that closed a scoring menu (Windows hands its press or release on) is not a zoom
+    if (QDateTime::currentMSecsSinceEpoch() < m_ignoreMouseUntilMs) {
+        event->accept();
+        return;
+    }
 
     #if QT_VERSION < QT_VERSION_CHECK(6,0,0)
         int x = event->x();
@@ -3384,6 +3394,11 @@ void gGraphView::keyReleaseEvent(QKeyEvent *event)
 
 void gGraphView::mouseDoubleClickEvent(QMouseEvent *event)
 {
+    // the click that closed a scoring menu (Windows hands its press or release on) is not a zoom
+    if (QDateTime::currentMSecsSinceEpoch() < m_ignoreMouseUntilMs) {
+        event->accept();
+        return;
+    }
     mousePressEvent(event); // signal missing.. a qt change might "fix" this if we are not careful.
 
     #if QT_VERSION < QT_VERSION_CHECK(6,0,0)
@@ -4217,4 +4232,9 @@ void gGraphView::redraw()
 #else
     update();
 #endif
+}
+
+void gGraphView::ignoreMouseFor(int ms)
+{
+    m_ignoreMouseUntilMs = QDateTime::currentMSecsSinceEpoch() + ms;
 }
