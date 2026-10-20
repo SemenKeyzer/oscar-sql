@@ -21,6 +21,9 @@
 #include <QDebug>
 #include <QTranslator>
 #include <QSettings>
+#ifdef Q_OS_WIN
+#include <windows.h>
+#endif
 #include <QFileInfo>
 #include <QFileDialog>
 #include <QFontDatabase>
@@ -744,10 +747,20 @@ int main(int argc, char *argv[]) {
 
     // Portable: an OSCAR_Data folder next to the program holds the data and the settings (an ini
     // file there, not the registry), so a copy on a USB stick runs anywhere without installing.
-    const QString portableData = portableDataFolder(QFileInfo(QString::fromLocal8Bit(argv[0])).absolutePath());
+    QString programDir = QFileInfo(QString::fromLocal8Bit(argv[0])).absolutePath();
+#ifdef Q_OS_WIN
+    {   // the program's own path in full Unicode (argv[0] is in the ANSI code page)
+        wchar_t path[MAX_PATH * 4];
+        const DWORD n = GetModuleFileNameW(nullptr, path, DWORD(sizeof(path) / sizeof(path[0])));
+        if (n > 0) programDir = QFileInfo(QString::fromWCharArray(path, int(n))).absolutePath();
+    }
+#endif
+    const QString portableData = portableDataFolder(programDir);
     if (!portableData.isEmpty()) {
+        const QString settingsDir = portableSettingsFolder(programDir);
+        QDir().mkpath(settingsDir);
         QSettings::setDefaultFormat(QSettings::IniFormat);
-        QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, portableData);
+        QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, settingsDir);
     }
     QSettings settings;
 

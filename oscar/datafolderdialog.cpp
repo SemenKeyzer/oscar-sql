@@ -446,3 +446,8 @@ QString portableDataFolder(const QString& programDir)
     const QString folder = QDir(programDir).filePath(QStringLiteral("OSCAR_Data"));
     return QFileInfo(folder).isDir() ? folder : QString();
 }
+
+QString portableSettingsFolder(const QString& programDir)
+{
+    return QDir(programDir).filePath(QStringLiteral("OSCAR_Settings"));
+}

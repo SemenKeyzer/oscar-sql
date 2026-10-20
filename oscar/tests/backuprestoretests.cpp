@@ -413,4 +413,6 @@ void BackupRestoreTests::testPortableDataFolder()
     QVERIFY(QDir(dir.path()).mkdir(QStringLiteral("OSCAR_Data")));
     QCOMPARE(portableDataFolder(dir.path()), QDir(dir.path()).filePath(QStringLiteral("OSCAR_Data")));
     QVERIFY(portableDataFolder(QString()).isEmpty());
+    // the settings beside it, not inside: the data folder stays OSCAR's own (empty on a first run)
+    QCOMPARE(portableSettingsFolder(dir.path()), QDir(dir.path()).filePath(QStringLiteral("OSCAR_Settings")));
 }

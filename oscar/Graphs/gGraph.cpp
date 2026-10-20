@@ -415,13 +415,19 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
         for (;;) {
             QFontMetrics fm(m_titleFont);
             box = fm.boundingRect(QRect(0, 0, w, height), Qt::TextWordWrap | Qt::AlignLeft, txt);
-            if ((box.width() <= w && box.height() <= 2 * fm.height() + 2) || m_titleFont.pointSize() <= 7) break;
-            m_titleFont.setPointSize(m_titleFont.pointSize() - 1);
+            if (box.width() <= w && box.height() <= 2 * fm.height() + 2) break;
+            if (m_titleFont.pointSize() > 0) {   // on screen: in points ...
+                if (m_titleFont.pointSize() <= 7) break;
+                m_titleFont.setPointSize(m_titleFont.pointSize() - 1);
+            } else {                              // ... printed: in pixels
+                if (m_titleFont.pixelSize() <= int(10 * printScaleY())) break;
+                m_titleFont.setPixelSize(m_titleFont.pixelSize() - 1);
+            }
         }
         painter.save();
         painter.setFont(m_titleFont);
         painter.setPen(Qt::black);
-        painter.drawText(QRect(marginLeft() + 4, originY, w, height), Qt::TextWordWrap | Qt::AlignLeft | Qt::AlignVCenter, txt);
+        painter.drawText(QRect(int(marginLeft() * printScaleX()) + 4, originY, w, height), Qt::TextWordWrap | Qt::AlignLeft | Qt::AlignVCenter, txt);
         painter.restore();
         left += graphView()->titleWidth*printScaleX();
     } else if (m_showTitle) {

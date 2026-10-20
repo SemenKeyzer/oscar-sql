@@ -521,19 +521,22 @@ void PreferencesDialog::fitToContent()
     QSize page;
     for (int i = 0; i < ui->tabWidget->count(); ++i) {
         QWidget *w = ui->tabWidget->widget(i);
+        QSize hint = w->sizeHint();
         if (auto *scroll = qobject_cast<QScrollArea *>(w)) {
-            if (scroll->widget()) w = scroll->widget();
+            // a page that scrolls itself: all of its width, but not all of its height
+            if (scroll->widget()) hint = QSize(scroll->widget()->sizeHint().width() + 24, qMin(scroll->widget()->sizeHint().height(), 560));
         }
-        page = page.expandedTo(w->sizeHint());
+        page = page.expandedTo(hint);
     }
     const int bar = ui->tabWidget->tabBar()->sizeHint().height();
-    ui->tabWidget->setMinimumSize(page + QSize(24, bar + 24));
+    const QSize room = screen() ? screen()->availableGeometry().size() : QSize(1280, 800);
+    ui->tabWidget->setMinimumSize((page + QSize(24, bar + 24)).boundedTo(room * 0.8));
     const QSize content = ui->content->sizeHint() + QSize(2 * ui->scrollArea->frameWidth(), 2 * ui->scrollArea->frameWidth());
-    QSize want = content + QSize(layout()->contentsMargins().left() + layout()->contentsMargins().right(),
-                                 layout()->contentsMargins().top() + layout()->contentsMargins().bottom()
-                                     + layout()->spacing() + 48);   // the button row
-    if (QScreen *sc = screen()) want = want.boundedTo(sc->availableGeometry().size() * 0.95);
-    setMinimumSize(want);
+    const QSize want = (content + QSize(layout()->contentsMargins().left() + layout()->contentsMargins().right(),
+                                        layout()->contentsMargins().top() + layout()->contentsMargins().bottom()
+                                            + layout()->spacing() + 48))   // the button row
+                           .boundedTo(room * 0.95);
+    setMinimumSize(want.boundedTo(room * 0.8));   // it can still be made smaller on a small screen
     resize(want);
 }
 

@@ -44,6 +44,9 @@ DataFolderStatus classifyDataFolder(const QString& path);
 /*! \brief The portable data folder: "OSCAR_Data" next to the program in \a programDir, when it
     exists (a copy run from a USB stick keeps its data and settings there); else empty. */
 QString portableDataFolder(const QString& programDir);
+/*! \brief Where a portable copy keeps its settings: "OSCAR_Settings" next to the program (beside
+    the data folder, not in it, so the data folder holds only OSCAR's data). */
+QString portableSettingsFolder(const QString& programDir);
 
 /*!
  * \brief Check whether \a name is usable as a data folder name on every platform OSCAR runs on.

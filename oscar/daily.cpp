@@ -867,6 +867,7 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
         m_eventWindowBox->setRange(ui->evViewSlider->minimum(), ui->evViewSlider->maximum());
         m_eventWindowBox->setValue(ui->evViewSlider->value());
         m_eventWindowBox->setButtonSymbols(QAbstractSpinBox::NoButtons);
+        m_eventWindowBox->setKeyboardTracking(false);   // "15" is 15 minutes, not 1 and then 15
         m_eventWindowBox->setAlignment(Qt::AlignCenter);
         m_eventWindowBox->setToolTip(tr("Type the minutes"));
         row->addWidget(ui->label_7);
@@ -3057,7 +3058,18 @@ void Daily::Load(QDate date)
     webView->setHtml(html);
     if (m_keepSidebarScroll >= 0 && m_keepSidebarDate == date) {   // a session switched on or off: stay put
         const int at = m_keepSidebarScroll;
-        QTimer::singleShot(0, webView, [this, at]() { webView->verticalScrollBar()->setValue(at); });
+        QScrollBar *bar = webView->verticalScrollBar();
+        if (bar->maximum() >= at) {
+            bar->setValue(at);
+        } else {   // a long page is laid out bit by bit: once it reaches that far
+            auto *once = new QMetaObject::Connection;
+            *once = connect(bar, &QScrollBar::rangeChanged, this, [bar, at, once](int, int max) {
+                if (max < at) return;
+                bar->setValue(at);
+                QObject::disconnect(*once);
+                delete once;
+            });
+        }
     }
     m_keepSidebarScroll = -1;
     

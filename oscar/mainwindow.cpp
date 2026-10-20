@@ -876,9 +876,11 @@ bool MainWindow::OpenProfile(QString profileName)
         const QSignalBlocker block(ui->actionScoringMode);
         ui->actionScoringMode->setChecked(on);
     });
-    {   // the profile's own "OSCAR analysis" switch
+    {   // the profile's own "OSCAR analysis" switch; scoring starts off on a new Daily page
         const QSignalBlocker block(ui->actionShowAnalysis);
         ui->actionShowAnalysis->setChecked(analysis::analysisShown());
+        const QSignalBlocker blockScoring(ui->actionScoringMode);
+        ui->actionScoringMode->setChecked(false);
     }
 
     PERF_TIMER_START("MW::OP::ReloadDailyGraphs");

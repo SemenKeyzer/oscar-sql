@@ -774,6 +774,7 @@ class gGraphView
     bool m_alignEscPressed = false;                  //!< Esc went down on this view (not in a dialog)
     bool m_alignDragging = false;
     qint64 m_ignoreMouseUntilMs = 0;   //!< see ignoreMouseFor()
+    bool m_swallowRelease = false;     //!< the release of a press ignored by ignoreMouseFor()
     bool m_horizontalTitles = false;
     int m_alignDragStartX = 0;
     double m_alignMsPerPx = 0.0;

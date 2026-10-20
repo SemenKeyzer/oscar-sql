@@ -2960,8 +2960,10 @@ ScoringResize::Target gGraphView::scoringEdgeAt(const QPoint &pos, gGraph **grap
 
 void gGraphView::mousePressEvent(QMouseEvent *event)
 {
-    // the click that closed a scoring menu (Windows hands its press or release on) is not a zoom
+    // the click that closed a scoring menu (Windows hands it on) is not a zoom: its press, and
+    // the release that goes with it however long the button is held
     if (QDateTime::currentMSecsSinceEpoch() < m_ignoreMouseUntilMs) {
+        m_swallowRelease = true;
         event->accept();
         return;
     }
@@ -3184,9 +3186,14 @@ void gGraphView::mousePressEvent(QMouseEvent *event)
 
 void gGraphView::mouseReleaseEvent(QMouseEvent *event)
 {
-    // the click that closed a scoring menu (Windows hands its press or release on) is not a zoom
-    if (QDateTime::currentMSecsSinceEpoch() < m_ignoreMouseUntilMs) {
+    if (m_swallowRelease || QDateTime::currentMSecsSinceEpoch() < m_ignoreMouseUntilMs) {
+        // and if its press got through (replayed inside the menu), nothing it started goes on
+        m_swallowRelease = false;
+        m_ignoreMouseUntilMs = 0;
+        m_button_down = false;
+        for (gGraph *g : m_graphs) g->cancelSelection();
         event->accept();
+        redraw();
         return;
     }
 
@@ -3394,7 +3401,6 @@ void gGraphView::keyReleaseEvent(QKeyEvent *event)
 
 void gGraphView::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    // the click that closed a scoring menu (Windows hands its press or release on) is not a zoom
     if (QDateTime::currentMSecsSinceEpoch() < m_ignoreMouseUntilMs) {
         event->accept();
         return;
