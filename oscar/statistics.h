@@ -241,6 +241,8 @@ class Statistics : public QObject
     QString GenerateHTML();
     //! A note that \a from – \a to holds nights with manual scoring; empty when none.
     static QString manualScoringNote(const QDate &from, const QDate &to);
+    //! \a note as a bar that catches the eye: yellow, bordered, a warning sign; empty for no note.
+    static QString manualScoringBanner(const QString &note);
 
     QString UpdateRecordsBox();
 

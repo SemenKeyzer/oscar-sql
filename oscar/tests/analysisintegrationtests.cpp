@@ -1914,6 +1914,12 @@ void AnalysisIntegrationTests::testStatisticsFootnote()
     QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Add, CPAP_Hypopnea, 2480, 2500)));
     const QString note = Statistics::manualScoringNote(date.addDays(-3), date);
     QVERIFY2(note.contains(QStringLiteral("1 night")) && note.contains(QStringLiteral("corrected by hand")), qPrintable(note));
+    // shown so it catches the eye: a yellow bar with a warning sign, above the tables (doctor 2026-10-16)
+    const QString banner = Statistics::manualScoringBanner(note);
+    QVERIFY(banner.contains(QStringLiteral("&#9888;")));
+    QVERIFY(banner.contains(QStringLiteral("#FFF3CD"), Qt::CaseInsensitive));
+    QVERIFY(banner.contains(note.toHtmlEscaped()));
+    QVERIFY(Statistics::manualScoringBanner(QString()).isEmpty());
     p_profile->daylist.remove(date);
     ManualScoring::clearDay(day);
     delete day;

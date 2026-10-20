@@ -1055,6 +1055,7 @@ void Daily::Link_clicked(const QUrl &url)
         keepSidebarScroll();   // the list stays where it was, not back at the top
         LoadDate(previous_date);
         mainwin->getOverview()->graphView()->dataChanged();
+        mainwin->GenerateStatistics();   // its disabled sessions and compliance change too
   //      webView->page()->mainFrame()->setScrollBarValue(Qt::Vertical, webView->page()->mainFrame()->scrollBarMaximum(Qt::Vertical)-i);
     } else  if (code=="toggleoxisession") { // Enable/Disable Oximetry session
         day=p_profile->GetDay(previous_date,MT_OXIMETER);
@@ -1067,6 +1068,7 @@ void Daily::Link_clicked(const QUrl &url)
         keepSidebarScroll();   // the list stays where it was, not back at the top
         LoadDate(previous_date);
         mainwin->getOverview()->graphView()->dataChanged();
+        mainwin->GenerateStatistics();   // its disabled sessions and compliance change too
   //      webView->page()->mainFrame()->setScrollBarValue(Qt::Vertical, webView->page()->mainFrame()->scrollBarMaximum(Qt::Vertical)-i);
     } else  if (code=="togglestagesession") { // Enable/Disable Sleep Stage session
         day=p_profile->GetDay(previous_date,MT_SLEEPSTAGE);
@@ -1076,6 +1078,7 @@ void Daily::Link_clicked(const QUrl &url)
         keepSidebarScroll();   // the list stays where it was, not back at the top
         LoadDate(previous_date);
         mainwin->getOverview()->graphView()->dataChanged();
+        mainwin->GenerateStatistics();   // its disabled sessions and compliance change too
     } else  if (code=="togglepositionsession") { // Enable/Disable Position session
         day=p_profile->GetDay(previous_date,MT_POSITION);
         if (!day) return;
@@ -1084,6 +1087,7 @@ void Daily::Link_clicked(const QUrl &url)
         keepSidebarScroll();   // the list stays where it was, not back at the top
         LoadDate(previous_date);
         mainwin->getOverview()->graphView()->dataChanged();
+        mainwin->GenerateStatistics();   // its disabled sessions and compliance change too
     } else if (code=="cpap")  {
         day=p_profile->GetDay(previous_date,MT_CPAP);
         if (day) {

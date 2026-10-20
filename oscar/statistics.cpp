@@ -467,7 +467,7 @@ void SummaryInfo::update(QDate earliestDate , QDate latestDate)
 {
     PERF_TIMER_SCOPE("Statistics::SummaryInfo::update()");
     if  ( (!latestDate.isValid()) ||  (!earliestDate.isValid()) ) return;
-    if  ( (latestDate == last()) &&  (earliestDate == start()) ) return;
+    // no shortcut for the same range: a session switched on or off on the Daily page changes it
     scUpdate.restart(scUpdate.getLimit(), "SummaryInfo::update(" + earliestDate.toString() + " - " + latestDate.toString() + ")");
     clear(earliestDate,latestDate);
     _start = earliestDate;
@@ -2226,7 +2226,9 @@ QString Statistics::GenerateCPAPUsage()
         } else if (row.calc == SC_COLUMNHEADERS) {
             html += QString("<tr><td><b>%1</b></td>").arg(tr("Details"));
             for (int j=0; j < periods.size(); j++) {
-                html += QString("<td align='right' onmouseover='ChangeColor(this, \"#eeeeee\");' onmouseout='ChangeColor(this, \"#ffffff\");' onclick='alert(\"overview=%1,%2\");'><b>%3</b></td>").arg(periods.at(j).start.toString(Qt::ISODate)).arg(periods.at(j).end.toString(Qt::ISODate)).arg(periods.at(j).header);
+                // the same width for every column, the empty months too: else the last month with data
+                // takes all the room left and sits far to the right (doctor 2026-10-16)
+                html += QString("<td align='right' width='%4%' onmouseover='ChangeColor(this, \"#eeeeee\");' onmouseout='ChangeColor(this, \"#ffffff\");' onclick='alert(\"overview=%1,%2\");'><b>%3</b></td>").arg(periods.at(j).start.toString(Qt::ISODate)).arg(periods.at(j).end.toString(Qt::ISODate)).arg(periods.at(j).header).arg(qMax(1, 70 / qMax(1, int(periods.size()))));
             }
             html += "</tr>";
             continue;
@@ -2363,7 +2365,7 @@ QString Statistics::GenerateHTML()
     htmlUsage = GenerateCPAPUsage();
     if (!htmlUsage.isEmpty()) {
         const QString note = manualScoringNote(p_profile->FirstDay(MT_CPAP), p_profile->LastDay(MT_CPAP));
-        if (!note.isEmpty()) htmlUsage += QStringLiteral("<p><i>%1</i></p>").arg(note.toHtmlEscaped());
+        htmlUsage = manualScoringBanner(note) + htmlUsage;   // above the tables, where it is seen
     }
 
     if (htmlUsage == "") {
@@ -2924,6 +2926,14 @@ QString Statistics::manualScoringNote(const QDate &from, const QDate &to)
     }
     if (nights == 0) return QString();
     return tr("* %n night(s) corrected by hand: the AHI and the event indices count the corrected events.", nullptr, nights);
+}
+
+QString Statistics::manualScoringBanner(const QString &note)
+{
+    if (note.isEmpty()) return QString();
+    return QStringLiteral("<div align=center><table cellpadding=6 cellspacing=0 style='background-color:#FFF3CD;"
+                          " border:1px solid #E0B252;'><tr><td><font size='+1' color='#B26A00'>&#9888;</font></td>"
+                          "<td><b>%1</b></td></tr></table></div><br/>").arg(note.toHtmlEscaped());
 }
 
 void Statistics::forgetRXChanges()
