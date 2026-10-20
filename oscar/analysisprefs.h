@@ -52,7 +52,6 @@ class AnalysisPreferencesPage : public QWidget
     void resetToDefaults();
     QDoubleSpinBox *number(double min, double max, double step, int decimals, const QString &suffix);
 
-    QCheckBox *m_enabled;
     QComboBox *m_rule;
     QLabel *m_ruleText;
     QCheckBox *m_limitOxi;

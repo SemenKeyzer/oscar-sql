@@ -37,9 +37,7 @@ AnalysisPreferencesPage::AnalysisPreferencesPage(QWidget *parent)
                                 "time with low SpO2 and pulse rises."), this);
     intro->setWordWrap(true);
     layout->addWidget(intro);
-    m_enabled = new QCheckBox(tr("Analyse nights with OSCAR's own analysis (experimental)"), this);
-    m_enabled->setObjectName(QStringLiteral("analysisEnabled"));
-    layout->addWidget(m_enabled);
+    // no switch here: the analysis always runs, «Анализ OSCAR» (the Daily button, View menu) shows or hides it
     // how many nights the settings on the page would recalculate; filled in once a counter is set
     m_recalcNote = new QLabel(this);
     m_recalcNote->setObjectName(QStringLiteral("recalculationNote"));
@@ -97,15 +95,11 @@ AnalysisPreferencesPage::AnalysisPreferencesPage(QWidget *parent)
     // every other parameter, as a percentage where it is a fraction
     m_advanced = new QGroupBox(tr("Advanced"), this);
     m_advanced->setObjectName(QStringLiteral("advancedGroup"));
-    m_advanced->setCheckable(true);
-    m_advanced->setChecked(false);
     auto *advanced = new QFormLayout(m_advanced);
     auto *advancedContent = new QWidget(m_advanced);
     auto *form = new QFormLayout(advancedContent);
     form->setContentsMargins(0, 0, 0, 0);
-    advanced->addRow(advancedContent);
-    advancedContent->setVisible(false);
-    connect(m_advanced, &QGroupBox::toggled, advancedContent, &QWidget::setVisible);
+    advanced->addRow(advancedContent);   // shown at once, under its heading
 
     const QString s = tr(" s"), pct = tr(" %"), bpm = tr(" bpm");
     auto add = [this, form](const char *name, const QString &label, QDoubleSpinBox *box, double *(*field)(AnalysisParams &), double scale) {
@@ -160,7 +154,6 @@ AnalysisPreferencesPage::AnalysisPreferencesPage(QWidget *parent)
     resetToDefaults();
 
     auto schedule = [this]() { m_recalcTimer->start(); };
-    connect(m_enabled, &QCheckBox::toggled, this, schedule);
     connect(m_rule, &QComboBox::currentIndexChanged, this, schedule);
     for (QCheckBox *box : { m_limitOxi, m_pulseArousal, m_classify }) connect(box, &QCheckBox::toggled, this, schedule);
     for (const Field &f : m_fields) connect(f.box, &QDoubleSpinBox::valueChanged, this, schedule);
@@ -177,7 +170,7 @@ void AnalysisPreferencesPage::setRecalculationCounter(const std::function<int(co
 void AnalysisPreferencesPage::updateRecalculationNote()
 {
     const AnalysisParams p = params();
-    if (!m_counter || !p.enabled) {
+    if (!m_counter) {
         m_recalcNote->hide();
         return;
     }
@@ -233,7 +226,6 @@ void AnalysisPreferencesPage::showRuleDescription()
 void AnalysisPreferencesPage::load(const AnalysisParams &p, const QList<double> &thresholds)
 {
     AnalysisParams copy = p;
-    m_enabled->setChecked(p.enabled);
     m_rule->setCurrentIndex(qMax(0, m_rule->findData(int(p.day.rule))));
     showRuleDescription();
     m_limitOxi->setChecked(p.day.limitOxiToCpap);
@@ -249,7 +241,7 @@ void AnalysisPreferencesPage::load(const AnalysisParams &p, const QList<double> 
 AnalysisParams AnalysisPreferencesPage::params() const
 {
     AnalysisParams p;
-    p.enabled = m_enabled->isChecked();
+    p.enabled = true;
     p.day.rule = HypopneaRule(m_rule->currentData().toInt());
     p.day.limitOxiToCpap = m_limitOxi->isChecked();
     p.day.pulseRiseAsArousal = m_pulseArousal->isChecked();

@@ -807,7 +807,7 @@ void AnalysisIntegrationTests::testAnalysisSettingsRoundTrip()
     p.oxi.tachyBpm = 110;
     settings->setParams(p);
     const AnalysisParams back = settings->params();
-    QCOMPARE(back.enabled, false);
+    QCOMPARE(back.enabled, true);   // no switch any more: always analysed (doctor 2026-10-16)
     QVERIFY(back.day.rule == HypopneaRule::Cms4);
     QCOMPARE(back.oxi.zoneMinDesats, 4);
     QCOMPARE(back.flowHash(), p.flowHash());
@@ -885,14 +885,12 @@ void AnalysisIntegrationTests::testAnalysisServiceKeepsDaysCurrent()
     QCOMPARE(AnalysisDailyRepository().find(m_profileId, date).id, qint64(0));
     QVERIFY(service.pendingDays().isEmpty());
 
-    // switched off altogether: nothing to do
+    // a profile saved with the old switch off is analysed all the same
     AnalysisParams off;
     off.enabled = false;
     p_profile->analysis->setParams(off);
     service.reloadSettings();
-    cs->setEnabled(true);
-    QVERIFY(service.pendingDays().isEmpty());
-    QVERIFY(!service.updateDay(date));
+    QVERIFY(service.params().enabled);
 
     p_profile->analysis->resetToDefaults();
     setActiveParams(AnalysisParams());

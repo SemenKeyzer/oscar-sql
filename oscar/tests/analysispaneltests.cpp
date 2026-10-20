@@ -20,6 +20,7 @@
 #include "analysisprefs.h"
 #include <QComboBox>
 #include <QDoubleSpinBox>
+#include <QGroupBox>
 #include <QLabel>
 #include <QLineEdit>
 #include "statistics.h"
@@ -335,7 +336,13 @@ void AnalysisPanelTests::testPreferencesPage()
     p.oxi.zoneMinDesats = 5;
     page.load(p, { 92, 88 });
     const AnalysisParams back = page.params();
-    QCOMPARE(back.enabled, false);
+    // no switch on the page: the analysis always runs, «Анализ OSCAR» shows or hides it (doctor 2026-10-16)
+    QVERIFY(!page.findChild<QCheckBox *>(QStringLiteral("analysisEnabled")));
+    QCOMPARE(back.enabled, true);
+    // «Дополнительно» is shown at once, not behind a check box
+    QGroupBox *advanced = page.findChild<QGroupBox *>(QStringLiteral("advancedGroup"));
+    QVERIFY(advanced && !advanced->isCheckable());
+    QVERIFY(page.findChild<QDoubleSpinBox *>(QStringLiteral("minEventSec"))->isVisibleTo(&page));
     QVERIFY(back.day.rule == HypopneaRule::Cms4);
     QCOMPARE(back.flowHash(), p.flowHash());
     QCOMPARE(back.oxiHash(), p.oxiHash());
@@ -380,16 +387,11 @@ void AnalysisPanelTests::testPreferencesRecalculationNote()
     minEvent->setValue(20);
     QTRY_COMPARE(note->text(), QStringLiteral("With these settings 18 night(s) will need recalculation."));
 
-    // switched off: nothing to say
-    page.findChild<QCheckBox *>(QStringLiteral("analysisEnabled"))->setChecked(false);
-    QTRY_VERIFY(note->isHidden());
-
-    // off until now, switched on: the nights are analysed for the first time
+    // off until now (a profile from before): the nights are analysed for the first time
     AnalysisParams off;
     off.enabled = false;
     page.load(off, { 90, 88 });
     page.setRecalculationCounter([](const AnalysisParams &) { return 26; }, false);
-    page.findChild<QCheckBox *>(QStringLiteral("analysisEnabled"))->setChecked(true);
     QTRY_COMPARE(note->text(), QStringLiteral("26 night(s) will be analysed."));
 }
 

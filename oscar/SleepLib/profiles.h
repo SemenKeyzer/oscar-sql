@@ -687,7 +687,8 @@ class AnalysisSettings : public PrefSettings
     //! Every parameter back to its default (the thresholds too).
     void resetToDefaults();
 
-    bool enabled() const { return getPref(STR_AN_Enabled).toBool(); }
+    //! Always: the analysis runs for every night; shown() decides whether the pages show it.
+    bool enabled() const { return true; }
     void setEnabled(bool enabled) { setPref(STR_AN_Enabled, enabled); }
 
     //! Mark the differences from the device on the Daily flow graph (a display choice,
@@ -696,7 +697,7 @@ class AnalysisSettings : public PrefSettings
     void setShowFlowDifferences(bool show) { setPref(STR_AN_ShowFlowDifferences, show); }
 
     //! The "OSCAR analysis" switch: whether the pages show the analysis at all (a display choice,
-    //! off until switched on; the analysis is computed or not as enabled() says).
+    //! off until switched on; the analysis itself is always computed).
     bool shown() const { return getPref(STR_AN_Shown).toBool(); }
     void setShown(bool shown) { setPref(STR_AN_Shown, shown); }
 

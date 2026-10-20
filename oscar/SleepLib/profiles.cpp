@@ -3468,7 +3468,7 @@ AnalysisSettings::AnalysisSettings(Profile *profile)
 analysis::AnalysisParams AnalysisSettings::params() const
 {
     analysis::AnalysisParams p;
-    p.enabled = getPref(STR_AN_Enabled).toBool();
+    p.enabled = true;   // always analysed; «Анализ OSCAR» only shows or hides it (the old switch is gone)
     const int rule = getPref(STR_AN_HypopneaRule).toInt();
     p.day.rule = rule >= int(analysis::HypopneaRule::Auto) && rule <= int(analysis::HypopneaRule::FlowOnly)
                ? analysis::HypopneaRule(rule) : analysis::HypopneaRule::Auto;
