@@ -191,11 +191,15 @@ QString AnalysisPanel::sidebarHtml(Day *day, const DayResult &r, const QString &
         html += QStringLiteral("</table>");
 
         if (r.flScored && r.flBreaths > 0) {
+            // one sentence that ties the figures together: the time is the % above, the breaths are
+            // more because single limited breaths count too (doctor 2026-10-09: "three numbers")
+            const QString pct = r.flowSeconds > 0 ? number(100.0 * r.flSeconds / r.flowSeconds) : QStringLiteral("&mdash;");
             html += QStringLiteral("<p>%1</p>").arg(HelpTips::term(r.flLimitedBreaths >= 0
-                ? tr("Flow limitation: %1, longest run %2; %3% of breaths")
-                      .arg(duration(1000LL * r.flSeconds), duration(1000LL * r.flLongestSeconds),
+                ? tr("Flow limitation: %1 = %2% of the analysed time, longest run %3; %4% of single breaths look limited")
+                      .arg(duration(1000LL * r.flSeconds), pct, duration(1000LL * r.flLongestSeconds),
                            number(100.0 * r.flLimitedBreaths / r.flBreaths, 0))
-                : tr("Flow limitation: %1, longest run %2").arg(duration(1000LL * r.flSeconds), duration(1000LL * r.flLongestSeconds)),
+                : tr("Flow limitation: %1 = %2% of the analysed time, longest run %3")
+                      .arg(duration(1000LL * r.flSeconds), pct, duration(1000LL * r.flLongestSeconds)),
                 QStringLiteral("fl_time")));
         }
         html += glasgowHtml(r, showGlasgowAdapted);

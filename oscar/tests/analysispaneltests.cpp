@@ -476,8 +476,10 @@ void AnalysisPanelTests::testFlowLimitationLine()
     r.flBreaths = 1000;
     r.flLimitedBreaths = 310;
     const QString html = AnalysisPanel::sidebarHtml(nullptr, r, QString(), {});
-    QVERIFY(html.contains(AnalysisPanel::tr("Flow limitation: %1, longest run %2; %3% of breaths")
-                              .arg(AnalysisPanel::duration(6300000), AnalysisPanel::duration(720000), QStringLiteral("31"))));
+    // one sentence that ties the figures together: the time, its % of the analysed time, the breaths (doctor 2026-10-09)
+    QVERIFY2(html.contains(AnalysisPanel::tr("Flow limitation: %1 = %2% of the analysed time, longest run %3; %4% of single breaths look limited")
+                               .arg(AnalysisPanel::duration(6300000), QStringLiteral("23.3"), AnalysisPanel::duration(720000), QStringLiteral("31"))),
+             qPrintable(html));
 }
 
 void AnalysisPanelTests::testGlasgowRows()
@@ -527,8 +529,8 @@ void AnalysisPanelTests::testFlowLimitationLineOldStamp()
     r.flBreaths = 1000;
     r.flLimitedBreaths = -1;   // not known
     const QString html = AnalysisPanel::sidebarHtml(nullptr, r, QString(), {});
-    QVERIFY(html.contains(AnalysisPanel::tr("Flow limitation: %1, longest run %2")
-                              .arg(AnalysisPanel::duration(6300000), AnalysisPanel::duration(720000))));
+    QVERIFY(html.contains(AnalysisPanel::tr("Flow limitation: %1 = %2% of the analysed time, longest run %3")
+                              .arg(AnalysisPanel::duration(6300000), QStringLiteral("23.3"), AnalysisPanel::duration(720000))));
     QVERIFY(!html.contains(QStringLiteral("-0%")));
 }
 
