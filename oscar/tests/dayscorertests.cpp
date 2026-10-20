@@ -405,3 +405,17 @@ void DayScorerTests::testMixedRateNight()
     QCOMPARE(r.glasgowAdapted.breaths, 90);
     QCOMPARE(r.flLimitedBreaths, 20);
 }
+
+// A stretch marked «Артефакт» leaves its desaturation out of the day: no link, no burden.
+void DayScorerTests::testDayExcludeLeavesLinkedBurden()
+{
+    DayInput in = night();
+    in.apneas.append(dayEvent(1000, 1020, RespEvent::ObstructiveApnea));
+    synth::dip(in.spo2, 1015, 5, 5, 10, 5);
+    QCOMPARE(scoreDay(in, AnalysisParams()).linkedDesaturations, 1);
+    in.oxiOverrides.exclude.append(Span { at(1005), at(1060), 0 });
+    const DayResult r = scoreDay(in, AnalysisParams());
+    QCOMPARE(r.oxi.countDesaturations(3), 0);
+    QCOMPARE(r.linkedDesaturations, 0);
+    QCOMPARE(r.linkedDesatArea, 0.0);
+}

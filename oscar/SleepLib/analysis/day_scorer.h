@@ -65,6 +65,7 @@ struct DayInput {
     Grid spo2;                          //!< 1 Hz, as recorded (NaN: no data)
     Grid pulse;
     bool oxiFromSeparateDevice = false; //!< SpO2 not from the CPAP: its clock may be off
+    OxiOverrides oxiOverrides;          //!< «Артефакт» / «Не артефакт» stretches, in the time of spo2
 };
 
 //! The day's scoring (spec §3.4).

@@ -594,8 +594,11 @@ QVector<OxiArtifact> merged(QVector<Piece> pieces, const Grid &g)
 
 } // namespace
 
-QVector<OxiArtifact> findOxiArtifacts(const Grid &spo2Raw, const Grid &pulseRaw)
+QVector<OxiArtifact> findOxiArtifacts(const Grid &spo2Raw, const Grid &pulseRaw, const OxiOverrides &overrides)
 {
+    auto indices = [&spo2Raw](const Span &sp) {
+        return qMakePair(qMax(0, spo2Raw.indexOf(sp.start)), qMin(spo2Raw.size(), spo2Raw.indexOf(sp.end)) - 1);
+    };
     QVector<Piece> pieces;
     QVector<float> v = spo2Raw.v;
     QVector<float> step = v;
@@ -612,6 +615,17 @@ QVector<OxiArtifact> findOxiArtifacts(const Grid &spo2Raw, const Grid &pulseRaw)
     disturbedFalls(spo2Raw, v, pulseRaw, pieces);
     frozen(spo2Raw, v, pulseRaw, pieces);
     probeOnOff(inRange, pieces);
+    // «Не артефакт» cancels these automatic calls where it overlaps them
+    for (const Span &sp : overrides.keep) {
+        const auto k = indices(sp);
+        pieces.erase(std::remove_if(pieces.begin() + from, pieces.end(),
+                                    [&k](const Piece &p) { return p.first <= k.second && p.last >= k.first; }),
+                     pieces.end());
+    }
+    for (const Span &sp : overrides.exclude) {
+        const auto k = indices(sp);
+        if (k.first <= k.second) pieces.append({ k.first, k.second, OxiArtifactReason::Manual });
+    }
     for (int k = from; k < pieces.size(); ++k) {
         for (int i = pieces[k].first; i <= pieces[k].last; ++i) v[i] = kNoData;
     }
@@ -630,6 +644,16 @@ void maskArtifacts(Grid &g, const QVector<OxiArtifact> &artifacts)
     }
 }
 
+void maskOximetry(Grid &spo2, Grid &pulse, const QVector<OxiArtifact> &artifacts)
+{
+    maskArtifacts(spo2, artifacts);
+    QVector<OxiArtifact> probe;
+    for (const OxiArtifact &a : artifacts) {
+        if (a.reason == OxiArtifactReason::Frozen || a.reason == OxiArtifactReason::ProbeOnOff) probe.append(a);
+    }
+    maskArtifacts(pulse, probe);
+}
+
 int OxiResult::artifactSeconds() const
 {
     qint64 ms = 0;
@@ -637,21 +661,16 @@ int OxiResult::artifactSeconds() const
     return int(ms / 1000);
 }
 
-OxiResult analyzeOximetry(const Grid &spo2Raw, const Grid &pulseRaw, const OxiParams &params)
+OxiResult analyzeOximetry(const Grid &spo2Raw, const Grid &pulseRaw, const OxiParams &params, const OxiOverrides &overrides)
 {
     OxiResult r;
     r.spo2Hist.fill(0, kSpo2HistMax - kSpo2HistMin + 1);
     r.pulseHist.fill(0, kPulseHistMax - kPulseHistMin + 1);
 
     // artefacts are left out of everything; the pulse too where the whole probe was off or stuck
-    r.artifacts = findOxiArtifacts(spo2Raw, pulseRaw);
+    r.artifacts = findOxiArtifacts(spo2Raw, pulseRaw, overrides);
     Grid spo2In = spo2Raw, pulseIn = pulseRaw;
-    maskArtifacts(spo2In, r.artifacts);
-    QVector<OxiArtifact> probe;
-    for (const OxiArtifact &a : r.artifacts) {
-        if (a.reason == OxiArtifactReason::Frozen || a.reason == OxiArtifactReason::ProbeOnOff) probe.append(a);
-    }
-    maskArtifacts(pulseIn, probe);
+    maskOximetry(spo2In, pulseIn, r.artifacts);
     const Grid spo2 = cleanSpo2(spo2In);
     const Grid pulse = cleanPulse(pulseIn);
 

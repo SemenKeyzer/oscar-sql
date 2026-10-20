@@ -359,9 +359,10 @@ DayResult scoreDay(const DayInput &in, const AnalysisParams &p)
         keepOnly(pulse, cpapSpans);
         r.oxiScope = QStringLiteral("cpap");
     }
-    r.oxi = analyzeOximetry(spo2, pulse, p.oxi);
+    r.oxi = analyzeOximetry(spo2, pulse, p.oxi, in.oxiOverrides);
     r.hasOximetry = r.oxi.hasSpo2;
     r.hasPulse = r.oxi.hasPulse;
+    maskOximetry(spo2, pulse, r.oxi.artifacts);   // the hypopnea rules see what the figures see
     const Grid cleanedSpo2 = cleanSpo2(spo2);
     const Grid cleanedPulse = cleanPulse(pulse);
 

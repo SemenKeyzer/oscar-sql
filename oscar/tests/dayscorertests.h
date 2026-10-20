@@ -24,6 +24,7 @@ private slots:
     void testLinkWindowEdges();
     void testHypopneaClassification();
     void testLinkedAreaAndUnexplained();
+    void testDayExcludeLeavesLinkedBurden();
     void testNoLinksWithoutCpap();
     void testPulseResponse();
     void testLimitOxiToCpap();

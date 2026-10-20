@@ -370,3 +370,44 @@ void OxiAnalyzerTests::testArtifactsLeaveTheFigures()
     QCOMPARE(r.spo2Seconds, 900 - r.artifactSeconds());
     QCOMPARE(r.spo2Hist[91 - kSpo2HistMin], 0);
 }
+
+namespace {
+
+Span seconds(const Grid &g, int from, int to) { return Span { g.timeAt(from), g.timeAt(to), 0 }; }
+
+} // namespace
+
+// «Артефакт» by hand: whatever lies in the stretch is left out, even a real desaturation.
+void OxiAnalyzerTests::testManualExcludeRemovesDesaturation()
+{
+    Grid s = synth::flat(900, 96);
+    synth::dip(s, 300, 5, 5, 10, 5);
+    QCOMPARE(analyze(s, livePulse(900)).countDesaturations(3), 1);
+    OxiOverrides o;
+    o.exclude.append(seconds(s, 290, 330));
+    const OxiResult r = analyzeOximetry(s, livePulse(900), OxiParams(), o);
+    QCOMPARE(r.countDesaturations(3), 0);
+    QCOMPARE(ofReason(r, OxiArtifactReason::Manual).size(), 1);
+}
+
+// «Не артефакт»: an automatic call inside the stretch is cancelled and the seconds count again.
+void OxiAnalyzerTests::testKeepCancelsAutomaticArtifact()
+{
+    Grid s = synth::flat(900, 96);
+    synth::fill(s, 300, 310, 91);
+    OxiOverrides o;
+    o.keep.append(seconds(s, 280, 320));
+    const OxiResult r = analyzeOximetry(s, livePulse(900), OxiParams(), o);
+    QVERIFY(r.artifacts.isEmpty());
+    QCOMPARE(r.spo2Seconds, 900);
+}
+
+// A spike is not a value at all: «Не артефакт» does not bring it back.
+void OxiAnalyzerTests::testKeepDoesNotCancelSpike()
+{
+    Grid s = synth::flat(900, 96);
+    synth::fill(s, 500, 502, 84);
+    OxiOverrides o;
+    o.keep.append(seconds(s, 490, 520));
+    QCOMPARE(ofReason(analyzeOximetry(s, livePulse(900), OxiParams(), o), OxiArtifactReason::Spike).size(), 1);
+}

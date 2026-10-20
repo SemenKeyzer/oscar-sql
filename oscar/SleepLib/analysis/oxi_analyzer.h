@@ -117,16 +117,27 @@ struct OxiResult {
 //! a fall with a disturbed pulse, a frozen signal, the probe going on or off, short
 //! fragments), merged: overlapping or touching stretches become one, with the reason of the
 //! longest of them (the first reason on a tie). In time order.
-QVector<OxiArtifact> findOxiArtifacts(const Grid &spo2Raw, const Grid &pulseRaw);
+//! The user's own calls: stretches marked «Артефакт» (\a exclude, reason Manual) and «Не
+//! артефакт» (\a keep: cancels the automatic calls that can be wrong — a fast fall, a disturbed
+//! pulse, a frozen signal, the probe — but not out-of-range values, spikes or short fragments).
+struct OxiOverrides {
+    QVector<Span> exclude;
+    QVector<Span> keep;
+};
+QVector<OxiArtifact> findOxiArtifacts(const Grid &spo2Raw, const Grid &pulseRaw, const OxiOverrides &overrides = OxiOverrides());
 //! Sets the seconds \a artifacts cover to no data.
 void maskArtifacts(Grid &g, const QVector<OxiArtifact> &artifacts);
+//! Leaves \a artifacts out of \a spo2, and those that silence the whole probe (frozen, probe on
+//! or off) out of \a pulse too.
+void maskOximetry(Grid &spo2, Grid &pulse, const QVector<OxiArtifact> &artifacts);
 
 Grid cleanSpo2(const Grid &raw);
 //! The pulse counterpart of cleanSpo2() (no spike rule).
 Grid cleanPulse(const Grid &raw);
 
 //! Analyses one session's SpO2 and pulse, both on 1 Hz grids (NaN = no data).
-OxiResult analyzeOximetry(const Grid &spo2, const Grid &pulse, const OxiParams &params);
+OxiResult analyzeOximetry(const Grid &spo2, const Grid &pulse, const OxiParams &params,
+                          const OxiOverrides &overrides = OxiOverrides());
 
 } // namespace analysis
 

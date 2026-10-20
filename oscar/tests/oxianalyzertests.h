@@ -42,6 +42,9 @@ private slots:
     void testProbeOnOffAtMostFiveMinutes();
     void testBasicCleaningIsReported();
     void testArtifactsLeaveTheFigures();
+    void testManualExcludeRemovesDesaturation();
+    void testKeepCancelsAutomaticArtifact();
+    void testKeepDoesNotCancelSpike();
 };
 DECLARE_TEST(OxiAnalyzerTests)
 
