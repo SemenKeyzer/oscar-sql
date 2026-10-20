@@ -17,7 +17,7 @@
 
 #include "profiles.h"
 #include "machine.h"
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && !defined(OSCAR_EXTERNAL_ZLIB)   // MSVC without a zlib of its own: Qt's
 #include "QtZlib/zlib.h"
 #else
 #include "zlib.h"

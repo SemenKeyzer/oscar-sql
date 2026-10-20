@@ -192,11 +192,21 @@ macx  {
     DEFINES         += _TTY_POSIX_
 } else:win32 {
     DEFINES          += WINVER=0x0501 # needed for mingw to pull in appropriate dbt business...probably a better way to do this
+    DEFINES          += NOMINMAX      # windows.h must not define min/max macros (they break min()/max() members under MSVC)
     LIBS             += -lsetupapi
     LIBS             += -ldbghelp # needed for call stack with names rather than addresses
 
     INCLUDEPATH += $$PWD
-    INCLUDEPATH += $$[QT_INSTALL_PREFIX]/../src/qtbase/src/3rdparty/zlib
+    # MSVC: Qt 6 does not export zlib's gz* functions, so a zlib is given with ZLIB_DIR=<prefix>
+    # (include/zlib.h, lib/zlib.lib; the Windows workflow takes it from vcpkg)
+    *-msvc*:!isEmpty(ZLIB_DIR) {
+        INCLUDEPATH += $$ZLIB_DIR/include
+        DEFINES += OSCAR_EXTERNAL_ZLIB
+        isEmpty(ZLIB_LIB): ZLIB_LIB = $$ZLIB_DIR/lib/zlib.lib
+        LIBS += $$ZLIB_LIB
+    } else {
+        INCLUDEPATH += $$[QT_INSTALL_PREFIX]/../src/qtbase/src/3rdparty/zlib
+    }
 
     if (*-msvc*):!equals(TEMPLATE_PREFIX, "vc") {
         LIBS += -ladvapi32
@@ -868,9 +878,11 @@ DISTFILES += help/default.css \
 
 message("CXXFLAGS pre-mods $$QMAKE_CXXFLAGS ")
 
-# Always treat warnings as errors, even (especially!) in release
-QMAKE_CFLAGS += -Werror
-QMAKE_CXXFLAGS += -Werror
+# Always treat warnings as errors, even (especially!) in release (GCC and clang; MSVC has its own flags)
+!msvc {
+    QMAKE_CFLAGS += -Werror
+    QMAKE_CXXFLAGS += -Werror
+}
 
 gcc | clang {
     COMPILER_VERSION = $$system($$QMAKE_CXX " -dumpversion")
@@ -882,8 +894,10 @@ gcc | clang {
 
 # Qt deprecates more API with every minor release, so a newer Qt than the one the
 # code was last built with must not break the build: deprecations stay warnings.
-QMAKE_CFLAGS += -Wno-error=deprecated-declarations
-QMAKE_CXXFLAGS += -Wno-error=deprecated-declarations
+!msvc {
+    QMAKE_CFLAGS += -Wno-error=deprecated-declarations
+    QMAKE_CXXFLAGS += -Wno-error=deprecated-declarations
+}
 
 message("CXXFLAGS post-mods $$QMAKE_CXXFLAGS ")
 message("CXXFLAGS_WARN_ON $$QMAKE_CXXFLAGS_WARN_ON")
