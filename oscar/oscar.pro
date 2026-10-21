@@ -187,7 +187,7 @@ macx|win32 {
         SOURCES += SleepLib/thirdparty/hidapi/mac/hid.c
         LIBS += -framework IOKit -framework CoreFoundation
     }
-    win32: SOURCES += SleepLib/thirdparty/hidapi/windows/hid.c   # loads hid.dll and cfgmgr32 itself
+    win32: SOURCES += SleepLib/thirdparty/rs01_hidapi_win.c   # hidapi/windows/hid.c with Windows 10 headers; loads hid.dll and cfgmgr32 itself
 }
 
 macx  {

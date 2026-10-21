@@ -206,7 +206,7 @@ void RS01ImportTests::testClockText()
 {
     const QDateTime when(QDate(2026, 10, 21), QTime(22, 15, 3));
     const QString ok = RS01Page::clockText(true, when, QString());
-    QVERIFY2(ok.contains(QStringLiteral("Device clock set")) && ok.contains(QLocale().toString(when, QLocale::ShortFormat)), qPrintable(ok));
+    QVERIFY2(ok.contains(QStringLiteral("Device clock set")) && ok.contains(QStringLiteral("22:15:03")), qPrintable(ok));
     const QString why = RS01Hid::errorText(RS01Hid::Error::NotFound);
     const QString failed = RS01Page::clockText(false, when, why);
     QVERIFY2(failed.contains(QStringLiteral("not set")) && failed.contains(why), qPrintable(failed));

@@ -11,6 +11,7 @@
 
 #include <QByteArray>
 #include <QDateTime>
+#include <functional>
 
 // The RS01's HID commands OSCAR sends (format notes §4, verified on the owner's device): identify and
 // set the clock; nothing else. Each is a 64-byte report body (without the report ID), zero padded.
@@ -25,5 +26,9 @@ QByteArray rs01ClockCommand(const QDateTime &local);
 bool rs01IsIdentifyReply(const QByteArray &reply);
 //! «F3 00 73»: the clock was set.
 bool rs01IsClockReply(const QByteArray &reply);
+
+//! Reads replies with \a read (given the time left, in ms; empty on a timeout) until \a accepted takes
+//! one or \a totalMs have passed; then the last reply read (empty if none came).
+QByteArray rs01AwaitReply(const std::function<QByteArray(int)> &read, bool (*accepted)(const QByteArray &), int totalMs);
 
 #endif // RS01_CLOCK_H

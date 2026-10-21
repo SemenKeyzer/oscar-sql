@@ -9,6 +9,8 @@
 #include "rs01clocktests.h"
 
 #include <QDateTime>
+#include <QElapsedTimer>
+#include <QThread>
 #include "SleepLib/loader_plugins/rs01_clock.h"
 #include "SleepLib/loader_plugins/rs01_hid.h"
 
@@ -91,4 +93,39 @@ void RS01ClockTests::testErrorTexts()
 #else
     QVERIFY(!RS01Hid::available());
 #endif
+}
+
+// Waiting for a reply: one deadline for the whole exchange, unrelated reports let pass, and when no
+// accepted reply comes the last unrelated one is what the device said (not "no reply").
+void RS01ClockTests::testAwaitReplyWithinDeadline()
+{
+    const QByteArray other = padded(bytes({ 0xF4, 0x00, 0x74 }));
+    const QByteArray done = padded(bytes({ 0xF3, 0x00, 0x73 }));
+    QList<int> asked;
+    QList<QByteArray> replies { other, done };
+    auto read = [&](int timeoutMs) {
+        asked << timeoutMs;
+        return replies.isEmpty() ? QByteArray() : replies.takeFirst();
+    };
+    QCOMPARE(rs01AwaitReply(read, rs01IsClockReply, 1000), done);
+    QCOMPARE(asked.size(), 2);
+    QVERIFY(asked[0] <= 1000 && asked[1] <= asked[0]);
+
+    // the device keeps sending something else: stop at the deadline, give back what it said
+    asked.clear();
+    int calls = 0;
+    auto chatty = [&](int timeoutMs) {
+        asked << timeoutMs;
+        ++calls;
+        QThread::msleep(30);
+        return other;
+    };
+    QElapsedTimer t;
+    t.start();
+    QCOMPARE(rs01AwaitReply(chatty, rs01IsClockReply, 200), other);
+    QVERIFY2(t.elapsed() < 400, qPrintable(QString::number(t.elapsed())));
+    QVERIFY(calls >= 2);
+
+    // silence: empty
+    QCOMPARE(rs01AwaitReply([](int) { return QByteArray(); }, rs01IsClockReply, 100), QByteArray());
 }

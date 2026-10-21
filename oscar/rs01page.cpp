@@ -106,7 +106,9 @@ QString RS01Page::writableWarning(const QString &mountPoint, const QString &devi
 
 QString RS01Page::clockText(bool ok, const QDateTime &when, const QString &error)
 {
-    return ok ? tr("Device clock set: %1").arg(QLocale().toString(when, QLocale::ShortFormat))
+    const QLocale locale;
+    return ok ? tr("Device clock set: %1").arg(locale.toString(when.date(), QLocale::ShortFormat) + QLatin1Char(' ')
+                                               + when.time().toString(QStringLiteral("HH:mm:ss")))
               : tr("Device clock not set: %1").arg(error);
 }
 

@@ -22,21 +22,17 @@ constexpr unsigned short kVendor = 0x28E9;
 constexpr unsigned short kProduct = 0x01F3;
 constexpr int kTimeoutMs = 1000;
 
-// Sends one 64-byte command (report ID 0 in front) and returns the first reply that \a accepted
-// takes; a few unrelated reports are let pass.
+// Sends one 64-byte command (report ID 0 in front) and waits at most 1 s in all for the reply
+// \a accepted takes.
 QByteArray exchange(hid_device *dev, const QByteArray &command, bool (*accepted)(const QByteArray &))
 {
     const QByteArray report = QByteArray(1, '\0') + command;
     if (hid_write(dev, reinterpret_cast<const unsigned char *>(report.constData()), size_t(report.size())) < 0) return QByteArray();
-    for (int attempt = 0; attempt < 3; ++attempt) {
+    return rs01AwaitReply([dev](int timeoutMs) {
         unsigned char buf[65] = {};
-        const int n = hid_read_timeout(dev, buf, sizeof(buf), kTimeoutMs);
-        if (n <= 0) return QByteArray();
-        const QByteArray reply(reinterpret_cast<const char *>(buf), n);
-        if (accepted(reply)) return reply;
-        if (attempt == 2) return reply;
-    }
-    return QByteArray();
+        const int n = hid_read_timeout(dev, buf, sizeof(buf), timeoutMs);
+        return n > 0 ? QByteArray(reinterpret_cast<const char *>(buf), n) : QByteArray();
+    }, accepted, kTimeoutMs);
 }
 #endif
 

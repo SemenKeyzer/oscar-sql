@@ -8,6 +8,8 @@
 
 #include "rs01_clock.h"
 
+#include <QElapsedTimer>
+
 namespace {
 
 constexpr int kReportBytes = 64;
@@ -67,4 +69,18 @@ bool rs01IsClockReply(const QByteArray &reply)
 {
     const QByteArray p = payload(reply);
     return p.size() >= 3 && quint8(p.at(0)) == 0xF3 && p.at(1) == '\0' && quint8(p.at(2)) == rs01Checksum(p.left(2));
+}
+
+QByteArray rs01AwaitReply(const std::function<QByteArray(int)> &read, bool (*accepted)(const QByteArray &), int totalMs)
+{
+    QElapsedTimer clock;
+    clock.start();
+    QByteArray last;
+    for (qint64 left = totalMs; left > 0; left = totalMs - clock.elapsed()) {
+        const QByteArray reply = read(int(left));
+        if (reply.isEmpty()) break;   // timed out
+        if (accepted(reply)) return reply;
+        last = reply;   // something else: wait on, but it is what the device said
+    }
+    return last;
 }
