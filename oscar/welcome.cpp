@@ -435,12 +435,15 @@ static QString oximetryNightHtml(const OximetryNight &n)
             html += QObject::tr("Average SpO2 %1%, lowest %2%.").arg(n.spo2Avg, 0, 'f', 1).arg(n.spo2Min, 0, 'f', 0) + "<br/>";
             html += QObject::tr("Below 90%: %1% of the time (%2 min).").arg(n.percentBelow90, 0, 'f', 1).arg(qRound(n.minutesBelow90)) + "<br/>";
             if (n.fromAnalysis) {
-                html += QObject::tr("ODI 3%: %1 per hour (%2 desaturations), %3.").arg(n.desaturations / n.hours, 0, 'f', 1).arg(n.desaturations)
-                            .arg(oxiGradeHtml(odiGrade(n.desaturations / n.hours))) + "<br/>";
-                html += QObject::tr("ODI 4%: %1 per hour.").arg(n.desaturations4 / n.hours, 0, 'f', 1) + "<br/>";
-                if (!std::isnan(n.hypoxicBurden)) {
-                    html += QObject::tr("Hypoxic burden: %1 %·min/h (%2).").arg(n.hypoxicBurden, 0, 'f', 1)
-                                .arg(oxiGradeHtml(hypoxicBurdenGrade(n.hypoxicBurden))) + "<br/>";
+                // graded on the desaturations of 4 % or more, as MediOX does
+                html += QObject::tr("ODI 4%: %1 per hour (%2 desaturations), %3.").arg(n.desaturations4 / n.hours, 0, 'f', 1).arg(n.desaturations4)
+                            .arg(oxiGradeHtml(odiGrade(n.desaturations4 / n.hours))) + "<br/>";
+                html += QObject::tr("ODI 3%: %1 per hour.").arg(n.desaturations / n.hours, 0, 'f', 1) + "<br/>";
+                if (!std::isnan(n.hypoxicBurden4)) {
+                    html += QObject::tr("Hypoxic burden: %1 %·min/h (%2), all desaturations %3.").arg(n.hypoxicBurden4, 0, 'f', 1)
+                                .arg(oxiGradeHtml(hypoxicBurdenGrade(n.hypoxicBurden4))).arg(n.hypoxicBurden, 0, 'f', 1) + "<br/>";
+                } else if (!std::isnan(n.hypoxicBurden)) {
+                    html += QObject::tr("Hypoxic burden, all desaturations: %1 %·min/h.").arg(n.hypoxicBurden, 0, 'f', 1) + "<br/>";
                 }
                 if (n.zones > 0) {
                     html += QObject::tr("Problem zones: %1, %2 min.").arg(n.zones).arg(qRound(n.zoneMinutes)) + "<br/>";

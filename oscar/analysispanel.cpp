@@ -274,15 +274,19 @@ QString AnalysisPanel::sidebarHtml(Day *day, const DayResult &r, const QString &
             html += row(label, value + QStringLiteral(" ") + oxiGradeHtml(grade));
             html += wide(QStringLiteral("<small>%1</small>").arg(oxiGradeScaleHtml(bounds, grade)));
         };
+        // MediOX scores desaturations of 4 % or more (its report: "4% oxygen desaturation") and its
+        // burden index from the same ones
         if (oxiHours > 0) {
-            const double odi = o.countDesaturations(3) / oxiHours;
-            graded(HelpTips::term(tr("ODI 3%"), QStringLiteral("odi3")), number(odi), odiGrade(odi), kOdiGradeBounds);
+            const double odi = o.countDesaturations(4) / oxiHours;
+            graded(HelpTips::term(tr("ODI 4%"), QStringLiteral("odi4")), number(odi), odiGrade(odi), kOdiGradeBounds);
         }
-        // from the oximeter alone (every desaturation)
-        const double hb = hypoxicBurden(o.desaturationArea(), o.spo2Seconds);
+        const double hb = hypoxicBurden(o.desaturationArea(4), o.spo2Seconds);
         if (!std::isnan(hb)) {
             graded(HelpTips::term(tr("Hypoxic burden index (HBI)"), QStringLiteral("hypoxic_burden")),
                    QStringLiteral("%1 %&middot;min/h").arg(number(hb)), hypoxicBurdenGrade(hb), kHypoxicGradeBounds);
+            // OSCAR's own figure from the oximeter alone: every desaturation
+            html += row(tr("&nbsp;&nbsp;all desaturations"),
+                        QStringLiteral("%1 %&middot;min/h").arg(number(hypoxicBurden(o.desaturationArea(), o.spo2Seconds))));
         }
         if (r.hasFlow) {   // a CPAP's or a screener's breathing events
             html += row(tr("&nbsp;&nbsp;linked to breathing events"), analysisHours > 0

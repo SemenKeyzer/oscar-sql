@@ -69,6 +69,7 @@ struct AnalysisDailyData
     bool hasCpap = false;      //!< a CPAP session that night (links to breathing events)
     bool screener = false;     //!< the flow analysed is a sleep screener's only: the index is an REI (kept in extra_json)
     int nDesat3 = 0, nDesat4 = 0;
+    double desatArea4 = -1;    //!< %·s, the desaturations of 4 % or more (MediOX's burden; kept in extra_json); < 0: not known
     QVector<int> spo2Hist;     //!< seconds per SpO2 % from 50 to 100
     double spo2Sum = 0;
     double spo2Median = 0;

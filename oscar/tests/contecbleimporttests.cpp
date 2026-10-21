@@ -396,11 +396,13 @@ void ContecBleImportTests::testOximetryNightFromAnalysis()
     row.pulseMax = 98;
 
     row.desatArea = 2400;                     // 40 %·min over 2 h
+    row.desatArea4 = 1200;                    // the desaturations of 4 % or more: 20 %·min (MediOX's HBI)
 
     const OximetryNight n = summarizeOximetry(row);
     QVERIFY(n.valid);
     QVERIFY(n.fromAnalysis);
     QCOMPARE(n.hypoxicBurden, 20.0);
+    QCOMPARE(n.hypoxicBurden4, 10.0);
     QCOMPARE(n.device, QStringLiteral("Contec CMS50FW"));
     QCOMPARE(n.hours, 2.0);
     QCOMPARE(n.spo2Min, 86.0);

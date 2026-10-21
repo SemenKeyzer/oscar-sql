@@ -209,6 +209,7 @@ AnalysisDailyData fromRecord(const QSqlRecord &r)
         const QJsonObject extra = QJsonDocument::fromJson(d.extraJson.toUtf8()).object();
         d.screener = extra.value(QStringLiteral("screener")).toBool();
         d.flFlowSeconds = extra.value(QStringLiteral("fl_flow_s")).toInt();
+        d.desatArea4 = extra.value(QStringLiteral("desat_area4")).toDouble(-1);
     }
     return d;
 }

@@ -101,7 +101,8 @@ struct OxiResult {
 
     int countDesaturations(double minDepth) const;
     int artifactSeconds() const;
-    double desaturationArea() const;           //!< %·s, all desaturations
+    //! %·s, of the desaturations at least \a minDepth deep (all by default)
+    double desaturationArea(double minDepth = 0) const;
     int cyclicSeconds() const;
     int zoneSeconds(int minSeverity = 1) const;
     int bradySeconds() const;

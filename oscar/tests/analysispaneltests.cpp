@@ -137,12 +137,14 @@ void AnalysisPanelTests::testSidebarForOximetryOnlyNight()
     // the hypoxic burden comes from the oximeter alone (all desaturations), graded as MediOX does
     QVERIFY2(html.contains(QStringLiteral("Hypoxic burden")), qPrintable(html));
     QVERIFY(!html.contains(QStringLiteral("linked to breathing events")));
-    const OxiGrade hb = hypoxicBurdenGrade(hypoxicBurden(r.oxi.desaturationArea(), r.oxi.spo2Seconds));
+    // MediOX grades the index of the desaturations of 4 % or more (its sample report)
+    const OxiGrade hb = hypoxicBurdenGrade(hypoxicBurden(r.oxi.desaturationArea(4), r.oxi.spo2Seconds));
     QVERIFY(html.contains(oxiGradeHtml(hb)));
     // like the MediOX report: the ODI and the burden index with their grades and scales
     QVERIFY(html.contains(QStringLiteral("Hypoxic burden index (HBI)")));
     QVERIFY(html.contains(oxiGradeScaleHtml(kHypoxicGradeBounds, hb)));
-    QVERIFY(html.contains(oxiGradeScaleHtml(kOdiGradeBounds, odiGrade(r.oxi.countDesaturations(3) / (r.oxi.spo2Seconds / 3600.0)))));
+    QVERIFY(html.contains(oxiGradeScaleHtml(kOdiGradeBounds, odiGrade(r.oxi.countDesaturations(4) / (r.oxi.spo2Seconds / 3600.0)))));
+    QVERIFY(html.contains(QStringLiteral("all desaturations")));   // OSCAR's own figure from every one, under it
     QVERIFY(html.contains(QStringLiteral("Problem zones")));
     QVERIFY(html.contains(QStringLiteral("below 85 %")));
     QVERIFY(html.contains(QStringLiteral("&lt; 85 %")));

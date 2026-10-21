@@ -127,6 +127,7 @@ OximetryNight summarizeOximetry(const AnalysisDailyData &row)
     n.zones = row.nZones;
     n.zoneMinutes = row.zoneSeconds / 60.0;
     n.hypoxicBurden = hypoxicBurden(row.desatArea, row.oxiSeconds);
+    if (row.desatArea4 >= 0) n.hypoxicBurden4 = hypoxicBurden(row.desatArea4, row.oxiSeconds);
     if (row.hasPulse && row.pulseSeconds > 0) {
         n.pulseAvg = row.pulseSum / row.pulseSeconds;
         n.pulseMin = row.pulseMin;

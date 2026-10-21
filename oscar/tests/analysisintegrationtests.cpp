@@ -3257,3 +3257,33 @@ void AnalysisIntegrationTests::testIndicesMixedNightNotDoubled()
     delete cs;
     delete ns;
 }
+
+// The area of the desaturations of 4 % or more (MediOX's hypoxic burden) is kept with the night;
+// a row from before it reads as unknown.
+void AnalysisIntegrationTests::testDesatArea4Stored()
+{
+    DayResult r;
+    r.hasOximetry = true;
+    r.oxi.spo2Seconds = 3600;
+    Desaturation small;
+    small.start = 1000;
+    small.end = 31000;
+    small.peak = 96;
+    small.nadir = 93;     // 3 %
+    small.area = 40;
+    Desaturation deep = small;
+    deep.nadir = 91;      // 5 %
+    deep.area = 100;
+    r.oxi.desaturations = { small, deep };
+    QCOMPARE(r.oxi.desaturationArea(), 140.0);
+    QCOMPARE(r.oxi.desaturationArea(4), 100.0);
+    AnalysisDailyData d = toDailyRow(r, AnalysisParams(), QStringLiteral("h"), QString());
+    QCOMPARE(d.desatArea4, 100.0);
+    d.profileId = m_profileId;
+    d.date = QDate(2026, 4, 2);
+    AnalysisDailyRepository repo;
+    QVERIFY(repo.upsert(d));
+    QCOMPARE(repo.find(m_profileId, d.date).desatArea4, 100.0);
+    repo.remove(m_profileId, d.date);
+    QVERIFY(AnalysisDailyData().desatArea4 < 0);
+}

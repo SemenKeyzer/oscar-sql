@@ -373,10 +373,12 @@ int OxiResult::countDesaturations(double minDepth) const
                              [minDepth](const Desaturation &d) { return d.depth() >= minDepth; }));
 }
 
-double OxiResult::desaturationArea() const
+double OxiResult::desaturationArea(double minDepth) const
 {
     double a = 0;
-    for (const Desaturation &d : desaturations) a += d.area;
+    for (const Desaturation &d : desaturations) {
+        if (d.depth() >= minDepth) a += d.area;
+    }
     return a;
 }
 

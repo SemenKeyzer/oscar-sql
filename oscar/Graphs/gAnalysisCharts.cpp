@@ -217,10 +217,14 @@ void gAnalysisChart::populate(Day *day, int idx)
         // from the oximeter alone, so that a night without CPAP has one too
         if (!r.hasOximetry || r.oxiSeconds <= 0) return;
         weight = r.oxiSeconds / 3600.0f;
-        const float hb = hypoxicBurden(r.desatArea, r.oxiSeconds);
+        // MediOX's index (desaturations of 4 % or more) against its grade lines; a night analysed
+        // before it was kept shows every desaturation's
+        const float all = hypoxicBurden(r.desatArea, r.oxiSeconds);
+        const float hb = r.desatArea4 >= 0 ? float(hypoxicBurden(r.desatArea4, r.oxiSeconds)) : all;
         slices.append(SummaryChartSlice(calc, hb, hb, title(HypoxicBurden), QColor(0x90, 0x50, 0xa0)));
-        tip = QObject::tr("\nHypoxic burden (approx.): %1 %·min/h (%2)").arg(num(hb), oxiGradeName(hypoxicBurdenGrade(hb)));
-        if (r.hasCpap && r.hasFlow && r.flowSeconds > 0) {
+        tip = QObject::tr("\nHypoxic burden (approx.): %1 %·min/h (%2)").arg(num(hb), oxiGradeName(hypoxicBurdenGrade(hb)))
+            + QObject::tr("\nall desaturations: %1 %·min/h").arg(num(all));
+        if (r.hasFlow && r.flowSeconds > 0) {   // a CPAP's or a screener's breathing events
             tip += QObject::tr("\nlinked to breathing events: %1 %·min/h").arg(num(r.linkedDesatArea / 60.0 / (r.flowSeconds / 3600.0)));
         }
         break;

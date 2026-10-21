@@ -159,6 +159,7 @@ void NightSummaryTests::testViewShowsTheNight()
     s.oxi.desaturations4 = 7;
     s.oxi.minutesBelow90 = 1.6;
     s.oxi.hypoxicBurden = 20;
+    s.oxi.hypoxicBurden4 = 10;
     s.oxi.pulseAvg = 61;
     s.oxi.pulseMin = 52;
     s.oxi.pulseMax = 96;
@@ -173,11 +174,13 @@ void NightSummaryTests::testViewShowsTheNight()
     QVERIFY(text(QStringLiteral("nsValue")).startsWith(QStringLiteral("7<span")));    // 7 h 12 min, units smaller
     QVERIFY(text(QStringLiteral("nsValue")).contains(QStringLiteral("&nbsp;min</span>")));
     QVERIFY(text(QStringLiteral("nsNote")).contains(QStringLiteral("OSCAR analysis — 2.1")));
-    QVERIFY(text(QStringLiteral("nsNote")).contains(QStringLiteral("ODI 3%: 2.2 per hour (") + oxiGradeHtml(OxiGrade::Normal)
-                                                     + QStringLiteral("), 4%: 1.1")));
+    // graded on the ODI 4 % as MediOX does; the 3 % beside it
+    QVERIFY2(text(QStringLiteral("nsNote")).contains(QStringLiteral("ODI 4%: 1.1 per hour (") + oxiGradeHtml(OxiGrade::Normal)
+                                                      + QStringLiteral("), 3%: 2.2")), qPrintable(text(QStringLiteral("nsNote"))));
     // the doctor's SpO2 tile: ODI 3 % and 4 %, T90 in minutes and the hypoxic burden with its grade
     QVERIFY(text(QStringLiteral("nsNote")).contains(QStringLiteral("T90: 2 min")));
-    QVERIFY(text(QStringLiteral("nsNote")).contains(QStringLiteral("Hypoxic burden: 20.0 %·min/h (") + oxiGradeHtml(OxiGrade::Mild) + QStringLiteral(")")));
+    QVERIFY(text(QStringLiteral("nsNote")).contains(QStringLiteral("Hypoxic burden: 10.0 %·min/h (") + oxiGradeHtml(OxiGrade::Normal)
+                                                     + QStringLiteral("), all desaturations 20.0")));
     QVERIFY(text(QStringLiteral("nsNote")).contains(QStringLiteral("pulse 61 (52 to 96)")));   // in the SpO2 tile
     QVERIFY(text(QStringLiteral("nsCaption")).contains(QStringLiteral("28 of 30 night")));
     QVERIFY(text(QStringLiteral("nsTitle")).contains(QStringLiteral("href='daily=2026-09-30'")));

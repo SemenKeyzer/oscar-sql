@@ -39,6 +39,8 @@ struct OximetryNight {
     double pulseAvg = 0, pulseMin = 0, pulseMax = 0;
     //! analysis: the hypoxic burden (%·min/h) from every desaturation; NaN without the analysis
     double hypoxicBurden = std::numeric_limits<double>::quiet_NaN();
+    //! analysis: the hypoxic burden from the desaturations of 4 % or more, as MediOX grades it; NaN if not known
+    double hypoxicBurden4 = std::numeric_limits<double>::quiet_NaN();
 };
 
 //! \brief The hypoxic burden from the oximeter alone: the area of every desaturation below
