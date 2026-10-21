@@ -610,10 +610,17 @@ void OximeterImport::on_fileImportButton_clicked()
 
     qDebug() << "oximod - File Import button clicked";
 	
-    QString filename = QFileDialog::getOpenFileName(nullptr, tr("Select a valid oximetry data file"), documentsFolder, tr("Oximetry Files (*.spo *.spor *.spo2 *.SpO2 *.dat *.csv)"), nullptr, nativeDialogOption());
+    QString filename = QFileDialog::getOpenFileName(nullptr, tr("Select a valid oximetry data file"), documentsFolder, tr("Oximetry Files (*.spo *.spor *.spo2 *.SpO2 *.dat *.csv *.hd *.HD)"), nullptr, nativeDialogOption());
 
     if (filename.isEmpty())
         return;
+
+    // a Contec RS01 recording's header: its page lists the recordings next to it
+    if (QFileInfo(filename).suffix().compare(QStringLiteral("hd"), Qt::CaseInsensitive) == 0) {
+        onRS01ImportClicked();
+        m_rs01Page->listRecordings(QFileInfo(filename).absolutePath());
+        return;
+    }
 
     // Make sure filename dialog had time to close properly..
     QApplication::processEvents();
