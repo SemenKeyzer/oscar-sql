@@ -15,6 +15,9 @@
 #include "SleepLib/schema.h"
 #include "SleepLib/session.h"
 #include "SleepLib/loader_plugins/rs01_import.h"
+#include "SleepLib/analysis/session_analysis.h"
+#include "SleepLib/analysis/flow_analyzer.h"
+#include "SleepLib/analysis/analysis_channels.h"
 #include "database/database_manager.h"
 #include "tests/rs01_synth.h"
 #include <QApplication>
@@ -109,7 +112,7 @@ void RS01ImportTests::testNasalFlowChannel()
 void RS01ImportTests::testImportBuildsSession()
 {
     QTemporaryDir device;
-    const QString dir = steadyRecording(device.path(), QStringLiteral("10170150"), QStringLiteral("20261017015053"), 120);
+    const QString dir = steadyRecording(device.path(), QStringLiteral("09170150"), QStringLiteral("20260917015053"), 120);
     RS01Importer importer;
     QString error;
     QCOMPARE(int(importer.import(dir, &error)), int(RS01Importer::Result::Imported));
@@ -117,9 +120,9 @@ void RS01ImportTests::testImportBuildsSession()
     QVERIFY(mach);
     QCOMPARE(mach->type(), MT_OXIMETER);
     QCOMPARE(mach->brand(), QStringLiteral("Contec"));
-    Session *s = mach->SessionExists(RS01Importer::sessionIdFor(QDateTime(QDate(2026, 10, 17), QTime(1, 50, 53))));
+    Session *s = mach->SessionExists(RS01Importer::sessionIdFor(QDateTime(QDate(2026, 9, 17), QTime(1, 50, 53))));
     QVERIFY(s);
-    QCOMPARE(s->first(), QDateTime(QDate(2026, 10, 17), QTime(1, 50, 53)).toMSecsSinceEpoch());
+    QCOMPARE(s->first(), QDateTime(QDate(2026, 9, 17), QTime(1, 50, 53)).toMSecsSinceEpoch());
     for (ChannelID c : { OXI_SPO2, OXI_Pulse, OXI_Plethy, OXI_NasalFlow }) QVERIFY2(s->channelExists(c), qPrintable(QString::number(c, 16)));
     QCOMPARE(s->Min(OXI_SPO2), EventDataType(95));
     // the waveforms in their own units: 18 counts below the zero = 4.49 Pa breathing in; pleth 60 of 127 = 47.2 %
@@ -229,4 +232,52 @@ void RS01ImportTests::testImportFromRenamedCopy()
     QCOMPARE(int(importer.import(dir, &error)), int(RS01Importer::Result::Imported));
     QVERIFY(importer.alreadyImported(dir));
     QVERIFY(QFileInfo::exists(QDir(importer.backupFolder()).filePath(QStringLiteral("20261024015053/10240150/10240150.hd"))));
+}
+
+// The owner's night, only where RS01_ROOT names it (none in the repository): the analysis of the nasal
+// flow finds the breathing pause at about 04:29:00–04:29:20.
+void RS01ImportTests::testRealNightAnalysedIfGiven()
+{
+    const QString root = qEnvironmentVariable("RS01_ROOT");
+    if (root.isEmpty()) QSKIP("RS01_ROOT not set");
+    RS01Importer importer;
+    QString error;
+    const RS01Importer::Result res = importer.import(QDir(root).filePath(QStringLiteral("10170150")), &error);
+    QVERIFY2(res == RS01Importer::Result::Imported, qPrintable(error));   // not a synthetic one of the same start
+    Machine *mach = p_profile->lookupMachine(QStringLiteral("RS01"), RS01Importer::loaderName());
+    Session *s = mach->SessionExists(RS01Importer::sessionIdFor(QDateTime(QDate(2026, 10, 17), QTime(1, 50, 53))));
+    QVERIFY(s);
+    // the analysis' events were saved and dropped from memory with the import's Save
+    s->LoadEventsFromDatabase(QSet<ChannelID> { OXI_NasalFlow, AN_Apnea, AN_FlowReduction, AN_Unscoreable });
+    int apneas = 0, nearPause = 0;   // an apnea's time is its end
+    const qint64 from = QDateTime(QDate(2026, 10, 17), QTime(4, 28, 50)).toMSecsSinceEpoch();
+    const qint64 to = QDateTime(QDate(2026, 10, 17), QTime(4, 29, 40)).toMSecsSinceEpoch();
+    for (EventList *el : s->eventlist.value(AN_Apnea)) {
+        for (quint32 i = 0; i < el->count(); ++i) {
+            ++apneas;
+            if (el->time(i) >= from && el->time(i) <= to) ++nearPause;
+        }
+    }
+    {
+        QVector<analysis::FlowChunk> chunks;
+        for (EventList *el : s->eventlist.value(OXI_NasalFlow)) {
+            analysis::FlowChunk c;
+            c.start = el->first();
+            c.rateMs = el->rate();
+            for (quint32 i = 0; i < el->count(); ++i) c.samples << analysis::linearisedNasal(el->data(i));
+            chunks << c;
+        }
+        analysis::FlowParams fp;
+        fp.classifyApneas = false;
+        const analysis::FlowResult fr = analysis::analyzeFlow(chunks, {}, nullptr, nullptr, fp);
+        qInfo() << "from the stored session: lists" << chunks.size() << "flow s" << fr.flowSeconds << "events" << fr.events.size();
+    }
+    for (EventList *el : s->eventlist.value(OXI_NasalFlow))
+        qInfo() << "nasal list: count" << el->count() << "rate" << el->rate() << "first" << QDateTime::fromMSecsSinceEpoch(el->first()).time()
+                << "last" << QDateTime::fromMSecsSinceEpoch(el->last()).time() << "gain" << el->gain() << "d0" << el->data(0) << "d1000" << el->data(1000);
+    int candidates = 0;
+    for (EventList *el : s->eventlist.value(AN_FlowReduction)) candidates += int(el->count());
+    qInfo() << "RS01 night: apneas" << apneas << "near 04:29" << nearPause << "hypopnea candidates" << candidates
+            << "flow s" << analysis::SessionStamp::read(s).flowSeconds << "source" << analysis::SessionStamp::read(s).source;
+    QVERIFY(nearPause >= 1);
 }
