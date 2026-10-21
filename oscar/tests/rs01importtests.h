@@ -26,6 +26,8 @@ private slots:
     void testCopyLeavesSourceUntouched();
     void testHdWithoutSegmentsFails();
     void testSessionIdStable();
+    void testWritableWarningText();
+    void testPageListsRecordings();
     void cleanupTestCase();
 private:
     QCoreApplication *m_app = nullptr;

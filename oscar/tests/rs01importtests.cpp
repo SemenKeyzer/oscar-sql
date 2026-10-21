@@ -17,7 +17,10 @@
 #include "SleepLib/loader_plugins/rs01_import.h"
 #include "database/database_manager.h"
 #include "tests/rs01_synth.h"
-#include <QCoreApplication>
+#include <QApplication>
+#include <QCheckBox>
+#include <QTreeWidget>
+#include "rs01page.h"
 #include <QDir>
 #include <QDirIterator>
 #include <QFileInfo>
@@ -53,7 +56,7 @@ void RS01ImportTests::initTestCase()
     static int argc = 1;
     static char appName[] = "test";
     static char *argv[] = { appName, nullptr };
-    if (QCoreApplication::instance() == nullptr) m_app = new QCoreApplication(argc, argv);
+    if (QCoreApplication::instance() == nullptr) m_app = new QApplication(argc, argv);   // the page is a widget
 
     if (DatabaseManager::instance().isOpen()) DatabaseManager::instance().close();
     m_tempDir = new QTemporaryDir(QDir::tempPath() + QStringLiteral("/oscar-rs01importtests-XXXXXX"));
@@ -162,4 +165,32 @@ void RS01ImportTests::testSessionIdStable()
     const QDateTime start(QDate(2026, 3, 29), QTime(2, 30, 0));   // around a DST change
     QCOMPARE(RS01Importer::sessionIdFor(start), RS01Importer::sessionIdFor(start));
     QCOMPARE(RS01Importer::sessionIdFor(start), SessionID(start.toUTC().toSecsSinceEpoch()));
+}
+
+// A volume mounted writable on macOS: the page says how to remount it read-only.
+void RS01ImportTests::testWritableWarningText()
+{
+    const QString w = RS01Page::writableWarning(QStringLiteral("/Volumes/SLEEP METER"), QStringLiteral("/dev/disk5s1"));
+    QVERIFY2(w.contains(QStringLiteral("diskutil unmount")), qPrintable(w));
+    QVERIFY(w.contains(QStringLiteral("diskutil mount readOnly /dev/disk5s1")));
+}
+
+// The page lists the recordings: new ones ticked, the one in OSCAR marked and not ticked.
+void RS01ImportTests::testPageListsRecordings()
+{
+    QTemporaryDir device;
+    const QString done = steadyRecording(device.path(), QStringLiteral("10210150"), QStringLiteral("20261021015053"), 60);
+    steadyRecording(device.path(), QStringLiteral("10220150"), QStringLiteral("20261022015053"), 90);
+    RS01Importer importer;
+    QCOMPARE(int(importer.import(done, nullptr)), int(RS01Importer::Result::Imported));
+
+    RS01Page page;
+    page.listRecordings(device.path());
+    QTreeWidget *list = page.findChild<QTreeWidget *>(QStringLiteral("rs01Recordings"));
+    QVERIFY(list);
+    QCOMPARE(list->topLevelItemCount(), 2);
+    QCOMPARE(list->topLevelItem(0)->checkState(0), Qt::Unchecked);
+    QVERIFY(list->topLevelItem(0)->text(1).contains(RS01Page::tr("already in OSCAR")));
+    QCOMPARE(list->topLevelItem(1)->checkState(0), Qt::Checked);
+    QVERIFY2(list->topLevelItem(1)->text(0).contains(QStringLiteral("1:30")), qPrintable(list->topLevelItem(1)->text(0)));   // 90 s
 }

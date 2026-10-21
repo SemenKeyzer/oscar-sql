@@ -22,6 +22,7 @@
 #include "Graphs/gXAxis.h"
 
 #include "oximeterimport.h"
+#include "rs01page.h"
 #include "helpstrip.h"
 #include "helptips.h"
 #include "translation.h"
@@ -242,6 +243,21 @@ OximeterImport::OximeterImport(QWidget *parent) :
     ui->verticalLayout_6->insertWidget(ui->verticalLayout_6->indexOf(btButton) + 1, o2ringButton);
     connect(o2ringButton, &QPushButton::clicked, this, &OximeterImport::onO2RingImportClicked);
 #endif
+
+    // Contec RS01 sleep screener: its USB disk, read only (no Bluetooth needed)
+    m_rs01Page = new RS01Page(this);
+    ui->stackedWidget->addWidget(m_rs01Page);
+    connect(m_rs01Page, &RS01Page::finished, this, &OximeterImport::onBluetoothFinished);
+    auto *rs01Button = new QPushButton(tr("Contec RS01 sleep screener (USB)"), ui->importSelectionPage);
+    rs01Button->setObjectName(QStringLiteral("rs01ImportButton"));
+    rs01Button->setIcon(ui->directImportButton->icon());
+    rs01Button->setIconSize(ui->directImportButton->iconSize());
+    rs01Button->setSizePolicy(ui->directImportButton->sizePolicy());
+    rs01Button->setMinimumHeight(ui->directImportButton->minimumHeight());
+    rs01Button->setAutoDefault(false);
+    rs01Button->setToolTip(tr("Switch the RS01 on, then plug it in: OSCAR copies its recordings and never writes to it."));
+    ui->verticalLayout_6->insertWidget(ui->verticalLayout_6->indexOf(ui->directImportButton), rs01Button);
+    connect(rs01Button, &QPushButton::clicked, this, &OximeterImport::onRS01ImportClicked);
 
     // hover explanations: the strip at the bottom shows what the control under the mouse does
     HelpStrip::placeAbove(ui->verticalLayout_5, ui->frame_2, new HelpStrip({ QStringLiteral("ui.oximport."), QStringLiteral("ui.ble."), QStringLiteral("ui.o2ring.") }, this));
@@ -1236,6 +1252,16 @@ void OximeterImport::onO2RingImportClicked()
     m_btDoneButton->hide();
     m_o2ringPage->start();
 #endif
+}
+
+void OximeterImport::onRS01ImportClicked()
+{
+    ui->stackedWidget->setCurrentWidget(m_rs01Page);
+    ui->nextButton->setVisible(false);
+    ui->retryButton->setVisible(false);
+    ui->informationButton->setVisible(false);
+    ui->cancelButton->setVisible(true);
+    m_rs01Page->start();
 }
 
 void OximeterImport::onBluetoothEnded(bool canRetry)

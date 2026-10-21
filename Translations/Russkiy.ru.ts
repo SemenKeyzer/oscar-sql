@@ -9740,55 +9740,70 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
     </message>
     <message>
         <location filename="../oscar/uiglossary.cpp" line="1844"/>
+        <source>Contec RS01 sleep screener</source>
+        <translation>Скринер сна Contec RS01</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uiglossary.cpp" line="1846"/>
+        <source>Imports the RS01&apos;s recordings (nasal flow, SpO2, pulse, pleth) from its USB disk &quot;SLEEP METER&quot; or a folder with a copy. OSCAR copies them first and never writes to the device.</source>
+        <translation>Импортирует записи RS01 (носовой поток, SpO2, пульс, плетизмограмма) с его USB-диска «SLEEP METER» или из папки с копией. OSCAR сначала копирует их и никогда ничего не пишет на прибор.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uiglossary.cpp" line="1847"/>
+        <source>Switch the RS01 on before plugging the cable in. On a Mac, mount it read-only: the device damages its recordings after the computer writes to it.</source>
+        <translation>Включите RS01 до подключения кабеля. На Mac подключайте его только для чтения: прибор портит свои записи, если компьютер что-то на него запишет.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uiglossary.cpp" line="1849"/>
         <source>Rings found</source>
         <translation>Найденные кольца</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1845"/>
         <location filename="../oscar/uiglossary.cpp" line="1850"/>
         <location filename="../oscar/uiglossary.cpp" line="1855"/>
         <location filename="../oscar/uiglossary.cpp" line="1860"/>
         <location filename="../oscar/uiglossary.cpp" line="1865"/>
+        <location filename="../oscar/uiglossary.cpp" line="1870"/>
         <source>Oximetry wizard → O2Ring</source>
         <translation>Мастер оксиметрии → O2Ring</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1846"/>
+        <location filename="../oscar/uiglossary.cpp" line="1851"/>
         <source>The O2Rings OSCAR found nearby; choose yours.</source>
         <translation>Кольца O2Ring, которые OSCAR нашёл рядом; выберите своё.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1847"/>
+        <location filename="../oscar/uiglossary.cpp" line="1852"/>
         <source>If the list stays empty, close the ViHealth app and wear the ring so that it wakes up.</source>
         <translation>Если список пуст, закройте приложение ViHealth и наденьте кольцо, чтобы оно проснулось.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1851"/>
+        <location filename="../oscar/uiglossary.cpp" line="1856"/>
         <source>Connects to the chosen ring and reads its list of records.</source>
         <translation>Подключается к выбранному кольцу и читает список его записей.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1854"/>
+        <location filename="../oscar/uiglossary.cpp" line="1859"/>
         <source>Set the ring&apos;s clock</source>
         <translation>Установить часы кольца</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1856"/>
+        <location filename="../oscar/uiglossary.cpp" line="1861"/>
         <source>Before the download, sets the ring&apos;s clock to the computer&apos;s time. OSCAR remembers this choice.</source>
         <translation>Перед скачиванием ставит на кольце время компьютера. OSCAR запоминает этот выбор.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1857"/>
+        <location filename="../oscar/uiglossary.cpp" line="1862"/>
         <source>Keep it on so the ring&apos;s nights line up with the CPAP nights.</source>
         <translation>Оставьте включённым, чтобы ночи кольца совпадали с ночами CPAP.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1859"/>
+        <location filename="../oscar/uiglossary.cpp" line="1864"/>
         <source>Records on the ring</source>
         <translation>Записи на кольце</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1861"/>
+        <location filename="../oscar/uiglossary.cpp" line="1866"/>
         <source>Every record the ring keeps, by start time. New ones are downloaded as soon as the ring is connected; the ones already in OSCAR are left unticked, but you can tick them and press Download to read them again.</source>
         <translation>Все записи кольца по времени начала. Новые скачиваются сразу после подключения; уже импортированные в OSCAR остаются без отметки, но их можно отметить и нажать «Скачать», чтобы прочитать снова.</translation>
     </message>
@@ -9797,17 +9812,17 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <translation type="vanished">Все записи кольца по времени начала. Новые отмечены; уже импортированные в OSCAR — нет, но их можно отметить и скачать снова.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1864"/>
+        <location filename="../oscar/uiglossary.cpp" line="1869"/>
         <source>Download</source>
         <translation>Скачать</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1866"/>
+        <location filename="../oscar/uiglossary.cpp" line="1871"/>
         <source>Downloads the ticked records and imports them into OSCAR. The records stay on the ring.</source>
         <translation>Скачивает отмеченные записи и импортирует их в OSCAR. На кольце записи остаются.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1867"/>
+        <location filename="../oscar/uiglossary.cpp" line="1872"/>
         <source>Keep the ring close to the computer until the import finishes.</source>
         <translation>Держите кольцо рядом с компьютером до конца импорта.</translation>
     </message>
@@ -11085,6 +11100,7 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <location filename="../oscar/uiglossary.cpp" line="1735"/>
         <location filename="../oscar/uiglossary.cpp" line="1740"/>
         <location filename="../oscar/uiglossary.cpp" line="1840"/>
+        <location filename="../oscar/uiglossary.cpp" line="1845"/>
         <source>Oximetry wizard → start page</source>
         <translation>Мастер оксиметрии → первая страница</translation>
     </message>
@@ -11404,7 +11420,7 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
     </message>
     <message>
         <location filename="../oscar/uiglossary.cpp" line="1824"/>
-        <location filename="../oscar/uiglossary.cpp" line="1849"/>
+        <location filename="../oscar/uiglossary.cpp" line="1854"/>
         <source>Connect</source>
         <translation>Подключиться</translation>
     </message>
@@ -15157,7 +15173,7 @@ Index</source>
     <name>OximeterImport</name>
     <message>
         <location filename="../oscar/oximeterimport.ui" line="61"/>
-        <location filename="../oscar/oximeterimport.cpp" line="51"/>
+        <location filename="../oscar/oximeterimport.cpp" line="52"/>
         <source>Oximeter Import Wizard</source>
         <translation>Мастер импорта оксиметрии</translation>
     </message>
@@ -15329,7 +15345,7 @@ Index</source>
     </message>
     <message>
         <location filename="../oscar/oximeterimport.ui" line="1812"/>
-        <location filename="../oscar/oximeterimport.cpp" line="201"/>
+        <location filename="../oscar/oximeterimport.cpp" line="202"/>
         <source>Retry</source>
         <translation>Повторить</translation>
     </message>
@@ -15355,7 +15371,7 @@ Index</source>
     </message>
     <message>
         <location filename="../oscar/oximeterimport.ui" line="1907"/>
-        <location filename="../oscar/oximeterimport.cpp" line="276"/>
+        <location filename="../oscar/oximeterimport.cpp" line="292"/>
         <source>Start</source>
         <translation>Начать</translation>
     </message>
@@ -15409,92 +15425,92 @@ Index</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;OSCAR нуждается в начальном времени для сохранения этого сеанса оксиметрии.&lt;/p&gt;&lt;p&gt;Выберите один из вариантов:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="321"/>
+        <location filename="../oscar/oximeterimport.cpp" line="337"/>
         <source>Scanning for compatible oximeters</source>
         <translation>Поиск совместимых оксиметров</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="353"/>
+        <location filename="../oscar/oximeterimport.cpp" line="369"/>
         <source>Could not detect any connected oximeter devices.</source>
         <translation>Не удалось обнаружить подключенные оксиметрические устройства.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="361"/>
+        <location filename="../oscar/oximeterimport.cpp" line="377"/>
         <source>Connecting to %1 Oximeter</source>
         <translation>Подключение к оксиметру %1</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="389"/>
+        <location filename="../oscar/oximeterimport.cpp" line="405"/>
         <source>Renaming this oximeter from &apos;%1&apos; to &apos;%2&apos;</source>
         <translation>Переименование оксиметра из &apos;%1&apos; в &apos; %2&apos;</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="392"/>
+        <location filename="../oscar/oximeterimport.cpp" line="408"/>
         <source>Oximeter name is different.. If you only have one and are sharing it between profiles, set the name to the same on both profiles.</source>
         <translation>Имя оксиметра отличается. Если у вас только один оксиметр и вы используете его в разных профилях, установите одно и то же имя во всех профилях.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="435"/>
+        <location filename="../oscar/oximeterimport.cpp" line="451"/>
         <source>&quot;%1&quot;, session %2</source>
         <translation>&quot;%1&quot;, сеанс %2</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="460"/>
+        <location filename="../oscar/oximeterimport.cpp" line="476"/>
         <source>Nothing to import</source>
         <translation>Нечего импортировать</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="461"/>
+        <location filename="../oscar/oximeterimport.cpp" line="477"/>
         <source>Your oximeter did not have any valid sessions.</source>
         <translation>Оксиметр не содержит корректных сессий.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="462"/>
+        <location filename="../oscar/oximeterimport.cpp" line="478"/>
         <source>Close</source>
         <translation>Закрыть</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="465"/>
+        <location filename="../oscar/oximeterimport.cpp" line="481"/>
         <source>Waiting for %1 to start</source>
         <translation>Ожидание запуска %1</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="466"/>
+        <location filename="../oscar/oximeterimport.cpp" line="482"/>
         <source>Waiting for the device to start the upload process...</source>
         <translation>Ожидание, пока устройство начнёт отправку данных...</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="468"/>
+        <location filename="../oscar/oximeterimport.cpp" line="484"/>
         <source>Select upload option on %1</source>
         <translation>Выберите отправку (Upload) на %1</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="469"/>
+        <location filename="../oscar/oximeterimport.cpp" line="485"/>
         <source>You need to tell your oximeter to begin sending data to the computer.</source>
         <translation>Включите передачу данных на компьютер в оксиметре.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="470"/>
+        <location filename="../oscar/oximeterimport.cpp" line="486"/>
         <source>Please connect your oximeter, enter it&apos;s menu and select upload to commence data transfer...</source>
         <translation>Подключите оксиметр, откройте его меню и выберите отправку (Upload), чтобы начать передачу данных...</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="500"/>
+        <location filename="../oscar/oximeterimport.cpp" line="516"/>
         <source>%1 device is uploading data...</source>
         <translation>Устройство %1 отправляет данные...</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="501"/>
+        <location filename="../oscar/oximeterimport.cpp" line="517"/>
         <source>Please wait until oximeter upload process completes. Do not unplug your oximeter.</source>
         <translation>Дождитесь, пока оксиметр закончит отправку данных. Не отключайте его.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="520"/>
+        <location filename="../oscar/oximeterimport.cpp" line="536"/>
         <source>Oximeter import completed..</source>
         <translation>Импорт оксиметра завершен..</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="545"/>
+        <location filename="../oscar/oximeterimport.cpp" line="561"/>
         <source>Select a valid oximetry data file</source>
         <translation>Выберите корректный файл данных оксиметрии</translation>
     </message>
@@ -15503,177 +15519,187 @@ Index</source>
         <translation type="vanished">Файлы оксиметрии (*.spo *.spor *.spo2 *.SpO2 *.dat)</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="567"/>
+        <location filename="../oscar/oximeterimport.cpp" line="583"/>
         <source>No Oximetry module could parse the given file:</source>
         <translation>Нет подходящего модуля оксиметрии для распознавания файла:</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="615"/>
+        <location filename="../oscar/oximeterimport.cpp" line="631"/>
         <source>Live Oximetry Mode</source>
         <translation>Оксиметрия в реальном времени</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="667"/>
+        <location filename="../oscar/oximeterimport.cpp" line="683"/>
         <source>Live Oximetry Stopped</source>
         <translation>Оксиметрия в реальном времени остановлена</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="668"/>
+        <location filename="../oscar/oximeterimport.cpp" line="684"/>
         <source>Live Oximetry import has been stopped</source>
         <translation>Импорт оксиметрии в реальном времени был остановлен</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1090"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1106"/>
         <source>Oximeter Session %1</source>
         <translation>Сеанс оксиметра %1</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1135"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1151"/>
         <source>OSCAR gives you the ability to track Oximetry data alongside CPAP session data, which can give valuable insight into the effectiveness of CPAP treatment. It will also work standalone with your Pulse Oximeter, allowing you to store, track and review your recorded data.</source>
         <translation>OSCAR позволяет отслеживать данные оксиметрии вместе с данными сеансов CPAP, что может дать полезную информацию об эффективности CPAP терапии. Можно также работать только с самим пульсоксиметром: сохранять, отслеживать и просматривать записанные данные.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1146"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1162"/>
         <source>If you are trying to sync oximetry and CPAP data, please make sure you imported your CPAP sessions first before proceeding!</source>
         <translation>Если вы собираетесь синхронизировать данные оксиметрии и CPAP, убедитесь, что вы импортировали свои сеансы CPAP, прежде чем продолжить!</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1149"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1165"/>
         <source>For OSCAR to be able to locate and read directly from your Oximeter device, you need to ensure the correct device drivers (eg. USB to Serial UART) have been installed on your computer. For more information about this, %1click here%2.</source>
         <translation>Чтобы OSCAR смог найти и прочесть данные с вашего оксиметра, на компьютере должны быть установлены нужные драйверы устройств (например, USB to Serial UART). Для получения дополнительной информации об этом %1нажмите здесь%2.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="597"/>
+        <location filename="../oscar/oximeterimport.cpp" line="613"/>
         <source>Oximeter not detected</source>
         <translation>Оксиметр не обнаружен</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="203"/>
+        <location filename="../oscar/oximeterimport.cpp" line="204"/>
         <source>Done</source>
         <translation>Готово</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="220"/>
+        <location filename="../oscar/oximeterimport.cpp" line="221"/>
         <source>Import over Bluetooth from a Contec oximeter (CMS50FW, CMS50D-BT, ...)</source>
         <translation>Импортировать по Bluetooth (Contec CMS50FW, CMS50D-BT, ...)</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="230"/>
+        <location filename="../oscar/oximeterimport.cpp" line="231"/>
         <source>Turn on Bluetooth in the oximeter&apos;s menu and close the Contec phone app first.</source>
         <translation>Сначала включите Bluetooth в меню оксиметра и закройте приложение Contec на телефоне.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="233"/>
+        <location filename="../oscar/oximeterimport.cpp" line="234"/>
         <source>O2Ring (Bluetooth)</source>
         <translation>O2Ring (Bluetooth)</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="241"/>
+        <location filename="../oscar/oximeterimport.cpp" line="242"/>
         <source>Close the ViHealth app on the phone and wear the ring so that it wakes up.</source>
         <translation>Закройте приложение ViHealth на телефоне и наденьте кольцо, чтобы оно проснулось.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="545"/>
+        <location filename="../oscar/oximeterimport.cpp" line="251"/>
+        <source>Contec RS01 sleep screener (USB)</source>
+        <translation>Скринер сна Contec RS01 (USB)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="258"/>
+        <source>Switch the RS01 on, then plug it in: OSCAR copies its recordings and never writes to it.</source>
+        <translation>Включите RS01, затем подключите кабель: OSCAR копирует записи и ничего не пишет на прибор.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="561"/>
         <source>Oximetry Files (*.spo *.spor *.spo2 *.SpO2 *.dat *.csv)</source>
         <translation>Файлы оксиметрии (*.spo *.spor *.spo2 *.SpO2 *.dat *.csv)</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="604"/>
+        <location filename="../oscar/oximeterimport.cpp" line="620"/>
         <source>Couldn&apos;t access oximeter</source>
         <translation>Невозможно получить доступ к оксиметру</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="618"/>
+        <location filename="../oscar/oximeterimport.cpp" line="634"/>
         <source>Starting up...</source>
         <translation>Запуск...</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="619"/>
+        <location filename="../oscar/oximeterimport.cpp" line="635"/>
         <source>If you can still read this after a few seconds, cancel and try again</source>
         <translation>Если вы все еще видите это сообщение через несколько секунд, отмените и попробуйте снова</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="666"/>
+        <location filename="../oscar/oximeterimport.cpp" line="682"/>
         <source>Live Import Stopped</source>
         <translation>Импорт в реальном времени остановлен</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="719"/>
+        <location filename="../oscar/oximeterimport.cpp" line="735"/>
         <source>%1 session(s) on %2, starting at %3</source>
         <translation>%1 сеанс(ов) за %2, начиная с %3</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="723"/>
+        <location filename="../oscar/oximeterimport.cpp" line="739"/>
         <source>No CPAP data available on %1</source>
         <translation>Нет данных CPAP доступных на %1</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="858"/>
+        <location filename="../oscar/oximeterimport.cpp" line="874"/>
         <source>Recording...</source>
         <translation>Запись...</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="865"/>
+        <location filename="../oscar/oximeterimport.cpp" line="881"/>
         <source>Finger not detected</source>
         <translation>Палец не обнаружен</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="969"/>
+        <location filename="../oscar/oximeterimport.cpp" line="985"/>
         <source>I want to use the time my computer recorded for this live oximetry session.</source>
         <translation>Использовать время компьютера для этой оксиметрической сессии в реальном времени.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="972"/>
+        <location filename="../oscar/oximeterimport.cpp" line="988"/>
         <source>I need to set the time manually, because my oximeter doesn&apos;t have an internal clock.</source>
         <translation>Установить время вручную, так как оксиметр не имеет внутренних часов.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="984"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1000"/>
         <source>Something went wrong getting session data</source>
         <translation>Что-то пошло не так при получении данных сеанса</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1131"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1147"/>
         <source>Welcome to the Oximeter Import Wizard</source>
         <translation>Добро пожаловать в Мастер импорта оксиметрии</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1133"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1149"/>
         <source>Pulse Oximeters are medical devices used to measure blood oxygen saturation. During extended Apnea events and abnormal breathing patterns, blood oxygen saturation levels can drop significantly, and can indicate issues that need medical attention.</source>
         <translation>Пульсоксиметры - это медицинские устройства, используемые для измерения насыщения крови кислородом. Во время апноэ и ненормальных форм дыхания, уровень кислорода в крови может значительно снижаться, и может указывать на проблемы, требующие медицинского вмешательства.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1137"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1153"/>
         <source>OSCAR is currently compatible with Contec CMS50D+, CMS50E, CMS50F and CMS50I serial oximeters.&lt;br/&gt;(Note: Direct importing from bluetooth models is &lt;span style=&quot; font-weight:600;&quot;&gt;probably not&lt;/span&gt; possible yet)</source>
         <translation>В настоящее время OSCAR совместим с оксиметрами Contec CMS50D +, CMS50E, CMS50F и CMS50i.&lt;br/&gt;(Примечание: прямой импорт данных из моделей с Bluetooth &lt;span style=&quot;font-weight:600;&quot;&gt;вероятно&lt;/span&gt; еще невозможен)</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1139"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1155"/>
         <source>You may wish to note, other companies, such as Pulox, simply rebadge Contec CMS50&apos;s under new names, such as the Pulox PO-200, PO-300, PO-400. These should also work.</source>
         <translation>Обратите внимание, что другие компании, такие как Pulox, выпускают Contec CMS50 под другими названиями, например Pulox PO-200, PO-300, PO-400. Они тоже будут работать.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1142"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1158"/>
         <source>It also can read from ChoiceMMed MD300W1 oximeter .dat files.</source>
         <translation>Можно также загружать .dat файлы оксиметра ChoiceMMed MD300W1.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1144"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1160"/>
         <source>Please remember:</source>
         <translation>Пожалуйста, помните:</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1148"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1164"/>
         <source>Important Notes:</source>
         <translation>Важное замечание:</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1151"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1167"/>
         <source>Contec CMS50D+ devices do not have an internal clock, and do not record a starting time. If you do not have a CPAP session to link a recording to, you will have to enter the start time manually after the import process is completed.</source>
         <translation>Устройства Contec CMS50D+ не имеют внутренних часов и не записывают время запуска. Если у вас нет сеанса CPAP, чтобы связать запись, нужно будет ввести время начала вручную после завершения процесса импорта.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1153"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1169"/>
         <source>Even for devices with an internal clock, it is still recommended to get into the habit of starting oximeter records at the same time as CPAP sessions, because CPAP internal clocks tend to drift over time, and not all can be reset easily.</source>
         <translation>Даже для устройств с внутренними часами, рекомендуется запускать запись оксиметрии одновременно с сеансом CPAP, так как внутренние часы CPAP теряют точность со временем, и не все можно легко установить.</translation>
     </message>
@@ -18563,16 +18589,16 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/common.cpp" line="965"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="375"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="375"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="379"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="379"/>
         <source>BMI</source>
         <translation>ИМТ</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/common.cpp" line="966"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="371"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="371"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="371"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="375"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="375"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="375"/>
         <source>Weight</source>
         <translation>Вес</translation>
     </message>
@@ -18721,7 +18747,7 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/common.cpp" line="999"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="355"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="359"/>
         <source>AVAPS</source>
         <translation>AVAPS</translation>
     </message>
@@ -18865,7 +18891,7 @@ TTIA: %1</translation>
     <message>
         <location filename="../oscar/SleepLib/common.cpp" line="1025"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2871"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="258"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="262"/>
         <source>PC</source>
         <translation>PC</translation>
     </message>
@@ -18896,7 +18922,7 @@ TTIA: %1</translation>
         <location filename="../oscar/Graphs/gAnalysisCharts.cpp" line="88"/>
         <location filename="../oscar/Graphs/gAnalysisCharts.cpp" line="158"/>
         <location filename="../oscar/SleepLib/common.cpp" line="1031"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="317"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="321"/>
         <source>AHI</source>
         <translation>AHI</translation>
     </message>
@@ -18912,7 +18938,7 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/common.cpp" line="1034"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="326"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="330"/>
         <source>RDI</source>
         <translation>RDI</translation>
     </message>
@@ -18964,19 +18990,19 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/common.cpp" line="1049"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="302"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="306"/>
         <source>Insp. Time</source>
         <translation>Время вдоха</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/common.cpp" line="1050"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="299"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="303"/>
         <source>Exp. Time</source>
         <translation>Время выдоха</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/common.cpp" line="1051"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="305"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="309"/>
         <source>Resp. Event</source>
         <translation>Событие</translation>
     </message>
@@ -18985,7 +19011,7 @@ TTIA: %1</translation>
         <location filename="../oscar/SleepLib/analysis/analysis_channels.cpp" line="82"/>
         <location filename="../oscar/SleepLib/analysis/analysis_channels.cpp" line="91"/>
         <location filename="../oscar/SleepLib/common.cpp" line="1052"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="308"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="312"/>
         <source>Flow Limitation</source>
         <translation>Ограничение потока</translation>
     </message>
@@ -19013,35 +19039,35 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/common.cpp" line="1057"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="311"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="315"/>
         <source>Target Vent.</source>
         <translation>Целевая вент.</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/common.cpp" line="1058"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="283"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="287"/>
         <source>Minute Vent.</source>
         <translation>Минутная вент.</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/common.cpp" line="1059"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="277"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="277"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="281"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="281"/>
         <source>Tidal Volume</source>
         <translation>Приливной объем</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/common.cpp" line="1060"/>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="362"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="286"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="290"/>
         <source>Resp. Rate</source>
         <translation>Частота дыхания</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/common.cpp" line="1061"/>
         <location filename="../oscar/SleepLib/loader_plugins/intellipap_loader.cpp" line="2818"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="280"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="280"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="284"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="284"/>
         <source>Snore</source>
         <translation>Храп</translation>
     </message>
@@ -19068,7 +19094,7 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/common.cpp" line="1066"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="320"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="324"/>
         <source>Total Leaks</source>
         <translation>Всего утечек</translation>
     </message>
@@ -19084,15 +19110,15 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/common.cpp" line="1069"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="268"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="268"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="272"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="272"/>
         <source>Flow Rate</source>
         <translation>Поток</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/common.cpp" line="1070"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="388"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="388"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="392"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="392"/>
         <source>Sleep Stage</source>
         <translation>Фаза сна</translation>
     </message>
@@ -19230,8 +19256,8 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/common.cpp" line="967"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="376"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="376"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="380"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="380"/>
         <source>Feeling</source>
         <translation>Самочувствие</translation>
     </message>
@@ -19287,15 +19313,15 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/common.cpp" line="1088"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="333"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="333"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="337"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="337"/>
         <source>Inclination</source>
         <translation>Наклон</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/common.cpp" line="1089"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="330"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="330"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="334"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="334"/>
         <source>Orientation</source>
         <translation>Направление</translation>
     </message>
@@ -19386,15 +19412,15 @@ TTIA: %1</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/common.cpp" line="1109"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="377"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="377"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="381"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="381"/>
         <source>Start</source>
         <translation>Начало</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/common.cpp" line="1110"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="378"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="378"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="382"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="382"/>
         <source>End</source>
         <translation>Конец</translation>
     </message>
@@ -21348,44 +21374,44 @@ TTIA: %1</translation>
         <translation>Пользовательский флаг #3 (UF3)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="258"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="262"/>
         <source>Pulse Change (PC)</source>
         <translation>Изменение пульса (PC)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="261"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="265"/>
         <source>SpO2 Drop (SD)</source>
         <translation>Падение SpO2 (SD)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="305"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="309"/>
         <source>A ResMed data item: Trigger Cycle Event</source>
         <translation>Данные ResMed: событие запуска цикла</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="317"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="321"/>
         <source>Apnea Hypopnea Index (AHI)</source>
         <translation>Индекс апноэ-гипоапноэ (AHI)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="326"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="330"/>
         <source>Respiratory Disturbance Index (RDI)</source>
         <translation>Индекс нарушения дыхания (RDI)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="339"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="339"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="343"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="343"/>
         <source>Mask On Time</source>
         <translation>Время в маске</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="339"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="343"/>
         <source>Time started according to str.edf</source>
         <translation>Время начала по данным str.edf</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="342"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="342"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="346"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="346"/>
         <source>Summary Only</source>
         <translation>Только итоги</translation>
     </message>
@@ -21471,92 +21497,92 @@ TTIA: %1</translation>
         <translation>Оптическая плетизмограмма сердечного ритма</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="258"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="262"/>
         <source>A sudden (user definable) change in heart rate</source>
         <translation>Внезапное (задается пользователем) изменение сердечного ритма</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="261"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="265"/>
         <source>A sudden (user definable) drop in blood oxygen saturation</source>
         <translation>Внезапное (задается пользователем) падение сатурации крови</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="261"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="265"/>
         <source>SD</source>
         <translation>SD</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="268"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="272"/>
         <source>Breathing flow rate waveform</source>
         <translation>Кривая изменения потока дыхания</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="271"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="271"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="271"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="274"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="274"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="275"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="275"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="275"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="278"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="278"/>
         <source>Mask Pressure</source>
         <translation>Давление маски</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="277"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="281"/>
         <source>Amount of air displaced per breath</source>
         <translation>Расход воздуха на один вдох</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="280"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="284"/>
         <source>Graph displaying snore volume</source>
         <translation>График силы храпа</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="283"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="287"/>
         <source>Minute Ventilation</source>
         <translation>Минутная вентиляция</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="283"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="287"/>
         <source>Amount of air displaced per minute</source>
         <translation>Расход воздуха в минуту</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="286"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="290"/>
         <source>Respiratory Rate</source>
         <translation>Частота дыхания</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="286"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="290"/>
         <source>Rate of breaths per minute</source>
         <translation>Количество вдохов в минуту</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="289"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="293"/>
         <source>Patient Triggered Breaths</source>
         <translation>Самостоятельное дыхание</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="289"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="293"/>
         <source>Percentage of breaths triggered by patient</source>
         <translation>Доля вдохов, сделанных самостоятельно</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="289"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="293"/>
         <source>Pat. Trig. Breaths</source>
         <translation>Сам. вдох</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="292"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="292"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="296"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="296"/>
         <source>Leak Rate</source>
         <translation>Объем утечки</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="292"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="296"/>
         <source>Rate of detected mask leakage</source>
         <translation>Объем утечек из маски</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="296"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="300"/>
         <source>Ratio between Inspiratory and Expiratory time</source>
         <translation>Соотношение между временем вдоха и выдоха</translation>
     </message>
@@ -21687,153 +21713,170 @@ TTIA: %1</translation>
         <translation>Пользовательское событие, определяемое волновым процессором OSCAR.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="255"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="256"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="256"/>
+        <source>Nasal flow</source>
+        <translation>Носовой поток</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/schema.cpp" line="256"/>
+        <source>Nasal-cannula pressure of a sleep screener: breathing in is up</source>
+        <translation>Давление в носовой канюле скринера сна: вдох — вверх</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/schema.cpp" line="256"/>
+        <location filename="../oscar/tests/rs01importtests.cpp" line="105"/>
+        <source>Pa</source>
+        <translation>Па</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/schema.cpp" line="259"/>
         <source>Perfusion Index</source>
         <translation>Индекс перфузии</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="255"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="259"/>
         <source>A relative assessment of the pulse strength at the monitoring site</source>
         <translation>Относительная оценка силы пульса в месте его измерения</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="255"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="259"/>
         <source>Perf. Index %</source>
         <translation>Инд. перф. %</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="274"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="278"/>
         <source>Mask Pressure (High frequency)</source>
         <translation>Давление маски (высокая частота)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="296"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="296"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="300"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="300"/>
         <source>I/E Value</source>
         <translation>Значение I/E</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="299"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="303"/>
         <source>Expiratory Time</source>
         <translation>Время выдоха</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="299"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="303"/>
         <source>Time taken to breathe out</source>
         <translation>Время затраченное на выдохи</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="302"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="306"/>
         <source>Inspiratory Time</source>
         <translation>Время вдоха</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="302"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="306"/>
         <source>Time taken to breathe in</source>
         <translation>Время затраченное на вдохи</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="305"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="309"/>
         <source>Respiratory Event</source>
         <translation>Дыхательное событие</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="308"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="312"/>
         <source>Graph showing severity of flow limitations</source>
         <translation>График серьезности ограничений потока</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="308"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="312"/>
         <source>Flow Limit.</source>
         <translation>Предел потока.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="311"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="311"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="315"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="315"/>
         <source>Target Minute Ventilation</source>
         <translation>Целевая минутная вентиляция</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="314"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="318"/>
         <source>Maximum Leak</source>
         <translation>Максимальная утечка</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="314"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="318"/>
         <source>The maximum rate of mask leakage</source>
         <translation>Максимальное значение утечек из маски</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="314"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="318"/>
         <source>Max Leaks</source>
         <translation>Макс утечки</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="317"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="321"/>
         <source>Graph showing running AHI for the past hour</source>
         <translation>График изменений ИАГ за последний час</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="320"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="324"/>
         <source>Total Leak Rate</source>
         <translation>Общий объем утечки</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="320"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="324"/>
         <source>Detected mask leakage including natural Mask leakages</source>
         <translation>Вычисленные утечки воздуха, включая нормлаьные утечки из маски</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="323"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="327"/>
         <source>Median Leak Rate</source>
         <translation>Медианный объем утечки</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="323"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="327"/>
         <source>Median rate of detected mask leakage</source>
         <translation>Медианный объем вычисленной утечки из маски</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="323"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="327"/>
         <source>Median Leaks</source>
         <translation>Медианные утечки</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="326"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="330"/>
         <source>Graph showing running RDI for the past hour</source>
         <translation>График изменения ИНД за последний час</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="330"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="334"/>
         <source>Sleep position in degrees</source>
         <translation>Позиция сна в градусах</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="333"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="337"/>
         <source>Upright angle in degrees</source>
         <translation>Угол наклона в градусах</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="336"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="336"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="340"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="340"/>
         <source>Movement</source>
         <translation>Движение</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="336"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="340"/>
         <source>Movement detector</source>
         <translation>Детектор движения</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="342"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="346"/>
         <source>CPAP Session contains summary data only</source>
         <translation>Сеанс CPAP содержит только общие данные</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prisma_loader.cpp" line="975"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="2859"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="345"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="345"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="349"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="349"/>
         <source>PAP Mode</source>
         <translation>Режим PAP</translation>
     </message>
@@ -21858,352 +21901,352 @@ TTIA: %1</translation>
         <translation>Вибрирующий храп по данным System One</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="345"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="349"/>
         <source>PAP Device Mode</source>
         <translation>Режим аппарата PAP</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="349"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="353"/>
         <source>APAP (Variable)</source>
         <translation>APAP (переменный)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="353"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="357"/>
         <source>ASV (Fixed EPAP)</source>
         <translation>ASV (постоянный EPAP)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="354"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="358"/>
         <source>ASV (Variable EPAP)</source>
         <translation>ASV (переменный EPAP)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="359"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="359"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="363"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="363"/>
         <source>Steady Breathing</source>
         <translation>Равномерное дыхание</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="359"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="363"/>
         <source>Variation in minute ventilation</source>
         <translation>Вариация минутной вентиляции</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="362"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="366"/>
         <source>Steady breathing (SB)</source>
         <translation>Равномерное дыхание (SB)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="362"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="366"/>
         <source>Low variation in minute ventilation</source>
         <translation>Низкая вариация минутной вентиляции</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="362"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="366"/>
         <source>SB</source>
         <translation>SB</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/resmed_loader.cpp" line="322"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="372"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="372"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="376"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="376"/>
         <source>Height</source>
         <translation>Высота</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="372"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="376"/>
         <source>Physical Height</source>
         <translation>Физическая высота</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="373"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="373"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="377"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="377"/>
         <source>Notes</source>
         <translation>Заметки</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="373"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="377"/>
         <source>Bookmark Notes</source>
         <translation>Закладка</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="375"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="379"/>
         <source>Body Mass Index</source>
         <translation>Индекс массы тела</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="376"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="380"/>
         <source>How you feel (1 = like crap, 10 = unstoppable)</source>
         <translation>Самочувствие (1 = отвратительно, 10 = превосходно)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="377"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="381"/>
         <source>Bookmark Start</source>
         <translation>Начало закладки</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="378"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="382"/>
         <source>Bookmark End</source>
         <translation>Конец закладки</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="379"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="379"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="379"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="383"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="383"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="383"/>
         <source>Last Updated</source>
         <translation>Последнее обновление</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="381"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="381"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="385"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="385"/>
         <source>Journal Notes</source>
         <translation>Заметки дневника</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="381"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="385"/>
         <source>Journal</source>
         <translation>Дневник</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="388"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="392"/>
         <source>1=Awake 2=REM 3=Light Sleep 4=Deep Sleep</source>
         <translation>1=Пробуждение 2=REM 3=Быстрый сон 4=Глубокий сон</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="390"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="390"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="394"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="394"/>
         <source>Brain Wave</source>
         <translation>Волна мозга</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="390"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="394"/>
         <source>BrainWave</source>
         <translation>Волна мозга</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="391"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="391"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="395"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="395"/>
         <source>Awakenings</source>
         <translation>Пробуждения</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="391"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="395"/>
         <source>Number of Awakenings</source>
         <translation>Число пробуждений</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="392"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="392"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="396"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="396"/>
         <source>Morning Feel</source>
         <translation>Утреннее самочувствие</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="392"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="396"/>
         <source>How you felt in the morning</source>
         <translation>Самочувствие утром</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="393"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="393"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="397"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="397"/>
         <source>Time Awake</source>
         <translation>Время бодрствования</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="393"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="397"/>
         <source>Time spent awake</source>
         <translation>Время проведенное не во сне</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="394"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="398"/>
         <source>Time In REM Sleep</source>
         <translation>Время REM сна</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="394"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="398"/>
         <source>Time spent in REM Sleep</source>
         <translation>Время, проведенное в REM сне</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="394"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="398"/>
         <source>Time in REM Sleep</source>
         <translation>Время REM сна</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="395"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="399"/>
         <source>Time In Light Sleep</source>
         <translation>Время быстрого сна</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="395"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="399"/>
         <source>Time spent in light sleep</source>
         <translation>Время, проведенное в быстром сне</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="395"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="399"/>
         <source>Time in Light Sleep</source>
         <translation>Время быстрого сна</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="396"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="400"/>
         <source>Time In Deep Sleep</source>
         <translation>Время глубокого сна</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="396"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="400"/>
         <source>Time spent in deep sleep</source>
         <translation>Время проведенное в глубоком сне</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="396"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="400"/>
         <source>Time in Deep Sleep</source>
         <translation>Время глубокого сна</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="397"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="397"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="401"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="401"/>
         <source>Time to Sleep</source>
         <translation>Время засыпания</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="397"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="401"/>
         <source>Time taken to get to sleep</source>
         <translation>Время, потраченное на засыпание</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="398"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="402"/>
         <source>Zeo ZQ</source>
         <translation>Zeo ZQ</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="398"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="402"/>
         <source>Zeo sleep quality measurement</source>
         <translation>Оценка качества сна Zeo</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="398"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="402"/>
         <source>ZEO ZQ</source>
         <translation>ZEO ZQ</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="402"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="406"/>
         <source>Respiratory Rate (Watch)</source>
         <translation>Частота дыхания (Watch)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="402"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="406"/>
         <source>Breaths per minute measured by Apple Watch</source>
         <translation>Количество вдохов в минуту, измеренное Apple Watch</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="402"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="406"/>
         <source>Resp. Rate (Watch)</source>
         <translation>Частота дых. (Watch)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="404"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="408"/>
         <source>Heart Rate Variability (SDNN)</source>
         <translation>Вариабельность сердечного ритма (SDNN)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="404"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="408"/>
         <source>Heart rate variability measured by Apple Watch</source>
         <translation>Вариабельность сердечного ритма, измеренная Apple Watch</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="404"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="408"/>
         <source>HRV (SDNN)</source>
         <translation>ВСР (SDNN)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="405"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="405"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="409"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="409"/>
         <source>Breathing Disturbances</source>
         <translation>Нарушения дыхания</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="405"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="409"/>
         <source>Apple&apos;s per-night sleep-breathing-disturbance count</source>
         <translation>Количество нарушений дыхания во сне за ночь, определённое Apple</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="406"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="406"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="410"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="410"/>
         <source>Wrist Temperature</source>
         <translation>Температура запястья</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="406"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="410"/>
         <source>Wrist temperature measured by Apple Watch, stored in Celsius</source>
         <translation>Температура запястья, измеренная Apple Watch, хранится в градусах Цельсия</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="413"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="413"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="413"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="417"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="417"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="417"/>
         <source>Pressure Wave</source>
         <translation>Волна давления</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="416"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="416"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="416"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="420"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="420"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="420"/>
         <source>Flow Abnormality</source>
         <translation>Нарушение потока</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="419"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="419"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="423"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="423"/>
         <source>I/E Ratio %</source>
         <translation>Соотношение I/E %</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="419"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="423"/>
         <source>Inspiration duration compared to expiration duration expressed as a percentage</source>
         <translation>Отношение длительности вдоха к длительности выдоха в процентах</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="431"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="435"/>
         <source>Debugging channel #1</source>
         <translation>Канал отладки #1</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="431"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="435"/>
         <source>Test #1</source>
         <translation>Тест #1</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="431"/>
-        <location filename="../oscar/SleepLib/schema.cpp" line="432"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="435"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="436"/>
         <source>For internal use only</source>
         <translation>Для служебного пользования</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="432"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="436"/>
         <source>Debugging channel #2</source>
         <translation>Канал отладки #2</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="432"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="436"/>
         <source>Test #2</source>
         <translation>Тест #2</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="904"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="908"/>
         <source>Zero</source>
         <translation>Ноль</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="908"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="912"/>
         <source>Leak Redline Threshold</source>
         <translation>Порог утечки (красная линия)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="910"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="914"/>
         <source>Upper Threshold</source>
         <translation>Верхняя граница</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="913"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="917"/>
         <source>Lower Threshold</source>
         <translation>Нижняя граница</translation>
     </message>
@@ -22940,17 +22983,17 @@ You may continue, but some data may be incomplete or incorrect.</source>
         <translation>Обнаружен файл блокировки профиля &apos;%1&apos;, на &apos;%2&apos;.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="350"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="354"/>
         <source>Fixed Bi-Level</source>
         <translation>Постоянный Bi-Level</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="351"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="355"/>
         <source>Auto Bi-Level (Fixed PS)</source>
         <translation>Авто Bi-Level (постоянный PS)</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/schema.cpp" line="352"/>
+        <location filename="../oscar/SleepLib/schema.cpp" line="356"/>
         <source>Auto Bi-Level (Variable PS)</source>
         <translation>Авто Bi-Level (переменный PS)</translation>
     </message>
@@ -25379,6 +25422,7 @@ Pulse rises: %1 per hour</source>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/o2ring_import.cpp" line="49"/>
+        <location filename="../oscar/SleepLib/loader_plugins/rs01_import.cpp" line="108"/>
         <source>Could not create the folder %1.</source>
         <translation>Не удалось создать папку %1.</translation>
     </message>
@@ -25403,6 +25447,36 @@ Pulse rises: %1 per hour</source>
         <location filename="../oscar/SleepLib/loader_plugins/vihealth_csv_loader.h" line="38"/>
         <source>ViHealth</source>
         <translation>ViHealth</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/rs01_import.cpp" line="103"/>
+        <source>%1: the header can&apos;t be read (%2).</source>
+        <translation>%1: не удаётся прочитать заголовок (%2).</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/rs01_import.cpp" line="113"/>
+        <source>%1: could not copy %2.</source>
+        <translation>%1: не удалось скопировать %2.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/rs01_import.cpp" line="117"/>
+        <source>%1: %2</source>
+        <translation>%1: %2</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/rs01_import.cpp" line="146"/>
+        <source>%1: the session could not be added.</source>
+        <translation>%1: не удалось добавить сеанс.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/rs01_import.cpp" line="151"/>
+        <source>%1: that night already has another oximeter&apos;s recording.</source>
+        <translation>%1: в эту ночь уже есть запись другого оксиметра.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/SleepLib/loader_plugins/rs01_import.cpp" line="155"/>
+        <source>%1: the recording could not be saved.</source>
+        <translation>%1: не удалось сохранить запись.</translation>
     </message>
 </context>
 <context>
@@ -25461,6 +25535,110 @@ Pulse rises: %1 per hour</source>
         <location filename="../oscar/SleepLib/loader_plugins/o2ring_link.cpp" line="175"/>
         <source>Couldn&apos;t turn on notifications from the ring.</source>
         <translation>Не удалось включить уведомления от кольца.</translation>
+    </message>
+</context>
+<context>
+    <name>RS01Page</name>
+    <message>
+        <location filename="../oscar/rs01page.cpp" line="64"/>
+        <source>Recording</source>
+        <translation>Запись</translation>
+    </message>
+    <message>
+        <location filename="../oscar/rs01page.cpp" line="64"/>
+        <source>Status</source>
+        <translation>Состояние</translation>
+    </message>
+    <message>
+        <location filename="../oscar/rs01page.cpp" line="69"/>
+        <source>Choose folder…</source>
+        <translation>Выбрать папку…</translation>
+    </message>
+    <message>
+        <location filename="../oscar/rs01page.cpp" line="71"/>
+        <source>A folder with the device&apos;s recordings (MMDDhhmm folders), or the device itself</source>
+        <translation>Папка с записями прибора (папки MMDDhhmm) или сам прибор</translation>
+    </message>
+    <message>
+        <location filename="../oscar/rs01page.cpp" line="72"/>
+        <source>Import</source>
+        <translation>Импортировать</translation>
+    </message>
+    <message>
+        <location filename="../oscar/rs01page.cpp" line="74"/>
+        <source>Done</source>
+        <translation>Готово</translation>
+    </message>
+    <message>
+        <location filename="../oscar/rs01page.cpp" line="88"/>
+        <source>The device is mounted with write access. macOS may then write its own files to it, and the device damages its recordings after that. Unplugging is not enough: unmount it and mount it read-only in Terminal, then press Choose folder…:</source>
+        <translation>Прибор подключён с правом записи. macOS может записать на него свои файлы, и после этого прибор портит свои записи. Просто отключить его недостаточно: отмонтируйте его и подключите только для чтения в Терминале, затем нажмите «Выбрать папку…»:</translation>
+    </message>
+    <message>
+        <location filename="../oscar/rs01page.cpp" line="92"/>
+        <source>OSCAR itself never writes to the device.</source>
+        <translation>Сам OSCAR никогда ничего не пишет на прибор.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/rs01page.cpp" line="111"/>
+        <source>Plug the RS01 in (switched on before the cable), or choose a folder with a copy of its recordings.</source>
+        <translation>Подключите RS01 (включив его до подключения кабеля) или выберите папку с копией его записей.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/rs01page.cpp" line="117"/>
+        <source>RS01 recordings</source>
+        <translation>Записи RS01</translation>
+    </message>
+    <message>
+        <location filename="../oscar/rs01page.cpp" line="137"/>
+        <source>the header can&apos;t be read</source>
+        <translation>не удаётся прочитать заголовок</translation>
+    </message>
+    <message>
+        <location filename="../oscar/rs01page.cpp" line="141"/>
+        <source>%1, %2</source>
+        <translation>%1, %2</translation>
+    </message>
+    <message>
+        <location filename="../oscar/rs01page.cpp" line="145"/>
+        <location filename="../oscar/rs01page.cpp" line="171"/>
+        <location filename="../oscar/tests/rs01importtests.cpp" line="193"/>
+        <source>already in OSCAR</source>
+        <translation>уже в OSCAR</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../oscar/rs01page.cpp" line="148"/>
+        <source>%n recording(s) in %1.</source>
+        <translation>
+            <numerusform>%n запись в %1.</numerusform>
+            <numerusform>%n записи в %1.</numerusform>
+            <numerusform>%n записей в %1.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../oscar/rs01page.cpp" line="149"/>
+        <source>No RS01 recordings in %1.</source>
+        <translation>В %1 нет записей RS01.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/rs01page.cpp" line="162"/>
+        <source>importing…</source>
+        <translation>импорт…</translation>
+    </message>
+    <message>
+        <location filename="../oscar/rs01page.cpp" line="168"/>
+        <source>imported</source>
+        <translation>импортировано</translation>
+    </message>
+    <message>
+        <location filename="../oscar/rs01page.cpp" line="181"/>
+        <source>Imported %1, failed %2: see the list.</source>
+        <translation>Импортировано: %1, ошибок: %2 — см. список.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/rs01page.cpp" line="182"/>
+        <source>Imported %1. Press Done to see them.</source>
+        <translation>Импортировано: %1. Нажмите «Готово», чтобы посмотреть.</translation>
     </message>
 </context>
 <context>

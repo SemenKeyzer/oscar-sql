@@ -452,6 +452,7 @@ SOURCES += \
     SleepLib/loader_plugins/vihealth_csv_loader.cpp \
     SleepLib/loader_plugins/rs01_reader.cpp \
     SleepLib/loader_plugins/rs01_import.cpp \
+    rs01page.cpp \
     SleepLib/loader_plugins/contec_ble_protocol.cpp \
     SleepLib/loader_plugins/contec_ble_downloader.cpp \
     SleepLib/loader_plugins/contec_ble_import.cpp \
@@ -705,6 +706,7 @@ HEADERS  += \
     SleepLib/loader_plugins/vihealth_csv_loader.h \
     SleepLib/loader_plugins/rs01_reader.h \
     SleepLib/loader_plugins/rs01_import.h \
+    rs01page.h \
     SleepLib/loader_plugins/contec_ble_protocol.h \
     SleepLib/loader_plugins/contec_ble_downloader.h \
     SleepLib/loader_plugins/contec_ble_import.h \

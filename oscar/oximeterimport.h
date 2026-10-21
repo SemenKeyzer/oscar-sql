@@ -83,6 +83,7 @@ private slots:
     void on_chooseSessionButton_clicked();
     void onBluetoothImportClicked();
     void onO2RingImportClicked();
+    void onRS01ImportClicked();
     void onBluetoothFinished(bool importedSomething);
     void onBluetoothEnded(bool canRetry);
 
@@ -129,6 +130,7 @@ private:
     QList<int> chosen_sessions;
     BluetoothOximeterPage *m_btPage = nullptr;
     O2RingPage *m_o2ringPage = nullptr;
+    class RS01Page *m_rs01Page = nullptr;
     QPushButton *m_btRetryButton = nullptr;
     QPushButton *m_btDoneButton = nullptr;
 };
