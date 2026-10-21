@@ -63,6 +63,9 @@ class gAnalysisChart : public gSummaryChart
     virtual ~gAnalysisChart() {}
 
     //! Graph code, title and y-axis units of a kind, for the Overview.
+    //! The days the chart spans: the CPAP's for the flow-shape kinds, every day otherwise (a sleep
+    //! screener's nights have the analysis' AHI too).
+    static MachineType machineType(Kind kind);
     static QString code(Kind kind);
     static QString title(Kind kind);
     static QString units(Kind kind);

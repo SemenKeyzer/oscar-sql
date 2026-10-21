@@ -52,13 +52,17 @@ QString num(double v, int decimals = 1)
 } // namespace
 
 gAnalysisChart::gAnalysisChart(Kind kind)
-    : gSummaryChart(code(kind), kind == Ahi || kind == FlowLimitation || kind == FlowLimitationMinutes
-                                    || kind == Glasgow ? MT_CPAP : MT_UNKNOWN),
+    : gSummaryChart(code(kind), machineType(kind)),
       m_kind(kind),
       m_deviceCalc(NoChannel, ST_CNT, Qt::black)
 {
     addCalc(NoChannel, ST_CNT, QColor(0x30, 0x60, 0xa0));
     m_deviceCalc.reset(0, 0);
+}
+
+MachineType gAnalysisChart::machineType(Kind kind)
+{
+    return kind == FlowLimitation || kind == FlowLimitationMinutes || kind == Glasgow ? MT_CPAP : MT_UNKNOWN;
 }
 
 QList<gAnalysisChart::Kind> gAnalysisChart::kinds()
@@ -153,6 +157,10 @@ void gAnalysisChart::populate(Day *day, int idx)
             total += v;
             add(v, v, schema::channel[p.code].label(), schema::channel[p.code].defaultColor());
             if (p.n) detail << QStringLiteral("%1 %2").arg(schema::channel[p.code].label(), num(v, 2));
+        }
+        if (r.screener) {   // a sleep screener's night: an REI, no device to compare with
+            tip = QObject::tr("\n%3: %1 (%2)").arg(num(total, 2), detail.join(QStringLiteral(", ")), AnalysisMark::title(QObject::tr("REI")));
+            break;
         }
         m_device[idx] = day->calcAHI();
         tip = QObject::tr("\n%4: %1 (%2)\nAHI (device): %3").arg(num(total, 2), detail.join(QStringLiteral(", ")), num(m_device[idx], 2), AnalysisMark::title(QObject::tr("AHI")));

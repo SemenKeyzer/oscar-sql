@@ -121,6 +121,7 @@ int analysisGroups(const QDate &first, const QDate &last, QSet<QString> &has)
         if (d.hasFlow && d.flBreaths > 0) has.insert(QStringLiteral("fl"));
         if (d.hasFlow && !d.glasgow.isEmpty()) has.insert(QStringLiteral("gi"));
         if (d.hasComparison) has.insert(QStringLiteral("comparison"));
+        if (d.screener) has.insert(QStringLiteral("screener"));   // not a group: names the AHI row
         if (d.hasOximetry) {
             has.insert(QStringLiteral("oxi"));
             has.insert(QStringLiteral("hb"));   // from the oximeter alone
@@ -131,8 +132,9 @@ int analysisGroups(const QDate &first, const QDate &last, QSet<QString> &has)
     return int(rows.size());
 }
 
-QString analysisName(const QString &key)
+QString analysisName(const QString &key, bool screenerNights = false)
 {
+    if (key == QLatin1String("ahi") && screenerNights) return Statistics::tr("AHI / REI");
     if (key == QLatin1String("#breathing")) return Statistics::tr("Breathing");
     if (key == QLatin1String("#oximetry")) return Statistics::tr("Oximetry");
     if (key == QLatin1String("#pulse")) return Statistics::tr("Pulse");
@@ -2288,7 +2290,7 @@ QString Statistics::GenerateCPAPUsage()
                         arg(subheading_color).arg(periods.size()+1).arg(analysisName(row.src));
                 continue;
             }
-            name = analysisName(row.src);
+            name = analysisName(row.src, analysisHas.contains(QStringLiteral("screener")));
         } else if (row.calc == SC_SPACE) {
             // if (CPAP HAS rows and OXI has rows then add space
             html+=QString("<tr bgcolor='%1'><th colspan=%2 align=center><font size='+2'>%3</font></th></tr>").
@@ -2982,7 +2984,7 @@ QString Statistics::analysisRowLabel(const QString &label, bool print)
     return AnalysisMark::barMark() + label + QStringLiteral(" ") + (print ? AnalysisMark::printPill() : AnalysisMark::pill());
 }
 
-QString Statistics::analysisLabel(const QString &key, bool print)
+QString Statistics::analysisLabel(const QString &key, bool print, bool screenerNights)
 {
-    return analysisRowLabel(analysisName(key), print);
+    return analysisRowLabel(analysisName(key, screenerNights), print);
 }

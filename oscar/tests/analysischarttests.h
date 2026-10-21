@@ -27,6 +27,7 @@ private slots:
     void testHypoxicBurdenTargetLines();
     void testGlasgowValue();
     void testFlMinutesValue();
+    void testChartKindsTakeOximeterNights();
 };
 
 DECLARE_TEST(AnalysisChartTests)

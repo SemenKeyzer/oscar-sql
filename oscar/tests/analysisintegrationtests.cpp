@@ -2797,6 +2797,9 @@ void AnalysisIntegrationTests::testStatisticsAnalysisLabel()
     QVERIFY(Statistics::analysisRowLabel(QStringLiteral("X"), false).contains(AnalysisMark::barMark() + QStringLiteral("X ") + AnalysisMark::pill()));
     QVERIFY(Statistics::analysisLabel(QStringLiteral("ahi"), true).contains(QStringLiteral("[analysis]")));
     QVERIFY(!Statistics::analysisLabel(QStringLiteral("hi"), false).contains(QStringLiteral("(analysis)")));
+    // a period with a sleep screener's nights: the index is an AHI or an REI
+    QVERIFY(Statistics::analysisLabel(QStringLiteral("ahi"), false, true).contains(Statistics::tr("AHI / REI")));
+    QCOMPARE(Statistics::analysisLabel(QStringLiteral("hi"), false, true), Statistics::analysisLabel(QStringLiteral("hi"), false));
 }
 
 // The tree shows the device's events as recorded: a type whose events were all removed by hand stays.

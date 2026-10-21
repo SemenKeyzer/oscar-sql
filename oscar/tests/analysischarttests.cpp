@@ -135,3 +135,13 @@ void AnalysisChartTests::testHypoxicBurdenTargetLines()
     QCOMPARE(gAnalysisChart::targets(gAnalysisChart::Odi), (QList<float> { 5 }));
     QVERIFY(gAnalysisChart::targets(gAnalysisChart::PulseRises).isEmpty());
 }
+
+// The analysis' AHI chart takes every night with analysis rows (a screener's too, without CPAP);
+// flow limitation and Glasgow come from a CPAP's flow only.
+void AnalysisChartTests::testChartKindsTakeOximeterNights()
+{
+    QCOMPARE(gAnalysisChart::machineType(gAnalysisChart::Ahi), MT_UNKNOWN);
+    QCOMPARE(gAnalysisChart::machineType(gAnalysisChart::Odi), MT_UNKNOWN);
+    QCOMPARE(gAnalysisChart::machineType(gAnalysisChart::FlowLimitation), MT_CPAP);
+    QCOMPARE(gAnalysisChart::machineType(gAnalysisChart::Glasgow), MT_CPAP);
+}
