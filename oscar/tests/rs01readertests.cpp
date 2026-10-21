@@ -114,18 +114,51 @@ void RS01ReaderTests::testSegmentsContinueInTime()
     QCOMPARE(spo2.first().samples.size(), 610);
 }
 
-// A missing segment number: what follows would land at the wrong time, so the reading stops.
-void RS01ReaderTests::testMissingSegmentStops()
+// A missing, empty or cut segment (the device's FAT damage): the others are kept, each at the
+// time its file name gives, with a gap where the missing one was.
+void RS01ReaderTests::testMissingSegmentIsGap()
 {
     QTemporaryDir root;
     const QByteArray s1 = segment(1, 600, [](int i) { return record(i, 2008, 60, 96); });
     const QByteArray s3 = segment(3, 10, [](int i) { return record(i, 2008, 60, 96); });
-    const RS01Recording r = rs01ReadRecording(recording(root.path(), QStringLiteral("10170150"), header(), { { 1, s1 }, { 3, s3 } }));
-    QCOMPARE(r.seconds, 600);
+    const QString dir = recording(root.path(), QStringLiteral("10170150"), header(), { { 1, s1 }, { 2, QByteArray() }, { 3, s3 } });
+    const RS01Recording r = rs01ReadRecording(dir);
+    QCOMPARE(r.seconds, 1210);
+    const QVector<RS01Run> spo2 = r.runs.value(QStringLiteral("SpO2"));
+    QCOMPARE(spo2.size(), 2);
+    QCOMPARE(spo2[1].startMs - spo2[0].startMs, qint64(1200000));
 
-    // a stray file ("001 copy.SEG") is not a segment and stops nothing
-    write(QDir(root.path()).filePath(QStringLiteral("10170150/001 copy.SEG")), s3);
-    QCOMPARE(rs01ReadRecording(QDir(root.path()).filePath(QStringLiteral("10170150"))).seconds, 600);
+    // a stray file ("001 copy.SEG") is not a segment and changes nothing
+    write(QDir(dir).filePath(QStringLiteral("001 copy.SEG")), s3);
+    QCOMPARE(rs01ReadRecording(dir).seconds, 1210);
+}
+
+// A segment whose number bytes were wiped (00 00 00): its file name says which it is.
+void RS01ReaderTests::testWipedSegmentNumberUsesFileName()
+{
+    QTemporaryDir root;
+    QByteArray s2 = segment(2, 10, [](int i) { return record(i, 2008, 60, 96); });
+    s2.replace(0, 3, QByteArray(3, '\0'));
+    const RS01Recording r = rs01ReadRecording(recording(root.path(), QStringLiteral("10170150"), header(),
+                                                        { { 1, steady(600) }, { 2, s2 } }));
+    QCOMPARE(r.seconds, 610);
+}
+
+// Copied on Windows or FAT: names in lower case, any folder name; other files around are ignored.
+void RS01ReaderTests::testCopiesAnyNameAnyCase()
+{
+    QTemporaryDir root;
+    const QString dir = QDir(root.path()).filePath(QStringLiteral("night copy"));
+    QDir().mkpath(dir);
+    write(QDir(dir).filePath(QStringLiteral("10170150.hd")), header());
+    write(QDir(dir).filePath(QStringLiteral("001.seg")), steady(30));
+    write(QDir(dir).filePath(QStringLiteral("0.indexHead")), QByteArray("spotlight"));
+    const RS01Recording r = rs01ReadRecording(dir);
+    QVERIFY2(r.valid, qPrintable(r.error));
+    QCOMPARE(r.seconds, 30);
+    QCOMPARE(r.name, QStringLiteral("10170150"));
+    QCOMPARE(rs01FindRecordings(root.path()), QStringList({ dir }));   // a folder holding recordings
+    QCOMPARE(rs01FindRecordings(dir), QStringList({ dir }));           // the recording itself
 }
 
 // The zero is the recording's own median (≈2008, not 2048); inspiration (lower values) is positive.
@@ -175,16 +208,70 @@ void RS01ReaderTests::testFindRecordings()
     QVERIFY(rs01FindRecordings(root.path()).first().endsWith(QStringLiteral("10170150")));
 }
 
-// A real night, only where the owner's copy is given (RS01_NIGHT=<folder>): never in the repository.
-void RS01ReaderTests::testRealNightIfGiven()
+namespace {
+
+// Mean of a signal's samples between two clock times of the recording's day.
+double meanBetween(const RS01Recording &r, const QString &label, const QTime &from, const QTime &to)
 {
-    const QString folder = qEnvironmentVariable("RS01_NIGHT");
-    if (folder.isEmpty()) QSKIP("RS01_NIGHT not set");
-    const RS01Recording r = rs01ReadRecording(folder);
-    QVERIFY2(r.valid, qPrintable(r.error));
-    qInfo() << "RS01 night" << r.name << "seconds" << r.seconds << "missing" << r.missingSeconds
-            << "flow runs" << r.runs.value(QStringLiteral("Flow")).size() << "SpO2 runs" << r.runs.value(QStringLiteral("SpO2")).size();
-    QCOMPARE(r.seconds, 27937);
-    QCOMPARE(r.missingSeconds, 0);
-    QCOMPARE(r.runs.value(QStringLiteral("Flow")).size(), 1);
+    const qint64 a = QDateTime(r.header.start.date(), from).toMSecsSinceEpoch();
+    const qint64 b = QDateTime(r.header.start.date(), to).toMSecsSinceEpoch();
+    double sum = 0;
+    int n = 0;
+    for (const RS01Run &run : r.runs.value(label)) {
+        for (int k = 0; k < run.samples.size(); ++k) {
+            const qint64 t = run.startMs + qint64(k * run.intervalMs);
+            if (t >= a && t < b) { sum += run.samples[k]; ++n; }
+        }
+    }
+    return n ? sum / n : qQNaN();
+}
+
+} // namespace
+
+// The owner's own recordings, only where RS01_ROOT names their folder: never in the repository.
+// The night, the polarity test and the device's FAT-damaged recordings of 2024.
+void RS01ReaderTests::testRealRecordingsIfGiven()
+{
+    const QString root = qEnvironmentVariable("RS01_ROOT");
+    if (root.isEmpty()) QSKIP("RS01_ROOT not set");
+
+    const RS01Recording night = rs01ReadRecording(QDir(root).filePath(QStringLiteral("10170150")));
+    QVERIFY2(night.valid, qPrintable(night.error));
+    QCOMPARE(night.seconds, 27937);
+    QCOMPARE(night.header.start.addSecs(night.seconds).time(), QTime(9, 36, 30));
+    const double spo2 = meanBetween(night, QStringLiteral("SpO2"), QTime(1, 50), QTime(9, 37));
+    const double pr = meanBetween(night, QStringLiteral("PR"), QTime(1, 50), QTime(9, 37));
+    float nadir = 101;
+    qint64 nadirAt = 0;
+    for (const RS01Run &run : night.runs.value(QStringLiteral("SpO2"))) {
+        for (int k = 0; k < run.samples.size(); ++k) {
+            if (run.samples[k] < nadir) { nadir = run.samples[k]; nadirAt = run.startMs + qint64(k * run.intervalMs); }
+        }
+    }
+    qInfo() << "night: SpO2 mean" << spo2 << "nadir" << nadir << "at" << QDateTime::fromMSecsSinceEpoch(nadirAt).time()
+            << "PR mean" << pr << "PR 06:42-06:45" << meanBetween(night, QStringLiteral("PR"), QTime(6, 42), QTime(6, 45));
+    QVERIFY(qAbs(spo2 - 91.3) < 0.5);
+    QCOMPARE(nadir, 73.0f);
+    QVERIFY(qAbs(pr - 65) < 2);
+
+    // inhales are up in OSCAR: the long exhales of 21:27 negative, the long inhales of 21:28:22 positive
+    const RS01Recording polarity = rs01ReadRecording(QDir(root).filePath(QStringLiteral("10172127")));
+    QVERIFY2(polarity.valid, qPrintable(polarity.error));
+    const double exhales = meanBetween(polarity, QStringLiteral("Flow"), QTime(21, 27, 15), QTime(21, 27, 52));
+    const double rest = meanBetween(polarity, QStringLiteral("Flow"), QTime(21, 28, 2), QTime(21, 28, 18));
+    const double inhales = meanBetween(polarity, QStringLiteral("Flow"), QTime(21, 28, 22), QTime(21, 28, 45));
+    qInfo() << "polarity: exhales" << exhales << "rest" << rest << "inhales" << inhales << "Pa";
+    QVERIFY(exhales < -5);
+    QVERIFY(inhales > 5);
+    QVERIFY(qAbs(rest) < 3);
+
+    // the damaged ones: no crash, the readable parts kept
+    for (const QString &dir : rs01FindRecordings(QDir(root).filePath(QStringLiteral("_damaged_2024")))) {
+        const RS01Recording d = rs01ReadRecording(dir);
+        qInfo() << "damaged" << QFileInfo(dir).fileName() << "valid" << d.valid << d.error << "start" << d.header.start
+                << "seconds" << d.seconds << "missing" << d.missingSeconds << "SpO2 runs" << d.runs.value(QStringLiteral("SpO2")).size();
+    }
+    const RS01Recording cut = rs01ReadRecording(QDir(root).filePath(QStringLiteral("_damaged_2024/11140200")));
+    QVERIFY2(cut.valid, qPrintable(cut.error));
+    QVERIFY(cut.seconds > 9 * 600);   // segment 9 is whole: the reading went past the missing 5 and empty 7, 8
 }

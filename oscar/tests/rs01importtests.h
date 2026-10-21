@@ -24,6 +24,7 @@ private slots:
     void testImportBuildsSession();
     void testImportTwiceAlreadyThere();
     void testSameFolderNameNextYear();
+    void testImportFromRenamedCopy();
     void testCopyLeavesSourceUntouched();
     void testHdWithoutSegmentsFails();
     void testSessionIdStable();

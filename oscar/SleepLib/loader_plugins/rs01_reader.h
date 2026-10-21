@@ -68,6 +68,10 @@ struct RS01Recording {
 //! Reads the recording in \a folder (MMDDhhmm.HD and 001.SEG, 002.SEG ...). Only reads.
 RS01Recording rs01ReadRecording(const QString &folder);
 
+//! The recording's header (.HD) in \a folder, whatever the case of its name (copies made on
+//! Windows or FAT may say .hd); empty when there is none.
+QString rs01HeaderFile(const QString &folder);
+
 //! The recording folders under \a root (MMDDhhmm with its .HD), in name order.
 QStringList rs01FindRecordings(const QString &root);
 

@@ -24,12 +24,14 @@ private slots:
     void testMissingMarkerIsGap();
     void testIndexOutOfRangeIsGap();
     void testSegmentsContinueInTime();
-    void testMissingSegmentStops();
+    void testMissingSegmentIsGap();
+    void testWipedSegmentNumberUsesFileName();
+    void testCopiesAnyNameAnyCase();
     void testFlowZeroAndSign();
     void testNoSignalZeros();
     void testTruncatedSegment();
     void testFindRecordings();
-    void testRealNightIfGiven();
+    void testRealRecordingsIfGiven();
 };
 DECLARE_TEST(RS01ReaderTests)
 

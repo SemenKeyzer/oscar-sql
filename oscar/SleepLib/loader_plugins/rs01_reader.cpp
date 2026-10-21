@@ -11,7 +11,6 @@
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
-#include <QRegularExpression>
 #include <QtEndian>
 #include <algorithm>
 
@@ -55,6 +54,20 @@ struct RawRecord {
     int second = 0;
     QVector<QVector<int>> values;   // per signal
 };
+
+} // namespace
+
+QString rs01HeaderFile(const QString &folder)
+{
+    const QStringList hds = QDir(folder).entryList({ QStringLiteral("*.hd") }, QDir::Files, QDir::Name);
+    for (const QString &hd : hds) {
+        if (QFileInfo(hd).completeBaseName().compare(QFileInfo(folder).fileName(), Qt::CaseInsensitive) == 0)
+            return QDir(folder).filePath(hd);
+    }
+    return hds.isEmpty() ? QString() : QDir(folder).filePath(hds.first());
+}
+
+namespace {
 
 int segmentNumber(const QString &file)
 {
@@ -118,10 +131,11 @@ RS01Header rs01ParseHeader(const QByteArray &hd)
 RS01Recording rs01ReadRecording(const QString &folder)
 {
     RS01Recording r;
-    r.name = QFileInfo(folder).fileName();
-    QFile hdFile(QDir(folder).filePath(r.name + QStringLiteral(".HD")));
-    if (!hdFile.open(QIODevice::ReadOnly)) {
-        r.error = QStringLiteral("no header %1.HD").arg(r.name);
+    const QString hdPath = rs01HeaderFile(folder);
+    r.name = hdPath.isEmpty() ? QFileInfo(folder).fileName() : QFileInfo(hdPath).completeBaseName();
+    QFile hdFile(hdPath);
+    if (hdPath.isEmpty() || !hdFile.open(QIODevice::ReadOnly)) {
+        r.error = QStringLiteral("no header (.HD) in %1").arg(QFileInfo(folder).fileName());
         return r;
     }
     r.header = rs01ParseHeader(hdFile.readAll());
@@ -133,19 +147,23 @@ RS01Recording rs01ReadRecording(const QString &folder)
     const int ns = h.channels.size();
     const int recordBytes = h.recordBytes();
 
-    // the segments in number order; a missing number ends the recording (later ones would be misplaced)
-    QStringList segs = QDir(folder).entryList({ QStringLiteral("*.SEG"), QStringLiteral("*.seg") }, QDir::Files);
+    // the segments in number order, each at the time its file name gives: a missing, empty or cut one
+    // (the device's FAT damage) leaves a gap and the others are kept
+    QStringList segs = QDir(folder).entryList({ QStringLiteral("*.seg") }, QDir::Files);
     std::sort(segs.begin(), segs.end(), [](const QString &a, const QString &b) { return segmentNumber(a) < segmentNumber(b); });
     QVector<RawRecord> raw;
-    int expected = 1;
     for (const QString &name : segs) {
         const int number = segmentNumber(name);
         if (number < 1) continue;   // not a segment ("001 copy.SEG")
-        if (number != expected) break;
         QFile f(QDir(folder).filePath(name));
-        if (!f.open(QIODevice::ReadOnly)) break;
+        if (!f.open(QIODevice::ReadOnly)) continue;
         const QByteArray seg = f.readAll();
-        if (seg.size() < h.segHeaderBytes || seg.left(3).toInt() != number) break;
+        if (seg.size() < h.segHeaderBytes) continue;
+        // its own number: wiped (00 00 00) → the file name's; another number → another file's
+        // clusters (cross-linked by the FAT damage), not this segment
+        bool digits = false;
+        const int own = QString::fromLatin1(seg.left(3)).toInt(&digits);
+        if (digits && own != number) continue;
         const int records = (seg.size() - h.segHeaderBytes) / recordBytes;
         for (int k = 0; k < records; ++k) {
             const char *p = seg.constData() + h.segHeaderBytes + k * recordBytes;
@@ -169,8 +187,8 @@ RS01Recording rs01ReadRecording(const QString &folder)
             }
             raw << rec;
         }
-        ++expected;
     }
+    std::stable_sort(raw.begin(), raw.end(), [](const RawRecord &a, const RawRecord &b) { return a.second < b.second; });
     if (raw.isEmpty()) {
         r.error = segs.isEmpty() ? QStringLiteral("no segments (.SEG)") : QStringLiteral("no readable records");
         return r;
@@ -221,12 +239,12 @@ RS01Recording rs01ReadRecording(const QString &folder)
 
 QStringList rs01FindRecordings(const QString &root)
 {
-    static const QRegularExpression kName(QStringLiteral("^\\d{8}$"));
+    // the recording itself, or the folders in it that hold one (any name: copies get renamed)
+    if (!rs01HeaderFile(root).isEmpty()) return { root };
     QStringList out;
     for (const QString &name : QDir(root).entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name)) {
-        if (!kName.match(name).hasMatch()) continue;
         const QString dir = QDir(root).filePath(name);
-        if (QFileInfo::exists(QDir(dir).filePath(name + QStringLiteral(".HD")))) out << dir;
+        if (!rs01HeaderFile(dir).isEmpty()) out << dir;
     }
     return out;
 }

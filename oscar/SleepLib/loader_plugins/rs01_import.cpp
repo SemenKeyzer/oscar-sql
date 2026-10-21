@@ -33,7 +33,7 @@ MachineInfo rs01Info()
 
 RS01Header readHeader(const QString &folder)
 {
-    QFile f(QDir(folder).filePath(QFileInfo(folder).fileName() + QStringLiteral(".HD")));
+    QFile f(rs01HeaderFile(folder));
     if (!f.open(QIODevice::ReadOnly)) return RS01Header();
     return rs01ParseHeader(f.readAll());
 }
@@ -60,8 +60,8 @@ bool copyFile(const QString &from, const QString &to)
 // The recording's files: its header and the segments.
 QStringList recordingFiles(const QString &folder)
 {
-    QStringList files { QFileInfo(folder).fileName() + QStringLiteral(".HD") };
-    files << QDir(folder).entryList({ QStringLiteral("*.SEG"), QStringLiteral("*.seg") }, QDir::Files, QDir::Name);
+    QStringList files { QFileInfo(rs01HeaderFile(folder)).fileName() };   // names as they are (.hd from a copy)
+    files << QDir(folder).entryList({ QStringLiteral("*.seg") }, QDir::Files, QDir::Name);
     return files;
 }
 
@@ -98,7 +98,7 @@ RS01Importer::Result RS01Importer::import(const QString &recordingFolder, QStrin
         if (error) *error = why;
         return Result::Failed;
     };
-    const QString name = QFileInfo(recordingFolder).fileName();
+    const QString name = QFileInfo(rs01HeaderFile(recordingFolder)).completeBaseName();   // MMDDhhmm, whatever the folder's name
     const RS01Header h = readHeader(recordingFolder);
     if (!h.valid) return fail(QObject::tr("%1: the header can't be read (%2).").arg(name, h.error));
     if (alreadyImported(recordingFolder)) return Result::AlreadyThere;

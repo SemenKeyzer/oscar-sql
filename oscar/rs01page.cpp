@@ -31,13 +31,13 @@ constexpr int kPathRole = Qt::UserRole + 1;
 // The recording's length from its header and the segment sizes, without reading the samples.
 int recordingSeconds(const QString &folder, QDateTime *start)
 {
-    QFile hd(QDir(folder).filePath(QFileInfo(folder).fileName() + QStringLiteral(".HD")));
+    QFile hd(rs01HeaderFile(folder));
     if (!hd.open(QIODevice::ReadOnly)) return -1;
     const RS01Header h = rs01ParseHeader(hd.readAll());
     if (!h.valid) return -1;
     if (start) *start = h.start;
     qint64 records = 0;
-    for (const QFileInfo &seg : QDir(folder).entryInfoList({ QStringLiteral("*.SEG"), QStringLiteral("*.seg") }, QDir::Files))
+    for (const QFileInfo &seg : QDir(folder).entryInfoList({ QStringLiteral("*.seg") }, QDir::Files))
         records += qMax<qint64>(0, (seg.size() - h.segHeaderBytes) / h.recordBytes());
     return int(records * h.recordSeconds);
 }
@@ -116,10 +116,8 @@ void RS01Page::chooseFolder()
 {
     const QString dir = QFileDialog::getExistingDirectory(this, tr("RS01 recordings"), QString(), QFileDialog::ShowDirsOnly);
     if (dir.isEmpty()) return;
-    // the folder of one recording, or the folder that holds them
-    const QString root = QFileInfo::exists(QDir(dir).filePath(QFileInfo(dir).fileName() + QStringLiteral(".HD")))
-                       ? QFileInfo(dir).absolutePath() : dir;
-    listRecordings(root);
+    // the folder of one recording or the folder that holds them, wherever the copy came from
+    listRecordings(dir);
 }
 
 void RS01Page::listRecordings(const QString &root)
@@ -133,7 +131,7 @@ void RS01Page::listRecordings(const QString &root)
         auto *item = new QTreeWidgetItem(m_list);
         item->setData(0, kPathRole, folder);
         if (seconds < 0) {
-            item->setText(0, QFileInfo(folder).fileName());
+            item->setText(0, QFileInfo(folder).fileName());   // the folder: it has no readable header
             item->setText(1, tr("the header can't be read"));
             item->setFlags(item->flags() & ~Qt::ItemIsUserCheckable);
             continue;

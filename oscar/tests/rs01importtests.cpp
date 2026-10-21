@@ -215,3 +215,18 @@ void RS01ImportTests::testPageListsRecordings()
     QCOMPARE(list->topLevelItem(1)->checkState(0), Qt::Checked);
     QVERIFY2(list->topLevelItem(1)->text(0).contains(QStringLiteral("1:30")), qPrintable(list->topLevelItem(1)->text(0)));   // 90 s
 }
+
+// A copy made elsewhere (a USB stick, a Windows PC): any folder name, names in lower case.
+void RS01ImportTests::testImportFromRenamedCopy()
+{
+    QTemporaryDir stick;
+    const QString dir = QDir(stick.path()).filePath(QStringLiteral("from the clinic"));
+    QDir().mkpath(dir);
+    write(QDir(dir).filePath(QStringLiteral("10240150.hd")), header(QStringLiteral("20261024015053")));
+    write(QDir(dir).filePath(QStringLiteral("001.seg")), segment(1, 60, [](int i) { return record(i, 2008, 62, 93); }));
+    RS01Importer importer;
+    QString error;
+    QCOMPARE(int(importer.import(dir, &error)), int(RS01Importer::Result::Imported));
+    QVERIFY(importer.alreadyImported(dir));
+    QVERIFY(QFileInfo::exists(QDir(importer.backupFolder()).filePath(QStringLiteral("20261024015053/10240150/10240150.hd"))));
+}
