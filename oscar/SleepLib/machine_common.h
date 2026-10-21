@@ -231,7 +231,7 @@ extern ChannelID INTELLIPAP_Unknown1, INTELLIPAP_Unknown2, INTP_SnoreFlag;
 
 //extern ChannelID SS_SenseAwakeLevel, SS_EPR, SS_EPRLevel, SS_Ramp;
 
-extern ChannelID OXI_Pulse, OXI_SPO2, OXI_Perf, OXI_PulseChange, OXI_SPO2Drop, OXI_Plethy;
+extern ChannelID OXI_Pulse, OXI_SPO2, OXI_Perf, OXI_PulseChange, OXI_SPO2Drop, OXI_Plethy, OXI_NasalFlow;
 
 extern ChannelID Journal_Notes, Journal_Weight, Journal_BMI, Journal_ZombieMeter, Bookmark_Start,
        Bookmark_End, Bookmark_Notes, LastUpdated;

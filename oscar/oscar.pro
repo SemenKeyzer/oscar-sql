@@ -451,6 +451,7 @@ SOURCES += \
     SleepLib/loader_plugins/md300w1_loader.cpp \
     SleepLib/loader_plugins/vihealth_csv_loader.cpp \
     SleepLib/loader_plugins/rs01_reader.cpp \
+    SleepLib/loader_plugins/rs01_import.cpp \
     SleepLib/loader_plugins/contec_ble_protocol.cpp \
     SleepLib/loader_plugins/contec_ble_downloader.cpp \
     SleepLib/loader_plugins/contec_ble_import.cpp \
@@ -703,6 +704,7 @@ HEADERS  += \
     SleepLib/loader_plugins/md300w1_loader.h \
     SleepLib/loader_plugins/vihealth_csv_loader.h \
     SleepLib/loader_plugins/rs01_reader.h \
+    SleepLib/loader_plugins/rs01_import.h \
     SleepLib/loader_plugins/contec_ble_protocol.h \
     SleepLib/loader_plugins/contec_ble_downloader.h \
     SleepLib/loader_plugins/contec_ble_import.h \
@@ -973,6 +975,7 @@ test {
         tests/o2ringimporttests.cpp \
         tests/vihealthcsvtests.cpp \
         tests/rs01readertests.cpp \
+        tests/rs01importtests.cpp \
         tests/analysismarktests.cpp \
         tests/htmlpagestests.cpp \
         tests/channelstoretests.cpp \
@@ -1036,6 +1039,7 @@ test {
         tests/o2ringimporttests.h \
         tests/vihealthcsvtests.h \
         tests/rs01readertests.h \
+        tests/rs01importtests.h \
         tests/rs01_synth.h \
         tests/analysismarktests.h \
         tests/htmlpagestests.h \

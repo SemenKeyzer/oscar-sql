@@ -29,6 +29,7 @@ private slots:
     void testNoSignalZeros();
     void testTruncatedSegment();
     void testFindRecordings();
+    void testRealNightIfGiven();
 };
 DECLARE_TEST(RS01ReaderTests)
 

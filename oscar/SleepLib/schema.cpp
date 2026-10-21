@@ -251,6 +251,10 @@ void init()
     schema::channel.add(GRP_OXI, new Channel(OXI_Plethy          = 0x1802, WAVEFORM,    MT_OXIMETER, SESSION, STR_GRAPH_Oxi_Plethy,
             QObject::tr("Plethysomogram"), QObject::tr("An optical Photo-plethysomogram showing heart rhythm"), QObject::tr("Plethy"),     STR_UNIT_Hz,           DEFAULT,    QColor(64, 64, 64)));
 
+    // the nasal-cannula pressure of a sleep screener (Contec RS01): a breathing signal, in Pa, not a CPAP's L/min
+    schema::channel.add(GRP_OXI, new Channel(OXI_NasalFlow        = 0x1806, WAVEFORM,   MT_OXIMETER, SESSION, "NasalFlow",
+            QObject::tr("Nasal flow"), QObject::tr("Nasal-cannula pressure of a sleep screener: breathing in is up"), QObject::tr("Nasal flow"), QObject::tr("Pa"), DEFAULT, QColor(0x20, 0x60, 0xa0)));
+
     schema::channel.add(GRP_OXI, new Channel(OXI_Perf             = 0x1805, WAVEFORM,   MT_OXIMETER, SESSION, STR_GRAPH_Oxi_Perf,
             QObject::tr("Perfusion Index"), QObject::tr("A relative assessment of the pulse strength at the monitoring site"), QObject::tr("Perf. Index %"), STR_UNIT_Percentage,     DEFAULT,   QColor("magenta")));
 

@@ -170,3 +170,17 @@ void RS01ReaderTests::testFindRecordings()
     QCOMPARE(rs01FindRecordings(root.path()).size(), 2);
     QVERIFY(rs01FindRecordings(root.path()).first().endsWith(QStringLiteral("10170150")));
 }
+
+// A real night, only where the owner's copy is given (RS01_NIGHT=<folder>): never in the repository.
+void RS01ReaderTests::testRealNightIfGiven()
+{
+    const QString folder = qEnvironmentVariable("RS01_NIGHT");
+    if (folder.isEmpty()) QSKIP("RS01_NIGHT not set");
+    const RS01Recording r = rs01ReadRecording(folder);
+    QVERIFY2(r.valid, qPrintable(r.error));
+    qInfo() << "RS01 night" << r.name << "seconds" << r.seconds << "missing" << r.missingSeconds
+            << "flow runs" << r.runs.value(QStringLiteral("Flow")).size() << "SpO2 runs" << r.runs.value(QStringLiteral("SpO2")).size();
+    QCOMPARE(r.seconds, 27937);
+    QCOMPARE(r.missingSeconds, 0);
+    QCOMPARE(r.runs.value(QStringLiteral("Flow")).size(), 1);
+}

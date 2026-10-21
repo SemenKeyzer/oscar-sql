@@ -57,7 +57,7 @@ ChannelID CPAP_LargeLeak,
 
 //ChannelID SS_SenseAwakeLevel, SS_EPR, SS_EPRLevel, SS_Ramp;
 
-ChannelID OXI_Pulse, OXI_SPO2, OXI_Perf, OXI_PulseChange, OXI_SPO2Drop, OXI_Plethy;
+ChannelID OXI_Pulse, OXI_SPO2, OXI_Perf, OXI_PulseChange, OXI_SPO2Drop, OXI_Plethy, OXI_NasalFlow;
 
 ChannelID Journal_Notes, Journal_Weight, Journal_BMI, Journal_ZombieMeter, LastUpdated,
         Bookmark_Start, Bookmark_End, Bookmark_Notes;
