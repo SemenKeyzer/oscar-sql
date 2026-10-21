@@ -122,6 +122,10 @@ void RS01ReaderTests::testMissingSegmentStops()
     const QByteArray s3 = segment(3, 10, [](int i) { return record(i, 2008, 60, 96); });
     const RS01Recording r = rs01ReadRecording(recording(root.path(), QStringLiteral("10170150"), header(), { { 1, s1 }, { 3, s3 } }));
     QCOMPARE(r.seconds, 600);
+
+    // a stray file ("001 copy.SEG") is not a segment and stops nothing
+    write(QDir(root.path()).filePath(QStringLiteral("10170150/001 copy.SEG")), s3);
+    QCOMPARE(rs01ReadRecording(QDir(root.path()).filePath(QStringLiteral("10170150"))).seconds, 600);
 }
 
 // The zero is the recording's own median (≈2008, not 2048); inspiration (lower values) is positive.

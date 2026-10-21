@@ -23,6 +23,7 @@ private slots:
     void testNasalFlowChannel();
     void testImportBuildsSession();
     void testImportTwiceAlreadyThere();
+    void testSameFolderNameNextYear();
     void testCopyLeavesSourceUntouched();
     void testHdWithoutSegmentsFails();
     void testSessionIdStable();

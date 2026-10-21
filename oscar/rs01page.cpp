@@ -155,6 +155,8 @@ void RS01Page::importChosen()
     RS01Importer importer;
     m_importButton->setEnabled(false);
     m_folderButton->setEnabled(false);
+    m_doneButton->setEnabled(false);   // nothing leaves the page while it imports
+    emit busyChanged(true);
     int failed = 0;
     for (int i = 0; i < m_list->topLevelItemCount(); ++i) {
         QTreeWidgetItem *item = m_list->topLevelItem(i);
@@ -178,6 +180,8 @@ void RS01Page::importChosen()
         item->setCheckState(0, Qt::Unchecked);
     }
     m_folderButton->setEnabled(true);
+    m_doneButton->setEnabled(true);
+    emit busyChanged(false);
     m_status->setText(failed ? tr("Imported %1, failed %2: see the list.").arg(m_imported).arg(failed)
                              : tr("Imported %1. Press Done to see them.").arg(m_imported));
 }

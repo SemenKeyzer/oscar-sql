@@ -103,13 +103,14 @@ RS01Importer::Result RS01Importer::import(const QString &recordingFolder, QStrin
     if (!h.valid) return fail(QObject::tr("%1: the header can't be read (%2).").arg(name, h.error));
     if (alreadyImported(recordingFolder)) return Result::AlreadyThere;
 
-    // copy first: the device's own disk is only ever read
-    const QString copy = QDir(backupFolder()).filePath(name);
+    // copy first: the device's own disk is only ever read. The copy is named by the full start
+    // (the device's MMDDhhmm has no year): another recording never finds an old copy under its name.
+    const QString copy = QDir(backupFolder()).filePath(h.start.toString(QStringLiteral("yyyyMMddHHmmss")) + QLatin1Char('/') + name);
     if (!QDir().mkpath(copy)) return fail(QObject::tr("Could not create the folder %1.").arg(QDir::toNativeSeparators(copy)));
     for (const QString &file : recordingFiles(recordingFolder)) {
         const QString to = QDir(copy).filePath(file);
         const QFileInfo src(QDir(recordingFolder).filePath(file));
-        if (QFileInfo(to).size() == src.size()) continue;   // copied before, complete
+        if (QFileInfo::exists(to) && QFileInfo(to).size() == src.size() && src.size() > 0) continue;   // copied before, complete
         if (!copyFile(src.filePath(), to)) return fail(QObject::tr("%1: could not copy %2.").arg(name, file));
     }
 
@@ -125,9 +126,14 @@ RS01Importer::Result RS01Importer::import(const QString &recordingFolder, QStrin
     qint64 lastMs = h.start.toMSecsSinceEpoch();
     for (const ChannelMap &m : maps) {
         for (const RS01Run &run : rec.runs.value(QLatin1String(m.label))) {
+            // stored as raw steps of the gain (qint16), as every waveform: 85.3 Pa at 0.1 is 853
+            QVector<qint16> raw(run.samples.size());
+            for (int k = 0; k < run.samples.size(); ++k)
+                raw[k] = qint16(qBound(-32768, qRound(run.samples[k] / m.gain), 32767));
+            const qint64 duration = qint64(run.samples.size() * run.intervalMs);
             EventList *el = sess->AddEventList(*m.code, EVL_Waveform, EventDataType(m.gain), 0, 0, 0, run.intervalMs);
-            for (int k = 0; k < run.samples.size(); ++k) el->AddEvent(run.startMs + qint64(k * run.intervalMs), run.samples[k]);
-            lastMs = qMax(lastMs, run.startMs + qint64(run.samples.size() * run.intervalMs));
+            el->AddWaveform(run.startMs, raw.data(), raw.size(), duration);
+            lastMs = qMax(lastMs, run.startMs + duration);
         }
     }
     for (ChannelID c : { OXI_Plethy, OXI_NasalFlow }) {   // the oximetry summaries leave these two

@@ -36,6 +36,8 @@ public:
 signals:
     //! The user is done with the page; \a imported: something new is in OSCAR.
     void finished(bool imported);
+    //! An import started (true) or ended: the wizard keeps Cancel off meanwhile.
+    void busyChanged(bool busy);
 
 private:
     void chooseFolder();

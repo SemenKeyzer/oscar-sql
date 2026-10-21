@@ -248,6 +248,7 @@ OximeterImport::OximeterImport(QWidget *parent) :
     m_rs01Page = new RS01Page(this);
     ui->stackedWidget->addWidget(m_rs01Page);
     connect(m_rs01Page, &RS01Page::finished, this, &OximeterImport::onBluetoothFinished);
+    connect(m_rs01Page, &RS01Page::busyChanged, this, [this](bool busy) { ui->cancelButton->setEnabled(!busy); });
     auto *rs01Button = new QPushButton(tr("Contec RS01 sleep screener (USB)"), ui->importSelectionPage);
     rs01Button->setObjectName(QStringLiteral("rs01ImportButton"));
     rs01Button->setIcon(ui->directImportButton->icon());

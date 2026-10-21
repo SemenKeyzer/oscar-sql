@@ -122,6 +122,27 @@ void RS01ImportTests::testImportBuildsSession()
     QCOMPARE(s->first(), QDateTime(QDate(2026, 10, 17), QTime(1, 50, 53)).toMSecsSinceEpoch());
     for (ChannelID c : { OXI_SPO2, OXI_Pulse, OXI_Plethy, OXI_NasalFlow }) QVERIFY2(s->channelExists(c), qPrintable(QString::number(c, 16)));
     QCOMPARE(s->Min(OXI_SPO2), EventDataType(95));
+    // the waveforms in their own units: 18 counts below the zero = 4.49 Pa breathing in; pleth 60 of 127 = 47.2 %
+    QVERIFY2(qAbs(s->Max(OXI_NasalFlow) - 18.0f * 1022.0f / 4095.0f) < 0.1f, qPrintable(QString::number(s->Max(OXI_NasalFlow))));
+    QVERIFY2(qAbs(s->Max(OXI_Plethy) - 60.0f * 100.0f / 127.0f) < 0.1f, qPrintable(QString::number(s->Max(OXI_Plethy))));
+}
+
+// The device names its folders MMDDhhmm, without the year: a later recording with the same
+// name is a new copy with its own data, never last year's.
+void RS01ImportTests::testSameFolderNameNextYear()
+{
+    QTemporaryDir lastYear, thisYear;
+    const QString a = recording(lastYear.path(), QStringLiteral("10230150"), header(QStringLiteral("20251023015053")),
+                                { { 1, segment(1, 60, [](int i) { return record(i, 2008, 62, 97); }) } });
+    const QString b = recording(thisYear.path(), QStringLiteral("10230150"), header(QStringLiteral("20261023015053")),
+                                { { 1, segment(1, 60, [](int i) { return record(i, 2008, 62, 91); }) } });
+    RS01Importer importer;
+    QCOMPARE(int(importer.import(a, nullptr)), int(RS01Importer::Result::Imported));
+    QCOMPARE(int(importer.import(b, nullptr)), int(RS01Importer::Result::Imported));
+    Machine *mach = p_profile->lookupMachine(QStringLiteral("RS01"), RS01Importer::loaderName());
+    Session *s = mach->SessionExists(RS01Importer::sessionIdFor(QDateTime(QDate(2026, 10, 23), QTime(1, 50, 53))));
+    QVERIFY(s);
+    QCOMPARE(s->Min(OXI_SPO2), EventDataType(91));
 }
 
 void RS01ImportTests::testImportTwiceAlreadyThere()
@@ -143,7 +164,7 @@ void RS01ImportTests::testCopyLeavesSourceUntouched()
     RS01Importer importer;
     QCOMPARE(int(importer.import(dir, nullptr)), int(RS01Importer::Result::Imported));
     QCOMPARE(snapshot(device.path()), before);
-    const QString copy = QDir(importer.backupFolder()).filePath(QStringLiteral("10190150"));
+    const QString copy = QDir(importer.backupFolder()).filePath(QStringLiteral("20261019015053/10190150"));
     QVERIFY(QFileInfo::exists(QDir(copy).filePath(QStringLiteral("10190150.HD"))));
     QVERIFY(QFileInfo::exists(QDir(copy).filePath(QStringLiteral("001.SEG"))));
     QVERIFY(importer.backupFolder().startsWith(p_profile->dataFolder()));

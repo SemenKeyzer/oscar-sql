@@ -416,7 +416,7 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     }
 
     const ChannelID oximetercodes[] = {
-        OXI_Pulse, OXI_SPO2, OXI_Perf, OXI_Plethy, AW_RespRate, AW_HRV
+        OXI_Pulse, OXI_SPO2, OXI_Perf, OXI_Plethy, OXI_NasalFlow, AW_RespRate, AW_HRV
     };
 
     // Add graphs from the Oximeter code list
@@ -612,6 +612,8 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
 
     //graphlist[schema::channel[CPAP_TidalVolume].code()]->AddLayer(AddCPAP(new gLineChart("TidalVolume2", square)));
     if (auto *g = graphlist.value(schema::channel[CPAP_FLG].code())) g->AddLayer(new gLineChart(CPAP_FLG, true));
+    // a sleep screener's nasal flow (Contec RS01): breathing in is up
+    if (auto *g = graphlist.value(schema::channel[OXI_NasalFlow].code())) g->AddLayer(new gLineChart(OXI_NasalFlow, false));
     if (auto *g = graphlist.value(schema::channel[AN_FLScore].code())) {
         g->AddLayer(new gLineChart(AN_FLScore, false));
         g->setForceMinY(0);

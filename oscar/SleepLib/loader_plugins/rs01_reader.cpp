@@ -140,6 +140,7 @@ RS01Recording rs01ReadRecording(const QString &folder)
     int expected = 1;
     for (const QString &name : segs) {
         const int number = segmentNumber(name);
+        if (number < 1) continue;   // not a segment ("001 copy.SEG")
         if (number != expected) break;
         QFile f(QDir(folder).filePath(name));
         if (!f.open(QIODevice::ReadOnly)) break;
