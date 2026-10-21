@@ -48,12 +48,17 @@ struct SessionStamp {
     int flLimitedBreaths = 0;       //!< scored breaths at or above the flow limitation threshold
     GlasgowCounts glasgow;          //!< Glasgow Index counts, original and adapted
     GlasgowCounts glasgowAdapted;
+    QString source;                 //!< the flow analysed: "cpap" (CPAP_FlowRate) or "nasal" (a screener's cannula)
 
     static SessionStamp read(Session *session);
     static SessionStamp fromJson(const QString &json);
     void write(Session *session) const;
     QString toJson() const;
 };
+
+//! A screener's nasal-cannula pressure made proportional to the flow: sign(x)·sqrt(|x|) (the
+//! pressure grows about as the square of the flow).
+float linearisedNasal(float pa);
 
 //! The stage 1 parts of a session that are missing or outdated for \a params.
 struct StageOneNeed {

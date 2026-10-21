@@ -3043,3 +3043,67 @@ void AnalysisIntegrationTests::testDayArtifactsDrawnAfterCorrections()
     QCOMPARE(eventCount(*sess, AN_OxiArtifact), 0);
     ManualScoringRepository::removeAllForSession(ManualScoring::keyOf(sess));
 }
+
+namespace {
+
+// A sleep screener's session: nasal-cannula pressure (Pa, about the square of the flow) at 50 Hz,
+// breathing with a 20 s pause in the middle.
+Session *nasalSession(Machine *mach, SessionID id)
+{
+    Session *sess = new Session(mach, id);
+    const analysis::FlowChunk flow = synth::breathing(50, 4, { { 300, 1.0 }, { 20, 0.0 }, { 300, 1.0 } });
+    QVector<qint16> raw(flow.samples.size());
+    for (int i = 0; i < flow.samples.size(); ++i) {
+        const float f = flow.samples[i];
+        raw[i] = qint16(qRound((f < 0 ? -1 : 1) * f * f * 30.0f / 0.1f));   // Pa at gain 0.1
+    }
+    EventList *el = sess->AddEventList(OXI_NasalFlow, EVL_Waveform, 0.1f, 0, 0, 0, 20.0);
+    el->AddWaveform(flow.start, raw.data(), raw.size(), qint64(raw.size()) * 20);
+    sess->really_set_first(flow.start);
+    sess->really_set_last(flow.start + qint64(raw.size()) * 20);
+    return sess;
+}
+
+} // namespace
+
+// Cannula pressure grows about as the square of the flow: the analysis takes its square root, so a
+// breath at 0.49 of the pressure is 0.7 of the flow (a 30 % reduction, not 51 %).
+void AnalysisIntegrationTests::testNasalLinearisation()
+{
+    QVERIFY(qAbs(analysis::linearisedNasal(0.49f) - 0.7f) < 1e-5f);
+    QVERIFY(qAbs(analysis::linearisedNasal(-0.49f) + 0.7f) < 1e-5f);
+    QCOMPARE(analysis::linearisedNasal(0.0f), 0.0f);
+}
+
+// An RS01 session (an oximeter with the nasal flow) gets OSCAR's flow analysis: the pause is an
+// apnea, not classified; no flow limitation or Glasgow from a 10-bit pressure.
+void AnalysisIntegrationTests::testStageOneNasalFlow()
+{
+    Machine mach(p_profile, 28);
+    mach.info.type = MT_OXIMETER;
+    Session *sess = nasalSession(&mach, 9);
+    analyzeSession(sess, AnalysisParams());
+    const SessionStamp st = SessionStamp::read(sess);
+    QVERIFY(st.flowAnalyzed);
+    QCOMPARE(st.source, QStringLiteral("nasal"));
+    QVERIFY(!st.flScored);
+    QCOMPARE(eventCount(*sess, AN_Apnea), 1);
+    QCOMPARE(eventCount(*sess, AN_ObstructiveApnea) + eventCount(*sess, AN_CentralApnea), 0);
+    QCOMPARE(eventCount(*sess, AN_FLScore), 0);
+    QCOMPARE(eventCount(*sess, AN_GlasgowIndex), 0);
+    delete sess;
+}
+
+// Sessions analysed before the nasal flow was read (their stamp says "no flow") are analysed again.
+void AnalysisIntegrationTests::testNasalSessionReanalysedAfterBump()
+{
+    Machine mach(p_profile, 29);
+    mach.info.type = MT_OXIMETER;
+    Session *sess = nasalSession(&mach, 10);
+    SessionStamp old;
+    old.flowVersion = kAnalysisAlgoVersion - 1;
+    old.oxiVersion = kAnalysisAlgoVersion - 1;
+    old.write(sess);
+    QVERIFY(stageOneNeeded(sess, AnalysisParams()).flow);
+    delete sess;
+}

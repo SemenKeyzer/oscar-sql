@@ -66,7 +66,10 @@ void runFlow(Session *s, const AnalysisParams &p, SessionStamp &stamp)
     stamp.flowSeconds = stamp.unscoreableSeconds = stamp.flBreaths = 0;
     stamp.flSum = 0;
 
+    // a CPAP's flow, else a sleep screener's nasal-cannula pressure (Contec RS01)
     auto it = s->eventlist.constFind(CPAP_FlowRate);
+    const bool nasal = it == s->eventlist.constEnd();
+    if (nasal) it = s->eventlist.constFind(OXI_NasalFlow);
     if (it == s->eventlist.constEnd()) return;
     QVector<FlowChunk> chunks;
     for (EventList *el : it.value()) {
@@ -75,10 +78,14 @@ void runFlow(Session *s, const AnalysisParams &p, SessionStamp &stamp)
         c.start = el->first();
         c.rateMs = el->rate();
         c.samples.reserve(int(el->count()));
-        for (quint32 i = 0; i < el->count(); ++i) c.samples.append(el->data(i));
+        for (quint32 i = 0; i < el->count(); ++i) c.samples.append(nasal ? linearisedNasal(el->data(i)) : el->data(i));
         chunks.append(c);
     }
     if (chunks.isEmpty()) return;
+    stamp.source = nasal ? QStringLiteral("nasal") : QStringLiteral("cpap");
+    // a cannula tells no obstructive from central apnea (no effort belts) and is too coarse for breath shape
+    FlowParams params = p.flow;
+    if (nasal) params.classifyApneas = false;
 
     QVector<Span> excluded = sessionSpans(s, CPAP_LargeLeak);
     excluded += sessionSpans(s, channelByCode("Prisma_Artifact"));
@@ -86,8 +93,18 @@ void runFlow(Session *s, const AnalysisParams &p, SessionStamp &stamp)
     const Grid pulse = sessionGrid(s, OXI_Pulse, 30, 220);
     const Grid obstruct = toOneHz(sessionSamples(s, channelByCode("Prisma_ObstructLevel")), 0, 100);
 
-    const FlowResult r = analyzeFlow(chunks, excluded, pulse.size() ? &pulse : nullptr,
-                                     obstruct.size() ? &obstruct : nullptr, p.flow);
+    FlowResult r = analyzeFlow(chunks, excluded, pulse.size() ? &pulse : nullptr,
+                               obstruct.size() ? &obstruct : nullptr, params);
+    if (nasal) {   // no flow limitation and no Glasgow Index from a cannula's pressure
+        r.flScored = false;
+        r.flSum = 0;
+        r.flBreaths = 0;
+        r.flLimitedBreaths = 0;
+        r.flowLimitation.clear();
+        r.glasgow = {};
+        r.glasgowAdapted = {};
+        for (Breath &b : r.breaths) b.fl = kNoData;
+    }
     stamp.flowRateHz = r.sampleRateHz;
     if (!r.analyzed) return;
     stamp.flowAnalyzed = true;
@@ -147,6 +164,11 @@ void runOximetry(Session *s, const AnalysisParams &p)
 
 } // namespace
 
+float linearisedNasal(float pa)
+{
+    return pa < 0 ? -std::sqrt(-pa) : std::sqrt(pa);
+}
+
 AnalysisParams activeParams()
 {
     QMutexLocker lock(&s_paramsMutex);
@@ -193,6 +215,7 @@ SessionStamp SessionStamp::fromJson(const QString &json)
     };
     st.glasgow = counts("gi");
     st.glasgowAdapted = counts("gia");
+    st.source = flow.value("src").toString(QStringLiteral("cpap"));
     return st;
 }
 
@@ -217,6 +240,7 @@ QString SessionStamp::toJson() const
             };
             if (!glasgow.isEmpty()) flow.insert("gi", counts(glasgow));
             if (!glasgowAdapted.isEmpty()) flow.insert("gia", counts(glasgowAdapted));
+            if (!source.isEmpty()) flow.insert("src", source);
         }
         o.insert("flow", flow);
     }
