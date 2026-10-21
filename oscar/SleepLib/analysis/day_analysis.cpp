@@ -144,6 +144,36 @@ Grid sourceGrid(const QList<Session *> &sessions, Machine *source, ChannelID cod
     return toOneHz(lists, minValid, maxValid);
 }
 
+// The sessions whose flow the day scores: the CPAP's, and a sleep screener's analysed nasal flow.
+QList<Session *> flowSessions(const QList<Session *> &sessions)
+{
+    QList<Session *> out;
+    for (Session *s : sessions) {
+        if (s->type() == MT_CPAP) out.append(s);
+    }
+    for (Session *s : sessions) {
+        if (s->type() != MT_OXIMETER) continue;
+        const SessionStamp st = SessionStamp::read(s);
+        if (st.flowAnalyzed && st.source == QLatin1String("nasal")) out.append(s);
+    }
+    return out;
+}
+
+bool overlapsAny(const Span &sp, const QVector<Span> &spans)
+{
+    for (const Span &o : spans) {
+        if (sp.start < o.end && sp.end > o.start) return true;
+    }
+    return false;
+}
+
+qint64 overlapMs(const Span &sp, const QVector<Span> &spans)
+{
+    qint64 ms = 0;
+    for (const Span &o : spans) ms += qMax<qint64>(0, qMin(sp.end, o.end) - qMax(sp.start, o.start));
+    return ms;
+}
+
 QString deviceName(Machine *m)
 {
     const QString name = (m->info.brand + QLatin1Char(' ') + m->info.model).trimmed();
@@ -206,10 +236,11 @@ bool storeOxiArtifacts(const QList<Session *> &sessions, const DayResult &result
 QString extraJson(const DayResult &r)
 {
     QJsonObject o;
-    if (r.hasCpap && r.hasOximetry) {
+    if (r.hasFlow && r.hasOximetry) {
         o.insert("n_linked_desat", r.linkedDesaturations);
-        o.insert("n_dev_linked_desat", r.deviceLinkedDesaturations);
+        if (r.hasCpap) o.insert("n_dev_linked_desat", r.deviceLinkedDesaturations);
     }
+    if (r.screener) o.insert("screener", true);
     if (r.hasPulse && r.hasFlow) o.insert("n_ev_pulse_rise", r.eventsWithPulseRise);
     return o.isEmpty() ? QString() : QString::fromUtf8(QJsonDocument(o).toJson(QJsonDocument::Compact));
 }
@@ -277,17 +308,20 @@ bool dayOutdated(Day *day, const AnalysisParams &params, const AnalysisDailyData
 DayInput buildDayInput(const QList<Session *> &sessions, QString *oxiSource)
 {
     DayInput in;
-    QList<Session *> cpap;
-    for (Session *s : sessions) {
-        if (s->type() == MT_CPAP) cpap.append(s);
+    const QList<Session *> cpap = flowSessions(sessions);
+    QVector<Span> cpapTime;   // a screener's flow counts only outside it
+    for (Session *s : cpap) {
+        if (s->type() == MT_CPAP) cpapTime.append(Span { s->first(), s->last(), 0 });
     }
 
     for (int k = 0; k < cpap.size(); ++k) {
         Session *s = cpap[k];
         const qint64 shift = s->correctionMs();
         const SessionStamp st = SessionStamp::read(s);
+        const bool screener = s->type() != MT_CPAP;
         CpapSession cs;
         cs.span = Span { s->first(), s->last(), 0 };
+        cs.cpap = !screener;
         cs.analyzed = st.flowAnalyzed;
         cs.sampleRateHz = st.flowRateHz;
         cs.flScored = st.flScored;
@@ -298,16 +332,34 @@ DayInput buildDayInput(const QList<Session *> &sessions, QString *oxiSource)
         cs.flLimitedBreaths = st.flLimitedBreaths;
         cs.glasgow = st.glasgow;
         cs.glasgowAdapted = st.glasgowAdapted;
+        // a screener's flow while a CPAP's is analysed: that time is the CPAP's (not counted twice)
+        auto outsideCpap = [&](const Span &sp) { return !screener || !overlapsAny(sp, cpapTime); };
+        if (screener) {
+            const qint64 length = qMax<qint64>(1, cs.span.end - cs.span.start);
+            const double outside = 1.0 - double(overlapMs(cs.span, cpapTime)) / length;
+            cs.flowSeconds = int(std::lround(cs.flowSeconds * outside));
+            cs.unscoreableSeconds = int(std::lround(cs.unscoreableSeconds * outside));
+            if (cs.flowSeconds <= 0) cs.analyzed = false;
+        }
         in.cpap.append(cs);
 
-        in.apneas += events(s, AN_ObstructiveApnea, RespEvent::ObstructiveApnea, k, shift);
-        in.apneas += events(s, AN_CentralApnea, RespEvent::CentralApnea, k, shift);
-        in.apneas += events(s, AN_Apnea, RespEvent::Apnea, k, shift);
-        in.candidates += events(s, AN_FlowReduction, RespEvent::Hypopnea, k, shift);
-        in.reras += sessionSpans(s, AN_RERA, shift);
-        in.flowLimitation += sessionSpans(s, AN_FlowLimitation, shift);
-        in.periodic += sessionSpans(s, AN_PeriodicBreathing, shift);
-        in.unscoreable += sessionSpans(s, AN_Unscoreable, shift);
+        auto keep = [&](QVector<DayEvent> list) {
+            list.erase(std::remove_if(list.begin(), list.end(), [&](const DayEvent &e) { return !outsideCpap(Span { e.start, e.end, 0 }); }), list.end());
+            return list;
+        };
+        auto keepSpans = [&](QVector<Span> list) {
+            list.erase(std::remove_if(list.begin(), list.end(), [&](const Span &sp) { return !outsideCpap(sp); }), list.end());
+            return list;
+        };
+        in.apneas += keep(events(s, AN_ObstructiveApnea, RespEvent::ObstructiveApnea, k, shift));
+        in.apneas += keep(events(s, AN_CentralApnea, RespEvent::CentralApnea, k, shift));
+        in.apneas += keep(events(s, AN_Apnea, RespEvent::Apnea, k, shift));
+        in.candidates += keep(events(s, AN_FlowReduction, RespEvent::Hypopnea, k, shift));
+        in.reras += keepSpans(sessionSpans(s, AN_RERA, shift));
+        in.flowLimitation += keepSpans(sessionSpans(s, AN_FlowLimitation, shift));
+        in.periodic += keepSpans(sessionSpans(s, AN_PeriodicBreathing, shift));
+        in.unscoreable += keepSpans(sessionSpans(s, AN_Unscoreable, shift));
+        if (screener) continue;   // no device events, no flow limitation scores
         for (EventList *el : s->eventlist.value(AN_FLScore)) {
             for (quint32 i = 0; i < el->count(); ++i) in.flScores.append(TimedValue { el->time(i) + shift, float(el->data(i)) });
         }
@@ -391,6 +443,7 @@ AnalysisDailyData toDailyRow(const DayResult &r, const AnalysisParams &params, c
     const OxiResult &o = r.oxi;
     d.hasOximetry = r.hasOximetry;
     d.hasCpap = r.hasCpap;
+    d.screener = r.screener;
     d.oxiSeconds = o.spo2Seconds;
     d.oxiScope = r.oxiScope;
     d.oxiSource = oxiSource;
@@ -472,11 +525,8 @@ DayAnalysis analyzeDay(Day *day, const AnalysisParams &params, bool onlyIfOutdat
                            << out.result.apneaOffsetToStartMs / 1000.0 << "s";
     }
 
-    QList<Session *> cpap;
-    for (Session *s : sessions) {
-        if (s->type() == MT_CPAP) cpap.append(s);
-    }
-    bool ok = storeHypopneas(cpap, out.result);
+    // the hypopneas go back into the session whose flow they were found in (a CPAP's or a screener's)
+    bool ok = storeHypopneas(flowSessions(sessions), out.result);
     ok = storeOxiArtifacts(sessions, out.result) && ok;
     if (profileId > 0) {
         AnalysisDailyData row = toDailyRow(out.result, params, inputs, out.oxiSource);

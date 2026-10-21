@@ -173,7 +173,7 @@ void scoreHypopneas(const DayInput &in, const AnalysisParams &p, const Grid &spo
 
 void linkDesaturations(const DayInput &in, const AnalysisParams &p, DayResult &r)
 {
-    if (!r.hasCpap) return;
+    if (!r.hasFlow) return;   // a CPAP's or a screener's breathing events
     const qint64 link = qint64(p.day.linkWindowSec * 1000);
     const QVector<Span> analysisWindows = windows(r.apneas, link) + windows(r.hypopneas, link);
     QVector<DayEvent> deviceAhi;
@@ -226,11 +226,11 @@ void pulseResponse(const Grid &pulse, DayResult &r)
 
 void compare(const DayInput &in, DayResult &r)
 {
-    if (!r.hasFlow) return;
+    if (!r.hasFlow || !r.hasCpap) return;   // a screener has no device events to agree with
     r.hasComparison = true;
     QVector<Span> analysed;
     for (const CpapSession &s : in.cpap) {
-        if (s.analyzed) analysed.append(s.span);
+        if (s.analyzed && s.cpap) analysed.append(s.span);
     }
     for (const DayEvent &e : in.deviceEvents) {
         const qint64 mid = (e.start + e.end) / 2;
@@ -329,9 +329,11 @@ DayResult scoreDay(const DayInput &in, const AnalysisParams &p)
     r.rule = p.day.rule;
 
     QVector<Span> cpapSpans;
+    bool cpapFlow = false;
     for (const CpapSession &s : in.cpap) {
-        cpapSpans.append(s.span);
+        if (s.cpap) cpapSpans.append(s.span);
         if (!s.analyzed) continue;
+        cpapFlow = cpapFlow || s.cpap;
         r.flowRateHz = r.hasFlow ? qMin(r.flowRateHz, s.sampleRateHz) : s.sampleRateHz;
         r.flScored = r.hasFlow ? (r.flScored && s.flScored) : s.flScored;
         r.hasFlow = true;
@@ -344,7 +346,8 @@ DayResult scoreDay(const DayInput &in, const AnalysisParams &p)
         r.glasgow += s.glasgow;
         r.glasgowAdapted += s.glasgowAdapted;
     }
-    r.hasCpap = !in.cpap.isEmpty();
+    r.hasCpap = !cpapSpans.isEmpty();
+    r.screener = r.hasFlow && !cpapFlow;
     r.flSeconds = spanSeconds(in.flowLimitation);
     for (const Span &sp : in.flowLimitation) {
         r.flLongestSeconds = qMax(r.flLongestSeconds, int((sp.end - sp.start) / 1000));

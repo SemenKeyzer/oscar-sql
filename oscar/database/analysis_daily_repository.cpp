@@ -7,6 +7,7 @@
  * for more details. */
 
 #include "analysis_daily_repository.h"
+#include <QJsonObject>
 
 #include <QDebug>
 #include <QJsonArray>
@@ -94,8 +95,8 @@ QVariantMap toColumns(const AnalysisDailyData &d)
     put(o, "spo2_median", d.spo2Median);
     put(o, "spo2_nadir", d.spo2Nadir);
     put(o, "desat_area", d.desatArea);
-    put(o && d.hasCpap, "linked_desat_area", d.linkedDesatArea);
-    put(o && d.hasCpap, "n_unexplained_desat", d.nUnexplainedDesat);
+    put(o && (d.hasCpap || d.screener), "linked_desat_area", d.linkedDesatArea);   // linked to a CPAP's or a screener's events
+    put(o && (d.hasCpap || d.screener), "n_unexplained_desat", d.nUnexplainedDesat);
     put(o, "n_cyclic", d.nCyclic);
     put(o, "cyclic_s", d.cyclicSeconds);
     put(o, "n_zones", d.nZones);
@@ -204,6 +205,7 @@ AnalysisDailyData fromRecord(const QSqlRecord &r)
     d.hasOffsetHint = !r.isNull("oxi_offset_hint_ms");
     d.oxiOffsetHintMs = r.value("oxi_offset_hint_ms").toLongLong();
     d.extraJson = r.value("extra_json").toString();
+    d.screener = !d.extraJson.isEmpty() && QJsonDocument::fromJson(d.extraJson.toUtf8()).object().value(QStringLiteral("screener")).toBool();
     return d;
 }
 

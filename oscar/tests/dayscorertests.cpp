@@ -419,3 +419,39 @@ void DayScorerTests::testDayExcludeLeavesLinkedBurden()
     QCOMPARE(r.linkedDesaturations, 0);
     QCOMPARE(r.linkedDesatArea, 0.0);
 }
+
+// A night with a sleep screener's flow only (no CPAP): the analysis scores it, links the
+// desaturations to its events and compares with no device.
+void DayScorerTests::testScreenerDay()
+{
+    DayInput in = night();
+    in.cpap[0].cpap = false;
+    in.apneas.append(dayEvent(1000, 1020, RespEvent::Apnea));
+    synth::dip(in.spo2, 1015, 5, 5, 10, 5);
+    const DayResult r = scoreDay(in, AnalysisParams());
+    QVERIFY(r.hasFlow);
+    QVERIFY(!r.hasCpap);
+    QVERIFY(r.screener);
+    QCOMPARE(r.linkedDesaturations, 1);
+    QVERIFY(!r.hasComparison);
+}
+
+// The probe off all night: the screener's hypopneas by the flow alone, nothing breaks.
+void DayScorerTests::testScreenerNoSpo2()
+{
+    DayInput in = night(false);
+    in.cpap[0].cpap = false;
+    in.candidates.append(dayEvent(1000, 1020, RespEvent::Hypopnea, 0.6f));
+    const DayResult r = scoreDay(in, AnalysisParams());
+    QVERIFY(r.screener);
+    QVERIFY(!r.hasOximetry);
+}
+
+// A CPAP night is as before: not a screener's, compared with the device.
+void DayScorerTests::testCpapDayUnchanged()
+{
+    const DayResult r = scoreDay(night(), AnalysisParams());
+    QVERIFY(r.hasCpap);
+    QVERIFY(!r.screener);
+    QVERIFY(r.hasComparison);
+}

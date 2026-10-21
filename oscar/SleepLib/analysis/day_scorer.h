@@ -32,6 +32,7 @@ struct DayEvent {
 //! One of the day's CPAP sessions, with the flow totals of its stage 1 stamp.
 struct CpapSession {
     Span span;              //!< device-corrected
+    bool cpap = true;       //!< a CPAP's flow; false: a sleep screener's nasal flow (outside CPAP time only)
     bool analyzed = false;  //!< its flow was analysed
     double sampleRateHz = 0;
     bool flScored = false;
@@ -71,6 +72,7 @@ struct DayInput {
 //! The day's scoring (spec §3.4).
 struct DayResult {
     bool hasCpap = false;
+    bool screener = false;              //!< the flow analysed is a sleep screener's only (no CPAP flow): REI
     bool hasFlow = false;               //!< some CPAP session's flow was analysed
     double flowRateHz = 0;              //!< lowest sample rate of the analysed sessions
     bool flScored = false;              //!< flow limitation scored in every analysed session

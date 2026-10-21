@@ -3107,3 +3107,60 @@ void AnalysisIntegrationTests::testNasalSessionReanalysedAfterBump()
     QVERIFY(stageOneNeeded(sess, AnalysisParams()).flow);
     delete sess;
 }
+
+// CPAP 1 h inside a 3 h RS01 recording: the CPAP's flow counts while the mask is on, the
+// screener's only outside it — its events and time inside the CPAP's are dropped.
+void AnalysisIntegrationTests::testCpapAndScreenerOverlap()
+{
+    Machine cpap(p_profile, 31);
+    cpap.info.type = MT_CPAP;
+    Machine rs01(p_profile, 32);
+    rs01.info.type = MT_OXIMETER;
+    const qint64 t0 = synth::kStart;
+    Session *cs = new Session(&cpap, 311);
+    cs->really_set_first(t0 + 3600000);
+    cs->really_set_last(t0 + 7200000);
+    SessionStamp cst;
+    cst.flowVersion = kAnalysisAlgoVersion;
+    cst.flowAnalyzed = true;
+    cst.flowSeconds = 3600;
+    cst.source = QStringLiteral("cpap");
+    cst.write(cs);
+    Session *ns = new Session(&rs01, 321);
+    ns->really_set_first(t0);
+    ns->really_set_last(t0 + 10800000);
+    SessionStamp nst;
+    nst.flowVersion = kAnalysisAlgoVersion;
+    nst.flowAnalyzed = true;
+    nst.flowSeconds = 10800;
+    nst.source = QStringLiteral("nasal");
+    nst.write(ns);
+    EventList *ap = ns->AddEventList(AN_Apnea, EVL_Event);
+    ap->AddEvent(t0 + 1800000, 15);   // outside the CPAP's hour
+    ap->AddEvent(t0 + 5400000, 15);   // inside it: the CPAP's flow scores that time
+    const DayInput in = buildDayInput({ cs, ns });
+    QCOMPARE(in.cpap.size(), 2);
+    QVERIFY(in.cpap[0].cpap);
+    QVERIFY(!in.cpap[1].cpap);
+    QCOMPARE(in.cpap[1].flowSeconds, 7200);
+    QCOMPARE(in.apneas.size(), 1);
+    QCOMPARE(in.apneas.first().end, t0 + 1800000);
+    delete cs;
+    delete ns;
+}
+
+// The screener mark survives the round trip through analysis_daily.
+void AnalysisIntegrationTests::testScreenerStored()
+{
+    DayResult r;
+    r.hasFlow = true;
+    r.screener = true;
+    AnalysisDailyData d = toDailyRow(r, AnalysisParams(), QStringLiteral("h"), QString());
+    QVERIFY(d.screener);
+    d.profileId = m_profileId;
+    d.date = QDate(2026, 4, 1);
+    AnalysisDailyRepository repo;
+    QVERIFY(repo.upsert(d));
+    QVERIFY(repo.find(m_profileId, d.date).screener);
+    repo.remove(m_profileId, d.date);
+}
