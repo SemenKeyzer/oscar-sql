@@ -254,7 +254,7 @@ OximeterImport::OximeterImport(QWidget *parent) :
     connect(m_rs01Page, &RS01Page::busyChanged, this, [this](bool busy) { ui->cancelButton->setEnabled(!busy); });
     auto *rs01Button = new QPushButton(tr("Contec RS01 sleep screener (USB)"), ui->importSelectionPage);
     rs01Button->setObjectName(QStringLiteral("rs01ImportButton"));
-    rs01Button->setIcon(ui->directImportButton->icon());
+    rs01Button->setIcon(QIcon(QStringLiteral(":/icons/rs01.png")));
     rs01Button->setIconSize(ui->directImportButton->iconSize());
     rs01Button->setSizePolicy(ui->directImportButton->sizePolicy());
     rs01Button->setMinimumHeight(ui->directImportButton->minimumHeight());
@@ -298,6 +298,7 @@ OximeterImport::OximeterImport(QWidget *parent) :
         ui->verticalLayout_6->insertWidget(ui->verticalLayout_6->indexOf(ui->fileImportButton), cableButton);
         connect(cableButton, &QPushButton::clicked, this, [this]() {
             ui->stackedWidget->setCurrentWidget(m_cablePage);
+            ui->label_5->setPixmap(QPixmap(QStringLiteral(":/icons/oximeter.png")));
             ui->nextButton->setVisible(false);
             ui->retryButton->setVisible(false);
         });
@@ -1308,6 +1309,7 @@ void OximeterImport::onO2RingImportClicked()
 void OximeterImport::onRS01ImportClicked()
 {
     ui->stackedWidget->setCurrentWidget(m_rs01Page);
+    ui->label_5->setPixmap(QPixmap(QStringLiteral(":/icons/rs01.png")));
     ui->nextButton->setVisible(false);
     ui->retryButton->setVisible(false);
     ui->informationButton->setVisible(false);
