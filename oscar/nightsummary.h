@@ -60,6 +60,11 @@ struct NightSummary {
     bool glasgowLessReliable = false; //!< the flow is recorded below 20 Hz (Prisma: 10 Hz)
     //! Takes the flow limitation figures from the analysis' row for the night.
     void takeFlowLimitation(const AnalysisDailyData &row);
+    bool screener = false;          //!< no CPAP; a sleep screener's flow analysed: analysisAhi is an REI
+    int reiApneas = 0;
+    int reiHypopneas = 0;
+    //! Takes a sleep screener's REI from the analysis' row (a night without CPAP).
+    void takeScreener(const AnalysisDailyData &row);
     bool hasLeak = false;
     double leak = 0;                //!< 95th percentile: the red line is meant for it
     double leakMedian = 0;          //!< 50th percentile
@@ -93,7 +98,8 @@ struct NightSummary {
     double medianAhi() const;
     //! What is off its target that night, one short sentence each; empty when nothing is.
     QStringList concerns() const;
-    //! The concern raised when OSCAR's analysis counts a higher AHI than the device.
+    //! The concern raised when OSCAR's analysis counts a higher AHI than the device, or (screener)
+    //! an REI at or above the target.
     QString analysisAhiConcern() const;
     //! \a concern (from concerns()) comes from OSCAR's analysis and is shown with its mark.
     bool isAnalysisConcern(const QString &concern) const;

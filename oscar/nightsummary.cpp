@@ -196,6 +196,7 @@ double NightSummary::medianAhi() const
 
 QString NightSummary::analysisAhiConcern() const
 {
+    if (screener) return tr("REI %1 (OSCAR's analysis of the screener), at or above %2.").arg(num(analysisAhi)).arg(kAhiTarget);
     return tr("OSCAR's analysis counts an AHI of %1, more than the device's %2.").arg(num(analysisAhi), num(ahi));
 }
 
@@ -215,6 +216,7 @@ QStringList NightSummary::concerns() const
     } else if (ahiLevel() == Good && hasAnalysisAhi && analysisAhi >= kAhiTarget) {
         out << analysisAhiConcern();
     }
+    if (screener && hasAnalysisAhi && analysisAhi >= kAhiTarget) out << analysisAhiConcern();
     if (leakLevel() == Attention) {
         out << tr("Leak at the 95%: %1 %2, at or above your red line of %3.").arg(num(leak), leakUnits).arg(leakRedline);
     }
@@ -303,6 +305,8 @@ NightSummary buildNightSummaryFor(Profile *profile, analysis::AnalysisService *s
                 s.secondsAtMax = 60.0 * day->timeAboveThreshold(day->getPressureChannelID(), s.pressureMax - 0.05);
         }
     }
+
+    if (!s.hasCpap) s.takeScreener(row);
 
     // That night's oximetry: the analysis' figures where it ran, else the classic count.
     s.oxi = summarizeOximetry(row);
@@ -650,6 +654,14 @@ void NightSummaryView::setSummary(const NightSummary &s)
                                      NightSummary::Unknown), QStringLiteral("p95"));
         }
     }
+    if (s.screener) {   // a sleep screener's night: OSCAR's analysis of its nasal flow
+        const QString note = tr("target under %1").arg(NightSummary::kAhiTarget) + QStringLiteral("<br/>")
+            + tr("apneas %1, hypopneas %2").arg(s.reiApneas).arg(s.reiHypopneas) + QStringLiteral(" ") + AnalysisMark::pill();
+        HelpTips::attach(addTile(col++, tr("REI"), num(s.analysisAhi), note,
+                                 s.analysisAhi >= NightSummary::kAhiTarget ? NightSummary::Attention : NightSummary::Good,
+                                 tr("Apneas and hypopneas per hour of the analysed recording, by OSCAR's analysis of the screener's nasal flow.")),
+                         QStringLiteral("rei"));
+    }
     if (s.oxi.valid && !s.oxi.spotChecks && s.oxi.spo2Avg > 0) {
         QString note = s.oxi.fromAnalysis
             ? tr("ODI 3%: %1 per hour (%2), 4%: %3").arg(num(s.oxi.desaturations / s.oxi.hours),
@@ -716,6 +728,17 @@ NightSummary::Level NightSummary::spo2Level() const
     // The classic drops follow the profile's own thresholds, so only ODI 3 % is judged.
     if (oxi.fromAnalysis && oxi.desaturations / oxi.hours >= kOdiTarget) return Attention;
     return Good;
+}
+
+void NightSummary::takeScreener(const AnalysisDailyData &row)
+{
+    if (!row.id || !row.screener || !row.hasFlow || row.flowSeconds <= 0) return;
+    screener = true;
+    hasAnalysisAhi = true;
+    // a screener's apneas are not classified (all nApnea); the others stay 0 but are counted alike
+    reiApneas = row.nObstructiveApnea + row.nCentralApnea + row.nApnea;
+    reiHypopneas = row.nObstructiveHypopnea + row.nCentralHypopnea + row.nHypopnea;
+    analysisAhi = (reiApneas + reiHypopneas) / (row.flowSeconds / 3600.0);
 }
 
 void NightSummary::takeFlowLimitation(const AnalysisDailyData &row)

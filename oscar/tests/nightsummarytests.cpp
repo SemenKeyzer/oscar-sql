@@ -580,3 +580,61 @@ void NightSummaryTests::testTrendBarsRedAboveTarget()
     QCOMPARE(NightTrend::barColor(false), QColor(0xd0, 0x30, 0x30));
     QVERIFY(NightTrend::barColor(true) != NightTrend::barColor(false));
 }
+
+// A sleep screener's night (no CPAP): the analysis' events per hour of the analysed recording
+// are an REI, taken from the analysis' row; a CPAP's row or one without flow gives none.
+void NightSummaryTests::testScreenerFromRow()
+{
+    AnalysisDailyData row;
+    row.id = 1;
+    row.hasFlow = true;
+    row.screener = true;
+    row.flowSeconds = 7200;
+    row.nApnea = 4;
+    row.nHypopnea = 8;
+    NightSummary s;
+    s.takeScreener(row);
+    QVERIFY(s.screener);
+    QVERIFY(s.hasAnalysisAhi);
+    QCOMPARE(s.analysisAhi, 6.0);
+    QCOMPARE(s.reiApneas, 4);
+    QCOMPARE(s.reiHypopneas, 8);
+
+    row.screener = false;   // a CPAP's analysis: the AHI tile shows it
+    NightSummary cpap;
+    cpap.takeScreener(row);
+    QVERIFY(!cpap.screener);
+    QVERIFY(!cpap.hasAnalysisAhi);
+
+    row.screener = true;
+    row.hasFlow = false;    // an oximeter without a breathing signal (CMS50, O2Ring)
+    NightSummary oxi;
+    oxi.takeScreener(row);
+    QVERIFY(!oxi.screener);
+}
+
+// The screener's night gets an REI tile marked as the analysis'; an oximeter-only night without
+// nasal flow gets none.
+void NightSummaryTests::testScreenerTile()
+{
+    NightSummaryView view;
+    NightSummary s;
+    s.date = QDate(2026, 10, 17);
+    s.screener = true;
+    s.hasAnalysisAhi = true;
+    s.analysisAhi = 6.0;
+    s.reiApneas = 4;
+    s.reiHypopneas = 8;
+    view.setSummary(s);
+    QCOMPARE(tileTexts(view, QStringLiteral("REI"), QStringLiteral("nsValue")), QStringLiteral("6.0"));
+    const QString note = tileTexts(view, QStringLiteral("REI"), QStringLiteral("nsNote"));
+    QVERIFY2(note.contains(QStringLiteral("apneas 4, hypopneas 8")), qPrintable(note));
+    QVERIFY(note.contains(AnalysisMark::pill()));
+    QVERIFY(s.concerns().join(QLatin1Char(' ')).contains(QStringLiteral("REI 6.0")));
+
+    NightSummary cms50;
+    cms50.date = s.date;
+    view.setSummary(cms50);
+    QVERIFY(tileTexts(view, QStringLiteral("REI"), QStringLiteral("nsValue")).isEmpty());
+    QVERIFY(cms50.concerns().isEmpty());
+}

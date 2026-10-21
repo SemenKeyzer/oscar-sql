@@ -41,6 +41,8 @@ private slots:
     void testTileLinkKeepsItsOwnTooltip();
     void testTrendCaptionsHaveHelp();
     void testTileTooltipFromInnerLabel();
+    void testScreenerFromRow();
+    void testScreenerTile();
 
 private:
     class QApplication *m_app = nullptr;
