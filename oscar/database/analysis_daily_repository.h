@@ -46,6 +46,9 @@ struct AnalysisDailyData
     int nUnconfirmable = 0;    //!< candidates without SpO2 coverage, scored by flow only
     int nHypopneaAasm3 = 0, nHypopneaCms4 = 0, nHypopneaFlow = 0;   //!< under each rule
     int flSeconds = 0;
+    int flFlowSeconds = 0;     //!< the time flow limitation is scored over when not all the flow (kept in extra_json); 0: flowSeconds
+    //! What flow limitation's share of the time is taken of.
+    int flDenominator() const { return flFlowSeconds > 0 ? flFlowSeconds : flowSeconds; }
     double flSum = 0;
     int flBreaths = 0;
     bool hasFlRuns = false;    //!< the two below are known (analysed by a version that keeps them)

@@ -3158,6 +3158,8 @@ void AnalysisIntegrationTests::testScreenerStored()
     DayResult r;
     r.hasFlow = true;
     r.screener = true;
+    r.flowSeconds = 7200;
+    r.flFlowSeconds = 3600;
     AnalysisDailyData d = toDailyRow(r, AnalysisParams(), QStringLiteral("h"), QString());
     QVERIFY(d.screener);
     d.profileId = m_profileId;
@@ -3165,7 +3167,11 @@ void AnalysisIntegrationTests::testScreenerStored()
     AnalysisDailyRepository repo;
     QVERIFY(repo.upsert(d));
     QVERIFY(repo.find(m_profileId, d.date).screener);
+    QCOMPARE(repo.find(m_profileId, d.date).flDenominator(), 3600);   // flow limitation over the CPAP's time
     repo.remove(m_profileId, d.date);
+    AnalysisDailyData plain;
+    plain.flowSeconds = 5000;
+    QCOMPARE(plain.flDenominator(), 5000);
 }
 
 // A screener's night in the Daily panel: the REI large, apneas and hypopneas beneath it, marked as the analysis'.
@@ -3188,11 +3194,16 @@ void AnalysisIntegrationTests::testIndicesScreenerNight()
     Session *sess = nasalSession(&mach, 11);
     analyzeSession(sess, AnalysisParams());
     QCOMPARE(eventCount(*sess, AN_Apnea), 1);
+    // an oximetry analysis channel stays per hour of oximetry, not of the analysed flow
+    sess->AddEventList(AN_Desaturation, EVL_Event)->AddEvent(sess->first() + 60000, 5);
+    sess->setCount(AN_Desaturation, 1);
+    sess->m_availableChannels.push_back(AN_Desaturation);
     mach.updateChannels(sess);   // as when the sessions are loaded
     Day day;
     day.addSession(sess);
     QHash<ChannelID, EventDataType> values;
     const QString html = Daily::indicesHtml(&day, true, values, 0.5);
+    QVERIFY(qAbs(values.value(AN_Desaturation) - 1.0 / day.hours(MT_OXIMETER)) < 1e-3);
     QVERIFY2(html.contains(QStringLiteral(">%1<").arg(analysis::channelBaseName(AN_Apnea))), qPrintable(html));
     QCOMPARE(values.value(AN_Apnea), EventDataType(2.0));   // 1 apnea in half an hour
     QVERIFY(!html.contains(QStringLiteral("inf")));
@@ -3209,4 +3220,40 @@ void AnalysisIntegrationTests::testNasalFlowGraphFlags()
     QVERIFY(!gLineChart::flagOnByDefault(CPAP_FlowRate, AN_Apnea));
     QVERIFY(gLineChart::flagOnByDefault(CPAP_FlowRate, CPAP_Obstructive));
     QVERIFY(gLineChart::flagOnByDefault(OXI_SPO2, AN_Desaturation));
+}
+
+// CPAP and a screener the same night: the screener's analysis events inside the CPAP's time are the
+// CPAP's (the day scores that time from the CPAP's flow), so Daily's rows don't count them twice.
+void AnalysisIntegrationTests::testIndicesMixedNightNotDoubled()
+{
+    Machine cpap(p_profile, 97);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Machine rs01(p_profile, 98);
+    rs01.info.type = MT_OXIMETER;
+    const qint64 t0 = synth::kStart;
+    Session *cs = scoredSession(&cpap, 971, m_machineRow);
+    cs->AddEventList(AN_Apnea, EVL_Event)->AddEvent(t0 + 500000, 15);
+    cs->UpdateSummaries();   // the machine learns the session's channels
+    cs->setCount(AN_Apnea, 1);
+    Session *ns = new Session(&rs01, 972);
+    ns->really_set_first(t0 - 1800000);
+    ns->really_set_last(t0 + 3600000);
+    EventList *el = ns->AddEventList(AN_Apnea, EVL_Event);
+    el->AddEvent(t0 - 600000, 15);    // before the mask: the screener's
+    el->AddEvent(t0 + 500000, 15);    // under the mask: the CPAP's
+    ns->setCount(AN_Apnea, 2);
+    ns->setOpened(true);
+    ns->m_availableChannels.push_back(AN_Apnea);
+    rs01.updateChannels(ns);
+    Day day;
+    day.addSession(cs);
+    day.addSession(ns);
+    QHash<ChannelID, EventDataType> values;
+    Daily::indicesHtml(&day, true, values);
+    QVERIFY2(qAbs(values.value(AN_Apnea) - 2.0 / day.hours(MT_CPAP)) < 1e-3, qPrintable(QString::number(values.value(AN_Apnea))));
+    day.removeSession(cs);
+    day.removeSession(ns);
+    delete cs;
+    delete ns;
 }

@@ -28,6 +28,7 @@ private slots:
     void testScreenerDay();
     void testScreenerNoSpo2();
     void testCpapDayUnchanged();
+    void testMixedNightFlowLimitation();
     void testNoLinksWithoutCpap();
     void testPulseResponse();
     void testLimitOxiToCpap();

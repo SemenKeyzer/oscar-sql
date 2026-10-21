@@ -70,6 +70,7 @@ private slots:
     void testReiFrame();
     void testIndicesScreenerNight();
     void testNasalFlowGraphFlags();
+    void testIndicesMixedNightNotDoubled();
     void testStageOneNasalFlow();
     void testNasalSessionReanalysedAfterBump();
     void testStageOneSkipsSessionWithoutEvents();

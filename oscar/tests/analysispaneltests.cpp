@@ -471,6 +471,7 @@ void AnalysisPanelTests::testFlowLimitationLine()
     DayResult r = cpapNight();
     r.flScored = true;
     r.flowSeconds = 27000;
+    r.flFlowSeconds = 27000;   // flow limitation over all of it (a CPAP night)
     r.flSeconds = 6300;
     r.flLongestSeconds = 720;
     r.flBreaths = 1000;
@@ -524,6 +525,7 @@ void AnalysisPanelTests::testFlowLimitationLineOldStamp()
     DayResult r = cpapNight();
     r.flScored = true;
     r.flowSeconds = 27000;
+    r.flFlowSeconds = 27000;   // flow limitation over all of it (a CPAP night)
     r.flSeconds = 6300;
     r.flLongestSeconds = 720;
     r.flBreaths = 1000;

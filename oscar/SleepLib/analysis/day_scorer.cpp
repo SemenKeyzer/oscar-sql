@@ -332,13 +332,20 @@ DayResult scoreDay(const DayInput &in, const AnalysisParams &p)
     bool cpapFlow = false;
     for (const CpapSession &s : in.cpap) {
         if (s.cpap) cpapSpans.append(s.span);
+        cpapFlow = cpapFlow || (s.cpap && s.analyzed);
+    }
+    bool flTaken = false;
+    for (const CpapSession &s : in.cpap) {
         if (!s.analyzed) continue;
-        cpapFlow = cpapFlow || s.cpap;
-        r.flowRateHz = r.hasFlow ? qMin(r.flowRateHz, s.sampleRateHz) : s.sampleRateHz;
-        r.flScored = r.hasFlow ? (r.flScored && s.flScored) : s.flScored;
         r.hasFlow = true;
         r.flowSeconds += s.flowSeconds;
         r.unscoreableSeconds += s.unscoreableSeconds;
+        // flow limitation and Glasgow: the CPAP's on a night with both (a nasal cannula scores neither)
+        if (cpapFlow && !s.cpap) continue;
+        r.flowRateHz = flTaken ? qMin(r.flowRateHz, s.sampleRateHz) : s.sampleRateHz;
+        r.flScored = flTaken ? (r.flScored && s.flScored) : s.flScored;
+        flTaken = true;
+        r.flFlowSeconds += s.flowSeconds;
         r.flSum += s.flSum;
         r.flBreaths += s.flBreaths;
         // -1: a session stamped before the limited breaths were counted makes the night's unknown

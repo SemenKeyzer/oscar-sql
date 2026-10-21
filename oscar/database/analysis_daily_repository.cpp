@@ -205,7 +205,11 @@ AnalysisDailyData fromRecord(const QSqlRecord &r)
     d.hasOffsetHint = !r.isNull("oxi_offset_hint_ms");
     d.oxiOffsetHintMs = r.value("oxi_offset_hint_ms").toLongLong();
     d.extraJson = r.value("extra_json").toString();
-    d.screener = !d.extraJson.isEmpty() && QJsonDocument::fromJson(d.extraJson.toUtf8()).object().value(QStringLiteral("screener")).toBool();
+    if (!d.extraJson.isEmpty()) {
+        const QJsonObject extra = QJsonDocument::fromJson(d.extraJson.toUtf8()).object();
+        d.screener = extra.value(QStringLiteral("screener")).toBool();
+        d.flFlowSeconds = extra.value(QStringLiteral("fl_flow_s")).toInt();
+    }
     return d;
 }
 

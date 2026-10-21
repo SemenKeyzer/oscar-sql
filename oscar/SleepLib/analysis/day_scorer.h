@@ -81,6 +81,7 @@ struct DayResult {
     double flSum = 0;
     int flBreaths = 0;
     int flSeconds = 0;                  //!< in flow limitation spans
+    int flFlowSeconds = 0;              //!< the analysed time flow limitation is scored over (the CPAP's on a mixed night)
     int flLongestSeconds = 0;           //!< the longest of those spans
     int flLimitedBreaths = 0;           //!< scored breaths at or above the threshold; -1 unknown
     GlasgowCounts glasgow;              //!< Glasgow Index counts of the night, original ...
@@ -96,6 +97,10 @@ struct DayResult {
     int hypopneasFlowOnly = 0;
     int unconfirmable = 0;              //!< candidates without SpO2, scored by flow only
     int count(RespEvent type) const;
+    //! Anything for the analysis to show: CPAP, an analysed flow (a screener's too) or oximetry.
+    bool hasAnalysis() const { return hasCpap || hasFlow || hasOximetry; }
+    //! What flow limitation's share of the time is taken of (flFlowSeconds, or all the flow when unset).
+    int flDenominator() const { return flFlowSeconds > 0 ? flFlowSeconds : flowSeconds; }
 
     bool hasOximetry = false;
     bool hasPulse = false;

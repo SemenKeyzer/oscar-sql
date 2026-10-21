@@ -241,6 +241,7 @@ QString extraJson(const DayResult &r)
         if (r.hasCpap) o.insert("n_dev_linked_desat", r.deviceLinkedDesaturations);
     }
     if (r.screener) o.insert("screener", true);
+    if (r.hasFlow && r.flFlowSeconds != r.flowSeconds) o.insert("fl_flow_s", r.flFlowSeconds);   // a mixed night: the CPAP's time
     if (r.hasPulse && r.hasFlow) o.insert("n_ev_pulse_rise", r.eventsWithPulseRise);
     return o.isEmpty() ? QString() : QString::fromUtf8(QJsonDocument(o).toJson(QJsonDocument::Compact));
 }
@@ -444,6 +445,7 @@ AnalysisDailyData toDailyRow(const DayResult &r, const AnalysisParams &params, c
     d.hasOximetry = r.hasOximetry;
     d.hasCpap = r.hasCpap;
     d.screener = r.screener;
+    d.flFlowSeconds = r.flFlowSeconds != r.flowSeconds ? r.flFlowSeconds : 0;
     d.oxiSeconds = o.spo2Seconds;
     d.oxiScope = r.oxiScope;
     d.oxiSource = oxiSource;

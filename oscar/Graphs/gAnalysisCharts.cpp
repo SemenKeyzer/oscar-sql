@@ -227,8 +227,8 @@ void gAnalysisChart::populate(Day *day, int idx)
     }
     case FlowLimitation: {
         if (!r.hasFlow || r.flowSeconds <= 0 || r.flBreaths <= 0) return;   // not scored below 10 Hz
-        weight = r.flowSeconds / 3600.0f;
-        const float pct = 100.0f * r.flSeconds / r.flowSeconds;
+        weight = r.flDenominator() / 3600.0f;
+        const float pct = 100.0f * r.flSeconds / r.flDenominator();
         slices.append(SummaryChartSlice(calc, pct, pct, title(FlowLimitation), QColor(0x70, 0x70, 0x70)));
         tip = QObject::tr("\nFlow limitation: %1% of the time").arg(num(pct));
         break;

@@ -2396,6 +2396,37 @@ QString Daily::getIndices(Day * day, QHash<ChannelID, EventDataType>& values, do
     return html;
 }
 
+namespace {
+
+// A sleep screener's analysis events of channel \a code inside a CPAP session's time (graph time).
+int screenerEventsUnderCpap(Day *day, ChannelID code)
+{
+    QVector<QPair<qint64, qint64>> cpap;
+    for (Session *s : day->sessions) {
+        if (s->enabled() && s->type() == MT_CPAP) cpap.append({ s->first(), s->last() });
+    }
+    if (cpap.isEmpty()) return 0;
+    int n = 0;
+    for (Session *s : day->sessions) {
+        if (!s->enabled() || s->type() == MT_CPAP) continue;
+        const qint64 shift = s->correctionMs();
+        for (EventList *el : s->eventlist.value(code)) {
+            for (quint32 i = 0; i < el->count(); ++i) {
+                const qint64 t = el->time(i) + shift;
+                for (const auto &c : cpap) {
+                    if (t >= c.first && t <= c.second) {
+                        ++n;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    return n;
+}
+
+} // namespace
+
 QString Daily::indicesHtml(Day *day, bool analysisShown, QHash<ChannelID, EventDataType> &values, double analysedHours)
 {
     QString html;
@@ -2425,7 +2456,7 @@ QString Daily::indicesHtml(Day *day, bool analysisShown, QHash<ChannelID, EventD
         }
         float channelHours = hours;
         // a sleep screener's night: the analysis' events per hour of its analysed recording
-        const bool screenerRow = chan.isComputed() && hours <= 0 && analysedHours > 0;
+        const bool screenerRow = chan.isComputed() && chan.machtype() == MT_CPAP && hours <= 0 && analysedHours > 0;
         if (screenerRow) {
             channelHours = analysedHours;
         } else if (chan.machtype() != MT_CPAP) {
@@ -2444,7 +2475,11 @@ QString Daily::indicesHtml(Day *day, bool analysisShown, QHash<ChannelID, EventD
             data = QString("%1").arg(val,0,'f',2);
         } else {
             // the device's own events per hour (manual scoring has its own page); the analysis' as before
-            if (chan.isComputed()) val = chan.machtype() == MT_CPAP && !screenerRow ? day->perHour(code) : day->count(code) / channelHours;
+            if (chan.isComputed() && chan.machtype() == MT_CPAP && !screenerRow) {
+                // a screener's events under the mask are the CPAP's: the day scores that time from its flow
+                const double h = ManualScoring::countedChannels().contains(code) ? day->ahiHours() : double(day->hours(MT_CPAP));
+                val = h > 0 ? (day->count(code) - screenerEventsUnderCpap(day, code)) / h : 0;
+            } else if (chan.isComputed()) val = day->count(code) / channelHours;
             else val = chan.machtype() == MT_CPAP ? day->devicePerHour(code) : day->count(code) / channelHours;
             data = QString("%1").arg(val,0,'f',2);
         }
@@ -4600,7 +4635,7 @@ void Daily::loadAnalysis(Day *day)
         m_loadingAnalysis = true;   // its own daysChanged() is no reason to reload
         m_analysisResult = service->dayResult(day, &m_analysisSource);
         m_loadingAnalysis = false;
-        m_analysisShown = m_analysisResult.hasCpap || m_analysisResult.hasOximetry;
+        m_analysisShown = m_analysisResult.hasAnalysis();   // a screener without SpO2 has its flow's
     }
     updateDifferenceOverlay();
     if (!m_analysisTab) return;

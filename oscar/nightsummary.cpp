@@ -746,7 +746,7 @@ void NightSummary::takeFlowLimitation(const AnalysisDailyData &row)
 {
     hasFlowLimitation = row.id && row.hasFlow && row.flowSeconds > 0 && row.flBreaths > 0;   // scored at 10 Hz or more
     if (hasFlowLimitation) {
-        flPercent = 100.0 * row.flSeconds / row.flowSeconds;
+        flPercent = 100.0 * row.flSeconds / row.flDenominator();
         flMinutes = row.flSeconds / 60.0;
     }
     hasGlasgow = row.id && row.hasFlow && !row.glasgow.isEmpty() && !row.glasgowAdapted.isEmpty();

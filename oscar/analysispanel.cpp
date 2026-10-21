@@ -193,7 +193,7 @@ QString AnalysisPanel::sidebarHtml(Day *day, const DayResult &r, const QString &
                          perHour(r.reras.size(), analysisHours));
             const bool deviceFl = day && day->channelExists(CPAP_FlowLimit);
             html += row3(HelpTips::term(tr("Flow limitation, % time"), QStringLiteral("fl_time")), deviceFl ? number(day->calcPON(CPAP_FlowLimit)) : QStringLiteral("&mdash;"),
-                         r.flScored && r.flowSeconds > 0 ? number(100.0 * r.flSeconds / r.flowSeconds) : QStringLiteral("&mdash;"));
+                         r.flScored && r.flDenominator() > 0 ? number(100.0 * r.flSeconds / r.flDenominator()) : QStringLiteral("&mdash;"));
             const bool devicePb = day && (day->channelExists(CPAP_CSR) || day->channelExists(CPAP_PB));
             html += row3(HelpTips::term(tr("Periodic breathing, % time"), QStringLiteral("csr")),
                          devicePb ? number(day->calcPON(CPAP_CSR) + day->calcPON(CPAP_PB)) : QStringLiteral("&mdash;"),
@@ -205,7 +205,7 @@ QString AnalysisPanel::sidebarHtml(Day *day, const DayResult &r, const QString &
         if (r.flScored && r.flBreaths > 0) {
             // one sentence that ties the figures together: the time is the % above, the breaths are
             // more because single limited breaths count too (doctor 2026-10-09: "three numbers")
-            const QString pct = r.flowSeconds > 0 ? number(100.0 * r.flSeconds / r.flowSeconds) : QStringLiteral("&mdash;");
+            const QString pct = r.flDenominator() > 0 ? number(100.0 * r.flSeconds / r.flDenominator()) : QStringLiteral("&mdash;");
             html += QStringLiteral("<p>%1</p>").arg(HelpTips::term(r.flLimitedBreaths >= 0
                 ? tr("Flow limitation: %1 = %2% of the analysed time, longest run %3; %4% of single breaths look limited")
                       .arg(duration(1000LL * r.flSeconds), pct, duration(1000LL * r.flLongestSeconds),

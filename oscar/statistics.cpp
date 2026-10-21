@@ -188,7 +188,7 @@ double analysisFigureValue(const QString &key, const QList<AnalysisDailyData> &r
             else if (key == QLatin1String("hi")) { num += d.nObstructiveHypopnea + d.nCentralHypopnea + d.nHypopnea; den += h; }
             else if (key == QLatin1String("rerai")) { num += d.nRera; den += h; }
             else if (key == QLatin1String("pb")) { num += 100.0 * d.pbSeconds; den += d.flowSeconds; }
-            else if (key == QLatin1String("fl") && d.flBreaths > 0) { num += 100.0 * d.flSeconds; den += d.flowSeconds; }
+            else if (key == QLatin1String("fl") && d.flBreaths > 0) { num += 100.0 * d.flSeconds; den += d.flDenominator(); }
             else if (key == QLatin1String("flmin") && d.flBreaths > 0) { num += d.flSeconds / 60.0; den += 1; }
             else if (key == QLatin1String("fllong") && d.flBreaths > 0 && d.hasFlRuns) { longest = qMax(longest, d.flLongestSeconds / 60.0); den += 1; }
             else if (key == QLatin1String("flbr") && d.flBreaths > 0 && d.hasFlRuns) { num += 100.0 * d.flLimitedBreaths; den += d.flBreaths; }

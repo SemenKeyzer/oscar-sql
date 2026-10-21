@@ -445,6 +445,8 @@ void DayScorerTests::testScreenerNoSpo2()
     const DayResult r = scoreDay(in, AnalysisParams());
     QVERIFY(r.screener);
     QVERIFY(!r.hasOximetry);
+    QCOMPARE(r.hypopneas.size(), 1);   // by the flow alone
+    QVERIFY(r.hasAnalysis());          // Daily shows the analysis section and tab
 }
 
 // A CPAP night is as before: not a screener's, compared with the device.
@@ -454,4 +456,26 @@ void DayScorerTests::testCpapDayUnchanged()
     QVERIFY(r.hasCpap);
     QVERIFY(!r.screener);
     QVERIFY(r.hasComparison);
+}
+
+// CPAP and a screener the same night: flow limitation and Glasgow are the CPAP's (a nasal cannula
+// scores neither), over the CPAP's analysed time only.
+void DayScorerTests::testMixedNightFlowLimitation()
+{
+    DayInput in = night();
+    CpapSession screener;
+    screener.span = Span { at(-3600), at(0), 0 };
+    screener.analyzed = true;
+    screener.cpap = false;
+    screener.sampleRateHz = 50;
+    screener.flScored = false;
+    screener.flowSeconds = 3600;
+    in.cpap.append(screener);
+    in.flowLimitation.append(Span { at(100), at(460), 0 });
+    const DayResult r = scoreDay(in, AnalysisParams());
+    QVERIFY(!r.screener);
+    QVERIFY(r.flScored);
+    QCOMPARE(r.flowRateHz, 25.0);
+    QCOMPARE(r.flowSeconds, kNight + 3600);
+    QCOMPARE(r.flFlowSeconds, kNight);
 }
