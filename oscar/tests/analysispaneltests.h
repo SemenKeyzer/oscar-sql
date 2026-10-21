@@ -21,6 +21,7 @@ private slots:
     void testFormatting();
     void testSidebarForCpapNight();
     void testSidebarForOximetryOnlyNight();
+    void testSidebarScreenerNoDeviceColumn();
     void testFlowLimitationLine();
     void testGlasgowRows();
     void testGlasgowDash();

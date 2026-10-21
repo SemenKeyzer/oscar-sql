@@ -166,28 +166,40 @@ QString AnalysisPanel::sidebarHtml(Day *day, const DayResult &r, const QString &
         const int oh = r.count(RespEvent::ObstructiveHypopnea), ch = r.count(RespEvent::CentralHypopnea), h = r.count(RespEvent::Hypopnea);
 
         html += kTable;
-        html += QStringLiteral("<tr><td></td><td align=right><b>%1</b></td><td align=right><b>%2</b></td></tr>")
-                    .arg(tr("Device"), tr("Analysis"));
-        html += row3(HelpTips::term(tr("AHI"), QStringLiteral("an_ahi")), day ? number(day->calcAHI()) : QStringLiteral("&mdash;"), perHour(r.apneas.size() + r.hypopneas.size(), analysisHours));
-        html += row3(HelpTips::term(tr("Apneas /h"), QStringLiteral("all_apnea")), perHour(devApneas, deviceHours), perHour(r.apneas.size(), analysisHours));
-        html += row3(QStringLiteral("&nbsp;&nbsp;OA &middot; CA &middot; A"),
-                     QStringLiteral("%1 &middot; %2 &middot; %3").arg(dev(CPAP_Obstructive)).arg(dev(CPAP_ClearAirway)).arg(dev(CPAP_Apnea) + dev(CPAP_AllApnea)),
-                     QStringLiteral("%1 &middot; %2 &middot; %3").arg(oa).arg(ca).arg(a));
-        html += row3(HelpTips::term(tr("Hypopneas /h"), QStringLiteral("hi")), perHour(devHypopneas, deviceHours), perHour(r.hypopneas.size(), analysisHours));
-        html += row3(QStringLiteral("&nbsp;&nbsp;OH &middot; CH &middot; H"),
-                     QStringLiteral("%1 &middot; %2 &middot; %3").arg(dev(CPAP_ObstructiveHypopnea)).arg(dev(CPAP_CentralHypopnea)).arg(dev(CPAP_Hypopnea)),
-                     QStringLiteral("%1 &middot; %2 &middot; %3").arg(oh).arg(ch).arg(h));
-        const bool deviceRera = day && day->channelExists(CPAP_RERA);
-        html += row3(HelpTips::term(tr("RERA /h"), QStringLiteral("rera")), deviceRera ? perHour(dev(CPAP_RERA), deviceHours) : QStringLiteral("&mdash;"),
-                     perHour(r.reras.size(), analysisHours));
-        const bool deviceFl = day && day->channelExists(CPAP_FlowLimit);
-        html += row3(HelpTips::term(tr("Flow limitation, % time"), QStringLiteral("fl_time")), deviceFl ? number(day->calcPON(CPAP_FlowLimit)) : QStringLiteral("&mdash;"),
-                     r.flScored && r.flowSeconds > 0 ? number(100.0 * r.flSeconds / r.flowSeconds) : QStringLiteral("&mdash;"));
-        const bool devicePb = day && (day->channelExists(CPAP_CSR) || day->channelExists(CPAP_PB));
-        html += row3(HelpTips::term(tr("Periodic breathing, % time"), QStringLiteral("csr")),
-                     devicePb ? number(day->calcPON(CPAP_CSR) + day->calcPON(CPAP_PB)) : QStringLiteral("&mdash;"),
-                     r.flowSeconds > 0 ? number(100.0 * r.pbSeconds / r.flowSeconds) : QStringLiteral("&mdash;"));
-        html += row3(tr("Hours"), number(deviceHours, 2), number(analysisHours, 2));
+        if (r.screener) {
+            // a sleep screener's night: no device to compare with, apneas not classified, the index an REI
+            html += QStringLiteral("<tr><td></td><td align=right><b>%1</b></td></tr>").arg(tr("Analysis"));
+            html += row(HelpTips::term(tr("REI"), QStringLiteral("rei")), perHour(r.apneas.size() + r.hypopneas.size(), analysisHours));
+            html += row(HelpTips::term(tr("Apneas /h"), QStringLiteral("all_apnea")), perHour(r.apneas.size(), analysisHours));
+            html += row(HelpTips::term(tr("Hypopneas /h"), QStringLiteral("hi")), perHour(r.hypopneas.size(), analysisHours));
+            html += row(HelpTips::term(tr("RERA /h"), QStringLiteral("rera")), perHour(r.reras.size(), analysisHours));
+            html += row(HelpTips::term(tr("Periodic breathing, % time"), QStringLiteral("csr")),
+                        r.flowSeconds > 0 ? number(100.0 * r.pbSeconds / r.flowSeconds) : QStringLiteral("&mdash;"));
+            html += row(tr("Hours"), number(analysisHours, 2));
+        } else {
+            html += QStringLiteral("<tr><td></td><td align=right><b>%1</b></td><td align=right><b>%2</b></td></tr>")
+                        .arg(tr("Device"), tr("Analysis"));
+            html += row3(HelpTips::term(tr("AHI"), QStringLiteral("an_ahi")), day ? number(day->calcAHI()) : QStringLiteral("&mdash;"), perHour(r.apneas.size() + r.hypopneas.size(), analysisHours));
+            html += row3(HelpTips::term(tr("Apneas /h"), QStringLiteral("all_apnea")), perHour(devApneas, deviceHours), perHour(r.apneas.size(), analysisHours));
+            html += row3(QStringLiteral("&nbsp;&nbsp;OA &middot; CA &middot; A"),
+                         QStringLiteral("%1 &middot; %2 &middot; %3").arg(dev(CPAP_Obstructive)).arg(dev(CPAP_ClearAirway)).arg(dev(CPAP_Apnea) + dev(CPAP_AllApnea)),
+                         QStringLiteral("%1 &middot; %2 &middot; %3").arg(oa).arg(ca).arg(a));
+            html += row3(HelpTips::term(tr("Hypopneas /h"), QStringLiteral("hi")), perHour(devHypopneas, deviceHours), perHour(r.hypopneas.size(), analysisHours));
+            html += row3(QStringLiteral("&nbsp;&nbsp;OH &middot; CH &middot; H"),
+                         QStringLiteral("%1 &middot; %2 &middot; %3").arg(dev(CPAP_ObstructiveHypopnea)).arg(dev(CPAP_CentralHypopnea)).arg(dev(CPAP_Hypopnea)),
+                         QStringLiteral("%1 &middot; %2 &middot; %3").arg(oh).arg(ch).arg(h));
+            const bool deviceRera = day && day->channelExists(CPAP_RERA);
+            html += row3(HelpTips::term(tr("RERA /h"), QStringLiteral("rera")), deviceRera ? perHour(dev(CPAP_RERA), deviceHours) : QStringLiteral("&mdash;"),
+                         perHour(r.reras.size(), analysisHours));
+            const bool deviceFl = day && day->channelExists(CPAP_FlowLimit);
+            html += row3(HelpTips::term(tr("Flow limitation, % time"), QStringLiteral("fl_time")), deviceFl ? number(day->calcPON(CPAP_FlowLimit)) : QStringLiteral("&mdash;"),
+                         r.flScored && r.flowSeconds > 0 ? number(100.0 * r.flSeconds / r.flowSeconds) : QStringLiteral("&mdash;"));
+            const bool devicePb = day && (day->channelExists(CPAP_CSR) || day->channelExists(CPAP_PB));
+            html += row3(HelpTips::term(tr("Periodic breathing, % time"), QStringLiteral("csr")),
+                         devicePb ? number(day->calcPON(CPAP_CSR) + day->calcPON(CPAP_PB)) : QStringLiteral("&mdash;"),
+                         r.flowSeconds > 0 ? number(100.0 * r.pbSeconds / r.flowSeconds) : QStringLiteral("&mdash;"));
+            html += row3(tr("Hours"), number(deviceHours, 2), number(analysisHours, 2));
+        }
         html += QStringLiteral("</table>");
 
         if (r.flScored && r.flBreaths > 0) {
@@ -272,7 +284,7 @@ QString AnalysisPanel::sidebarHtml(Day *day, const DayResult &r, const QString &
             graded(HelpTips::term(tr("Hypoxic burden index (HBI)"), QStringLiteral("hypoxic_burden")),
                    QStringLiteral("%1 %&middot;min/h").arg(number(hb)), hypoxicBurdenGrade(hb), kHypoxicGradeBounds);
         }
-        if (r.hasCpap && r.hasFlow) {
+        if (r.hasFlow) {   // a CPAP's or a screener's breathing events
             html += row(tr("&nbsp;&nbsp;linked to breathing events"), analysisHours > 0
                         ? QStringLiteral("%1 %&middot;min/h").arg(number(r.linkedDesatArea / 60.0 / analysisHours)) : QStringLiteral("&mdash;"));
         }
@@ -300,7 +312,7 @@ QString AnalysisPanel::sidebarHtml(Day *day, const DayResult &r, const QString &
         html += kTable;
         html += row(HelpTips::term(tr("Problem zones"), QStringLiteral("oxi_zones")), o.zones.isEmpty() ? tr("none")
                     : tr("%1, %2 (marked %3)").arg(o.zones.size()).arg(duration(1000LL * o.zoneSeconds(1)), duration(1000LL * o.zoneSeconds(2))));
-        if (r.hasCpap && r.hasFlow) {
+        if (r.hasFlow) {   // a CPAP's or a screener's breathing events
             html += row(HelpTips::term(tr("Unexplained desaturations"), QStringLiteral("unexplained_desat")), QString::number(r.unexplained.size()));
         }
         html += row(tr("SpO2 source"), oxiSource.toHtmlEscaped() + (r.oxiScope == QLatin1String("cpap") ? tr(" (CPAP time only)") : QString()));

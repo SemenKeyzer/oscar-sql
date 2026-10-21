@@ -608,3 +608,37 @@ void AnalysisPanelTests::testTabListsArtifacts()
     }
     QVERIFY(found);
 }
+
+// A sleep screener's night: the analysis' column only (no device to compare), the index named REI,
+// the desaturations linked to its breathing events.
+void AnalysisPanelTests::testSidebarScreenerNoDeviceColumn()
+{
+    DayInput in;
+    CpapSession s;
+    s.span = Span { at(0), at(3600), 0 };
+    s.analyzed = true;
+    s.cpap = false;
+    s.sampleRateHz = 25;
+    s.flowSeconds = 3600;
+    in.cpap.append(s);
+    in.spo2 = synth::flat(3600, 96);
+    in.pulse = synth::flat(3600, 60);
+    synth::dip(in.spo2, 300, 4, 5, 10, 5);
+    for (const Desaturation &d : analyzeOximetry(in.spo2, Grid(), OxiParams()).desaturations) {
+        const double end = (d.nadirTime - synth::kStart) / 1000.0 + 100;
+        in.apneas.append(ev(end - 15, end, RespEvent::Apnea));
+    }
+    const DayResult r = scoreDay(in, AnalysisParams());
+    QVERIFY(r.screener);
+    const QString html = AnalysisPanel::sidebarHtml(nullptr, r, QStringLiteral("RS01"), { 90 });
+    QVERIFY2(!html.contains(QStringLiteral(">Device<")), qPrintable(html));
+    QVERIFY(html.contains(QStringLiteral("REI")));
+    QVERIFY(!html.contains(QStringLiteral("OA &middot; CA")));
+    QVERIFY(html.contains(QStringLiteral("linked to breathing events")));
+    QVERIFY(html.contains(QStringLiteral("Unexplained desaturations")));
+    QVERIFY(!html.contains(QStringLiteral("Agreement with the device")));
+
+    const QString cpap = AnalysisPanel::sidebarHtml(nullptr, cpapNight(), QStringLiteral("CMS50F"), { 90 });
+    QVERIFY(cpap.contains(QStringLiteral(">Device<")));
+    QVERIFY(!cpap.contains(QStringLiteral("REI")));
+}
