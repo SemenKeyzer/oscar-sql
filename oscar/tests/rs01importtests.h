@@ -30,6 +30,7 @@ private slots:
     void testSessionIdStable();
     void testWritableWarningText();
     void testPageListsRecordings();
+    void testClockText();
     void testRealNightAnalysedIfGiven();
     void cleanupTestCase();
 private:

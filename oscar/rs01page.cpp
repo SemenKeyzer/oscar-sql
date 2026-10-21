@@ -20,6 +20,7 @@
 #include <QStorageInfo>
 #include <QTreeWidget>
 #include <QVBoxLayout>
+#include "SleepLib/loader_plugins/rs01_hid.h"
 #include "SleepLib/loader_plugins/rs01_import.h"
 #include "SleepLib/loader_plugins/rs01_reader.h"
 
@@ -51,6 +52,11 @@ RS01Page::RS01Page(QWidget *parent)
     m_status = new QLabel(this);
     m_status->setWordWrap(true);
     layout->addWidget(m_status);
+    m_clock = new QLabel(this);
+    m_clock->setObjectName(QStringLiteral("rs01ClockLine"));
+    m_clock->setWordWrap(true);
+    m_clock->hide();
+    layout->addWidget(m_clock);
     m_warning = new QLabel(this);
     m_warning->setObjectName(QStringLiteral("rs01Warning"));
     m_warning->setWordWrap(true);
@@ -69,16 +75,22 @@ RS01Page::RS01Page(QWidget *parent)
     m_folderButton = new QPushButton(tr("Choose folder…"), this);
     m_folderButton->setObjectName(QStringLiteral("rs01Folder"));
     m_folderButton->setToolTip(tr("A folder with the device's recordings (MMDDhhmm folders), or the device itself"));
+    m_clockButton = new QPushButton(tr("Set clock"), this);
+    m_clockButton->setObjectName(QStringLiteral("rs01Clock"));
+    m_clockButton->setToolTip(tr("Set the device's clock to this computer's time (the device must be plugged in)"));
+    m_clockButton->setVisible(RS01Hid::available());
     m_importButton = new QPushButton(tr("Import"), this);
     m_importButton->setObjectName(QStringLiteral("rs01Import"));
     m_doneButton = new QPushButton(tr("Done"), this);
     m_doneButton->setObjectName(QStringLiteral("rs01Done"));
     buttons->addWidget(m_folderButton);
+    buttons->addWidget(m_clockButton);
     buttons->addStretch(1);
     buttons->addWidget(m_importButton);
     buttons->addWidget(m_doneButton);
     layout->addLayout(buttons);
     connect(m_folderButton, &QPushButton::clicked, this, &RS01Page::chooseFolder);
+    connect(m_clockButton, &QPushButton::clicked, this, &RS01Page::setDeviceClock);
     connect(m_importButton, &QPushButton::clicked, this, &RS01Page::importChosen);
     connect(m_doneButton, &QPushButton::clicked, this, [this]() { emit finished(m_imported > 0); });
 }
@@ -92,11 +104,30 @@ QString RS01Page::writableWarning(const QString &mountPoint, const QString &devi
          + QStringLiteral("\n") + tr("OSCAR itself never writes to the device.");
 }
 
+QString RS01Page::clockText(bool ok, const QDateTime &when, const QString &error)
+{
+    return ok ? tr("Device clock set: %1").arg(QLocale().toString(when, QLocale::ShortFormat))
+              : tr("Device clock not set: %1").arg(error);
+}
+
+void RS01Page::setDeviceClock()
+{
+    // from the computer's local time; HID only, the device's disk stays untouched
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    const QDateTime now = QDateTime::currentDateTime();
+    RS01Hid::Error error = RS01Hid::Error::None;
+    const bool ok = RS01Hid::setClock(now, &error);
+    QApplication::restoreOverrideCursor();
+    m_clock->setText(clockText(ok, now, RS01Hid::errorText(error)));
+    m_clock->show();
+}
+
 void RS01Page::start()
 {
     m_imported = 0;
     m_list->clear();
     m_warning->hide();
+    m_clock->hide();
     for (const QStorageInfo &v : QStorageInfo::mountedVolumes()) {
         if (!v.isValid() || !v.isReady() || v.name() != kVolumeName) continue;
 #ifdef Q_OS_MACOS
@@ -105,6 +136,8 @@ void RS01Page::start()
             m_warning->show();
         }
 #endif
+        // the device itself is plugged in: its clock starts the next recording
+        if (RS01Hid::available()) setDeviceClock();
         listRecordings(v.rootPath());
         return;
     }

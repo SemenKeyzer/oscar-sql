@@ -23,7 +23,9 @@
 #include <QApplication>
 #include <QCheckBox>
 #include <QTreeWidget>
+#include <QPushButton>
 #include "rs01page.h"
+#include "SleepLib/loader_plugins/rs01_hid.h"
 #include <QDir>
 #include <QDirIterator>
 #include <QFileInfo>
@@ -197,6 +199,22 @@ void RS01ImportTests::testWritableWarningText()
     const QString w = RS01Page::writableWarning(QStringLiteral("/Volumes/SLEEP METER"), QStringLiteral("/dev/disk5s1"));
     QVERIFY2(w.contains(QStringLiteral("diskutil unmount")), qPrintable(w));
     QVERIFY(w.contains(QStringLiteral("diskutil mount readOnly /dev/disk5s1")));
+}
+
+// The page's line about the device's clock: the time it was set to, or why not.
+void RS01ImportTests::testClockText()
+{
+    const QDateTime when(QDate(2026, 10, 21), QTime(22, 15, 3));
+    const QString ok = RS01Page::clockText(true, when, QString());
+    QVERIFY2(ok.contains(QStringLiteral("Device clock set")) && ok.contains(QLocale().toString(when, QLocale::ShortFormat)), qPrintable(ok));
+    const QString why = RS01Hid::errorText(RS01Hid::Error::NotFound);
+    const QString failed = RS01Page::clockText(false, when, why);
+    QVERIFY2(failed.contains(QStringLiteral("not set")) && failed.contains(why), qPrintable(failed));
+    // the button where the clock can be set at all (never pressed here: no test talks to the device)
+    RS01Page page;
+    QPushButton *button = page.findChild<QPushButton *>(QStringLiteral("rs01Clock"));
+    QVERIFY(button);
+    QCOMPARE(!button->isHidden(), RS01Hid::available());
 }
 
 // The page lists the recordings: new ones ticked, the one in OSCAR marked and not ticked.
