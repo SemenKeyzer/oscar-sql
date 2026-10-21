@@ -1,0 +1,74 @@
+/* Contec RS01 Clock Tests
+ *
+ * Copyright (c) 2026 The OSCAR Team
+ *
+ * This file is subject to the terms and conditions of the GNU General Public
+ * License. See the file COPYING in the main directory of the source code
+ * for more details. */
+
+#include "rs01clocktests.h"
+
+#include <QDateTime>
+#include "SleepLib/loader_plugins/rs01_clock.h"
+
+namespace {
+
+QByteArray bytes(std::initializer_list<int> list)
+{
+    QByteArray b;
+    for (int v : list) b.append(char(v));
+    return b;
+}
+
+QByteArray padded(const QByteArray &b)
+{
+    return b + QByteArray(64 - b.size(), '\0');
+}
+
+} // namespace
+
+// The checksum the device uses (and checks): command and parameters, 7 bits.
+void RS01ClockTests::testChecksum()
+{
+    QCOMPARE(rs01Checksum(bytes({ 0xF3, 0x00 })), quint8(0x73));   // its own reply to set clock
+    QCOMPARE(rs01Checksum(bytes({ 0x83, 0x1A, 0x0A, 0x15, 0x16, 0x0F, 0x03, 0x00, 0x00 })), quint8(0x64));
+    QCOMPARE(rs01Checksum(bytes({ 0x8B, 0x04, 0x00 })), quint8(0x0F));   // the notes' «8B 04 00 0F»
+}
+
+// «81 01»: the command and its checksum (no parameters).
+void RS01ClockTests::testIdentifyCommand()
+{
+    QCOMPARE(rs01IdentifyCommand(), padded(bytes({ 0x81, 0x01 })));
+}
+
+void RS01ClockTests::testClockCommand()
+{
+    const QDateTime t(QDate(2026, 10, 21), QTime(22, 15, 3));
+    QCOMPARE(rs01ClockCommand(t), padded(bytes({ 0x83, 0x1A, 0x0A, 0x15, 0x16, 0x0F, 0x03, 0x00, 0x00, 0x64 })));
+}
+
+// The year is one byte from 2000 and must stay 7-bit.
+void RS01ClockTests::testClockYearRange()
+{
+    QVERIFY(rs01ClockCommand(QDateTime(QDate(1999, 12, 31), QTime(23, 59, 59))).isEmpty());
+    QVERIFY(rs01ClockCommand(QDateTime(QDate(2128, 1, 1), QTime(0, 0))).isEmpty());
+    QCOMPARE(rs01ClockCommand(QDateTime(QDate(2127, 1, 1), QTime(0, 0))).at(1), char(127));
+}
+
+// Replies as the device sent them, with or without the report ID in front.
+void RS01ClockTests::testReplies()
+{
+    const QByteArray identify = bytes({ 0xF1 }) + QByteArray("RS01    ") + bytes({ 0x77 });
+    QVERIFY(rs01IsIdentifyReply(padded(identify)));
+    QVERIFY(rs01IsIdentifyReply(bytes({ 0x00 }) + padded(identify)));
+    QVERIFY(!rs01IsIdentifyReply(padded(bytes({ 0xF1 }) + QByteArray("RS01    ") + bytes({ 0x76 }))));   // checksum
+    QVERIFY(!rs01IsIdentifyReply(padded(bytes({ 0x82 }) + QByteArray("RS01    ") + bytes({ 0x78 }))));   // protocol B
+    QVERIFY(!rs01IsIdentifyReply(padded(bytes({ 0xF1 }) + QByteArray("XX99    ") + bytes({ 0x11 }))));
+    QVERIFY(!rs01IsIdentifyReply(QByteArray()));
+
+    QVERIFY(rs01IsClockReply(padded(bytes({ 0xF3, 0x00, 0x73 }))));
+    QVERIFY(rs01IsClockReply(bytes({ 0x00 }) + padded(bytes({ 0xF3, 0x00, 0x73 }))));
+    QVERIFY(!rs01IsClockReply(padded(bytes({ 0xF3, 0x01, 0x74 }))));   // not "done"
+    QVERIFY(!rs01IsClockReply(padded(bytes({ 0xF3, 0x00, 0x72 }))));
+    QVERIFY(!rs01IsClockReply(bytes({ 0xF3 })));
+}
