@@ -599,6 +599,7 @@ void NightSummaryTests::testScreenerFromRow()
     QCOMPARE(s.analysisAhi, 6.0);
     QCOMPARE(s.reiApneas, 4);
     QCOMPARE(s.reiHypopneas, 8);
+    QCOMPARE(s.reiHours, 2.0);
 
     row.screener = false;   // a CPAP's analysis: the AHI tile shows it
     NightSummary cpap;

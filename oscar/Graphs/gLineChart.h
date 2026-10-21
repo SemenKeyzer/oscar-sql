@@ -82,6 +82,9 @@ class gLineChart: public Layer
     gLineChart(ChannelID code, bool square_plot = false, bool disable_accel = false);
     virtual ~gLineChart();
 
+    //! Whether the flag \a code is shown on the graph of \a graph until the user says otherwise.
+    static bool flagOnByDefault(ChannelID graph, ChannelID code);
+
     //! \brief The drawing code that fills the vertex buffers
     virtual void paint(QPainter &painter, gGraph &w, const QRegion &region);
 

@@ -738,7 +738,8 @@ void NightSummary::takeScreener(const AnalysisDailyData &row)
     // a screener's apneas are not classified (all nApnea); the others stay 0 but are counted alike
     reiApneas = row.nObstructiveApnea + row.nCentralApnea + row.nApnea;
     reiHypopneas = row.nObstructiveHypopnea + row.nCentralHypopnea + row.nHypopnea;
-    analysisAhi = (reiApneas + reiHypopneas) / (row.flowSeconds / 3600.0);
+    reiHours = row.flowSeconds / 3600.0;
+    analysisAhi = (reiApneas + reiHypopneas) / reiHours;
 }
 
 void NightSummary::takeFlowLimitation(const AnalysisDailyData &row)

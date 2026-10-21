@@ -63,6 +63,7 @@ struct NightSummary {
     bool screener = false;          //!< no CPAP; a sleep screener's flow analysed: analysisAhi is an REI
     int reiApneas = 0;
     int reiHypopneas = 0;
+    double reiHours = 0;            //!< the analysed recording's hours
     //! Takes a sleep screener's REI from the analysis' row (a night without CPAP).
     void takeScreener(const AnalysisDailyData &row);
     bool hasLeak = false;

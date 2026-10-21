@@ -2256,6 +2256,19 @@ QString Daily::ahiFiguresHtml(const QString &name, double deviceAhi, double anal
     return html;
 }
 
+QString Daily::reiFiguresHtml(double rei, int apneas, int hypopneas)
+{
+    QString html = QString("<tr><td colspan=5 bgcolor='%1' align=center><div title='%5' style='white-space: nowrap;'><font size=+3 color='%2'><b>%3</b></font>"
+                           "&nbsp;&nbsp;&nbsp;&nbsp; <font size=+3 color='%2'><b>%4</b></font></div></td></tr>\n")
+                       .arg("#F88017", COLOR_Text.name(), tr("REI").toHtmlEscaped(), QString::number(rei, 'f', 1),
+                            tr("Apneas and hypopneas per hour of the analysed recording, by OSCAR's analysis of the screener's nasal flow.").toHtmlEscaped());
+    const QString parts = HelpTips::term(tr("apneas %1, hypopneas %2").arg(apneas).arg(hypopneas).toHtmlEscaped(), QStringLiteral("rei"))
+                        + QStringLiteral(" ") + AnalysisMark::pill();
+    html += QString("<tr><td colspan=5 bgcolor='%1' align=center><font color='%2'>%3</font></td></tr>\n")
+                .arg("#F88017", COLOR_Text.name(), parts);
+    return html;
+}
+
 QString Daily::manualAnalysisHtml(const QString &scoringBlock, double correctedAhi, double deviceAhi, const QString &name,
                                   bool cpapData, const QString &countsTable)
 {
@@ -2370,8 +2383,8 @@ QString Daily::getAHI(Day * day, bool isBrick, double analysisAhi) {
     return html;
 }
 
-QString Daily::getIndices(Day * day, QHash<ChannelID, EventDataType>& values ) {
-    const QString html = indicesHtml(day, analysis::analysisShown(), values);
+QString Daily::getIndices(Day * day, QHash<ChannelID, EventDataType>& values, double analysedHours) {
+    const QString html = indicesHtml(day, analysis::analysisShown(), values, analysedHours);
 #ifndef COMBINE_MODE_3
     if (!leftSideBarEnable[LSB_SLEEPTIME_INDICES] )
 #else
@@ -2383,7 +2396,7 @@ QString Daily::getIndices(Day * day, QHash<ChannelID, EventDataType>& values ) {
     return html;
 }
 
-QString Daily::indicesHtml(Day *day, bool analysisShown, QHash<ChannelID, EventDataType> &values)
+QString Daily::indicesHtml(Day *day, bool analysisShown, QHash<ChannelID, EventDataType> &values, double analysedHours)
 {
     QString html;
     QString analysisHtml;   // OSCAR's analysis, under its own heading after the device's rows
@@ -2411,7 +2424,11 @@ QString Daily::indicesHtml(Day *day, bool analysisShown, QHash<ChannelID, EventD
             continue;
         }
         float channelHours = hours;
-        if (chan.machtype() != MT_CPAP) {
+        // a sleep screener's night: the analysis' events per hour of its analysed recording
+        const bool screenerRow = chan.isComputed() && hours <= 0 && analysedHours > 0;
+        if (screenerRow) {
+            channelHours = analysedHours;
+        } else if (chan.machtype() != MT_CPAP) {
             // Use device type hours (if available) rather than CPAP hours, since
             // might have Oximetry (for example) longer or shorter than CPAP
             channelHours = day->hours(chan.machtype());
@@ -2427,7 +2444,7 @@ QString Daily::indicesHtml(Day *day, bool analysisShown, QHash<ChannelID, EventD
             data = QString("%1").arg(val,0,'f',2);
         } else {
             // the device's own events per hour (manual scoring has its own page); the analysis' as before
-            if (chan.isComputed()) val = chan.machtype() == MT_CPAP ? day->perHour(code) : day->count(code) / channelHours;
+            if (chan.isComputed()) val = chan.machtype() == MT_CPAP && !screenerRow ? day->perHour(code) : day->count(code) / channelHours;
             else val = chan.machtype() == MT_CPAP ? day->devicePerHour(code) : day->count(code) / channelHours;
             data = QString("%1").arg(val,0,'f',2);
         }
@@ -3005,6 +3022,13 @@ void Daily::Load(QDate date)
             QString  beg = "<table cellspacing=0 cellpadding=0 border=0 width='100%'>"
             "<tr><td colspan=5 bgcolor='#89abcd' align=center><p title=''> &nbsp; <b><font size=+0 color=white>";
             htmlLeftAHI  = QString("%1 %2 </b></td></tr></table>").arg(beg).arg(msg);
+            if (figures.screener && analysis::analysisShown()) {
+                // a sleep screener's night: OSCAR's analysis of its nasal flow, per hour of the recording
+                htmlLeftAHI += QStringLiteral("<table cellspacing=0 cellpadding=0 border=0 width='100%'>\n")
+                             + reiFiguresHtml(figures.analysisAhi, figures.reiApneas, figures.reiHypopneas) + QStringLiteral("</table>\n");
+                QHash<ChannelID, EventDataType> values;
+                htmlLeftIndices = getIndices(day, values, figures.reiHours);
+            }
         }
 
         htmlLeftStatistics = getStatisticsInfo(day);

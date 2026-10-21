@@ -3164,3 +3164,46 @@ void AnalysisIntegrationTests::testScreenerStored()
     QVERIFY(repo.find(m_profileId, d.date).screener);
     repo.remove(m_profileId, d.date);
 }
+
+// A screener's night in the Daily panel: the REI large, apneas and hypopneas beneath it, marked as the analysis'.
+void AnalysisIntegrationTests::testReiFrame()
+{
+    const QString html = Daily::reiFiguresHtml(6.0, 4, 8);
+    QVERIFY2(html.contains(QStringLiteral(">REI<")), qPrintable(html));
+    QVERIFY(html.contains(QStringLiteral("6.0")));
+    QVERIFY(html.contains(QStringLiteral("apneas 4, hypopneas 8")));
+    QVERIFY(html.contains(AnalysisMark::pill()));
+    QVERIFY(html.contains(QStringLiteral("help:rei")) || html.contains(QStringLiteral("rei")));
+}
+
+// The analysis' indices on a screener's night are per hour of the analysed recording (the day has
+// no CPAP hours to divide by).
+void AnalysisIntegrationTests::testIndicesScreenerNight()
+{
+    Machine mach(p_profile, 30);
+    mach.info.type = MT_OXIMETER;
+    Session *sess = nasalSession(&mach, 11);
+    analyzeSession(sess, AnalysisParams());
+    QCOMPARE(eventCount(*sess, AN_Apnea), 1);
+    mach.updateChannels(sess);   // as when the sessions are loaded
+    Day day;
+    day.addSession(sess);
+    QHash<ChannelID, EventDataType> values;
+    const QString html = Daily::indicesHtml(&day, true, values, 0.5);
+    QVERIFY2(html.contains(QStringLiteral(">%1<").arg(analysis::channelBaseName(AN_Apnea))), qPrintable(html));
+    QCOMPARE(values.value(AN_Apnea), EventDataType(2.0));   // 1 apnea in half an hour
+    QVERIFY(!html.contains(QStringLiteral("inf")));
+    day.removeSession(sess);
+    delete sess;
+}
+
+// The nasal-flow graph shows the analysis' breathing events by default (it has no device flags);
+// the CPAP flow graph keeps the device's flags and the analysis' on request.
+void AnalysisIntegrationTests::testNasalFlowGraphFlags()
+{
+    for (ChannelID c : { AN_Apnea, AN_Hypopnea, AN_RERA }) QVERIFY(gLineChart::flagOnByDefault(OXI_NasalFlow, c));
+    QVERIFY(!gLineChart::flagOnByDefault(OXI_NasalFlow, AN_FlowReduction));
+    QVERIFY(!gLineChart::flagOnByDefault(CPAP_FlowRate, AN_Apnea));
+    QVERIFY(gLineChart::flagOnByDefault(CPAP_FlowRate, CPAP_Obstructive));
+    QVERIFY(gLineChart::flagOnByDefault(OXI_SPO2, AN_Desaturation));
+}

@@ -84,6 +84,20 @@ gLineChart::gLineChart(ChannelID code, bool square_plot, bool disable_accel)
     resetGraphViewSettings();
 }
 
+bool gLineChart::flagOnByDefault(ChannelID graph, ChannelID code)
+{
+    // the device's flags on the flow graph; OSCAR's own analysis flags only on request
+    if ((graph == CPAP_FlowRate || graph == CPAP_MaskPressureHi) && schema::channel[code].machtype() == MT_CPAP
+            && !schema::channel[code].isComputed()) return true;
+    if (graph == CPAP_Leak && code == CPAP_LargeLeak) return true;
+    // a sleep screener's nasal flow has no device flags: the analysis' breathing events
+    if (graph == OXI_NasalFlow && (code == AN_Apnea || code == AN_Hypopnea || code == AN_RERA)) return true;
+    // the analysis' desaturations on SpO2 and pulse rises on the pulse
+    if (graph == OXI_SPO2 && (code == AN_Desaturation || code == AN_OxiArtifact)) return true;
+    if (graph == OXI_Pulse && code == AN_PulseRise) return true;
+    return false;
+}
+
 gLineChart::~gLineChart()
 {
     for (auto fit = flags.begin(), end=flags.end(); fit != end; ++fit) {
@@ -224,18 +238,7 @@ skipcheck:
     QList<ChannelID> available = m_day->getSortedMachineChannels(z);
 
     for (const auto & code : available) {
-        if (!m_flags_enabled.contains(code)) {
-            bool b = false;
-
-            // the device's flags on the flow graph; OSCAR's own analysis flags only on request
-            if (((m_codes[0] == CPAP_FlowRate) ||((m_codes[0] == CPAP_MaskPressureHi))) && (schema::channel[code].machtype() == MT_CPAP)
-                    && !schema::channel[code].isComputed()) b = true;
-            if ((m_codes[0] == CPAP_Leak) && (code == CPAP_LargeLeak)) b = true;
-            // the analysis' desaturations on SpO2 and pulse rises on the pulse
-            if ((m_codes[0] == OXI_SPO2) && (code == AN_Desaturation || code == AN_OxiArtifact)) b = true;
-            if ((m_codes[0] == OXI_Pulse) && (code == AN_PulseRise)) b = true;
-            m_flags_enabled[code] = b;
-        }
+        if (!m_flags_enabled.contains(code)) m_flags_enabled[code] = flagOnByDefault(m_codes[0], code);
         if (!m_day->channelExists(code)) continue;
 
         schema::Channel * chan = &schema::channel[code];

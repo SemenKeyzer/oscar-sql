@@ -135,7 +135,10 @@ public:
     //! "Flow limitation (manual scoring): X% of the night, Y min" when stretches are marked; else empty.
     static QString manualFlowHtml(Day *day);
     //! The index table: the device's own figures, then OSCAR's analysis under its heading (when \a analysisShown).
-    static QString indicesHtml(Day *day, bool analysisShown, QHash<ChannelID, EventDataType> &values);
+    //! On a night without CPAP hours the analysis' rows are per \a analysedHours (a sleep screener's recording).
+    static QString indicesHtml(Day *day, bool analysisShown, QHash<ChannelID, EventDataType> &values, double analysedHours = 0);
+    //! A sleep screener's night: the REI (OSCAR's analysis of its nasal flow) large, its apneas and hypopneas beneath.
+    static QString reiFiguresHtml(double rei, int apneas, int hypopneas);
     //! A left-sidebar section heading: \a name links to folding the section; \a afterLink (e.g. a mark) follows it.
     //! The long slider above the graphs, in seconds from the start of the night.
     struct NightScroll {
@@ -496,7 +499,7 @@ private:
     QString getOximeterInformation(Day *);
     QString getEventBreakdown(Day *);
     QString getPieChart(float values, Day *);
-    QString getIndices(Day * day, QHash<ChannelID, EventDataType>& values );
+    QString getIndices(Day *day, QHash<ChannelID, EventDataType> &values, double analysedHours = 0);
     QString getSleepTime(Day *);
     QString getLeftSidebar (bool honorPieChart);
 

@@ -67,6 +67,9 @@ private slots:
     void testNasalLinearisation();
     void testCpapAndScreenerOverlap();
     void testScreenerStored();
+    void testReiFrame();
+    void testIndicesScreenerNight();
+    void testNasalFlowGraphFlags();
     void testStageOneNasalFlow();
     void testNasalSessionReanalysedAfterBump();
     void testStageOneSkipsSessionWithoutEvents();
