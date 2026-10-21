@@ -508,3 +508,24 @@ void ContecBleImportTests::testOxiGradeHtml()
     QVERIFY(!scale.contains(oxiGradeColor(OxiGrade::Severe)));
     QVERIFY(oxiGradeScaleHtml(kHypoxicGradeBounds, OxiGrade::Normal).contains(QStringLiteral("normal &lt; 13")));
 }
+
+// Linz's hypoxic load: the area between SpO2 and 100 % over the whole recording, per hour.
+void ContecBleImportTests::testHypoxicLoad()
+{
+    QVector<int> hist(51, 0);              // seconds per SpO2 % from 50 to 100
+    hist[96 - 50] = 3600;                  // an hour at 96 %: 4 % below 100 for 60 min
+    QCOMPARE(hypoxicLoad(hist), 240.0);
+    hist[86 - 50] = 3600;                  // and an hour at 86 %: (4·60 + 14·60) / 2 h
+    QCOMPARE(hypoxicLoad(hist), 540.0);
+    QVERIFY(std::isnan(hypoxicLoad(QVector<int>(51, 0))));
+    QVERIFY(std::isnan(hypoxicLoad(QVector<int>())));
+
+    AnalysisDailyData row;
+    row.id = 1;
+    row.hasOximetry = true;
+    row.oxiSeconds = 3600;
+    row.spo2Sum = 96.0 * 3600;
+    row.spo2Hist = QVector<int>(51, 0);
+    row.spo2Hist[96 - 50] = 3600;
+    QCOMPARE(summarizeOximetry(row).hypoxicLoad, 240.0);
+}

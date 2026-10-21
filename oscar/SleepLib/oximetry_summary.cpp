@@ -128,6 +128,7 @@ OximetryNight summarizeOximetry(const AnalysisDailyData &row)
     n.zoneMinutes = row.zoneSeconds / 60.0;
     n.hypoxicBurden = hypoxicBurden(row.desatArea, row.oxiSeconds);
     if (row.desatArea4 >= 0) n.hypoxicBurden4 = hypoxicBurden(row.desatArea4, row.oxiSeconds);
+    n.hypoxicLoad = hypoxicLoad(row.spo2Hist);
     if (row.hasPulse && row.pulseSeconds > 0) {
         n.pulseAvg = row.pulseSum / row.pulseSeconds;
         n.pulseMin = row.pulseMin;
@@ -193,4 +194,16 @@ QString oxiGradeScaleHtml(const double (&bounds)[3], OxiGrade current)
                     : QStringLiteral("<span style='color:#808080'>%1</span>").arg(steps[g]));
     }
     return out.join(QStringLiteral(" · "));
+}
+
+double hypoxicLoad(const QVector<int> &spo2Hist)
+{
+    double area = 0;   // %·s
+    qint64 seconds = 0;
+    for (int i = 0; i < spo2Hist.size(); ++i) {
+        area += double(spo2Hist[i]) * (100 - (analysis::kSpo2HistMin + i));
+        seconds += spo2Hist[i];
+    }
+    if (seconds <= 0) return std::numeric_limits<double>::quiet_NaN();
+    return area / 60.0 / (seconds / 3600.0);
 }

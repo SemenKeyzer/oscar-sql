@@ -10,6 +10,7 @@
 #define OXIMETRY_SUMMARY_H
 
 #include <QString>
+#include <QVector>
 #include <limits>
 #include "SleepLib/machine_common.h"
 
@@ -41,12 +42,17 @@ struct OximetryNight {
     double hypoxicBurden = std::numeric_limits<double>::quiet_NaN();
     //! analysis: the hypoxic burden from the desaturations of 4 % or more, as MediOX grades it; NaN if not known
     double hypoxicBurden4 = std::numeric_limits<double>::quiet_NaN();
+    //! analysis: Linz's hypoxic load (area below 100 %, %·min/h); NaN without the analysis
+    double hypoxicLoad = std::numeric_limits<double>::quiet_NaN();
 };
 
 //! \brief The hypoxic burden from the oximeter alone: the area of every desaturation below
 //! its own baseline (\a desatArea, %·s) per hour of \a seconds with SpO2, in %·min/h, as in
 //! Esmaeili et al. 2023 (desaturations found automatically). NaN without time with SpO2.
 double hypoxicBurden(double desatArea, int seconds);
+//! Linz's hypoxic load: the area between SpO2 and 100 % over every second with SpO2 (\a spo2Hist,
+//! seconds per % from kSpo2HistMin), per hour, in %·min/h; no desaturations to find. NaN without SpO2.
+double hypoxicLoad(const QVector<int> &spo2Hist);
 
 //! The grades Braebon gives on its MediOX oximeter's report.
 enum class OxiGrade { Normal, Mild, Moderate, Severe };

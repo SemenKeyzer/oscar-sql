@@ -224,6 +224,8 @@ void gAnalysisChart::populate(Day *day, int idx)
         slices.append(SummaryChartSlice(calc, hb, hb, title(HypoxicBurden), QColor(0x90, 0x50, 0xa0)));
         tip = QObject::tr("\nHypoxic burden (approx.): %1 %·min/h (%2)").arg(num(hb), oxiGradeName(hypoxicBurdenGrade(hb)))
             + QObject::tr("\nall desaturations: %1 %·min/h").arg(num(all));
+        if (!std::isnan(hypoxicLoad(r.spo2Hist)))
+            tip += QObject::tr("\nhypoxic load (Linz): %1 %·min/h").arg(num(hypoxicLoad(r.spo2Hist), 0));
         if (r.hasFlow && r.flowSeconds > 0) {   // a CPAP's or a screener's breathing events
             tip += QObject::tr("\nlinked to breathing events: %1 %·min/h").arg(num(r.linkedDesatArea / 60.0 / (r.flowSeconds / 3600.0)));
         }

@@ -288,6 +288,12 @@ QString AnalysisPanel::sidebarHtml(Day *day, const DayResult &r, const QString &
             html += row(tr("&nbsp;&nbsp;all desaturations"),
                         QStringLiteral("%1 %&middot;min/h").arg(number(hypoxicBurden(o.desaturationArea(), o.spo2Seconds))));
         }
+        // Linz: every second's distance from 100 %, no desaturations to find (compares nights and devices)
+        const double load = hypoxicLoad(o.spo2Hist);
+        if (!std::isnan(load)) {
+            html += row(HelpTips::term(tr("Hypoxic load (Linz)"), QStringLiteral("hypoxic_load")),
+                        QStringLiteral("%1 %&middot;min/h").arg(number(load, 0)));
+        }
         if (r.hasFlow) {   // a CPAP's or a screener's breathing events
             html += row(tr("&nbsp;&nbsp;linked to breathing events"), analysisHours > 0
                         ? QStringLiteral("%1 %&middot;min/h").arg(number(r.linkedDesatArea / 60.0 / analysisHours)) : QStringLiteral("&mdash;"));

@@ -35,6 +35,7 @@ private slots:
     void testNightSummaryForAnyDate();
     void testOximetryNightFromAnalysis();
     void testHypoxicBurdenGrades();
+    void testHypoxicLoad();
     void testOxiGradeHtml();
     void cleanupTestCase();
 private:
