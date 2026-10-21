@@ -23,6 +23,9 @@
 
 #include "oximeterimport.h"
 #include "rs01page.h"
+#include <QLabel>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
 #include "helpstrip.h"
 #include "helptips.h"
 #include "translation.h"
@@ -257,8 +260,55 @@ OximeterImport::OximeterImport(QWidget *parent) :
     rs01Button->setMinimumHeight(ui->directImportButton->minimumHeight());
     rs01Button->setAutoDefault(false);
     rs01Button->setToolTip(tr("Switch the RS01 on, then plug it in: OSCAR copies its recordings and never writes to it."));
-    ui->verticalLayout_6->insertWidget(ui->verticalLayout_6->indexOf(ui->directImportButton), rs01Button);
+    ui->verticalLayout_6->insertWidget(ui->verticalLayout_6->indexOf(ui->fileImportButton), rs01Button);
     connect(rs01Button, &QPushButton::clicked, this, &OximeterImport::onRS01ImportClicked);
+
+    // The start page by device (owner 2026-10-21): the cable's model and settings applied to every
+    // button above them; they now have a page of their own, with the cable's two imports
+    {
+        m_cablePage = new QWidget(this);
+        m_cablePage->setObjectName(QStringLiteral("cablePage"));
+        auto *cable = new QVBoxLayout(m_cablePage);
+        auto *title = new QLabel(QStringLiteral("<h3>%1</h3>").arg(tr("Contec CMS50 over a USB cable").toHtmlEscaped()), m_cablePage);
+        cable->addWidget(title);
+        ui->verticalLayout_6->removeItem(ui->horizontalLayout_4);   // "Select your oximeter" and the model list
+        cable->addLayout(ui->horizontalLayout_4);
+        for (QWidget *w : std::initializer_list<QWidget *> { ui->oldCMS50specific, ui->newCMS50settingsPanel,
+                                                              ui->directImportButton, ui->liveImportButton }) {
+            ui->verticalLayout_6->removeWidget(w);
+            cable->addWidget(w);
+        }
+        cable->addStretch(1);
+        auto *back = new QPushButton(tr("Back"), m_cablePage);
+        back->setObjectName(QStringLiteral("cableBackButton"));
+        auto *row = new QHBoxLayout;
+        row->addWidget(back);
+        row->addStretch(1);
+        cable->addLayout(row);
+        ui->stackedWidget->addWidget(m_cablePage);
+        connect(back, &QPushButton::clicked, this, [this]() { ui->stackedWidget->setCurrentWidget(ui->importSelectionPage); });
+
+        auto *cableButton = new QPushButton(tr("Contec CMS50 over a USB cable (records, or connected all night)"), ui->importSelectionPage);
+        cableButton->setObjectName(QStringLiteral("cableImportButton"));
+        cableButton->setIcon(ui->directImportButton->icon());
+        cableButton->setIconSize(ui->directImportButton->iconSize());
+        cableButton->setSizePolicy(ui->directImportButton->sizePolicy());
+        cableButton->setMinimumHeight(ui->directImportButton->minimumHeight());
+        cableButton->setAutoDefault(false);
+        ui->verticalLayout_6->insertWidget(ui->verticalLayout_6->indexOf(ui->fileImportButton), cableButton);
+        connect(cableButton, &QPushButton::clicked, this, [this]() {
+            ui->stackedWidget->setCurrentWidget(m_cablePage);
+            ui->nextButton->setVisible(false);
+            ui->retryButton->setVisible(false);
+        });
+
+        ui->label_3->hide();   // "first select your oximeter type": the devices are the choice now
+        ui->label->setText(tr("Choose your oximeter:"));
+        auto *fromFile = new QLabel(tr("Or from a file:"), ui->importSelectionPage);
+        fromFile->setAlignment(ui->label->alignment());
+        fromFile->setFont(ui->label->font());
+        ui->verticalLayout_6->insertWidget(ui->verticalLayout_6->indexOf(ui->fileImportButton), fromFile);
+    }
 
     // hover explanations: the strip at the bottom shows what the control under the mouse does
     HelpStrip::placeAbove(ui->verticalLayout_5, ui->frame_2, new HelpStrip({ QStringLiteral("ui.oximport."), QStringLiteral("ui.ble."), QStringLiteral("ui.o2ring.") }, this));

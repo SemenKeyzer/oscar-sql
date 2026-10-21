@@ -131,6 +131,7 @@ private:
     BluetoothOximeterPage *m_btPage = nullptr;
     O2RingPage *m_o2ringPage = nullptr;
     class RS01Page *m_rs01Page = nullptr;
+    QWidget *m_cablePage = nullptr;   //!< the CMS50 cable's model, settings and its two imports
     QPushButton *m_btRetryButton = nullptr;
     QPushButton *m_btDoneButton = nullptr;
 };

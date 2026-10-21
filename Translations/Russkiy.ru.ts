@@ -2035,22 +2035,22 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
         <translation>Время терапии</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="766"/>
+        <location filename="../oscar/daily.cpp" line="768"/>
         <source>Align</source>
         <translation>Выровнять</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="769"/>
+        <location filename="../oscar/daily.cpp" line="771"/>
         <source>Line up an oximeter or other device with the CPAP data for this night</source>
         <translation>Совместить оксиметр или другое устройство с данными CPAP за эту ночь</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="788"/>
+        <location filename="../oscar/daily.cpp" line="790"/>
         <source>Scoring</source>
         <translation>Разметка</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="791"/>
+        <location filename="../oscar/daily.cpp" line="793"/>
         <source>Correct the device&apos;s apneas and hypopneas by hand</source>
         <translation>Исправить апноэ и гипопноэ аппарата вручную</translation>
     </message>
@@ -2059,35 +2059,35 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
         <translation type="vanished">Режим разметки: протяните мышью по графику потока, чтобы отметить участок, или щёлкните событие правой кнопкой · Esc — выход</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="996"/>
+        <location filename="../oscar/daily.cpp" line="998"/>
         <source>Clinical Mode</source>
         <translation>Стандартный режим</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="996"/>
+        <location filename="../oscar/daily.cpp" line="998"/>
         <source> Disabling Sessions requires Permissive Mode be set in OSCAR Preferences in the Clinical tab.</source>
         <translation> Для отключения сеансов необходимо установить расширенный режим в настройках OSCAR на вкладке «Клинический».</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="914"/>
-        <location filename="../oscar/daily.cpp" line="1027"/>
-        <location filename="../oscar/daily.cpp" line="1417"/>
-        <location filename="../oscar/daily.cpp" line="4727"/>
-        <location filename="../oscar/daily.cpp" line="4851"/>
+        <location filename="../oscar/daily.cpp" line="916"/>
+        <location filename="../oscar/daily.cpp" line="1029"/>
+        <location filename="../oscar/daily.cpp" line="1419"/>
+        <location filename="../oscar/daily.cpp" line="4729"/>
+        <location filename="../oscar/daily.cpp" line="4853"/>
         <source>Manual scoring</source>
         <translation>Ручная разметка</translation>
     </message>
     <message>
         <location filename="../oscar/daily.cpp" line="277"/>
-        <location filename="../oscar/daily.cpp" line="777"/>
-        <location filename="../oscar/daily.cpp" line="1409"/>
-        <location filename="../oscar/daily.cpp" line="2577"/>
+        <location filename="../oscar/daily.cpp" line="779"/>
+        <location filename="../oscar/daily.cpp" line="1411"/>
+        <location filename="../oscar/daily.cpp" line="2579"/>
         <source>OSCAR analysis</source>
         <translation>Анализ OSCAR</translation>
     </message>
     <message>
         <location filename="../oscar/daily.cpp" line="283"/>
-        <location filename="../oscar/daily.cpp" line="2576"/>
+        <location filename="../oscar/daily.cpp" line="2578"/>
         <source>Manual analysis</source>
         <translation>Ручной анализ</translation>
     </message>
@@ -2101,138 +2101,138 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
         <translation type="vanished">Режим разметки: протяните мышью по графику потока, чтобы отметить участок, потяните за край, чтобы его изменить, или щёлкните событие правой кнопкой · Esc — выход</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="817"/>
+        <location filename="../oscar/daily.cpp" line="819"/>
         <source>Previous event of this type</source>
         <translation>Предыдущее событие этого типа</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="822"/>
+        <location filename="../oscar/daily.cpp" line="824"/>
         <source>Next event of this type</source>
         <translation>Следующее событие этого типа</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="827"/>
+        <location filename="../oscar/daily.cpp" line="829"/>
         <source>%1 min</source>
         <translation>%1 мин</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="836"/>
+        <location filename="../oscar/daily.cpp" line="838"/>
         <source>Stop repeating</source>
         <translation>Не повторять</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="852"/>
+        <location filename="../oscar/daily.cpp" line="854"/>
         <source>Event window, min:</source>
         <translation>Окно события, мин:</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="860"/>
+        <location filename="../oscar/daily.cpp" line="862"/>
         <source>One minute less</source>
         <translation>На минуту меньше</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="864"/>
+        <location filename="../oscar/daily.cpp" line="866"/>
         <source>One minute more</source>
         <translation>На минуту больше</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="872"/>
+        <location filename="../oscar/daily.cpp" line="874"/>
         <source>Type the minutes</source>
         <translation>Введите минуты</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="914"/>
-        <location filename="../oscar/daily.cpp" line="1027"/>
+        <location filename="../oscar/daily.cpp" line="916"/>
+        <location filename="../oscar/daily.cpp" line="1029"/>
         <source>Undo all manual scoring of this night?</source>
         <translation>Отменить всю ручную разметку этой ночи?</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1117"/>
+        <location filename="../oscar/daily.cpp" line="1119"/>
         <source>No %1 events are recorded this day</source>
         <translation>В этот день не было зарегистрировано событий &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1287"/>
+        <location filename="../oscar/daily.cpp" line="1289"/>
         <source>%1 event</source>
         <translation>%1 cобытие</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1288"/>
+        <location filename="../oscar/daily.cpp" line="1290"/>
         <source>%1 events</source>
         <translation>%1 cобытий</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1357"/>
+        <location filename="../oscar/daily.cpp" line="1359"/>
         <source>Session Start Times</source>
         <translation>Начало сеанса</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1358"/>
+        <location filename="../oscar/daily.cpp" line="1360"/>
         <source>Session End Times</source>
         <translation>Конец сеанса</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1389"/>
+        <location filename="../oscar/daily.cpp" line="1391"/>
         <source>All</source>
         <translation>Все</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1694"/>
+        <location filename="../oscar/daily.cpp" line="1696"/>
         <source>Session Information</source>
         <translation>Информация о сеансе</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1719"/>
+        <location filename="../oscar/daily.cpp" line="1721"/>
         <source>Oximetry Sessions</source>
         <translation>Сеансы оксиметрии</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1739"/>
+        <location filename="../oscar/daily.cpp" line="1741"/>
         <source>Duration</source>
         <translation>Длительность</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1809"/>
+        <location filename="../oscar/daily.cpp" line="1811"/>
         <source>DEVICE SETTINGS ERROR</source>
         <translation>ОШИБКА НАСТРОЕК АППАРАТА</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1927"/>
+        <location filename="../oscar/daily.cpp" line="1929"/>
         <source>Not known for this night: the device reports it only for nights since its settings were last changed.</source>
         <translation>Для этой ночи неизвестно: аппарат сообщает это значение только для ночей после последнего изменения его настроек.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1969"/>
+        <location filename="../oscar/daily.cpp" line="1971"/>
         <source>SpO2 spot checks</source>
         <translation>Точечные измерения SpO2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1970"/>
+        <location filename="../oscar/daily.cpp" line="1972"/>
         <source>Pulse readings</source>
         <translation>Показания пульса</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1971"/>
+        <location filename="../oscar/daily.cpp" line="1973"/>
         <source>Spot-check data; desaturation detection is not applicable</source>
         <translation>Данные точечных измерений; обнаружение десатурации неприменимо</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1976"/>
+        <location filename="../oscar/daily.cpp" line="1978"/>
         <source>SpO2 drops (classic, %1% for %2 s)</source>
         <translation>Падения SpO2 (классич., на %1% от %2 с)</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2013"/>
+        <location filename="../oscar/daily.cpp" line="2015"/>
         <source>(Mode and Pressure settings missing; yesterday&apos;s shown.)</source>
         <translation>(Нет настроек режима и давления; показаны вчерашние)</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2209"/>
+        <location filename="../oscar/daily.cpp" line="2211"/>
         <source>General</source>
         <translation>Общие</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="5037"/>
+        <location filename="../oscar/daily.cpp" line="5039"/>
         <source>Flow limitation (manual scoring): %1% of the night, %2 min</source>
         <translation>Ограничение потока (ручная разметка): %1 % ночи, %2 мин</translation>
     </message>
@@ -2241,7 +2241,7 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
         <translation type="vanished">по аппарату %1 · исправлено вручную</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2360"/>
+        <location filename="../oscar/daily.cpp" line="2362"/>
         <source>Obstructive and Central shares of the %1</source>
         <translation>Доли обструктивных и центральных событий в %1</translation>
     </message>
@@ -2250,52 +2250,52 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
         <translation type="vanished">анализ OSCAR: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2461"/>
+        <location filename="../oscar/daily.cpp" line="2463"/>
         <source>Breathing Disturbances (Apple)</source>
         <translation>Нарушения дыхания (Apple)</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2473"/>
+        <location filename="../oscar/daily.cpp" line="2475"/>
         <source>Wrist Temperature</source>
         <translation>Температура запястья</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2554"/>
+        <location filename="../oscar/daily.cpp" line="2556"/>
         <source>Time within the watch&apos;s sleep session spent without the CPAP mask on, and its share of that session</source>
         <translation>Время сеанса сна по данным часов, проведённое без маски CPAP, и его доля в этом сеансе</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2559"/>
+        <location filename="../oscar/daily.cpp" line="2561"/>
         <source>Unmasked Sleep</source>
         <translation>Сон без маски</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2807"/>
+        <location filename="../oscar/daily.cpp" line="2809"/>
         <source>Channel %1</source>
         <translation>Канал %1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2978"/>
+        <location filename="../oscar/daily.cpp" line="2980"/>
         <source>no data :(</source>
         <translation>Нет данных</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2979"/>
+        <location filename="../oscar/daily.cpp" line="2981"/>
         <source>Sorry, this device only provides compliance data.</source>
         <translation>К сожалению, этот аппарат предоставляет только общие данные.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3002"/>
+        <location filename="../oscar/daily.cpp" line="3004"/>
         <source>No CPAP data is available for this day</source>
         <translation>Данные CPAP за этот день отсутствуют</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3771"/>
+        <location filename="../oscar/daily.cpp" line="3773"/>
         <source>This bookmark is in a currently disabled area..</source>
         <translation>Закладка в недоступной сейчас области.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4853"/>
+        <location filename="../oscar/daily.cpp" line="4855"/>
         <source>added %1, removed %2, type changed %3, bounds changed %4, %5 (%6 stretches)</source>
         <translation>добавлено %1, убрано %2, сменён тип %3, границы изменены %4, %5 (участков: %6)</translation>
     </message>
@@ -2304,7 +2304,7 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
         <translation type="vanished">добавлено %1, убрано %2, сменён тип %3, %4 (участков: %5)</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4948"/>
+        <location filename="../oscar/daily.cpp" line="4950"/>
         <source>All events [%1]</source>
         <translation>Все события [%1]</translation>
     </message>
@@ -2317,7 +2317,7 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
         <translation type="vanished">убрано: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2279"/>
+        <location filename="../oscar/daily.cpp" line="2281"/>
         <source>%1 → %2</source>
         <translation>%1 → %2</translation>
     </message>
@@ -2326,18 +2326,18 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
         <translation type="vanished">исключено %1 мин</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="911"/>
-        <location filename="../oscar/daily.cpp" line="4847"/>
+        <location filename="../oscar/daily.cpp" line="913"/>
+        <location filename="../oscar/daily.cpp" line="4849"/>
         <source>Undo this change</source>
         <translation>Отменить эту правку</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4725"/>
+        <location filename="../oscar/daily.cpp" line="4727"/>
         <source>Change all %1 events of type &quot;%2&quot; to &quot;%3&quot;?</source>
         <translation>Сменить тип всех событий «%2» (%1) на «%3»?</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4726"/>
+        <location filename="../oscar/daily.cpp" line="4728"/>
         <source>Remove all %1 events of type &quot;%2&quot;? They will no longer count.</source>
         <translation>Убрать все события «%2» (%1)? Они перестанут учитываться.</translation>
     </message>
@@ -2346,7 +2346,7 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
         <translation type="vanished">добавлено %1, убрано %2, сменён тип %3, исключено %4 мин (участков: %5)</translation>
     </message>
     <message numerus="yes">
-        <location filename="../oscar/daily.cpp" line="4858"/>
+        <location filename="../oscar/daily.cpp" line="4860"/>
         <source>%n change(s) refer to an event that is no longer there</source>
         <translation>
             <numerusform>%n правка ссылается на событие, которого больше нет</numerusform>
@@ -2355,13 +2355,13 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
         </translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="911"/>
-        <location filename="../oscar/daily.cpp" line="4861"/>
+        <location filename="../oscar/daily.cpp" line="913"/>
+        <location filename="../oscar/daily.cpp" line="4863"/>
         <source>Undo all scoring of this night</source>
         <translation>Отменить всю разметку ночи</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1716"/>
+        <location filename="../oscar/daily.cpp" line="1718"/>
         <source>CPAP Sessions</source>
         <translation>Сеансы CPAP</translation>
     </message>
@@ -2371,147 +2371,147 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
         <translation>Подробности</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="805"/>
+        <location filename="../oscar/daily.cpp" line="807"/>
         <source>Scoring mode</source>
         <translation>Режим разметки</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="807"/>
+        <location filename="../oscar/daily.cpp" line="809"/>
         <source>drag across the flow graph to mark a stretch, drag an edge to change it, or right-click an event · Esc to leave</source>
         <translation>протяните мышью по графику потока, чтобы отметить участок, потяните за край, чтобы его изменить, или щёлкните событие правой кнопкой · Esc — выход</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1722"/>
+        <location filename="../oscar/daily.cpp" line="1724"/>
         <source>Sleep Stage Sessions</source>
         <translation>Сеансы стадий сна</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1725"/>
+        <location filename="../oscar/daily.cpp" line="1727"/>
         <source>Position Sensor Sessions</source>
         <translation>Сеансы датчика положения</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1730"/>
+        <location filename="../oscar/daily.cpp" line="1732"/>
         <source>Unknown Session</source>
         <translation>Неизвестный сеанс</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2004"/>
+        <location filename="../oscar/daily.cpp" line="2006"/>
         <source>Model %1 - %2</source>
         <translation>Модель %1 - %2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2009"/>
+        <location filename="../oscar/daily.cpp" line="2011"/>
         <source>PAP Mode: %1</source>
         <translation>Режим PAP: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2138"/>
+        <location filename="../oscar/daily.cpp" line="2140"/>
         <source>This day just contains summary data, only limited information is available.</source>
         <translation>Этот день содержит только общие данные, информация ограничена.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2164"/>
+        <location filename="../oscar/daily.cpp" line="2166"/>
         <source>Total ramp time</source>
         <translation>Время разгона</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2168"/>
+        <location filename="../oscar/daily.cpp" line="2170"/>
         <source>Time outside of ramp</source>
         <translation>Время вне разгона</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2218"/>
+        <location filename="../oscar/daily.cpp" line="2220"/>
         <source>Start</source>
         <translation>Начало</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2218"/>
+        <location filename="../oscar/daily.cpp" line="2220"/>
         <source>End</source>
         <translation>Конец</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2248"/>
+        <location filename="../oscar/daily.cpp" line="2250"/>
         <source>OSCAR analysis — %1</source>
         <translation>анализ OSCAR — %1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2251"/>
+        <location filename="../oscar/daily.cpp" line="2253"/>
         <source>manual scoring — %1</source>
         <translation>ручная разметка — %1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2260"/>
+        <location filename="../oscar/daily.cpp" line="2262"/>
         <source>No CPAP data this night.</source>
         <translation>В эту ночь нет данных CPAP.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2262"/>
+        <location filename="../oscar/daily.cpp" line="2264"/>
         <source>No manual scoring this night: switch Scoring on below to correct the events.</source>
         <translation>Ручной разметки этой ночи нет — включите «Разметку» внизу, чтобы исправить события.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2265"/>
+        <location filename="../oscar/daily.cpp" line="2267"/>
         <source>%1 after manual scoring: %2 (device %3)</source>
         <translation>%1 после ручной разметки: %2 (по аппарату %3)</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2283"/>
+        <location filename="../oscar/daily.cpp" line="2285"/>
         <source>Events per hour: device → after manual scoring</source>
         <translation>Событий в час: по аппарату → после ручной разметки</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2661"/>
+        <location filename="../oscar/daily.cpp" line="2663"/>
         <source>Unable to display Pie Chart on this system</source>
         <translation>В этой системе невозможно отобразить круговую диаграмму</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3018"/>
+        <location filename="../oscar/daily.cpp" line="3020"/>
         <source>&quot;Nothing&apos;s here!&quot;</source>
         <translation>&quot;Здесь ничего нет!&quot;</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3021"/>
+        <location filename="../oscar/daily.cpp" line="3023"/>
         <source>No data is available for this day.</source>
         <translation>Данных за этот день нет.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1953"/>
+        <location filename="../oscar/daily.cpp" line="1955"/>
         <source>Oximeter Information</source>
         <translation>Информация об оксиметре</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1759"/>
+        <location filename="../oscar/daily.cpp" line="1761"/>
         <source>Click to %1 this session.</source>
         <translation>Нажмите, чтобы %1 этот сеанс.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1759"/>
+        <location filename="../oscar/daily.cpp" line="1761"/>
         <source>disable</source>
         <translation>отключить</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1759"/>
+        <location filename="../oscar/daily.cpp" line="1761"/>
         <source>enable</source>
         <translation>включить</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1775"/>
+        <location filename="../oscar/daily.cpp" line="1777"/>
         <source>%1 Session #%2</source>
         <translation>%1: сеанс #%2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1776"/>
+        <location filename="../oscar/daily.cpp" line="1778"/>
         <source>%1h %2m %3s</source>
         <translation>%1ч %2м %3с</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1812"/>
+        <location filename="../oscar/daily.cpp" line="1814"/>
         <source>Device Settings</source>
         <translation>Настройки аппарата</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1818"/>
+        <location filename="../oscar/daily.cpp" line="1820"/>
         <source>&lt;b&gt;Please Note:&lt;/b&gt; All settings shown below are based on assumptions that nothing has changed since previous days.</source>
         <translation>&lt;b&gt;Обратите внимание:&lt;/b&gt; Все настройки ниже основаны на предположении, что в предыдущие дни не произошло изменений.</translation>
     </message>
@@ -2520,72 +2520,72 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
         <translation type="vanished">Десатурации SpO2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1979"/>
+        <location filename="../oscar/daily.cpp" line="1981"/>
         <source>Pulse Change events</source>
         <translation>Изменения пульса</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="1980"/>
+        <location filename="../oscar/daily.cpp" line="1982"/>
         <source>SpO2 Baseline Used</source>
         <translation>Базовое значение SpO2</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2049"/>
+        <location filename="../oscar/daily.cpp" line="2051"/>
         <source>Statistics</source>
         <translation>Статистика</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2148"/>
+        <location filename="../oscar/daily.cpp" line="2150"/>
         <source>Total time in apnea</source>
         <translation>Общее время апноэ</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2158"/>
+        <location filename="../oscar/daily.cpp" line="2160"/>
         <source>Time over leak redline</source>
         <translation>Время избыточных утечек</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2631"/>
+        <location filename="../oscar/daily.cpp" line="2633"/>
         <source>Event Breakdown</source>
         <translation>Разбор событий</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2344"/>
+        <location filename="../oscar/daily.cpp" line="2346"/>
         <source>This CPAP device does NOT record detailed data</source>
         <translation>Этот аппарат не записывает подробные данные</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2969"/>
+        <location filename="../oscar/daily.cpp" line="2971"/>
         <source>Sessions all off!</source>
         <translation>Все сеансы отключены!</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2971"/>
+        <location filename="../oscar/daily.cpp" line="2973"/>
         <source>Sessions exist for this day but are switched off.</source>
         <translation>В этот день есть сеансы, но они отключены.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2974"/>
+        <location filename="../oscar/daily.cpp" line="2976"/>
         <source>Impossibly short session</source>
         <translation>Недопустимо короткий сеанс</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2975"/>
+        <location filename="../oscar/daily.cpp" line="2977"/>
         <source>Zero hours??</source>
         <translation>Ноль часов??</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="2980"/>
+        <location filename="../oscar/daily.cpp" line="2982"/>
         <source>Complain to your Equipment Provider!</source>
         <translation>Обратитесь к поставщику вашего аппарата!</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3411"/>
+        <location filename="../oscar/daily.cpp" line="3413"/>
         <source>Pick a Colour</source>
         <translation>Выберите цвет</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="3722"/>
+        <location filename="../oscar/daily.cpp" line="3724"/>
         <source>Bookmark at %1</source>
         <translation>Закладка на %1</translation>
     </message>
@@ -2623,57 +2623,57 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
         <translation>События, найденные собственным анализом OSCAR (экспериментально)</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4362"/>
-        <location filename="../oscar/daily.cpp" line="4417"/>
-        <location filename="../oscar/daily.cpp" line="4428"/>
-        <location filename="../oscar/daily.cpp" line="4555"/>
+        <location filename="../oscar/daily.cpp" line="4364"/>
+        <location filename="../oscar/daily.cpp" line="4419"/>
+        <location filename="../oscar/daily.cpp" line="4430"/>
+        <location filename="../oscar/daily.cpp" line="4557"/>
         <source>Align Device Time</source>
         <translation>Выравнивание времени устройства</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4363"/>
+        <location filename="../oscar/daily.cpp" line="4365"/>
         <source>Save or cancel the change in the Time Corrections window first.</source>
         <translation>Сначала сохраните или отмените изменение в окне «Коррекция времени».</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4418"/>
+        <location filename="../oscar/daily.cpp" line="4420"/>
         <source>Save the time shift of %1 for %2?</source>
         <translation>Сохранить сдвиг времени %1 для %2?</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4428"/>
-        <location filename="../oscar/daily.cpp" line="4555"/>
+        <location filename="../oscar/daily.cpp" line="4430"/>
+        <location filename="../oscar/daily.cpp" line="4557"/>
         <source>Couldn&apos;t save the time correction.</source>
         <translation>Не удалось сохранить коррекцию времени.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4444"/>
+        <location filename="../oscar/daily.cpp" line="4446"/>
         <source>No CPAP data this night to align against.</source>
         <translation>За эту ночь нет данных CPAP для выравнивания.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4448"/>
+        <location filename="../oscar/daily.cpp" line="4450"/>
         <source>Other corrections also apply: %1</source>
         <translation>Также действуют другие коррекции: %1</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4451"/>
+        <location filename="../oscar/daily.cpp" line="4453"/>
         <source>Large offset - check the device clock or use a date-range correction.</source>
         <translation>Большой сдвиг — проверьте часы устройства или используйте коррекцию для диапазона дат.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4455"/>
+        <location filename="../oscar/daily.cpp" line="4457"/>
         <source>Drag the framed graphs or use the buttons. Arrow keys: 10 s, Shift+arrow: 1 min.</source>
         <translation>Перетаскивайте графики в рамке или используйте кнопки. Стрелки: 10 с, Shift+стрелка: 1 мин.</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4526"/>
+        <location filename="../oscar/daily.cpp" line="4528"/>
         <source>%1  (Δ %2)</source>
         <translation>%1  (Δ %2)</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4597"/>
-        <location filename="../oscar/daily.cpp" line="4602"/>
+        <location filename="../oscar/daily.cpp" line="4599"/>
+        <location filename="../oscar/daily.cpp" line="4604"/>
         <source>Analysis (second opinion)</source>
         <translation>Анализ (второе мнение)</translation>
     </message>
@@ -9740,70 +9740,95 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
     </message>
     <message>
         <location filename="../oscar/uiglossary.cpp" line="1844"/>
+        <source>Contec CMS50 over a USB cable</source>
+        <translation>Contec CMS50 по кабелю USB</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uiglossary.cpp" line="1846"/>
+        <source>For a Contec CMS50 on its USB cable: the next page has the model, setting the clock and the device name, and the two ways to import — its recorded sessions, or connected to the computer all night.</source>
+        <translation>Для Contec CMS50 на USB-кабеле: на следующей странице — модель, установка часов и имени прибора и два способа импорта: записанные сеансы или подключение к компьютеру на всю ночь.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uiglossary.cpp" line="1849"/>
+        <source>Back</source>
+        <translation>Назад</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uiglossary.cpp" line="1850"/>
+        <source>Oximetry wizard → CMS50 over a cable</source>
+        <translation>Мастер оксиметрии → CMS50 по кабелю</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uiglossary.cpp" line="1851"/>
+        <source>Back to the choice of oximeter.</source>
+        <translation>Вернуться к выбору оксиметра.</translation>
+    </message>
+    <message>
+        <location filename="../oscar/uiglossary.cpp" line="1854"/>
         <source>Contec RS01 sleep screener</source>
         <translation>Скринер сна Contec RS01</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1846"/>
+        <location filename="../oscar/uiglossary.cpp" line="1856"/>
         <source>Imports the RS01&apos;s recordings (nasal flow, SpO2, pulse, pleth) from its USB disk &quot;SLEEP METER&quot; or a folder with a copy. OSCAR copies them first and never writes to the device.</source>
         <translation>Импортирует записи RS01 (носовой поток, SpO2, пульс, плетизмограмма) с его USB-диска «SLEEP METER» или из папки с копией. OSCAR сначала копирует их и никогда ничего не пишет на прибор.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1847"/>
+        <location filename="../oscar/uiglossary.cpp" line="1857"/>
         <source>Switch the RS01 on before plugging the cable in. On a Mac, mount it read-only: the device damages its recordings after the computer writes to it.</source>
         <translation>Включите RS01 до подключения кабеля. На Mac подключайте его только для чтения: прибор портит свои записи, если компьютер что-то на него запишет.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1849"/>
+        <location filename="../oscar/uiglossary.cpp" line="1859"/>
         <source>Rings found</source>
         <translation>Найденные кольца</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1850"/>
-        <location filename="../oscar/uiglossary.cpp" line="1855"/>
         <location filename="../oscar/uiglossary.cpp" line="1860"/>
         <location filename="../oscar/uiglossary.cpp" line="1865"/>
         <location filename="../oscar/uiglossary.cpp" line="1870"/>
+        <location filename="../oscar/uiglossary.cpp" line="1875"/>
+        <location filename="../oscar/uiglossary.cpp" line="1880"/>
         <source>Oximetry wizard → O2Ring</source>
         <translation>Мастер оксиметрии → O2Ring</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1851"/>
+        <location filename="../oscar/uiglossary.cpp" line="1861"/>
         <source>The O2Rings OSCAR found nearby; choose yours.</source>
         <translation>Кольца O2Ring, которые OSCAR нашёл рядом; выберите своё.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1852"/>
+        <location filename="../oscar/uiglossary.cpp" line="1862"/>
         <source>If the list stays empty, close the ViHealth app and wear the ring so that it wakes up.</source>
         <translation>Если список пуст, закройте приложение ViHealth и наденьте кольцо, чтобы оно проснулось.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1856"/>
+        <location filename="../oscar/uiglossary.cpp" line="1866"/>
         <source>Connects to the chosen ring and reads its list of records.</source>
         <translation>Подключается к выбранному кольцу и читает список его записей.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1859"/>
+        <location filename="../oscar/uiglossary.cpp" line="1869"/>
         <source>Set the ring&apos;s clock</source>
         <translation>Установить часы кольца</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1861"/>
+        <location filename="../oscar/uiglossary.cpp" line="1871"/>
         <source>Before the download, sets the ring&apos;s clock to the computer&apos;s time. OSCAR remembers this choice.</source>
         <translation>Перед скачиванием ставит на кольце время компьютера. OSCAR запоминает этот выбор.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1862"/>
+        <location filename="../oscar/uiglossary.cpp" line="1872"/>
         <source>Keep it on so the ring&apos;s nights line up with the CPAP nights.</source>
         <translation>Оставьте включённым, чтобы ночи кольца совпадали с ночами CPAP.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1864"/>
+        <location filename="../oscar/uiglossary.cpp" line="1874"/>
         <source>Records on the ring</source>
         <translation>Записи на кольце</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1866"/>
+        <location filename="../oscar/uiglossary.cpp" line="1876"/>
         <source>Every record the ring keeps, by start time. New ones are downloaded as soon as the ring is connected; the ones already in OSCAR are left unticked, but you can tick them and press Download to read them again.</source>
         <translation>Все записи кольца по времени начала. Новые скачиваются сразу после подключения; уже импортированные в OSCAR остаются без отметки, но их можно отметить и нажать «Скачать», чтобы прочитать снова.</translation>
     </message>
@@ -9812,17 +9837,17 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <translation type="vanished">Все записи кольца по времени начала. Новые отмечены; уже импортированные в OSCAR — нет, но их можно отметить и скачать снова.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1869"/>
+        <location filename="../oscar/uiglossary.cpp" line="1879"/>
         <source>Download</source>
         <translation>Скачать</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1871"/>
+        <location filename="../oscar/uiglossary.cpp" line="1881"/>
         <source>Downloads the ticked records and imports them into OSCAR. The records stay on the ring.</source>
         <translation>Скачивает отмеченные записи и импортирует их в OSCAR. На кольце записи остаются.</translation>
     </message>
     <message>
-        <location filename="../oscar/uiglossary.cpp" line="1872"/>
+        <location filename="../oscar/uiglossary.cpp" line="1882"/>
         <source>Keep the ring close to the computer until the import finishes.</source>
         <translation>Держите кольцо рядом с компьютером до конца импорта.</translation>
     </message>
@@ -11101,6 +11126,7 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
         <location filename="../oscar/uiglossary.cpp" line="1740"/>
         <location filename="../oscar/uiglossary.cpp" line="1840"/>
         <location filename="../oscar/uiglossary.cpp" line="1845"/>
+        <location filename="../oscar/uiglossary.cpp" line="1855"/>
         <source>Oximetry wizard → start page</source>
         <translation>Мастер оксиметрии → первая страница</translation>
     </message>
@@ -11420,7 +11446,7 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
     </message>
     <message>
         <location filename="../oscar/uiglossary.cpp" line="1824"/>
-        <location filename="../oscar/uiglossary.cpp" line="1854"/>
+        <location filename="../oscar/uiglossary.cpp" line="1864"/>
         <source>Connect</source>
         <translation>Подключиться</translation>
     </message>
@@ -15173,7 +15199,7 @@ Index</source>
     <name>OximeterImport</name>
     <message>
         <location filename="../oscar/oximeterimport.ui" line="61"/>
-        <location filename="../oscar/oximeterimport.cpp" line="52"/>
+        <location filename="../oscar/oximeterimport.cpp" line="55"/>
         <source>Oximeter Import Wizard</source>
         <translation>Мастер импорта оксиметрии</translation>
     </message>
@@ -15345,7 +15371,7 @@ Index</source>
     </message>
     <message>
         <location filename="../oscar/oximeterimport.ui" line="1812"/>
-        <location filename="../oscar/oximeterimport.cpp" line="202"/>
+        <location filename="../oscar/oximeterimport.cpp" line="205"/>
         <source>Retry</source>
         <translation>Повторить</translation>
     </message>
@@ -15371,7 +15397,7 @@ Index</source>
     </message>
     <message>
         <location filename="../oscar/oximeterimport.ui" line="1907"/>
-        <location filename="../oscar/oximeterimport.cpp" line="292"/>
+        <location filename="../oscar/oximeterimport.cpp" line="343"/>
         <source>Start</source>
         <translation>Начать</translation>
     </message>
@@ -15425,92 +15451,92 @@ Index</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;OSCAR нуждается в начальном времени для сохранения этого сеанса оксиметрии.&lt;/p&gt;&lt;p&gt;Выберите один из вариантов:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="337"/>
+        <location filename="../oscar/oximeterimport.cpp" line="388"/>
         <source>Scanning for compatible oximeters</source>
         <translation>Поиск совместимых оксиметров</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="369"/>
+        <location filename="../oscar/oximeterimport.cpp" line="420"/>
         <source>Could not detect any connected oximeter devices.</source>
         <translation>Не удалось обнаружить подключенные оксиметрические устройства.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="377"/>
+        <location filename="../oscar/oximeterimport.cpp" line="428"/>
         <source>Connecting to %1 Oximeter</source>
         <translation>Подключение к оксиметру %1</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="405"/>
+        <location filename="../oscar/oximeterimport.cpp" line="456"/>
         <source>Renaming this oximeter from &apos;%1&apos; to &apos;%2&apos;</source>
         <translation>Переименование оксиметра из &apos;%1&apos; в &apos; %2&apos;</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="408"/>
+        <location filename="../oscar/oximeterimport.cpp" line="459"/>
         <source>Oximeter name is different.. If you only have one and are sharing it between profiles, set the name to the same on both profiles.</source>
         <translation>Имя оксиметра отличается. Если у вас только один оксиметр и вы используете его в разных профилях, установите одно и то же имя во всех профилях.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="451"/>
+        <location filename="../oscar/oximeterimport.cpp" line="502"/>
         <source>&quot;%1&quot;, session %2</source>
         <translation>&quot;%1&quot;, сеанс %2</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="476"/>
+        <location filename="../oscar/oximeterimport.cpp" line="527"/>
         <source>Nothing to import</source>
         <translation>Нечего импортировать</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="477"/>
+        <location filename="../oscar/oximeterimport.cpp" line="528"/>
         <source>Your oximeter did not have any valid sessions.</source>
         <translation>Оксиметр не содержит корректных сессий.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="478"/>
+        <location filename="../oscar/oximeterimport.cpp" line="529"/>
         <source>Close</source>
         <translation>Закрыть</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="481"/>
+        <location filename="../oscar/oximeterimport.cpp" line="532"/>
         <source>Waiting for %1 to start</source>
         <translation>Ожидание запуска %1</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="482"/>
+        <location filename="../oscar/oximeterimport.cpp" line="533"/>
         <source>Waiting for the device to start the upload process...</source>
         <translation>Ожидание, пока устройство начнёт отправку данных...</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="484"/>
+        <location filename="../oscar/oximeterimport.cpp" line="535"/>
         <source>Select upload option on %1</source>
         <translation>Выберите отправку (Upload) на %1</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="485"/>
+        <location filename="../oscar/oximeterimport.cpp" line="536"/>
         <source>You need to tell your oximeter to begin sending data to the computer.</source>
         <translation>Включите передачу данных на компьютер в оксиметре.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="486"/>
+        <location filename="../oscar/oximeterimport.cpp" line="537"/>
         <source>Please connect your oximeter, enter it&apos;s menu and select upload to commence data transfer...</source>
         <translation>Подключите оксиметр, откройте его меню и выберите отправку (Upload), чтобы начать передачу данных...</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="516"/>
+        <location filename="../oscar/oximeterimport.cpp" line="567"/>
         <source>%1 device is uploading data...</source>
         <translation>Устройство %1 отправляет данные...</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="517"/>
+        <location filename="../oscar/oximeterimport.cpp" line="568"/>
         <source>Please wait until oximeter upload process completes. Do not unplug your oximeter.</source>
         <translation>Дождитесь, пока оксиметр закончит отправку данных. Не отключайте его.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="536"/>
+        <location filename="../oscar/oximeterimport.cpp" line="587"/>
         <source>Oximeter import completed..</source>
         <translation>Импорт оксиметра завершен..</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="561"/>
+        <location filename="../oscar/oximeterimport.cpp" line="612"/>
         <source>Select a valid oximetry data file</source>
         <translation>Выберите корректный файл данных оксиметрии</translation>
     </message>
@@ -15519,187 +15545,212 @@ Index</source>
         <translation type="vanished">Файлы оксиметрии (*.spo *.spor *.spo2 *.SpO2 *.dat)</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="583"/>
+        <location filename="../oscar/oximeterimport.cpp" line="634"/>
         <source>No Oximetry module could parse the given file:</source>
         <translation>Нет подходящего модуля оксиметрии для распознавания файла:</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="631"/>
+        <location filename="../oscar/oximeterimport.cpp" line="682"/>
         <source>Live Oximetry Mode</source>
         <translation>Оксиметрия в реальном времени</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="683"/>
+        <location filename="../oscar/oximeterimport.cpp" line="734"/>
         <source>Live Oximetry Stopped</source>
         <translation>Оксиметрия в реальном времени остановлена</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="684"/>
+        <location filename="../oscar/oximeterimport.cpp" line="735"/>
         <source>Live Oximetry import has been stopped</source>
         <translation>Импорт оксиметрии в реальном времени был остановлен</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1106"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1157"/>
         <source>Oximeter Session %1</source>
         <translation>Сеанс оксиметра %1</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1151"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1202"/>
         <source>OSCAR gives you the ability to track Oximetry data alongside CPAP session data, which can give valuable insight into the effectiveness of CPAP treatment. It will also work standalone with your Pulse Oximeter, allowing you to store, track and review your recorded data.</source>
         <translation>OSCAR позволяет отслеживать данные оксиметрии вместе с данными сеансов CPAP, что может дать полезную информацию об эффективности CPAP терапии. Можно также работать только с самим пульсоксиметром: сохранять, отслеживать и просматривать записанные данные.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1162"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1213"/>
         <source>If you are trying to sync oximetry and CPAP data, please make sure you imported your CPAP sessions first before proceeding!</source>
         <translation>Если вы собираетесь синхронизировать данные оксиметрии и CPAP, убедитесь, что вы импортировали свои сеансы CPAP, прежде чем продолжить!</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1165"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1216"/>
         <source>For OSCAR to be able to locate and read directly from your Oximeter device, you need to ensure the correct device drivers (eg. USB to Serial UART) have been installed on your computer. For more information about this, %1click here%2.</source>
         <translation>Чтобы OSCAR смог найти и прочесть данные с вашего оксиметра, на компьютере должны быть установлены нужные драйверы устройств (например, USB to Serial UART). Для получения дополнительной информации об этом %1нажмите здесь%2.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="613"/>
+        <location filename="../oscar/oximeterimport.cpp" line="664"/>
         <source>Oximeter not detected</source>
         <translation>Оксиметр не обнаружен</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="204"/>
+        <location filename="../oscar/oximeterimport.cpp" line="207"/>
         <source>Done</source>
         <translation>Готово</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="221"/>
+        <location filename="../oscar/oximeterimport.cpp" line="224"/>
         <source>Import over Bluetooth from a Contec oximeter (CMS50FW, CMS50D-BT, ...)</source>
         <translation>Импортировать по Bluetooth (Contec CMS50FW, CMS50D-BT, ...)</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="231"/>
+        <location filename="../oscar/oximeterimport.cpp" line="234"/>
         <source>Turn on Bluetooth in the oximeter&apos;s menu and close the Contec phone app first.</source>
         <translation>Сначала включите Bluetooth в меню оксиметра и закройте приложение Contec на телефоне.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="234"/>
+        <location filename="../oscar/oximeterimport.cpp" line="237"/>
         <source>O2Ring (Bluetooth)</source>
         <translation>O2Ring (Bluetooth)</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="242"/>
+        <location filename="../oscar/oximeterimport.cpp" line="245"/>
         <source>Close the ViHealth app on the phone and wear the ring so that it wakes up.</source>
         <translation>Закройте приложение ViHealth на телефоне и наденьте кольцо, чтобы оно проснулось.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="251"/>
+        <location filename="../oscar/oximeterimport.cpp" line="255"/>
         <source>Contec RS01 sleep screener (USB)</source>
         <translation>Скринер сна Contec RS01 (USB)</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="258"/>
+        <location filename="../oscar/oximeterimport.cpp" line="262"/>
         <source>Switch the RS01 on, then plug it in: OSCAR copies its recordings and never writes to it.</source>
         <translation>Включите RS01, затем подключите кабель: OSCAR копирует записи и ничего не пишет на прибор.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="561"/>
+        <location filename="../oscar/oximeterimport.cpp" line="272"/>
+        <source>Contec CMS50 over a USB cable</source>
+        <translation>Contec CMS50 по кабелю USB</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="282"/>
+        <source>Back</source>
+        <translation>Назад</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="291"/>
+        <source>Contec CMS50 over a USB cable (records, or connected all night)</source>
+        <translation>Contec CMS50 по кабелю USB (записи или подключение на всю ночь)</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="306"/>
+        <source>Choose your oximeter:</source>
+        <translation>Выберите ваш оксиметр:</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="307"/>
+        <source>Or from a file:</source>
+        <translation>Или из файла:</translation>
+    </message>
+    <message>
+        <location filename="../oscar/oximeterimport.cpp" line="612"/>
         <source>Oximetry Files (*.spo *.spor *.spo2 *.SpO2 *.dat *.csv)</source>
         <translation>Файлы оксиметрии (*.spo *.spor *.spo2 *.SpO2 *.dat *.csv)</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="620"/>
+        <location filename="../oscar/oximeterimport.cpp" line="671"/>
         <source>Couldn&apos;t access oximeter</source>
         <translation>Невозможно получить доступ к оксиметру</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="634"/>
+        <location filename="../oscar/oximeterimport.cpp" line="685"/>
         <source>Starting up...</source>
         <translation>Запуск...</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="635"/>
+        <location filename="../oscar/oximeterimport.cpp" line="686"/>
         <source>If you can still read this after a few seconds, cancel and try again</source>
         <translation>Если вы все еще видите это сообщение через несколько секунд, отмените и попробуйте снова</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="682"/>
+        <location filename="../oscar/oximeterimport.cpp" line="733"/>
         <source>Live Import Stopped</source>
         <translation>Импорт в реальном времени остановлен</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="735"/>
+        <location filename="../oscar/oximeterimport.cpp" line="786"/>
         <source>%1 session(s) on %2, starting at %3</source>
         <translation>%1 сеанс(ов) за %2, начиная с %3</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="739"/>
+        <location filename="../oscar/oximeterimport.cpp" line="790"/>
         <source>No CPAP data available on %1</source>
         <translation>Нет данных CPAP доступных на %1</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="874"/>
+        <location filename="../oscar/oximeterimport.cpp" line="925"/>
         <source>Recording...</source>
         <translation>Запись...</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="881"/>
+        <location filename="../oscar/oximeterimport.cpp" line="932"/>
         <source>Finger not detected</source>
         <translation>Палец не обнаружен</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="985"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1036"/>
         <source>I want to use the time my computer recorded for this live oximetry session.</source>
         <translation>Использовать время компьютера для этой оксиметрической сессии в реальном времени.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="988"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1039"/>
         <source>I need to set the time manually, because my oximeter doesn&apos;t have an internal clock.</source>
         <translation>Установить время вручную, так как оксиметр не имеет внутренних часов.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1000"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1051"/>
         <source>Something went wrong getting session data</source>
         <translation>Что-то пошло не так при получении данных сеанса</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1147"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1198"/>
         <source>Welcome to the Oximeter Import Wizard</source>
         <translation>Добро пожаловать в Мастер импорта оксиметрии</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1149"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1200"/>
         <source>Pulse Oximeters are medical devices used to measure blood oxygen saturation. During extended Apnea events and abnormal breathing patterns, blood oxygen saturation levels can drop significantly, and can indicate issues that need medical attention.</source>
         <translation>Пульсоксиметры - это медицинские устройства, используемые для измерения насыщения крови кислородом. Во время апноэ и ненормальных форм дыхания, уровень кислорода в крови может значительно снижаться, и может указывать на проблемы, требующие медицинского вмешательства.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1153"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1204"/>
         <source>OSCAR is currently compatible with Contec CMS50D+, CMS50E, CMS50F and CMS50I serial oximeters.&lt;br/&gt;(Note: Direct importing from bluetooth models is &lt;span style=&quot; font-weight:600;&quot;&gt;probably not&lt;/span&gt; possible yet)</source>
         <translation>В настоящее время OSCAR совместим с оксиметрами Contec CMS50D +, CMS50E, CMS50F и CMS50i.&lt;br/&gt;(Примечание: прямой импорт данных из моделей с Bluetooth &lt;span style=&quot;font-weight:600;&quot;&gt;вероятно&lt;/span&gt; еще невозможен)</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1155"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1206"/>
         <source>You may wish to note, other companies, such as Pulox, simply rebadge Contec CMS50&apos;s under new names, such as the Pulox PO-200, PO-300, PO-400. These should also work.</source>
         <translation>Обратите внимание, что другие компании, такие как Pulox, выпускают Contec CMS50 под другими названиями, например Pulox PO-200, PO-300, PO-400. Они тоже будут работать.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1158"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1209"/>
         <source>It also can read from ChoiceMMed MD300W1 oximeter .dat files.</source>
         <translation>Можно также загружать .dat файлы оксиметра ChoiceMMed MD300W1.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1160"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1211"/>
         <source>Please remember:</source>
         <translation>Пожалуйста, помните:</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1164"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1215"/>
         <source>Important Notes:</source>
         <translation>Важное замечание:</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1167"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1218"/>
         <source>Contec CMS50D+ devices do not have an internal clock, and do not record a starting time. If you do not have a CPAP session to link a recording to, you will have to enter the start time manually after the import process is completed.</source>
         <translation>Устройства Contec CMS50D+ не имеют внутренних часов и не записывают время запуска. Если у вас нет сеанса CPAP, чтобы связать запись, нужно будет ввести время начала вручную после завершения процесса импорта.</translation>
     </message>
     <message>
-        <location filename="../oscar/oximeterimport.cpp" line="1169"/>
+        <location filename="../oscar/oximeterimport.cpp" line="1220"/>
         <source>Even for devices with an internal clock, it is still recommended to get into the habit of starting oximeter records at the same time as CPAP sessions, because CPAP internal clocks tend to drift over time, and not all can be reset easily.</source>
         <translation>Даже для устройств с внутренними часами, рекомендуется запускать запись оксиметрии одновременно с сеансом CPAP, так как внутренние часы CPAP теряют точность со временем, и не все можно легко установить.</translation>
     </message>
@@ -24234,24 +24285,24 @@ popout window, delete it, then pop out this graph again.</source>
         <translation>Эта страница на других языках:</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4046"/>
+        <location filename="../oscar/daily.cpp" line="4048"/>
         <location filename="../oscar/overview.cpp" line="632"/>
         <source>%1 Graphs</source>
         <translation>%1 графиков</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4050"/>
+        <location filename="../oscar/daily.cpp" line="4052"/>
         <location filename="../oscar/overview.cpp" line="636"/>
         <source>%1 of %2 Graphs</source>
         <translation>%1 из %2 графиков</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4087"/>
+        <location filename="../oscar/daily.cpp" line="4089"/>
         <source>%1 Event Types</source>
         <translation>%1 типов событий</translation>
     </message>
     <message>
-        <location filename="../oscar/daily.cpp" line="4091"/>
+        <location filename="../oscar/daily.cpp" line="4093"/>
         <source>%1 of %2 Event Types</source>
         <translation>%1 из %2 типов событий</translation>
     </message>
@@ -25422,7 +25473,7 @@ Pulse rises: %1 per hour</source>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/o2ring_import.cpp" line="49"/>
-        <location filename="../oscar/SleepLib/loader_plugins/rs01_import.cpp" line="108"/>
+        <location filename="../oscar/SleepLib/loader_plugins/rs01_import.cpp" line="109"/>
         <source>Could not create the folder %1.</source>
         <translation>Не удалось создать папку %1.</translation>
     </message>
@@ -25454,27 +25505,27 @@ Pulse rises: %1 per hour</source>
         <translation>%1: не удаётся прочитать заголовок (%2).</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/rs01_import.cpp" line="113"/>
+        <location filename="../oscar/SleepLib/loader_plugins/rs01_import.cpp" line="114"/>
         <source>%1: could not copy %2.</source>
         <translation>%1: не удалось скопировать %2.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/rs01_import.cpp" line="117"/>
+        <location filename="../oscar/SleepLib/loader_plugins/rs01_import.cpp" line="118"/>
         <source>%1: %2</source>
         <translation>%1: %2</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/rs01_import.cpp" line="146"/>
+        <location filename="../oscar/SleepLib/loader_plugins/rs01_import.cpp" line="152"/>
         <source>%1: the session could not be added.</source>
         <translation>%1: не удалось добавить сеанс.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/rs01_import.cpp" line="151"/>
+        <location filename="../oscar/SleepLib/loader_plugins/rs01_import.cpp" line="157"/>
         <source>%1: that night already has another oximeter&apos;s recording.</source>
         <translation>%1: в эту ночь уже есть запись другого оксиметра.</translation>
     </message>
     <message>
-        <location filename="../oscar/SleepLib/loader_plugins/rs01_import.cpp" line="155"/>
+        <location filename="../oscar/SleepLib/loader_plugins/rs01_import.cpp" line="161"/>
         <source>%1: the recording could not be saved.</source>
         <translation>%1: не удалось сохранить запись.</translation>
     </message>
@@ -25590,24 +25641,24 @@ Pulse rises: %1 per hour</source>
         <translation>Записи RS01</translation>
     </message>
     <message>
-        <location filename="../oscar/rs01page.cpp" line="137"/>
+        <location filename="../oscar/rs01page.cpp" line="135"/>
         <source>the header can&apos;t be read</source>
         <translation>не удаётся прочитать заголовок</translation>
     </message>
     <message>
-        <location filename="../oscar/rs01page.cpp" line="141"/>
+        <location filename="../oscar/rs01page.cpp" line="139"/>
         <source>%1, %2</source>
         <translation>%1, %2</translation>
     </message>
     <message>
-        <location filename="../oscar/rs01page.cpp" line="145"/>
+        <location filename="../oscar/rs01page.cpp" line="143"/>
         <location filename="../oscar/rs01page.cpp" line="171"/>
-        <location filename="../oscar/tests/rs01importtests.cpp" line="193"/>
+        <location filename="../oscar/tests/rs01importtests.cpp" line="214"/>
         <source>already in OSCAR</source>
         <translation>уже в OSCAR</translation>
     </message>
     <message numerus="yes">
-        <location filename="../oscar/rs01page.cpp" line="148"/>
+        <location filename="../oscar/rs01page.cpp" line="146"/>
         <source>%n recording(s) in %1.</source>
         <translation>
             <numerusform>%n запись в %1.</numerusform>
@@ -25616,7 +25667,7 @@ Pulse rises: %1 per hour</source>
         </translation>
     </message>
     <message>
-        <location filename="../oscar/rs01page.cpp" line="149"/>
+        <location filename="../oscar/rs01page.cpp" line="147"/>
         <source>No RS01 recordings in %1.</source>
         <translation>В %1 нет записей RS01.</translation>
     </message>
@@ -25631,12 +25682,12 @@ Pulse rises: %1 per hour</source>
         <translation>импортировано</translation>
     </message>
     <message>
-        <location filename="../oscar/rs01page.cpp" line="181"/>
+        <location filename="../oscar/rs01page.cpp" line="183"/>
         <source>Imported %1, failed %2: see the list.</source>
         <translation>Импортировано: %1, ошибок: %2 — см. список.</translation>
     </message>
     <message>
-        <location filename="../oscar/rs01page.cpp" line="182"/>
+        <location filename="../oscar/rs01page.cpp" line="184"/>
         <source>Imported %1. Press Done to see them.</source>
         <translation>Импортировано: %1. Нажмите «Готово», чтобы посмотреть.</translation>
     </message>
