@@ -10,6 +10,7 @@
 
 #include <QDateTime>
 #include "SleepLib/loader_plugins/rs01_clock.h"
+#include "SleepLib/loader_plugins/rs01_hid.h"
 
 namespace {
 
@@ -71,4 +72,23 @@ void RS01ClockTests::testReplies()
     QVERIFY(!rs01IsClockReply(padded(bytes({ 0xF3, 0x01, 0x74 }))));   // not "done"
     QVERIFY(!rs01IsClockReply(padded(bytes({ 0xF3, 0x00, 0x72 }))));
     QVERIFY(!rs01IsClockReply(bytes({ 0xF3 })));
+}
+
+// Each way setting the clock can fail has its own words; "not found" says how to connect it.
+void RS01ClockTests::testErrorTexts()
+{
+    QSet<QString> texts;
+    for (RS01Hid::Error e : { RS01Hid::Error::NotAvailable, RS01Hid::Error::NotFound, RS01Hid::Error::CannotOpen,
+                              RS01Hid::Error::NotRS01, RS01Hid::Error::NoReply, RS01Hid::Error::BadReply }) {
+        const QString t = RS01Hid::errorText(e);
+        QVERIFY(!t.isEmpty());
+        texts.insert(t);
+    }
+    QCOMPARE(texts.size(), 6);
+    QVERIFY(RS01Hid::errorText(RS01Hid::Error::NotFound).contains(QStringLiteral("before")));
+#if defined(Q_OS_MACOS) || defined(Q_OS_WIN)
+    QVERIFY(RS01Hid::available());
+#else
+    QVERIFY(!RS01Hid::available());
+#endif
 }

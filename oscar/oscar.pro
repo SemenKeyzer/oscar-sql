@@ -179,6 +179,17 @@ win32 {
 }
 RC_ICONS = ./icons/logo.ico
 
+# hidapi (vendored, unmodified) for the Contec RS01's clock: macOS and Windows only
+macx|win32 {
+    DEFINES += OSCAR_HIDAPI
+    INCLUDEPATH += $$PWD/SleepLib/thirdparty/hidapi
+    macx {
+        SOURCES += SleepLib/thirdparty/hidapi/mac/hid.c
+        LIBS += -framework IOKit -framework CoreFoundation
+    }
+    win32: SOURCES += SleepLib/thirdparty/hidapi/windows/hid.c   # loads hid.dll and cfgmgr32 itself
+}
+
 macx  {
   QMAKE_TARGET_BUNDLE_PREFIX = "org.oscar-team"
 # QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.13
@@ -453,6 +464,7 @@ SOURCES += \
     SleepLib/loader_plugins/rs01_reader.cpp \
     SleepLib/loader_plugins/rs01_import.cpp \
     SleepLib/loader_plugins/rs01_clock.cpp \
+    SleepLib/loader_plugins/rs01_hid.cpp \
     rs01page.cpp \
     SleepLib/loader_plugins/contec_ble_protocol.cpp \
     SleepLib/loader_plugins/contec_ble_downloader.cpp \
@@ -708,6 +720,7 @@ HEADERS  += \
     SleepLib/loader_plugins/rs01_reader.h \
     SleepLib/loader_plugins/rs01_import.h \
     SleepLib/loader_plugins/rs01_clock.h \
+    SleepLib/loader_plugins/rs01_hid.h \
     rs01page.h \
     SleepLib/loader_plugins/contec_ble_protocol.h \
     SleepLib/loader_plugins/contec_ble_downloader.h \

@@ -1,0 +1,1 @@
+hidapi 0.15.0 from https://github.com/libusb/hidapi (tag hidapi-0.15.0), unmodified; used under the GPL 3 (see LICENSE.txt). Only the macOS and Windows backends.

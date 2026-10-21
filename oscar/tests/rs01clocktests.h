@@ -22,6 +22,7 @@ private slots:
     void testClockCommand();
     void testClockYearRange();
     void testReplies();
+    void testErrorTexts();
 };
 DECLARE_TEST(RS01ClockTests)
 
