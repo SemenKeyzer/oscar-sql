@@ -102,6 +102,8 @@ private slots:
     void testUpdateExcludeAcrossSessions();
     void testUpdateAdded();
     void testRetypeAdded();
+    void testOverviewTitleWraps();
+    void testPinnedAnalysisGraphKeepsColour();
     void testEditRowResize();
     void testUpdateExcludeIntoNextSession();
     void testScoringDragEsc();

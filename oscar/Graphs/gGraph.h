@@ -105,6 +105,12 @@ class gGraph : public QObject
 
     //! \brief Return minimum height this graph is allowed to (considering layer preferences too)
     int minHeight();
+    //! The title's font across the title column (\a width): \a base, smaller only while the title
+    //! needs more than \a maxLines lines or a word is wider than the column (7 pt at least).
+    static QFont fitTitleFont(const QFont &base, const QString &title, int width, int maxLines, int minPixels = 10);
+    static constexpr int kTitleLines = 4;   //!< Overview titles across: lines before the font shrinks
+    //! The height \a title takes wrapped in \a width with \a font.
+    static int titleHeight(const QFont &font, const QString &title, int width);
     void setMinHeight(int height) { m_min_height = height; }
 
     int maxHeight() { return m_max_height; }
@@ -313,6 +319,13 @@ class gGraph : public QObject
     void setComputed(bool b) { m_computed = b; }
     //! The sand of computed graphs.
     static QColor computedBackground() { return QColor(0xFB, 0xF1, 0xD9); }
+    //! The plot area's background: sand for OSCAR's analysis (pinned too), white for another pinned
+    //! graph; invalid: none of its own.
+    static QColor plotBackground(bool pinned, bool computed, bool printing)
+    {
+        if (computed && !printing) return computedBackground();
+        return pinned ? QColor(Qt::white) : QColor();
+    }
     //! The name in the graph lists: the full name where the graph's own title is short (aGI).
     QString listName() const { return m_listName.isEmpty() ? m_title : m_listName; }
     void setListName(const QString &name) { m_listName = name; }

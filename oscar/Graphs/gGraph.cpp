@@ -407,23 +407,11 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
     int y;
 
     if (m_showTitle && graphView()->horizontalTitles()) {
-        // across, wrapped on up to two lines, shrunk to fit the title column
-        m_titleFont = *mediumfont;
+        // across, wrapped on up to four lines at the usual size (minHeight keeps room for them);
+        // smaller only for a word wider than the title column
         const QString &txt = title();
         const int w = int(graphView()->titleWidth * printScaleX()) - 6;
-        QRect box;
-        for (;;) {
-            QFontMetrics fm(m_titleFont);
-            box = fm.boundingRect(QRect(0, 0, w, height), Qt::TextWordWrap | Qt::AlignLeft, txt);
-            if (box.width() <= w && box.height() <= 2 * fm.height() + 2) break;
-            if (m_titleFont.pointSize() > 0) {   // on screen: in points ...
-                if (m_titleFont.pointSize() <= 7) break;
-                m_titleFont.setPointSize(m_titleFont.pointSize() - 1);
-            } else {                              // ... printed: in pixels
-                if (m_titleFont.pixelSize() <= int(10 * printScaleY())) break;
-                m_titleFont.setPixelSize(m_titleFont.pixelSize() - 1);
-            }
-        }
+        m_titleFont = fitTitleFont(*mediumfont, txt, w, kTitleLines, int(10 * printScaleY()));
         painter.save();
         painter.setFont(m_titleFont);
         painter.setPen(Qt::black);
@@ -553,13 +541,10 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
         }
     }
 
-    if (isPinned()) {
-        // Fill the background on pinned graphs
-        painter.fillRect(originX + left, originY + top, width - right, height - bottom - top, QBrush(QColor(Qt::white)));
-    } else if (m_computed && !printing()) {
-        // computed by OSCAR, not the device's: a sand background (doctor 2026-10-16)
-        painter.fillRect(originX + left, originY + top, width - right, height - bottom - top, QBrush(computedBackground()));
-    }
+    // computed by OSCAR, not the device's: a sand background (doctor 2026-10-16), pinned too (2026-10-22);
+    // another pinned graph white
+    const QColor background = plotBackground(isPinned(), m_computed, printing());
+    if (background.isValid()) painter.fillRect(originX + left, originY + top, width - right, height - bottom - top, QBrush(background));
 
     for (const auto & layer : m_layers) {
         if (!layer->visible()) { continue; }
@@ -1616,11 +1601,39 @@ Layer *gGraph::getLineChart()
     return nullptr;
 }
 
+QFont gGraph::fitTitleFont(const QFont &base, const QString &title, int width, int maxLines, int minPixels)
+{
+    QFont f = base;
+    for (;;) {
+        const QFontMetrics fm(f);
+        const QRect box = fm.boundingRect(QRect(0, 0, width, 10000), Qt::TextWordWrap | Qt::AlignLeft, title);
+        if (box.width() <= width && box.height() <= maxLines * fm.height() + 2) break;
+        if (f.pointSize() > 0) {   // on screen: in points ...
+            if (f.pointSize() <= 7) break;
+            f.setPointSize(f.pointSize() - 1);
+        } else {                   // ... printed: in pixels
+            if (f.pixelSize() <= minPixels) break;
+            f.setPixelSize(f.pixelSize() - 1);
+        }
+    }
+    return f;
+}
+
+int gGraph::titleHeight(const QFont &font, const QString &title, int width)
+{
+    return QFontMetrics(font).boundingRect(QRect(0, 0, width, 10000), Qt::TextWordWrap | Qt::AlignLeft, title).height();
+}
+
 int gGraph::minHeight()
 {
     // adjust graph height for centerLayer (ploting area) required height.
     int adjustment  = top + bottom;    //adjust graph minimun to layer minimum
     int minlayerheight = m_min_height  - adjustment;
+    if (m_showTitle && m_graphview && m_graphview->horizontalTitles() && mediumfont) {
+        // the title across, wrapped, fits beside the plot
+        const int w = m_graphview->titleWidth - 6;
+        minlayerheight = max(minlayerheight, titleHeight(fitTitleFont(*mediumfont, title(), w, kTitleLines), title(), w) + 8 - adjustment);
+    }
     for (const auto & layer : m_layers) {
         if (layer->position() != LayerCenter) continue;
         minlayerheight = max(max (m_defaultLayerMinHeight,layer->minimumHeight()),minlayerheight);

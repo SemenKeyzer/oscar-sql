@@ -2342,6 +2342,34 @@ void AnalysisIntegrationTests::testUpdateAdded()
     ManualScoring::clearDay(&day);
 }
 
+// Overview titles across: a long name wraps on up to four lines at the usual size (doctor 2026-10-22:
+// "don't shrink it"), and the graph is kept tall enough for them.
+void AnalysisIntegrationTests::testOverviewTitleWraps()
+{
+    QFont base;
+    base.setPointSize(12);
+    const QString title = QStringLiteral("Ограничение потока, минуты · анализ");
+    const int width = 124;
+    const QFont f = gGraph::fitTitleFont(base, title, width, 4);
+    QCOMPARE(f.pointSize(), 12);
+    const int h = gGraph::titleHeight(f, title, width);
+    QVERIFY(h > QFontMetrics(f).height() * 2);    // wrapped onto more than two lines
+    QVERIFY(h <= QFontMetrics(f).height() * 4 + 4);
+    // a single word wider than the column still shrinks, down to 7 pt
+    QVERIFY(gGraph::fitTitleFont(base, QStringLiteral("Сверхдлиннаяподписьбезпробелов"), width, 4).pointSize() < 12);
+}
+
+// A pinned graph of OSCAR's analysis keeps its sand background: both "pinned" (the pin) and
+// "analysis" stay visible (doctor 2026-10-22).
+void AnalysisIntegrationTests::testPinnedAnalysisGraphKeepsColour()
+{
+    QCOMPARE(gGraph::plotBackground(true, true, false), gGraph::computedBackground());
+    QCOMPARE(gGraph::plotBackground(true, false, false), QColor(Qt::white));
+    QCOMPARE(gGraph::plotBackground(false, true, false), gGraph::computedBackground());
+    QVERIFY(!gGraph::plotBackground(false, false, false).isValid());   // the view's own background
+    QCOMPARE(gGraph::plotBackground(true, true, true), QColor(Qt::white));   // printed: plain
+}
+
 // An event added by hand gets another type: the same edit, its span kept; the counts follow.
 void AnalysisIntegrationTests::testRetypeAdded()
 {
