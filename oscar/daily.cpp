@@ -852,9 +852,10 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
         auto *row = new QHBoxLayout(eventWindowBar);
         row->setContentsMargins(6, 2, 6, 2);
         ui->label_7->setText(tr("Event window, min:"));
-        // a longer slider, a minute a click either side, and a box to type the minutes in
-        ui->evViewSlider->setMinimumWidth(300);
-        ui->evViewSlider->setMaximumWidth(600);
+        // the slider about a third of the bar (doctor 2026-10-22: half the screen is too far for the
+        // mouse); a minute less / more on either side of the minutes, which can be typed
+        ui->evViewSlider->setMinimumWidth(160);
+        ui->evViewSlider->setMaximumWidth(450);
         ui->evViewLCD->hide();
         auto *less = new QToolButton(eventWindowBar);
         less->setObjectName(QStringLiteral("eventWindowLess"));
@@ -873,10 +874,10 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
         m_eventWindowBox->setAlignment(Qt::AlignCenter);
         m_eventWindowBox->setToolTip(tr("Type the minutes"));
         row->addWidget(ui->label_7);
+        row->addWidget(ui->evViewSlider, 1);
         row->addWidget(less);
-        row->addWidget(ui->evViewSlider, 2);
-        row->addWidget(more);
         row->addWidget(m_eventWindowBox);
+        row->addWidget(more);
         connect(less, &QToolButton::clicked, this, [this]() { ui->evViewSlider->setValue(ui->evViewSlider->value() - 1); });
         connect(more, &QToolButton::clicked, this, [this]() { ui->evViewSlider->setValue(ui->evViewSlider->value() + 1); });
         connect(m_eventWindowBox, &QSpinBox::valueChanged, ui->evViewSlider, &QSlider::setValue);
@@ -889,7 +890,7 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
         m_nightScroll->setObjectName(QStringLiteral("nightScroll"));
         m_nightScroll->setEnabled(false);
         row->addSpacing(12);
-        row->addWidget(m_nightScroll, 1);
+        row->addWidget(m_nightScroll, 2);
         connect(m_nightScroll, &QScrollBar::valueChanged, this, [this](int value) {
             const QPair<qint64, qint64> shown = shownRange();
             if (shown.second <= shown.first || m_nightLast <= m_nightFirst) return;
