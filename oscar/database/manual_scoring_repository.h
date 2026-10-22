@@ -25,6 +25,8 @@ class ManualScoringRepository
     static qint64 add(const ManualScoring::Edit &edit);
     //! New bounds of the edit \a id (device time); false when there is no such edit.
     static bool update(qint64 id, qint64 startMs, qint64 endMs);
+    //! The edit's event type (an event added by hand changes its type).
+    static bool updateChannel(qint64 id, ChannelID channel);
     static bool remove(qint64 id);
     static bool removeAllForSession(const ManualScoring::SessionKey &key);
 

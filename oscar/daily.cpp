@@ -4791,6 +4791,9 @@ void Daily::applyScoring(const QVariantMap &choice, qint64 startMs, qint64 endMs
         }
     } else if (action == QLatin1String("undo")) {
         ManualScoring::undoEdit(day, choice.value(QStringLiteral("editId")).toLongLong());
+    } else if (action == QLatin1String("retypeAdded")) {   // only this event added by hand
+        ManualScoring::retypeEdit(day, choice.value(QStringLiteral("editId")).toLongLong(),
+                                  choice.value(QStringLiteral("newChannel")).toUInt());
     } else {
         return;
     }

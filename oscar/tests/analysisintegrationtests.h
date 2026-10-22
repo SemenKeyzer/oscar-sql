@@ -101,6 +101,7 @@ private slots:
     void testResizeEventCorrection();
     void testUpdateExcludeAcrossSessions();
     void testUpdateAdded();
+    void testRetypeAdded();
     void testEditRowResize();
     void testUpdateExcludeIntoNextSession();
     void testScoringDragEsc();

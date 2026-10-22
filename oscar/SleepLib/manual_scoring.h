@@ -157,6 +157,8 @@ bool updateEdit(Day *day, qint64 id, qint64 startMs, qint64 endMs);
 //! Undoes the edit \a id of \a day's sessions; an excluded stretch stored with several sessions
 //! is undone in all of them.
 bool undoEdit(Day *day, qint64 id);
+//! The event added by hand \a id of \a day's sessions becomes \a newChannel (its span kept).
+bool retypeEdit(Day *day, qint64 id, ChannelID newChannel);
 //! The flow limitation marked by hand in the day's enabled CPAP sessions, less excluded time.
 qint64 flowLimitedMs(Day *day);
 //! Whether any enabled CPAP or oximeter session of \a day has edits of any kind (marks and stretches too).

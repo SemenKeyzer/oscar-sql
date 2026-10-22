@@ -2342,6 +2342,30 @@ void AnalysisIntegrationTests::testUpdateAdded()
     ManualScoring::clearDay(&day);
 }
 
+// An event added by hand gets another type: the same edit, its span kept; the counts follow.
+void AnalysisIntegrationTests::testRetypeAdded()
+{
+    Machine cpap(p_profile, 95);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Day day;
+    Session *s = scoredSession(&cpap, 951, m_machineRow);
+    day.addSession(s);
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Add, CPAP_Obstructive, 480, 500)));
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Add, CPAP_Obstructive, 600, 620)));
+    const EventDataType oa = day.count(CPAP_Obstructive), h = day.count(CPAP_Hypopnea);
+    const qint64 id = ManualScoringRepository::editsForSession(ManualScoring::keyOf(s)).first().id;
+    QVERIFY(ManualScoring::retypeEdit(&day, id, CPAP_Hypopnea));
+    const ManualScoring::Edit e = ManualScoringRepository::editsForSession(ManualScoring::keyOf(s)).first();
+    QCOMPARE(e.id, id);
+    QCOMPARE(e.channel, CPAP_Hypopnea);
+    QCOMPARE(e.startMs, synth::kStart + 480000);
+    QCOMPARE(day.count(CPAP_Obstructive), oa - 1);   // only this one changed
+    QCOMPARE(day.count(CPAP_Hypopnea), h + 1);
+    QVERIFY(!ManualScoring::retypeEdit(&day, id + 1000, CPAP_Hypopnea));   // no such edit
+    ManualScoring::clearDay(&day);
+}
+
 // new bounds of an event in the list of edits: the type, the length before and after
 void AnalysisIntegrationTests::testEditRowResize()
 {

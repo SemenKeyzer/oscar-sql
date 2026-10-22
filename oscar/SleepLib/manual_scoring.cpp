@@ -527,6 +527,20 @@ bool undoEdit(Day *day, qint64 id)
     return true;
 }
 
+bool retypeEdit(Day *day, qint64 id, ChannelID newChannel)
+{
+    if (!day || !newChannel) return false;
+    for (Session *s : day->sessions) {
+        for (const Edit &e : ManualScoringRepository::editsForSession(keyOf(s))) {
+            if (e.id != id) continue;
+            if (e.kind != Kind::Add || !ManualScoringRepository::updateChannel(id, newChannel)) return false;
+            refresh(s);
+            return true;
+        }
+    }
+    return false;
+}
+
 qint64 flowLimitedMs(Day *day)
 {
     qint64 ms = 0;

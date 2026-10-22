@@ -161,6 +161,15 @@ bool ManualScoringRepository::update(qint64 id, qint64 startMs, qint64 endMs)
     return run(q, "update") && q.numRowsAffected() == 1;
 }
 
+bool ManualScoringRepository::updateChannel(qint64 id, ChannelID channel)
+{
+    QSqlQuery q(DatabaseManager::instance().database());
+    q.prepare(QStringLiteral("UPDATE manual_scoring SET channel = ? WHERE id = ?"));
+    q.addBindValue(channel);
+    q.addBindValue(id);
+    return run(q, "update channel") && q.numRowsAffected() == 1;
+}
+
 bool ManualScoringRepository::remove(qint64 id)
 {
     QSqlQuery q(DatabaseManager::instance().database());

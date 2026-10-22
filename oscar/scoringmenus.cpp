@@ -137,6 +137,14 @@ QMenu *ScoringMenus::forEvent(const EffectiveEvent &e, QWidget *parent, int coun
             if (c != e.channel) keyed(types, typeName(c), keyOf(c))->setData(data("retype", own, c, ownEnd));
         }
     }
+    if (e.origin == Origin::Added) {   // added by hand: the same edit gets another type
+        QMenu *types = menu->addMenu(tr("Change type"));
+        types->menuAction()->setText(tr("Change type") + QStringLiteral("\tT"));
+        types->menuAction()->setProperty(kKeyProperty, QStringLiteral("T"));
+        for (ChannelID c : ManualScoring::menuChannels()) {
+            if (c != e.channel) keyed(types, typeName(c), keyOf(c))->setData(data("retypeAdded", e.channel, c, e.endMs, e.editId));
+        }
+    }
     if (e.origin != Origin::Device) {
         menu->addSeparator();
         keyed(menu, tr("Undo this change"), QLatin1Char('U'))->setData(data("undo", own, 0, e.endMs, e.editId));

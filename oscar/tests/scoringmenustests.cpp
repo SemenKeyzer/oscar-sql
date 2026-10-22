@@ -316,3 +316,20 @@ void ScoringMenusTests::testMarkTypeName()
     QCOMPARE(ScoringMenus::typeName(CPAP_ManualFlowLimit), QStringLiteral("Flow limitation"));
     QCOMPARE(ScoringMenus::repeatText(CPAP_ManualFlowLimit), QStringLiteral("Repeat: Flow limitation"));
 }
+
+// An event added by hand changes its own type (doctor 2026-10-22: only "all of a type" was offered).
+void ScoringMenusTests::testAddedEventChangeType()
+{
+    QScopedPointer<QMenu> m(ScoringMenus::forEvent(scoredEvent(Origin::Added, CPAP_Obstructive, CPAP_Obstructive, 42), nullptr, 3));
+    QAction *change = find(m.data(), QStringLiteral("Change type"));
+    QVERIFY(change && change->menu());
+    QVERIFY(!find(m.data(), QStringLiteral("Remove event (do not count)")));   // undo takes it away
+    const QStringList types = texts(change->menu());
+    QVERIFY(!types.contains(QStringLiteral("Obstructive apnea")));
+    QVERIFY(types.contains(QStringLiteral("Hypopnea")));
+    const QVariantMap d = find(change->menu(), QStringLiteral("Hypopnea"))->data().toMap();
+    QCOMPARE(d.value(QStringLiteral("action")).toString(), QStringLiteral("retypeAdded"));
+    QCOMPARE(d.value(QStringLiteral("editId")).toLongLong(), qint64(42));
+    QCOMPARE(d.value(QStringLiteral("newChannel")).toUInt(), CPAP_Hypopnea);
+    QVERIFY(find(m.data(), QStringLiteral("Undo this change")));
+}
