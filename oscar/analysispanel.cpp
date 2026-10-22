@@ -89,7 +89,8 @@ QString glasgowHtml(const DayResult &r, bool adapted)
     auto value = [&dash](double v) { return std::isnan(v) ? dash : number(v, 2); };
     if (!r.flScored) {
         return QStringLiteral("<p><b>%1</b>: &mdash; <font size=-1>%2</font></p>")
-            .arg(AnalysisPanel::tr("Glasgow Index"), AnalysisPanel::tr("Not computed: the flow is recorded below 10 Hz."));
+            .arg(AnalysisPanel::tr("Glasgow Index"), r.screener ? AnalysisPanel::tr("Not computed: not scored from a nasal cannula.")
+                                                               : AnalysisPanel::tr("Not computed: the flow is recorded below 10 Hz."));
     }
     // the original index; the adapted one beside it only when asked for (Preferences → Analysis)
     auto line = [adapted](const QString &label, const QString &a, const QString &b) {
@@ -288,15 +289,15 @@ QString AnalysisPanel::sidebarHtml(Day *day, const DayResult &r, const QString &
             html += row(tr("&nbsp;&nbsp;all desaturations"),
                         QStringLiteral("%1 %&middot;min/h").arg(number(hypoxicBurden(o.desaturationArea(), o.spo2Seconds))));
         }
+        if (r.hasFlow) {   // a CPAP's or a screener's breathing events: part of the burden above
+            html += row(tr("&nbsp;&nbsp;linked to breathing events"), analysisHours > 0
+                        ? QStringLiteral("%1 %&middot;min/h").arg(number(r.linkedDesatArea / 60.0 / analysisHours)) : QStringLiteral("&mdash;"));
+        }
         // Linz: every second's distance from 100 %, no desaturations to find (compares nights and devices)
         const double load = hypoxicLoad(o.spo2Hist);
         if (!std::isnan(load)) {
             html += row(HelpTips::term(tr("Hypoxic load (Linz)"), QStringLiteral("hypoxic_load")),
                         QStringLiteral("%1 %&middot;min/h").arg(number(load, 0)));
-        }
-        if (r.hasFlow) {   // a CPAP's or a screener's breathing events
-            html += row(tr("&nbsp;&nbsp;linked to breathing events"), analysisHours > 0
-                        ? QStringLiteral("%1 %&middot;min/h").arg(number(r.linkedDesatArea / 60.0 / analysisHours)) : QStringLiteral("&mdash;"));
         }
         html += QStringLiteral("</table>");
 
@@ -368,7 +369,8 @@ QString AnalysisPanel::sidebarHtml(Day *day, const DayResult &r, const QString &
             break;
         }
         QString flow = tr("Flow recorded at %1 Hz.").arg(number(r.flowRateHz, 0));
-        if (!r.flScored) flow += QLatin1Char(' ') + tr("Flow limitation and cardiogenic oscillations need 10 Hz: not scored.");
+        if (r.screener) flow += QLatin1Char(' ') + tr("Flow limitation and the Glasgow Index are not scored from a nasal cannula (its pressure is too coarse for the breath's shape).");
+        else if (!r.flScored) flow += QLatin1Char(' ') + tr("Flow limitation and cardiogenic oscillations need 10 Hz: not scored.");
         notes << flow;
         if (r.unscoreableSeconds > 0) notes << tr("Unscoreable time: %1 (leaks, gaps, weak signal).").arg(duration(1000LL * r.unscoreableSeconds));
         if (!r.hasOximetry) notes << tr("No oximetry: hypopneas are scored from the flow only.");

@@ -642,6 +642,11 @@ void AnalysisPanelTests::testSidebarScreenerNoDeviceColumn()
     QVERIFY(html.contains(QStringLiteral("linked to breathing events")));
     QVERIFY(html.contains(QStringLiteral("Unexplained desaturations")));
     QVERIFY(!html.contains(QStringLiteral("Agreement with the device")));
+    // the linked part sits under the burden it is part of, not under Linz's load
+    QVERIFY(html.indexOf(QStringLiteral("linked to breathing events")) < html.indexOf(QStringLiteral("Hypoxic load (Linz)")));
+    // a nasal cannula scores no flow limitation or Glasgow: not the sample rate's fault (it is 25 Hz here)
+    QVERIFY2(!html.contains(QStringLiteral("below 10 Hz")) && !html.contains(QStringLiteral("need 10 Hz")), qPrintable(html));
+    QVERIFY(html.contains(QStringLiteral("not scored from a nasal cannula")));
 
     const QString cpap = AnalysisPanel::sidebarHtml(nullptr, cpapNight(), QStringLiteral("CMS50F"), { 90 });
     QVERIFY(cpap.contains(QStringLiteral(">Device<")));
