@@ -46,6 +46,7 @@
 
 #include "saveGraphLayoutSettings.h"
 #include "daily.h"
+#include "overviewpresets.h"
 #include "analysismark.h"
 #include "glossary.h"
 #include "helptips.h"
@@ -854,8 +855,8 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
         ui->label_7->setText(tr("Event window, min:"));
         // the slider about a third of the bar (doctor 2026-10-22: half the screen is too far for the
         // mouse); a minute less / more on either side of the minutes, which can be typed
-        ui->evViewSlider->setMinimumWidth(160);
-        ui->evViewSlider->setMaximumWidth(450);
+        ui->evViewSlider->setMinimumWidth(140);
+        ui->evViewSlider->setMaximumWidth(300);   // 2026-10-23: shorter still, the hand reaches ~20 min
         ui->evViewLCD->hide();
         auto *less = new QToolButton(eventWindowBar);
         less->setObjectName(QStringLiteral("eventWindowLess"));
@@ -878,6 +879,17 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
         row->addWidget(less);
         row->addWidget(m_eventWindowBox);
         row->addWidget(more);
+        // back to the whole night in one click (doctor 2026-10-23: otherwise many right clicks or Esc held)
+        auto *wholeNight = new QToolButton(eventWindowBar);
+        wholeNight->setObjectName(QStringLiteral("wholeNight"));
+        wholeNight->setText(tr("Whole night"));
+        wholeNight->setToolTip(tr("Show the whole night: undo all zooming"));
+        row->addSpacing(6);
+        row->addWidget(wholeNight);
+        connect(wholeNight, &QToolButton::clicked, this, [this]() {
+            GraphView->ResetBounds();
+            GraphView->timedRedraw(0);
+        });
         connect(less, &QToolButton::clicked, this, [this]() { ui->evViewSlider->setValue(ui->evViewSlider->value() - 1); });
         connect(more, &QToolButton::clicked, this, [this]() { ui->evViewSlider->setValue(ui->evViewSlider->value() + 1); });
         connect(m_eventWindowBox, &QSpinBox::valueChanged, ui->evViewSlider, &QSlider::setValue);
@@ -902,6 +914,8 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     // always the first row above the graphs: the Align and scoring bars open under it
     ui->verticalLayout_3->insertWidget(ui->verticalLayout_3->indexOf(m_alignBar), eventWindowBar);
     connect(scoringButton, &QPushButton::toggled, this, &Daily::onScoringButtonToggled);
+    // the switches under the graphs: blue with white text while on, like the Overview's sets (doctor 2026-10-23)
+    for (QPushButton *b : { alignButton, analysisButton, scoringButton }) b->setStyleSheet(OverviewPresets::buttonStyle(QStringLiteral("QPushButton")));
     ui->treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->treeWidget, &QTreeWidget::customContextMenuRequested, this, [this](const QPoint &pos) {
         QTreeWidgetItem *item = ui->treeWidget->itemAt(pos);
@@ -1409,6 +1423,7 @@ void Daily::UpdateEventsTree(QTreeWidget *tree, Day *day, bool analysisShown)
 
     // OSCAR's analysis under its heading
     if (analysisShown && !analysisNodes.isEmpty()) {
+        tree->addTopLevelItem(AnalysisMark::treeSeparator());   // the groups read apart (doctor 2026-10-23)
         tree->addTopLevelItem(AnalysisMark::treeHeading(tr("OSCAR analysis"), true));
         for (QTreeWidgetItem *node : std::as_const(analysisNodes)) tree->addTopLevelItem(node);
     } else {
@@ -1417,7 +1432,8 @@ void Daily::UpdateEventsTree(QTreeWidget *tree, Day *day, bool analysisShown)
 
     // the doctor's manual scoring last: click a row to go there, right-click to undo it
     if (QTreeWidgetItem *scoring = ScoringMenus::treeNode(ScoringMenus::editRows(day))) {
-        tree->addTopLevelItem(AnalysisMark::treeHeading(tr("Manual scoring"), false));
+        tree->addTopLevelItem(AnalysisMark::treeSeparator());
+        tree->addTopLevelItem(ManualMark::treeHeading(tr("Manual scoring")));   // green as everywhere
         tree->addTopLevelItem(scoring);
         scoring->setExpanded(true);
     }

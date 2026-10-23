@@ -76,6 +76,15 @@ QTreeWidgetItem *treeHeading(const QString &text, bool analysis)
     return item;
 }
 
+QTreeWidgetItem *treeSeparator()
+{
+    auto *item = new QTreeWidgetItem(QStringList(QString()));
+    item->setFlags(Qt::ItemIsEnabled);
+    item->setData(0, HeadingRole, true);   // never an event
+    item->setSizeHint(0, QSize(0, 10));
+    return item;
+}
+
 } // namespace AnalysisMark
 
 namespace ManualMark {
@@ -100,6 +109,17 @@ QString barMark()
 QString headingRow(const QString &title, int colspan)
 {
     return QStringLiteral("<tr><td colspan=%1>%2<b>%3</b> %4</td></tr>\n").arg(colspan).arg(barMark(), title, pill());
+}
+
+QTreeWidgetItem *treeHeading(const QString &text)
+{
+    QTreeWidgetItem *item = AnalysisMark::treeHeading(text, false);
+    item->setBackground(0, QColor(QLatin1String(PillBackground)));
+    item->setForeground(0, QColor(QLatin1String(PillText)));
+    QPixmap bar(4, 14);
+    bar.fill(QColor(QLatin1String(BarColor)));
+    item->setIcon(0, QIcon(bar));
+    return item;
 }
 
 } // namespace ManualMark

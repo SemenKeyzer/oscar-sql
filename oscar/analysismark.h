@@ -41,6 +41,8 @@ QString headingRow(const QString &title, int colspan);
 QString title(const QString &base);
 //! A heading row of the events tree that cannot be chosen; \a analysis gives it the mark's look.
 QTreeWidgetItem *treeHeading(const QString &text, bool analysis);
+//! An empty row between two groups of the events tree.
+QTreeWidgetItem *treeSeparator();
 
 } // namespace AnalysisMark
 
@@ -52,6 +54,8 @@ QString pill();
 QString barMark();
 //! A table heading row: the bar, the title in bold, the pill.
 QString headingRow(const QString &title, int colspan);
+//! The events tree's heading of the manual scoring, in its green.
+QTreeWidgetItem *treeHeading(const QString &text);
 } // namespace ManualMark
 
 #endif // ANALYSISMARK_H

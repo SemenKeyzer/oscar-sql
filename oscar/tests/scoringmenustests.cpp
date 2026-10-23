@@ -100,8 +100,8 @@ void ScoringMenusTests::testShortEventWarning()
 void ScoringMenusTests::testEventMenu()
 {
     QScopedPointer<QMenu> m(ScoringMenus::forEvent(scoredEvent(Origin::Device, CPAP_ClearAirway, CPAP_ClearAirway, 0), nullptr));
-    QCOMPARE(texts(m.data()), QStringList({ QStringLiteral("Remove event (do not count)"), QStringLiteral("Change type") }));
-    const QVariantMap remove = find(m.data(), QStringLiteral("Remove event (do not count)"))->data().toMap();
+    QCOMPARE(texts(m.data()), QStringList({ QStringLiteral("Delete episode (do not count)"), QStringLiteral("Change type") }));
+    const QVariantMap remove = find(m.data(), QStringLiteral("Delete episode (do not count)"))->data().toMap();
     QCOMPARE(remove.value(QStringLiteral("action")).toString(), QStringLiteral("remove"));
     QCOMPARE(remove.value(QStringLiteral("channel")).toUInt(), CPAP_ClearAirway);
     QCOMPARE(remove.value(QStringLiteral("timeMs")).toLongLong(), qint64(300000));
@@ -119,7 +119,8 @@ void ScoringMenusTests::testUndoOnlyForEdited()
 {
     for (Origin o : { Origin::Added, Origin::Removed, Origin::Retyped }) {
         QScopedPointer<QMenu> m(ScoringMenus::forEvent(scoredEvent(o, CPAP_Obstructive, CPAP_ClearAirway, 42), nullptr));
-        QAction *undo = find(m.data(), QStringLiteral("Undo this change"));
+        // an event added by hand is deleted; a device event changed by hand gets its own back (doctor 2026-10-23)
+        QAction *undo = find(m.data(), o == Origin::Added ? QStringLiteral("Delete episode") : QStringLiteral("Undo this change"));
         QVERIFY(undo);
         QCOMPARE(undo->data().toMap().value(QStringLiteral("action")).toString(), QStringLiteral("undo"));
         QCOMPARE(undo->data().toMap().value(QStringLiteral("editId")).toLongLong(), qint64(42));
@@ -128,7 +129,7 @@ void ScoringMenusTests::testUndoOnlyForEdited()
     QVERIFY(!find(device.data(), QStringLiteral("Undo this change")));
     // a retyped event is changed again from its device type
     QScopedPointer<QMenu> retyped(ScoringMenus::forEvent(scoredEvent(Origin::Retyped, CPAP_Obstructive, CPAP_ClearAirway, 42), nullptr));
-    QCOMPARE(find(retyped.data(), QStringLiteral("Remove event (do not count)"))->data().toMap().value(QStringLiteral("channel")).toUInt(),
+    QCOMPARE(find(retyped.data(), QStringLiteral("Delete episode (do not count)"))->data().toMap().value(QStringLiteral("channel")).toUInt(),
              CPAP_ClearAirway);
 }
 
@@ -173,7 +174,7 @@ void ScoringMenusTests::testLetterKeys()
     QVERIFY(!ScoringMenus::actionForKey(range.data(), QStringLiteral("z")));
 
     QScopedPointer<QMenu> ev(ScoringMenus::forEvent(scoredEvent(Origin::Retyped, CPAP_Obstructive, CPAP_ClearAirway, 42), nullptr));
-    QCOMPARE(ScoringMenus::actionForKey(ev.data(), QStringLiteral("r")), find(ev.data(), QStringLiteral("Remove event (do not count)")));
+    QCOMPARE(ScoringMenus::actionForKey(ev.data(), QStringLiteral("r")), find(ev.data(), QStringLiteral("Delete episode (do not count)")));
     QAction *type = ScoringMenus::actionForKey(ev.data(), QStringLiteral("е"));   // T on the Russian layout
     QVERIFY(type && type->menu());
     QCOMPARE(ScoringMenus::actionForKey(type->menu(), QStringLiteral("c")), find(type->menu(), QStringLiteral("Central apnea")));
@@ -200,17 +201,17 @@ void ScoringMenusTests::testLetterKeys()
 void ScoringMenusTests::testBulkItems()
 {
     QScopedPointer<QMenu> m(ScoringMenus::forEvent(scoredEvent(Origin::Device, CPAP_Obstructive, CPAP_Obstructive, 0), nullptr, 77));
-    QAction *all = find(m.data(), QStringLiteral("Change type of all Obstructive apnea (77)"));
+    QAction *all = find(m.data(), QStringLiteral("Change type of all episodes: Obstructive apnea (77)"));
     QVERIFY(all && all->menu());
     const QVariantMap toH = find(all->menu(), QStringLiteral("Obstructive hypopnea"))->data().toMap();
     QCOMPARE(toH.value(QStringLiteral("action")).toString(), QStringLiteral("retypeAll"));
     QCOMPARE(toH.value(QStringLiteral("channel")).toUInt(), CPAP_Obstructive);
     QCOMPARE(toH.value(QStringLiteral("newChannel")).toUInt(), CPAP_ObstructiveHypopnea);
-    const QVariantMap removeAll = find(m.data(), QStringLiteral("Remove all Obstructive apnea (77)"))->data().toMap();
+    const QVariantMap removeAll = find(m.data(), QStringLiteral("Delete all episodes: Obstructive apnea (77)"))->data().toMap();
     QCOMPARE(removeAll.value(QStringLiteral("action")).toString(), QStringLiteral("removeAll"));
     // a single event of its type: nothing to do in bulk
     QScopedPointer<QMenu> one(ScoringMenus::forEvent(scoredEvent(Origin::Device, CPAP_Obstructive, CPAP_Obstructive, 0), nullptr, 1));
-    QVERIFY(!find(one.data(), QStringLiteral("Remove all Obstructive apnea (1)")));
+    QVERIFY(!find(one.data(), QStringLiteral("Delete all episodes: Obstructive apnea (1)")));
 }
 
 // Excluded time reads in seconds under two minutes: 17 s is not "0 min".
@@ -229,7 +230,7 @@ void ScoringMenusTests::testResizedEventNamedByOwnEnd()
     e.durationSec = 17;
     e.resizeEditId = 5;
     QScopedPointer<QMenu> m(ScoringMenus::forEvent(e, nullptr));
-    QCOMPARE(find(m.data(), QStringLiteral("Remove event (do not count)"))->data().toMap().value(QStringLiteral("timeMs")).toLongLong(),
+    QCOMPARE(find(m.data(), QStringLiteral("Delete episode (do not count)"))->data().toMap().value(QStringLiteral("timeMs")).toLongLong(),
              qint64(300000));
     QAction *toH = find(m.data(), ScoringMenus::typeName(CPAP_ObstructiveHypopnea));
     QVERIFY(toH);
@@ -323,7 +324,7 @@ void ScoringMenusTests::testAddedEventChangeType()
     QScopedPointer<QMenu> m(ScoringMenus::forEvent(scoredEvent(Origin::Added, CPAP_Obstructive, CPAP_Obstructive, 42), nullptr, 3));
     QAction *change = find(m.data(), QStringLiteral("Change type"));
     QVERIFY(change && change->menu());
-    QVERIFY(!find(m.data(), QStringLiteral("Remove event (do not count)")));   // undo takes it away
+    QVERIFY(!find(m.data(), QStringLiteral("Delete episode (do not count)")));   // undo takes it away
     const QStringList types = texts(change->menu());
     QVERIFY(!types.contains(QStringLiteral("Obstructive apnea")));
     QVERIFY(types.contains(QStringLiteral("Hypopnea")));
@@ -331,5 +332,5 @@ void ScoringMenusTests::testAddedEventChangeType()
     QCOMPARE(d.value(QStringLiteral("action")).toString(), QStringLiteral("retypeAdded"));
     QCOMPARE(d.value(QStringLiteral("editId")).toLongLong(), qint64(42));
     QCOMPARE(d.value(QStringLiteral("newChannel")).toUInt(), CPAP_Hypopnea);
-    QVERIFY(find(m.data(), QStringLiteral("Undo this change")));
+    QVERIFY(find(m.data(), QStringLiteral("Delete episode")));
 }

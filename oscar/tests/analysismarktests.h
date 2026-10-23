@@ -25,6 +25,7 @@ private slots:
     void testHeadingRow();
     void testTitle();
     void testTreeHeading();
+    void testTreeManualHeadingAndSeparator();
     void testChannelBaseName();
     void cleanupTestCase();
 private:

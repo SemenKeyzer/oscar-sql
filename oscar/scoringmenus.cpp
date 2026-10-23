@@ -129,7 +129,7 @@ QMenu *ScoringMenus::forEvent(const EffectiveEvent &e, QWidget *parent, int coun
     const ChannelID own = e.originalChannel;
     const qint64 ownEnd = e.originalEndMs;
     if (e.origin != Origin::Added) {
-        if (e.origin != Origin::Removed) keyed(menu, tr("Remove event (do not count)"), QLatin1Char('R'))->setData(data("remove", own, 0, ownEnd));
+        if (e.origin != Origin::Removed) keyed(menu, tr("Delete episode (do not count)"), QLatin1Char('R'))->setData(data("remove", own, 0, ownEnd));
         QMenu *types = menu->addMenu(tr("Change type"));
         types->menuAction()->setText(tr("Change type") + QStringLiteral("\tT"));
         types->menuAction()->setProperty(kKeyProperty, QStringLiteral("T"));
@@ -147,16 +147,19 @@ QMenu *ScoringMenus::forEvent(const EffectiveEvent &e, QWidget *parent, int coun
     }
     if (e.origin != Origin::Device) {
         menu->addSeparator();
-        keyed(menu, tr("Undo this change"), QLatin1Char('U'))->setData(data("undo", own, 0, e.endMs, e.editId));
+        // the words of the doctor's other software (Neurosoft): an event added by hand is deleted;
+        // a device event changed by hand gets back what the device said
+        keyed(menu, e.origin == Origin::Added ? tr("Delete episode") : tr("Undo this change"), QLatin1Char('U'))
+            ->setData(data("undo", own, 0, e.endMs, e.editId));
     }
     // every event of this type at once
     if (e.origin != Origin::Removed && countOfType > 1) {
         menu->addSeparator();
-        QMenu *all = menu->addMenu(tr("Change type of all %1 (%2)").arg(typeName(e.channel)).arg(countOfType));
+        QMenu *all = menu->addMenu(tr("Change type of all episodes: %1 (%2)").arg(typeName(e.channel)).arg(countOfType));
         for (ChannelID c : ManualScoring::menuChannels()) {
             if (c != e.channel) all->addAction(typeName(c))->setData(data("retypeAll", e.channel, c));
         }
-        menu->addAction(tr("Remove all %1 (%2)").arg(typeName(e.channel)).arg(countOfType))->setData(data("removeAll", e.channel));
+        menu->addAction(tr("Delete all episodes: %1 (%2)").arg(typeName(e.channel)).arg(countOfType))->setData(data("removeAll", e.channel));
     }
     installLetterKeys(menu);
     return menu;

@@ -134,3 +134,21 @@ void AnalysisMarkTests::testManualMark()
     const QString row = ManualMark::headingRow(QStringLiteral("Manual analysis"), 2);
     QVERIFY(row.contains(ManualMark::pill()) && row.contains(ManualMark::barMark()));
 }
+
+// The events tree (doctor 2026-10-23): the manual scoring heading green as everywhere, and an empty
+// row between the groups so the blocks read apart.
+void AnalysisMarkTests::testTreeManualHeadingAndSeparator()
+{
+    QScopedPointer<QTreeWidgetItem> manual(ManualMark::treeHeading(QStringLiteral("Manual scoring")));
+    QCOMPARE(manual->background(0).color(), QColor(QStringLiteral("#E3F4EA")));
+    QCOMPARE(manual->foreground(0).color(), QColor(QStringLiteral("#1F5F3B")));
+    QVERIFY(!manual->icon(0).isNull());
+    QVERIFY(manual->font(0).bold());
+    QVERIFY(manual->data(0, AnalysisMark::HeadingRole).toBool());
+    QVERIFY(!(manual->flags() & Qt::ItemIsSelectable));
+
+    QScopedPointer<QTreeWidgetItem> gap(AnalysisMark::treeSeparator());
+    QVERIFY(gap->text(0).isEmpty());
+    QVERIFY(!(gap->flags() & Qt::ItemIsSelectable));
+    QVERIFY(gap->data(0, AnalysisMark::HeadingRole).toBool());   // never taken for an event
+}
