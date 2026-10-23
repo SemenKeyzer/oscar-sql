@@ -139,6 +139,11 @@ class gLineChart: public Layer
     void addDotLine(DottedLine dot) { m_dotlines.append(dot); }
     QVector<DottedLine> m_dotlines;
     QHash<ChannelID, bool> m_flags_enabled;
+    //! The nasal flow smoothed for display (AppSetting::nasalFlowFilterHz), per waveform list
+    QHash<const EventList *, QVector<EventStoreType>> m_smoothed;
+    double m_smoothedHz = 0;
+    //! The samples of \a el as drawn: smoothed at \a hz, or the list's own.
+    EventStoreType *displaySamples(EventList &el, double hz);
     QHash<ChannelID, QHash<quint32, bool> > m_dot_enabled;
 
     virtual Layer * Clone() {

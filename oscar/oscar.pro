@@ -422,6 +422,8 @@ SOURCES += \
     Graphs/gLineChart.cpp \
     Graphs/gLineOverlay.cpp \
     Graphs/gDifferenceOverlay.cpp \
+    Graphs/gDesatFill.cpp \
+    SleepLib/analysis/signal_filter.cpp \
     Graphs/gOverviewGraph.cpp \
     Graphs/gPressureChart.cpp \
     Graphs/gSegmentChart.cpp \
@@ -629,6 +631,8 @@ HEADERS  += \
     Graphs/gLineChart.h \
     Graphs/gLineOverlay.h \
     Graphs/gDifferenceOverlay.h \
+    Graphs/gDesatFill.h \
+    SleepLib/analysis/signal_filter.h \
     Graphs/gSegmentChart.h\
     Graphs/gspacer.h \
     Graphs/gStatsLine.h \

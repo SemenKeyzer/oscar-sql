@@ -13,6 +13,7 @@
 #include "SleepLib/analysis/analysis_service.h"
 
 #include "Graphs/gLineChart.h"
+#include "SleepLib/analysis/signal_filter.h"
 
 #include <QString>
 #include <QDebug>
@@ -127,8 +128,27 @@ bool gLineChart::isEmpty()
 }
 
 
+EventStoreType *gLineChart::displaySamples(EventList &el, double hz)
+{
+    if (hz <= 0 || el.type() != EVL_Waveform || el.rate() <= 0) return el.rawData();
+    if (hz != m_smoothedHz) {
+        m_smoothed.clear();
+        m_smoothedHz = hz;
+    }
+    QVector<EventStoreType> &out = m_smoothed[&el];
+    if (out.size() != int(el.count())) {
+        QVector<float> x(int(el.count()));
+        for (int i = 0; i < x.size(); ++i) x[i] = el.rawData()[i];
+        const QVector<float> y = analysis::lowPass(x, 1000.0 / el.rate(), hz);
+        out.resize(y.size());
+        for (int i = 0; i < y.size(); ++i) out[i] = EventStoreType(qRound(y[i]));
+    }
+    return out.data();
+}
+
 void gLineChart::SetDay(Day *d)
 {
+    m_smoothed.clear();
     //    Layer::SetDay(d);
     m_day = d;
 
@@ -773,7 +793,9 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
                     time = el.time(idx) + drift;
                     double rate = double(sr) * double(sam);
-                    EventStoreType *ptr = el.rawData() + idx;
+                    // a sleep screener's nasal flow smoothed for the eye (doctor 2026-10-23); the analysis reads the samples as recorded
+                    const double filterHz = code == OXI_NasalFlow && AppSetting ? AppSetting->nasalFlowFilterHz() : 0;
+                    EventStoreType *ptr = displaySamples(el, filterHz) + idx;
                     if ((unsigned) siz > el.count())
                         siz = el.count();
 

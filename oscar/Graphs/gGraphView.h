@@ -630,6 +630,8 @@ class gGraphView
     QMenu * limits_menu;
     QMenu * lines_menu;
     QAction * target_lines_action = nullptr;
+    QMenu * smoothing_menu = nullptr;        //!< the nasal flow's display smoothing
+    QAction * desat_fill_action = nullptr;   //!< shading of the desaturations on SpO2
     QMenu * plots_menu;
 
     QMenu * oximeter_menu;

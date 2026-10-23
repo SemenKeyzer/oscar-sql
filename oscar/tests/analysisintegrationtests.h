@@ -103,6 +103,8 @@ private slots:
     void testUpdateAdded();
     void testRetypeAdded();
     void testAnalysisColoursMatchDevice();
+    void testDisplayLowPass();
+    void testDesatFillShape();
     void testOverviewTitleWraps();
     void testPinnedAnalysisGraphKeepsColour();
     void testEditRowResize();

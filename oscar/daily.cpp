@@ -75,6 +75,7 @@
 
 #include "Graphs/gLineOverlay.h"
 #include "Graphs/gDifferenceOverlay.h"
+#include "Graphs/gDesatFill.h"
 #include "Graphs/gFlagsLine.h"
 #include "Graphs/gSleepStageChart.h"
 #include "Graphs/gSessionBarLayer.h"
@@ -657,7 +658,9 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
         g->AddLayer(new gSessionBarLayer());
     }
     if (auto *g = graphlist.value(schema::channel[OXI_SPO2].code())) {
-        g->AddLayer(new gLineChart(OXI_SPO2, true));
+        auto *spo2 = new gLineChart(OXI_SPO2, true);
+        g->AddLayer(new gDesatFill(spo2));   // the desaturations' areas under the line
+        g->AddLayer(spo2);
         g->AddLayer(new gSessionBarLayer());
     }
     if (auto *g = graphlist.value(schema::channel[OXI_Perf].code())) g->AddLayer(new gLineChart(OXI_Perf, false));

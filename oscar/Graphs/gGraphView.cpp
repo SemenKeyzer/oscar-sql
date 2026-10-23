@@ -19,6 +19,7 @@
 #include <QPixmapCache>
 #include <QTimer>
 #include <QFontMetrics>
+#include <QActionGroup>
 #include <QWidgetAction>
 #include <QGridLayout>
 #include <QVBoxLayout>
@@ -604,6 +605,29 @@ gGraphView::gGraphView(QWidget *parent, gGraphView *shared, QWidget *caller)
     target_lines_action->setCheckable(true);
     connect(target_lines_action, &QAction::toggled, this, [this](bool on) {
         if (AppSetting) AppSetting->setShowTargetLines(on);
+        timedRedraw(0);
+    });
+    // the nasal flow smoothed for the eye (doctor 2026-10-23): none, 5 Hz or 1 Hz
+    smoothing_menu = context_menu->addMenu(tr("Smoothing"));
+    smoothing_menu->setObjectName(QStringLiteral("smoothingMenu"));
+    auto *smoothingGroup = new QActionGroup(smoothing_menu);
+    const struct { double hz; QString text; } cutoffs[] = { { 0, tr("None") }, { 5, tr("5 Hz") }, { 1, tr("1 Hz") } };
+    for (const auto &c : cutoffs) {
+        QAction *a = smoothing_menu->addAction(c.text);
+        a->setCheckable(true);
+        a->setData(c.hz);
+        smoothingGroup->addAction(a);
+    }
+    connect(smoothingGroup, &QActionGroup::triggered, this, [this](QAction *a) {
+        if (AppSetting) AppSetting->setNasalFlowFilterHz(a->data().toDouble());
+        timedRedraw(0);
+    });
+    desat_fill_action = context_menu->addAction(tr("Shade desaturations"));
+    desat_fill_action->setObjectName(QStringLiteral("actionDesatFill"));
+    desat_fill_action->setCheckable(true);
+    desat_fill_action->setToolTip(tr("The area each desaturation adds to the hypoxic burden, under the SpO2 line"));
+    connect(desat_fill_action, &QAction::toggled, this, [this](bool on) {
+        if (AppSetting) AppSetting->setShowDesatFill(on);
         timedRedraw(0);
     });
 
@@ -2470,6 +2494,15 @@ void gGraphView::populateMenu(gGraph * graph)
         const QSignalBlocker block(target_lines_action);
         target_lines_action->setChecked(gSummaryChart::targetLinesShown());
         target_lines_action->setVisible(stg && !stg->targetValues().isEmpty());
+    }
+    {
+        const ChannelID first = lc && !lc->m_codes.isEmpty() ? lc->m_codes[0] : NoChannel;
+        smoothing_menu->menuAction()->setVisible(first == OXI_NasalFlow);
+        const double hz = AppSetting ? AppSetting->nasalFlowFilterHz() : 0;
+        for (QAction *a : smoothing_menu->actions()) a->setChecked(qFuzzyCompare(a->data().toDouble() + 1, hz + 1));
+        const QSignalBlocker block(desat_fill_action);
+        desat_fill_action->setVisible(first == OXI_SPO2);
+        desat_fill_action->setChecked(AppSetting && AppSetting->showDesatFill());
     }
 
     limits_menu->clear();

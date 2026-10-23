@@ -16,6 +16,8 @@
 #include "overviewpresets.h"
 #include "Graphs/gLineChart.h"
 #include "Graphs/gGraph.h"
+#include "Graphs/gDesatFill.h"
+#include "SleepLib/analysis/signal_filter.h"
 #include <QKeyEvent>
 #include "Graphs/gGraphView.h"
 
@@ -3367,4 +3369,70 @@ void AnalysisIntegrationTests::testDesatArea4Stored()
     QCOMPARE(repo.find(m_profileId, d.date).desatArea4, 100.0);
     repo.remove(m_profileId, d.date);
     QVERIFY(AnalysisDailyData().desatArea4 < 0);
+}
+
+// The nasal flow's display smoothing (doctor 2026-10-23, as Neurosoft's low-pass): a zero-phase
+// low-pass keeps a slow breath where it is and takes the fast noise away; 0 Hz leaves it alone.
+void AnalysisIntegrationTests::testDisplayLowPass()
+{
+    const int rate = 50;
+    QVector<float> x(rate * 20);
+    for (int i = 0; i < x.size(); ++i) {
+        const double t = double(i) / rate;
+        x[i] = float(100 * std::sin(2 * M_PI * 0.3 * t) + 20 * std::sin(2 * M_PI * 10 * t));
+    }
+    const QVector<float> y = analysis::lowPass(x, rate, 1.0);
+    QCOMPARE(y.size(), x.size());
+    // the 10 Hz part gone (its amplitude 20 → under 2), the 0.3 Hz breath kept (amplitude within 10 %)
+    double maxY = 0;
+    for (int i = rate * 5; i < rate * 15; ++i) maxY = qMax(maxY, double(qAbs(y[i])));
+    QVERIFY2(maxY > 90 && maxY < 110, qPrintable(QString::number(maxY)));
+    // residual fast ripple: the difference from the clean breath
+    double ripple = 0;
+    for (int i = rate * 5; i < rate * 15; ++i) {
+        const double t = double(i) / rate;
+        ripple = qMax(ripple, qAbs(double(y[i]) - 100 * std::sin(2 * M_PI * 0.3 * t)));
+    }
+    QVERIFY2(ripple < 12, qPrintable(QString::number(ripple)));
+    // zero phase: the breath's peak stays where it was (within 2 samples)
+    int peakX = 0, peakY = 0;
+    for (int i = rate * 5; i < rate * 9; ++i) {
+        if (100 * std::sin(2 * M_PI * 0.3 * double(i) / rate) > 100 * std::sin(2 * M_PI * 0.3 * double(peakX) / rate)) peakX = i;
+        if (y[i] > y[peakY]) peakY = i;
+    }
+    QVERIFY2(qAbs(peakX - peakY) <= 2, qPrintable(QStringLiteral("%1 vs %2").arg(peakX).arg(peakY)));
+    QCOMPARE(analysis::lowPass(x, rate, 0), x);
+    QVERIFY(analysis::lowPass(QVector<float>(), rate, 1).isEmpty());
+    QCOMPARE(analysis::lowPass(QVector<float>(3, 7.0f), rate, 1), QVector<float>(3, 7.0f));
+}
+
+// The hypoxic burden's area on the SpO2 graph (doctor 2026-10-23, as Neurosoft shades it): the
+// polygon between the desaturation's SpO2 and its peak, within the burden window around the nadir.
+void AnalysisIntegrationTests::testDesatFillShape()
+{
+    QVector<float> spo2(200, 96);
+    for (int i = 100; i < 140; ++i) spo2[i] = 96 - qMin(i - 100, 139 - i) * 0.5f;   // down to 86.5 at 119/120 and back
+    const qint64 t0 = synth::kStart;
+    auto at = [](int s) { return synth::kStart + qint64(s) * 1000; };
+    const QPolygonF shape = gDesatFill::shape([&](qint64 t) { return spo2[int((t - t0) / 1000)]; }, at(100), at(140), at(119), 96, 1000);
+    QVERIFY(!shape.isEmpty());
+    // the top edge at the peak, the bottom along SpO2, within nadir ± 30 s and the desaturation
+    double minT = 1e18, maxT = 0, maxV = 0, minV = 1e9;
+    for (const QPointF &p : shape) {
+        minT = qMin(minT, p.x());
+        maxT = qMax(maxT, p.x());
+        maxV = qMax(maxV, p.y());
+        minV = qMin(minV, p.y());
+    }
+    QCOMPARE(qint64(minT), at(100));   // the window starts at 89 but the desaturation at 100
+    QCOMPARE(qint64(maxT), at(140));
+    QCOMPARE(maxV, 96.0);
+    QVERIFY(minV <= 87);
+    // a long desaturation: the window clips it to nadir ± 30 s
+    const QPolygonF clipped = gDesatFill::shape([](qint64) { return 90.0f; }, at(0), at(199), at(100), 96, 1000);
+    minT = 1e18; maxT = 0;
+    for (const QPointF &p : clipped) { minT = qMin(minT, p.x()); maxT = qMax(maxT, p.x()); }
+    QCOMPARE(qint64(minT), at(70));
+    QCOMPARE(qint64(maxT), at(130));
+    QVERIFY(gDesatFill::shape([](qint64) { return 96.0f; }, at(10), at(10), at(10), 96, 1000).isEmpty());
 }
