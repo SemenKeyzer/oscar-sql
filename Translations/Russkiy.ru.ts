@@ -197,7 +197,7 @@
     <message>
         <location filename="../oscar/analysispanel.cpp" line="173"/>
         <source>REI</source>
-        <translation>РИД</translation>
+        <translation>REI</translation>
     </message>
     <message>
         <location filename="../oscar/analysispanel.cpp" line="182"/>
@@ -2269,7 +2269,7 @@ Supported services: Dropbox, Google Drive, OneDrive, Box, 0x0.st, or any direct 
     <message>
         <location filename="../oscar/daily.cpp" line="2264"/>
         <source>REI</source>
-        <translation>РИД</translation>
+        <translation>REI</translation>
     </message>
     <message>
         <location filename="../oscar/daily.cpp" line="2265"/>
@@ -5688,7 +5688,7 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
     <message>
         <location filename="../oscar/glossary.cpp" line="207"/>
         <source>REI · analysis</source>
-        <translation>РИД · анализ</translation>
+        <translation>REI · анализ</translation>
     </message>
     <message>
         <location filename="../oscar/glossary.cpp" line="207"/>
@@ -5698,7 +5698,7 @@ Note: Macro substitution (#PROFILE_ID, #START_DATE, #END_DATE) has already been 
     <message>
         <location filename="../oscar/glossary.cpp" line="208"/>
         <source>Apneas and hypopneas per hour of recording, scored by OSCAR&apos;s analysis from a sleep screener&apos;s nasal flow (Contec RS01). The hours are of recording, not of sleep, so it is an REI, not an AHI.</source>
-        <translation>Апноэ и гипопноэ в час записи по анализу OSCAR носового потока скринера сна (Contec RS01). Часы — это часы записи, а не сна, поэтому это РИД (REI), а не AHI.</translation>
+        <translation>Апноэ и гипопноэ в час записи по анализу OSCAR носового потока скринера сна (Contec RS01). Часы — это часы записи, а не сна, поэтому это REI, а не AHI.</translation>
     </message>
     <message>
         <location filename="../oscar/glossary.cpp" line="209"/>
@@ -14410,7 +14410,7 @@ Outdated days need it after an update or a change of settings. All days runs eve
     <message>
         <location filename="../oscar/nightsummary.cpp" line="199"/>
         <source>REI %1 (OSCAR&apos;s analysis of the screener), at or above %2.</source>
-        <translation>РИД %1 (анализ OSCAR по скринеру) — %2 или выше.</translation>
+        <translation>REI %1 (анализ OSCAR по скринеру) — %2 или выше.</translation>
     </message>
     <message>
         <location filename="../oscar/nightsummary.cpp" line="212"/>
@@ -14673,7 +14673,7 @@ Outdated days need it after an update or a change of settings. All days runs eve
     <message>
         <location filename="../oscar/nightsummary.cpp" line="660"/>
         <source>REI</source>
-        <translation>РИД</translation>
+        <translation>REI</translation>
     </message>
     <message>
         <location filename="../oscar/nightsummary.cpp" line="662"/>
@@ -21088,12 +21088,12 @@ TTIA: %1</translation>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3035"/>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3037"/>
         <source>Show AHI</source>
-        <translation>Показывать ИАГ</translation>
+        <translation>Показывать AHI</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3036"/>
         <source>Whether or not device shows AHI via built-in display.</source>
-        <translation>Отображение ИАГ на встроенном дисплее.</translation>
+        <translation>Отображение AHI на встроенном дисплее.</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/loader_plugins/prs1_loader.cpp" line="3079"/>
@@ -22016,7 +22016,7 @@ TTIA: %1</translation>
     <message>
         <location filename="../oscar/SleepLib/schema.cpp" line="321"/>
         <source>Graph showing running AHI for the past hour</source>
-        <translation>График изменений ИАГ за последний час</translation>
+        <translation>График изменений AHI за последний час</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/schema.cpp" line="324"/>
@@ -22046,7 +22046,7 @@ TTIA: %1</translation>
     <message>
         <location filename="../oscar/SleepLib/schema.cpp" line="330"/>
         <source>Graph showing running RDI for the past hour</source>
-        <translation>График изменения ИНД за последний час</translation>
+        <translation>График изменения RDI за последний час</translation>
     </message>
     <message>
         <location filename="../oscar/SleepLib/schema.cpp" line="334"/>
@@ -29061,19 +29061,19 @@ Make sure you trust the recipient before sharing this data.</source>
     </message>
     <message>
         <source>Days AHI of 5 or greater: %1</source>
-        <translation type="vanished">Дней с ИАГ 5 и выше: %1</translation>
+        <translation type="vanished">Дней с AHI 5 и выше: %1</translation>
     </message>
     <message>
         <source>Best AHI</source>
-        <translation type="vanished">Лучший ИАГ</translation>
+        <translation type="vanished">Лучший AHI</translation>
     </message>
     <message>
         <source>Date: %1 AHI: %2</source>
-        <translation type="vanished">Дата: %1, ИАГ: %2</translation>
+        <translation type="vanished">Дата: %1, AHI: %2</translation>
     </message>
     <message>
         <source>Worst AHI</source>
-        <translation type="vanished">Худший ИАГ</translation>
+        <translation type="vanished">Худший AHI</translation>
     </message>
     <message>
         <location filename="../oscar/statistics.cpp" line="2574"/>
@@ -29164,7 +29164,7 @@ Make sure you trust the recipient before sharing this data.</source>
     </message>
     <message>
         <source>AHI: %1</source>
-        <translation type="vanished">ИАГ: %1</translation>
+        <translation type="vanished">AHI: %1</translation>
     </message>
     <message>
         <location filename="../oscar/statistics.cpp" line="2733"/>
@@ -29181,7 +29181,7 @@ Make sure you trust the recipient before sharing this data.</source>
         <location filename="../oscar/statistics.cpp" line="137"/>
         <location filename="../oscar/tests/analysisintegrationtests.cpp" line="2853"/>
         <source>AHI / REI</source>
-        <translation>AHI / РИД</translation>
+        <translation>AHI / REI</translation>
     </message>
     <message>
         <location filename="../oscar/statistics.cpp" line="141"/>
