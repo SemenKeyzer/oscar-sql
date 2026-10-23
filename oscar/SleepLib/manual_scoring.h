@@ -86,6 +86,7 @@ struct MarkEdit {
 };
 
 struct Result {
+    bool baseIsAnalysis = false;   //!< a screener's session: the base events are the analysis', not a device's
     QHash<ChannelID, int> delta;   //!< counted minus device count, per scored channel
     qint64 excludedMs = 0;         //!< excluded time inside the sessions, overlaps counted once
     QList<QPair<qint64, qint64>> excludedSpans;   //!< the excluded stretches, merged and clipped to the sessions
@@ -157,6 +158,22 @@ bool updateEdit(Day *day, qint64 id, qint64 startMs, qint64 endMs);
 //! Undoes the edit \a id of \a day's sessions; an excluded stretch stored with several sessions
 //! is undone in all of them.
 bool undoEdit(Day *day, qint64 id);
+//! A sleep screener's session: no device events, the analysis' breathing events on its nasal flow.
+bool isScreenerSession(Session *s);
+//! The session of \a day an edit at \a t (graph time) goes to: the enabled CPAP session there (or the
+//! nearest); a screener's session where no CPAP recorded, or always when \a nasalFlow (the edit was made
+//! on the nasal-flow graph) and no CPAP covers \a t.
+Session *sessionForEdit(Day *day, qint64 t, bool nasalFlow);
+//! A screener night's REI after manual scoring.
+struct ScreenerIndex {
+    bool valid = false;
+    double rei = 0;          //!< the analysis' events with the edits, per hour of the analysed flow less excluded time
+    double analysisRei = 0;  //!< the analysis' own
+    int events = 0;
+    double hours = 0;
+};
+//! The REI of \a day's screener sessions after manual scoring, over \a analysedSeconds of flow.
+ScreenerIndex screenerIndex(Day *day, double analysedSeconds);
 //! The event added by hand \a id of \a day's sessions becomes \a newChannel (its span kept).
 bool retypeEdit(Day *day, qint64 id, ChannelID newChannel);
 //! The flow limitation marked by hand in the day's enabled CPAP sessions, less excluded time.

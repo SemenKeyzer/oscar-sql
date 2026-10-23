@@ -23,6 +23,7 @@ private slots:
     void testDragZoomsOutsideScoringMode();
     void testRightClickRequestsMenu();
     void testOtherGraphsUnaffected();
+    void testNasalFlowAndSpo2Score();
     void testRangeFromPixels();
     void testLayerItems();
     void testWholeNightGraphsUseWholeRange();

@@ -10,12 +10,14 @@
 
 #include <QSet>
 #include <algorithm>
+#include <limits>
 
 #include "SleepLib/day.h"
 #include "SleepLib/machine_common.h"
 #include "SleepLib/machine.h"
 #include "SleepLib/profiles.h"
 #include "SleepLib/schema.h"
+#include "SleepLib/analysis/analysis_channels.h"
 #include "SleepLib/session.h"
 #include "database/manual_scoring_repository.h"
 #include "database/daily_summary_repository.h"
@@ -274,15 +276,31 @@ void loadSummary(Session *s)
 Result resultFor(Session *s)
 {
     const QList<Edit> edits = ManualScoringRepository::editsForSession(keyOf(s));
-    const QList<ChannelID> channels = countedChannels();
-    // the device events are needed: load the scored channels if they are not all in memory
+    // the base: a device's events, or on a sleep screener the analysis' own, each as the scored type
+    // it would be on a CPAP (doctor 2026-10-23)
+    const bool screener = isScreenerSession(s);
+    QList<QPair<ChannelID, ChannelID>> sources;   // stored channel → scored channel
+    if (screener) {
+        sources = { { AN_ObstructiveApnea, CPAP_Obstructive }, { AN_CentralApnea, CPAP_ClearAirway }, { AN_Apnea, CPAP_Apnea },
+                    { AN_Hypopnea, CPAP_Hypopnea }, { AN_ObstructiveHypopnea, CPAP_ObstructiveHypopnea },
+                    { AN_CentralHypopnea, CPAP_CentralHypopnea }, { AN_RERA, CPAP_RERA } };
+    } else {
+        for (ChannelID code : countedChannels()) sources.append({ code, code });
+    }
+    // the base events are needed: load those channels if they are not all in memory
     // (nothing loaded, or the analysis holds only some channels)
+    QSet<ChannelID> wanted;
+    for (const auto &src : sources) wanted.insert(src.first);
     const bool wasEmpty = s->eventlist.isEmpty() && !s->eventsLoaded();
-    if (wasEmpty || s->partialEvents()) s->LoadEventsFromDatabase(QSet<ChannelID>(channels.cbegin(), channels.cend()));
+    bool missing = wasEmpty || s->partialEvents();
+    if (screener && !wasEmpty) {
+        for (ChannelID c : wanted) missing = missing || (!s->eventlist.contains(c) && s->m_availableChannels.contains(c));
+    }
+    if (missing && s->sessionRowId() > 0) s->LoadEventsFromDatabase(wanted);
     QList<DeviceEvent> device;
-    for (ChannelID code : channels) {
-        for (EventList *el : s->eventlist.value(code)) {
-            for (quint32 i = 0; i < el->count(); ++i) device.append({ code, el->time(i), double(el->data(i)) });
+    for (const auto &src : sources) {
+        for (EventList *el : s->eventlist.value(src.first)) {
+            for (quint32 i = 0; i < el->count(); ++i) device.append({ src.second, el->time(i), double(el->data(i)) });
         }
     }
     if (wasEmpty) s->TrashEvents();
@@ -294,6 +312,7 @@ Result resultFor(Session *s)
     }
     if (spans.isEmpty()) spans.append({ s->realFirst(), s->realLast() });
     Result r = apply(device, edits, spans);
+    r.baseIsAnalysis = screener;
 
     // shown on the graphs with the device's time correction
     const qint64 c = s->correctionMs();
@@ -330,7 +349,7 @@ void refresh(Session *s)
     // marks (flow limitation) and «Не артефакт» change no count, nor does anything on an oximeter's
     // session: such a session is not corrected by hand
     bool counts = false;
-    if (s->type() == MT_CPAP && ManualScoringRepository::hasScoring(key)) {
+    if ((s->type() == MT_CPAP || isScreenerSession(s)) && ManualScoringRepository::hasScoring(key)) {
         for (const Edit &e : ManualScoringRepository::editsForSession(key)) counts = counts || (e.kind != Kind::Mark && e.kind != Kind::Keep);
     }
     if (!counts) {
@@ -539,6 +558,73 @@ bool retypeEdit(Day *day, qint64 id, ChannelID newChannel)
         }
     }
     return false;
+}
+
+bool isScreenerSession(Session *s)
+{
+    if (!s || s->type() == MT_CPAP) return false;
+    return s->eventlist.contains(OXI_NasalFlow) || s->m_availableChannels.contains(OXI_NasalFlow);
+}
+
+Session *sessionForEdit(Day *day, qint64 t, bool nasalFlow)
+{
+    if (!day) return nullptr;
+    auto covers = [t](Session *s) { return t >= s->first() && t <= s->last(); };
+    auto nearest = [t](const QList<Session *> &list) {
+        Session *best = nullptr;
+        qint64 bestGap = std::numeric_limits<qint64>::max();
+        for (Session *s : list) {
+            const qint64 gap = t < s->first() ? s->first() - t : (t > s->last() ? t - s->last() : 0);
+            if (gap < bestGap) {
+                best = s;
+                bestGap = gap;
+            }
+        }
+        return best;
+    };
+    QList<Session *> cpap, screener;
+    for (Session *s : day->sessions) {
+        if (!s->enabled()) continue;
+        if (s->type() == MT_CPAP) cpap.append(s);
+        else if (isScreenerSession(s)) screener.append(s);
+    }
+    for (Session *s : cpap) {
+        if (covers(s)) return s;   // under the mask the CPAP's flow scores
+    }
+    if (!screener.isEmpty() && (nasalFlow || cpap.isEmpty())) {
+        for (Session *s : screener) {
+            if (covers(s)) return s;
+        }
+        if (cpap.isEmpty()) return nearest(screener);
+    }
+    return nearest(cpap);
+}
+
+ScreenerIndex screenerIndex(Day *day, double analysedSeconds)
+{
+    ScreenerIndex out;
+    if (!day || analysedSeconds <= 0) return out;
+    const QVector<ChannelID> *ahi = ahiChannelGroup(AllAhiChannels);
+    int base = 0;
+    qint64 excludedMs = 0;
+    bool any = false;
+    for (Session *s : day->sessions) {
+        if (!s->enabled() || !isScreenerSession(s)) continue;
+        any = true;
+        const Result r = resultFor(s);
+        excludedMs += r.excludedMs;
+        for (const EffectiveEvent &e : r.events) {
+            if (!ahi->contains(e.originalChannel) && !ahi->contains(e.channel)) continue;
+            if (e.origin != Origin::Added && ahi->contains(e.originalChannel)) ++base;
+            if (e.origin != Origin::Removed && !e.excluded && ahi->contains(e.channel)) ++out.events;
+        }
+    }
+    if (!any) return out;
+    out.hours = qMax(0.0, analysedSeconds - excludedMs / 1000.0) / 3600.0;
+    out.analysisRei = base / (analysedSeconds / 3600.0);
+    out.rei = out.hours > 0 ? out.events / out.hours : 0;
+    out.valid = true;
+    return out;
 }
 
 qint64 flowLimitedMs(Day *day)

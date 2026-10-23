@@ -2397,6 +2397,111 @@ void AnalysisIntegrationTests::testAnalysisColoursMatchDevice()
     QCOMPARE(analysis::storedColour(CPAP_Obstructive, oldDefault), oldDefault);   // not an analysis channel
 }
 
+namespace {
+
+// A screener's session as the analysis left it: nasal flow, two apneas and a hypopnea (ends at 600,
+// 1200 and 1800 s, 20 s each), over an hour from kStart.
+Session *screenerSession(Machine *mach, SessionID id)
+{
+    Session *s = new Session(mach, id);
+    const qint64 t0 = synth::kStart;
+    s->really_set_first(t0);
+    s->really_set_last(t0 + 3600000);
+    QVector<qint16> flow(10, 0);
+    s->AddEventList(OXI_NasalFlow, EVL_Waveform, 0.1f, 0, 0, 0, 1000.0)->AddWaveform(t0, flow.data(), flow.size(), 10000);
+    EventList *a = s->AddEventList(AN_Apnea, EVL_Event);
+    a->AddEvent(t0 + 600000, 20);
+    a->AddEvent(t0 + 1200000, 20);
+    s->AddEventList(AN_Hypopnea, EVL_Event)->AddEvent(t0 + 1800000, 20);
+    s->setOpened(true);   // in memory: nothing to load
+    return s;
+}
+
+} // namespace
+
+// A screener's night scored by hand: the analysis' events are the base, as the device's are on a
+// CPAP night (doctor 2026-10-23); its own AN_ channels stay as they are.
+void AnalysisIntegrationTests::testScreenerScoringBase()
+{
+    Machine rs01(p_profile, 120);
+    rs01.info.type = MT_OXIMETER;
+    rs01.info.serial = QStringLiteral("RS01T1");
+    Session *s = screenerSession(&rs01, 1201);
+    QVERIFY(ManualScoring::isScreenerSession(s));
+    ManualScoring::Result r = ManualScoring::resultFor(s);
+    QVERIFY(r.baseIsAnalysis);
+    QCOMPARE(ManualScoring::countOf(r.events, CPAP_Apnea), 2);
+    QCOMPARE(ManualScoring::countOf(r.events, CPAP_Hypopnea), 1);
+
+    ManualScoring::Edit remove;
+    remove.kind = ManualScoring::Kind::Remove;
+    remove.channel = CPAP_Apnea;
+    remove.startMs = remove.endMs = synth::kStart + 600000;
+    QVERIFY(ManualScoring::addEdit(s, remove));
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Add, CPAP_Obstructive, 2400, 2420)));
+    r = ManualScoring::resultFor(s);
+    QCOMPARE(r.delta.value(CPAP_Apnea), -1);
+    QCOMPARE(r.delta.value(CPAP_Obstructive), 1);
+    QCOMPARE(s->manualDelta().value(CPAP_Obstructive), 1);   // the day counts it
+    QCOMPARE(s->eventlist.value(AN_Apnea).first()->count(), quint32(2));   // the analysis' own untouched
+    ManualScoringRepository::removeAllForSession(ManualScoring::keyOf(s));
+    delete s;
+}
+
+// The REI after manual scoring: the analysis' events with the edits, per hour of the analysed flow
+// less the time excluded by hand; beside it the analysis' own REI.
+void AnalysisIntegrationTests::testScreenerIndex()
+{
+    Machine rs01(p_profile, 121);
+    rs01.info.type = MT_OXIMETER;
+    rs01.info.serial = QStringLiteral("RS01T2");
+    Session *s = screenerSession(&rs01, 1211);
+    Day day;
+    day.addSession(s);
+    ManualScoring::ScreenerIndex i = ManualScoring::screenerIndex(&day, 3600);
+    QVERIFY(i.valid);
+    QCOMPARE(i.analysisRei, 3.0);
+    QCOMPARE(i.rei, 3.0);
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Add, CPAP_Hypopnea, 2400, 2420)));
+    QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Exclude, 0, 1100, 1300)));   // the 2nd apnea out
+    i = ManualScoring::screenerIndex(&day, 3600);
+    QCOMPARE(i.events, 3);                       // 3 − 1 excluded + 1 added
+    QVERIFY(qAbs(i.hours - 3400.0 / 3600) < 1e-6);
+    QVERIFY(qAbs(i.rei - 3 / (3400.0 / 3600)) < 1e-6);
+    QCOMPARE(i.analysisRei, 3.0);
+    QVERIFY(!ManualScoring::screenerIndex(&day, 0).valid);
+    ManualScoringRepository::removeAllForSession(ManualScoring::keyOf(s));
+    day.removeSession(s);
+    delete s;
+}
+
+// Which session an edit at a time goes to: the CPAP's where it recorded, a screener's elsewhere.
+void AnalysisIntegrationTests::testSessionForEdit()
+{
+    Machine cpap(p_profile, 122);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Machine rs01(p_profile, 123);
+    rs01.info.type = MT_OXIMETER;
+    Session *cs = scoredSession(&cpap, 1221, m_machineRow);   // kStart .. +1 h
+    Session *ns = screenerSession(&rs01, 1231);
+    ns->really_set_first(synth::kStart - 3600000);              // an hour before the mask
+    Day day;
+    day.addSession(cs);
+    day.addSession(ns);
+    QCOMPARE(ManualScoring::sessionForEdit(&day, synth::kStart + 600000, false), cs);
+    QCOMPARE(ManualScoring::sessionForEdit(&day, synth::kStart - 600000, true), ns);   // on the nasal flow, before the mask
+    QCOMPARE(ManualScoring::sessionForEdit(&day, synth::kStart + 600000, true), cs);   // under the mask the CPAP's flow scores
+    day.removeSession(cs);
+    day.removeSession(ns);
+    Day screenerOnly;
+    screenerOnly.addSession(ns);
+    QCOMPARE(ManualScoring::sessionForEdit(&screenerOnly, synth::kStart + 600000, false), ns);
+    screenerOnly.removeSession(ns);
+    delete cs;
+    delete ns;
+}
+
 // An event added by hand gets another type: the same edit, its span kept; the counts follow.
 void AnalysisIntegrationTests::testRetypeAdded()
 {

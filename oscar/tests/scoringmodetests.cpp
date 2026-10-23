@@ -279,3 +279,14 @@ void ScoringModeTests::testMarkedOnlyOnFlowGraph()
     r.flowLimitedSpans = { { 100000, 230000 } };
     for (const Item &it : gManualScoringLayer::items(r, 0, 1000000, true, false, false)) QVERIFY(it.kind != Item::Marked);
 }
+
+// A screener's nasal flow is scored like the CPAP's flow, and desaturations on SpO2 (doctor 2026-10-23).
+void ScoringModeTests::testNasalFlowAndSpo2Score()
+{
+    for (const QString &g : { STR_GRAPH_Oxi_NasalFlow, STR_GRAPH_Oxi_SPO2 }) {
+        QCOMPARE(actionFor(true, g, Qt::LeftButton, true), Action::SelectRange);
+        QCOMPARE(actionFor(true, g, Qt::RightButton, false), Action::ContextMenu);
+        QCOMPARE(actionFor(false, g, Qt::LeftButton, true), Action::None);
+    }
+    QCOMPARE(actionFor(true, STR_GRAPH_Oxi_Pulse, Qt::LeftButton, true), Action::None);
+}

@@ -15,8 +15,10 @@ namespace ScoringGesture {
 Action actionFor(bool scoringMode, const QString &graphName, Qt::MouseButton button, bool dragged)
 {
     if (!scoringMode) return Action::None;
-    if (button == Qt::LeftButton && dragged && graphName == STR_GRAPH_FlowRate) return Action::SelectRange;
-    if (button == Qt::RightButton && !dragged && (graphName == STR_GRAPH_FlowRate || graphName == STR_GRAPH_SleepFlags)) {
+    // the CPAP's flow, a sleep screener's nasal flow, and SpO2 for desaturations (doctor 2026-10-23)
+    const bool scored = graphName == STR_GRAPH_FlowRate || graphName == STR_GRAPH_Oxi_NasalFlow || graphName == STR_GRAPH_Oxi_SPO2;
+    if (button == Qt::LeftButton && dragged && scored) return Action::SelectRange;
+    if (button == Qt::RightButton && !dragged && (scored || graphName == STR_GRAPH_SleepFlags)) {
         return Action::ContextMenu;
     }
     return Action::None;

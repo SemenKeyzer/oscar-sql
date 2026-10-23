@@ -50,6 +50,7 @@ const QString STR_GRAPH_PeakAHI = "PeakAHI";
 const QString STR_GRAPH_TAP = "TimeAtPressure";
 const QString STR_GRAPH_Oxi_Pulse = "Pulse";
 const QString STR_GRAPH_Oxi_SPO2 = "SPO2";
+const QString STR_GRAPH_Oxi_NasalFlow = "NasalFlow";   //!< a sleep screener's nasal flow (OXI_NasalFlow)
 const QString STR_GRAPH_Oxi_Plethy = "Plethy";
 const QString STR_GRAPH_Oxi_Perf = "Perf. Index";
 const QString STR_GRAPH_Oxi_PulseChange = "PulseChange";
