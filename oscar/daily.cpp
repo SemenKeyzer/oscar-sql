@@ -749,7 +749,10 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
         // the boxes on the flows scored by hand: the CPAP's and a sleep screener's nasal flow
         const bool flow = it.key() == STR_GRAPH_FlowRate || it.key() == STR_GRAPH_Oxi_NasalFlow;
         const bool markers = flow || it.key() == STR_GRAPH_SleepFlags;
-        it.value()->AddLayer(new gManualScoringLayer(m_scoringDrawn, markers, flow));
+        // each flow its own events: the CPAP's on the flow rate, a screener's on the nasal flow
+        const auto source = it.key() == STR_GRAPH_FlowRate ? gManualScoringLayer::Source::Cpap
+                          : it.key() == STR_GRAPH_Oxi_NasalFlow ? gManualScoringLayer::Source::Screener : gManualScoringLayer::Source::Any;
+        it.value()->AddLayer(new gManualScoringLayer(m_scoringDrawn, markers, flow, source));
     }
     GraphView->setScoringResult(m_scoringDrawn);
     GraphView->setScoringLimits([this](const ScoringResize::Target &t) { return scoringLimits(t); });
@@ -4789,6 +4792,19 @@ void Daily::onScoringButtonToggled(bool on)
 
 namespace {
 
+//! The enabled sessions of \a day that carry SpO2: an oximeter's; a CPAP's own only when no oximeter has any.
+QList<Session *> spo2Sessions(Day *day)
+{
+    QList<Session *> oximeter, cpap;
+    for (Session *s : day ? day->sessions : QList<Session *>()) {
+        if (!ManualScoring::isStretchSession(s)) continue;
+        const bool has = s->eventlist.contains(OXI_SPO2) || s->m_availableChannels.contains(OXI_SPO2);
+        if (!has) continue;
+        (s->type() == MT_CPAP ? cpap : oximeter).append(s);
+    }
+    return oximeter.isEmpty() ? cpap : oximeter;
+}
+
 //! The session of \a day an edit at \a t goes to (the CPAP's, or a screener's: ManualScoring::sessionForEdit).
 Session *scoringSessionAt(Day *day, qint64 t, bool nasalFlow)
 {
@@ -4820,8 +4836,12 @@ void Daily::applyScoring(const QVariantMap &choice, qint64 startMs, qint64 endMs
         e.endMs = endMs;
         // every session the stretch touches: a flow limitation mark on the CPAP's, «Артефакт» and
         // «Не артефакт» on the oximeter's too (they change the oximetry)
+        // chosen on SpO2: the sessions that carry it (an oximeter's, else a CPAP's own oximetry),
+        // so an artefact there leaves the CPAP's breathing alone (review 2026-10-24)
+        const QList<Session *> spo2 = m_scoringSpo2 ? spo2Sessions(day) : QList<Session *>();
         for (Session *s : day->sessions) {
-            const bool takes = e.kind == Kind::Mark ? s->type() == MT_CPAP : ManualScoring::isStretchSession(s);
+            const bool takes = e.kind == Kind::Mark ? s->type() == MT_CPAP
+                             : m_scoringSpo2 ? spo2.contains(s) : ManualScoring::isStretchSession(s);
             if (takes && s->first() < endMs && s->last() > startMs) ManualScoring::addEdit(s, e);
         }
     } else if (action == QLatin1String("remove") || action == QLatin1String("retype")) {
@@ -4829,14 +4849,21 @@ void Daily::applyScoring(const QVariantMap &choice, qint64 startMs, qint64 endMs
         e.newChannel = choice.value(QStringLiteral("newChannel")).toUInt();
         e.startMs = timeMs;
         e.endMs = timeMs;
-        if (Session *s = scoringSessionAt(day, timeMs, true)) ManualScoring::addEdit(s, e);   // the event's own session
+        // the event's own session: a screener's or the CPAP's, whichever drew it
+        bool screener = false;
+        for (const ManualScoring::EffectiveEvent &ev : m_scoringDrawn->events) {
+            if (ev.originalChannel == channel && qAbs(ev.originalEndMs - timeMs) <= 1000) screener = ev.screener;
+        }
+        if (Session *s = ManualScoring::sessionOfKind(day, timeMs, screener)) ManualScoring::addEdit(s, e);
     } else if (action == QLatin1String("retypeAll") || action == QLatin1String("removeAll")) {
         const ChannelID to = action == QLatin1String("retypeAll") ? choice.value(QStringLiteral("newChannel")).toUInt() : 0;
         // plan first: the question names the events that will actually change
         QList<QPair<Session *, ManualScoring::BulkPlan>> plans;
         int n = 0;
         for (Session *s : day->sessions) {
-            if (s->type() != MT_CPAP || !s->enabled()) continue;
+            // the sessions of the clicked event's kind: the CPAP's, or a screener's (review 2026-10-24)
+            const bool ofKind = m_scoringScreenerEvent ? ManualScoring::isScreenerSession(s) : s->type() == MT_CPAP;
+            if (!ofKind || !s->enabled()) continue;
             plans.append({ s, ManualScoring::bulkEdits(ManualScoring::resultFor(s), channel, to) });
             n += plans.last().second.count;
         }
@@ -4853,14 +4880,14 @@ void Daily::applyScoring(const QVariantMap &choice, qint64 startMs, qint64 endMs
         e.kind = Kind::Desat;
         e.startMs = startMs;
         e.endMs = endMs;
-        for (Session *s : day->sessions) {
-            if (ManualScoring::isStretchSession(s) && s->first() < endMs && s->last() > startMs) ManualScoring::addEdit(s, e);
+        for (Session *s : spo2Sessions(day)) {
+            if (s->first() < endMs && s->last() > startMs) ManualScoring::addEdit(s, e);
         }
     } else if (action == QLatin1String("removedesat")) {   // one of the analysis' taken out, by its end
         e.kind = Kind::RemoveDesat;
         e.startMs = e.endMs = timeMs;
-        for (Session *s : day->sessions) {
-            if (ManualScoring::isStretchSession(s) && timeMs >= s->first() - 2000 && timeMs <= s->last() + 2000) {
+        for (Session *s : spo2Sessions(day)) {
+            if (timeMs >= s->first() - 2000 && timeMs <= s->last() + 2000) {
                 ManualScoring::addEdit(s, e);
                 break;
             }
@@ -4890,7 +4917,9 @@ void Daily::scoringChanged()
 void Daily::onScoringRange(gGraph *graph, qint64 startMs, qint64 endMs, QPoint globalPos)
 {
     m_scoringNasal = graph && graph->name() == STR_GRAPH_Oxi_NasalFlow;   // a screener's events (doctor 2026-10-23)
-    if (graph && graph->name() == STR_GRAPH_Oxi_SPO2) {   // desaturations scored by hand, artefacts
+    m_scoringSpo2 = graph && graph->name() == STR_GRAPH_Oxi_SPO2;
+    if (m_scoringSpo2) {   // desaturations scored by hand, artefacts
+        if (!m_analysisShown) return;   // the desaturations are the analysis': nothing to see without it
         QScopedPointer<QMenu> menu(ScoringMenus::forSpo2Range(endMs - startMs, this));
         QAction *title = new QAction(menu->title(), menu.data());
         title->setEnabled(false);
@@ -4904,7 +4933,7 @@ void Daily::onScoringRange(gGraph *graph, qint64 startMs, qint64 endMs, QPoint g
         applyScoring(ScoringMenus::repeatChoice(m_repeatType), startMs, endMs);
         return;
     }
-    QScopedPointer<QMenu> menu(ScoringMenus::forRange(endMs - startMs, this));
+    QScopedPointer<QMenu> menu(ScoringMenus::forRange(endMs - startMs, this, !m_scoringNasal));   // no flow limitation on a cannula
     QAction *title = new QAction(menu->title(), menu.data());
     title->setEnabled(false);
     menu->insertAction(menu->actions().value(0), title);
@@ -4926,8 +4955,12 @@ void Daily::onScoringContext(gGraph *graph, qint64 timeMs, QPoint globalPos)
     const qint64 slack = qMax<qint64>(2000, qint64(8.0 * double(graph->max_x - graph->min_x) / plotWidth));
     const ManualScoring::EffectiveEvent *best = nullptr;
     QList<ManualScoring::EffectiveEvent> events;
+    // the graph's own events: the CPAP's on the flow rate, a screener's on the nasal flow (both on the flags)
+    const bool nasal = graph->name() == STR_GRAPH_Oxi_NasalFlow, flowRate = graph->name() == STR_GRAPH_FlowRate;
     for (Session *s : day->sessions) {
-        if ((s->type() != MT_CPAP && !ManualScoring::isScreenerSession(s)) || !s->enabled()) continue;
+        const bool screener = ManualScoring::isScreenerSession(s);
+        if ((s->type() != MT_CPAP && !screener) || !s->enabled()) continue;
+        if ((nasal && !screener) || (flowRate && screener)) continue;
         events += ManualScoring::resultFor(s).events;
     }
     qint64 bestGap = slack + 1;
@@ -4962,7 +4995,12 @@ void Daily::onScoringContext(gGraph *graph, qint64 timeMs, QPoint globalPos)
     }
     if (menu) {
     } else if (best) {
-        menu.reset(ScoringMenus::forEvent(*best, this, ManualScoring::countOf(events, best->channel)));
+        m_scoringScreenerEvent = best->screener;   // whose events "all of a type" means
+        QList<ManualScoring::EffectiveEvent> same;
+        for (const ManualScoring::EffectiveEvent &e : events) {
+            if (e.screener == best->screener) same.append(e);
+        }
+        menu.reset(ScoringMenus::forEvent(*best, this, ManualScoring::countOf(same, best->channel)));
     } else {
         // inside an excluded or a marked stretch? (stored in device time, the graph shows it corrected)
         for (Session *s : day->sessions) {
@@ -5040,7 +5078,8 @@ QPair<qint64, qint64> Daily::scoringLimits(const ScoringResize::Target &t)
     // on the graphs' clock: the device time plus its correction
     auto span = [](Session *s) { return qMakePair(s->first() + s->correctionMs(), s->last() + s->correctionMs()); };
     if (t.kind == ScoringResize::Target::Event && t.eventIndex >= 0 && t.eventIndex < m_scoringDrawn->events.size()) {
-        if (Session *s = scoringSessionAt(day, m_scoringDrawn->events.at(t.eventIndex).originalEndMs, true)) return span(s);
+        const ManualScoring::EffectiveEvent &ev = m_scoringDrawn->events.at(t.eventIndex);
+        if (Session *s = ManualScoring::sessionOfKind(day, ev.originalEndMs, ev.screener)) return span(s);
         return out;
     }
     bool any = false;
@@ -5064,7 +5103,7 @@ void Daily::onScoringResized(const ScoringResize::Target &t, qint64 startMs, qin
         const ManualScoring::EffectiveEvent ev = m_scoringDrawn->events.at(t.eventIndex);
         if (ev.origin == ManualScoring::Origin::Added) {
             ManualScoring::updateEdit(day, ev.editId, startMs, endMs);
-        } else if (Session *s = scoringSessionAt(day, ev.originalEndMs, true)) {
+        } else if (Session *s = ManualScoring::sessionOfKind(day, ev.originalEndMs, ev.screener)) {
             ManualScoring::resizeEvent(s, ev, startMs, endMs);
         }
     } else {

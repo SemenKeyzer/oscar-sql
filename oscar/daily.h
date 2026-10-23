@@ -581,6 +581,8 @@ private:
     //! Remembers where the Details page is scrolled, for the reload after a session is switched.
     void keepSidebarScroll();
     bool m_scoringNasal = false;   //!< the last stretch was chosen on a screener's nasal flow
+    bool m_scoringSpo2 = false;    //!< ... on SpO2
+    bool m_scoringScreenerEvent = false;   //!< the event right-clicked last is a screener's
     //! Scrolls the sidebar to \a at, now or once the page is laid out that far.
     void restoreSidebarScroll(int at);
     //! Shows \a html in the sidebar where it was scrolled to (the same night drawn again).

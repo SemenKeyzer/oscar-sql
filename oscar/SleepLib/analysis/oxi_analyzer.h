@@ -129,6 +129,9 @@ struct OxiOverrides {
     QVector<qint64> removeDesat;   //!< the ends of the analysis' desaturations taken out by hand
 };
 QVector<OxiArtifact> findOxiArtifacts(const Grid &spo2Raw, const Grid &pulseRaw, const OxiOverrides &overrides = OxiOverrides());
+//! The desaturations scored by hand: \a o's removed ones taken out of \a desats, each added stretch
+//! measured on \a s; an added one replaces the found ones it overlaps (only when it could be measured).
+void applyManualDesaturations(QVector<Desaturation> &desats, const Grid &s, const OxiOverrides &o);
 //! Sets the seconds \a artifacts cover to no data.
 void maskArtifacts(Grid &g, const QVector<OxiArtifact> &artifacts);
 //! Leaves \a artifacts out of \a spo2, and those that silence the whole probe (frozen, probe on

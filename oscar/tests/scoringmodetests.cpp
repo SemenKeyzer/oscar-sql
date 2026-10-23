@@ -290,3 +290,21 @@ void ScoringModeTests::testNasalFlowAndSpo2Score()
     }
     QCOMPARE(actionFor(true, STR_GRAPH_Oxi_Pulse, Qt::LeftButton, true), Action::None);
 }
+
+// Each flow graph draws its own events (review 2026-10-24): the CPAP's on the flow rate, the
+// screener's on the nasal flow; the event flags graph all of them.
+void ScoringModeTests::testLayerShowsItsOwnEvents()
+{
+    ManualScoring::Result r;
+    ManualScoring::EffectiveEvent cpap { CPAP_Obstructive, CPAP_Obstructive, 100000, 10, ManualScoring::Origin::Added, 1, false, 100000, 10, 0 };
+    ManualScoring::EffectiveEvent screener = cpap;
+    screener.endMs = screener.originalEndMs = 200000;
+    screener.screener = true;
+    r.events = { cpap, screener };
+    using Source = gManualScoringLayer::Source;
+    QCOMPARE(gManualScoringLayer::forSource(r, Source::Any).events.size(), 2);
+    QCOMPARE(gManualScoringLayer::forSource(r, Source::Cpap).events.size(), 1);
+    QVERIFY(!gManualScoringLayer::forSource(r, Source::Cpap).events.first().screener);
+    QCOMPARE(gManualScoringLayer::forSource(r, Source::Screener).events.size(), 1);
+    QVERIFY(gManualScoringLayer::forSource(r, Source::Screener).events.first().screener);
+}

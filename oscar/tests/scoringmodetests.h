@@ -24,6 +24,7 @@ private slots:
     void testRightClickRequestsMenu();
     void testOtherGraphsUnaffected();
     void testNasalFlowAndSpo2Score();
+    void testLayerShowsItsOwnEvents();
     void testRangeFromPixels();
     void testLayerItems();
     void testWholeNightGraphsUseWholeRange();

@@ -70,6 +70,7 @@ struct EffectiveEvent {
     qint64 originalEndMs = 0;    //!< the device's end (Added: the same as endMs)
     double originalDurationSec = 0;
     qint64 resizeEditId = 0;     //!< the Resize edit giving it new bounds; 0 for none
+    bool screener = false;       //!< a sleep screener's event (its analysis' base), not a CPAP's
 };
 
 //! An Exclude edit's own stretch, before stretches are merged.
@@ -176,6 +177,10 @@ struct ScreenerIndex {
 ScreenerIndex screenerIndex(Day *day, double analysedSeconds);
 //! The same over the analysed flow its screener sessions' stamps record.
 ScreenerIndex screenerIndex(Day *day);
+//! The session of \a day of that kind (a screener's, or the CPAP's) holding \a t, or the nearest one.
+Session *sessionOfKind(Day *day, qint64 t, bool screener);
+//! Whether \a day's screener sessions have edits that change its breathing events (not SpO2 ones only).
+bool hasBreathingEdits(Day *day);
 //! The event added by hand \a id of \a day's sessions becomes \a newChannel (its span kept).
 bool retypeEdit(Day *day, qint64 id, ChannelID newChannel);
 //! The flow limitation marked by hand in the day's enabled CPAP sessions, less excluded time.

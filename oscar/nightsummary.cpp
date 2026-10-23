@@ -311,7 +311,7 @@ NightSummary buildNightSummaryFor(Profile *profile, analysis::AnalysisService *s
         s.takeScreener(row);
         // scored by hand on the nasal flow: the REI after manual scoring (doctor 2026-10-23)
         Day *any = s.screener ? profile->GetDay(s.date) : nullptr;
-        if (any && ManualScoring::hasEdits(any)) {
+        if (any && ManualScoring::hasBreathingEdits(any)) {
             const ManualScoring::ScreenerIndex idx = ManualScoring::screenerIndex(any);
             if (idx.valid) s.reiManual = idx.rei;
         }

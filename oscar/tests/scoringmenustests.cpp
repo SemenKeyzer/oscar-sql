@@ -339,6 +339,10 @@ void ScoringMenusTests::testAddedEventChangeType()
 // a desaturation of the analysis is deleted, one scored by hand undone.
 void ScoringMenusTests::testSpo2Menus()
 {
+    // on a screener's nasal flow there is no flow limitation to mark (review 2026-10-24)
+    QScopedPointer<QMenu> nasal(ScoringMenus::forRange(20000, nullptr, false));
+    QVERIFY(!find(nasal.data(), QStringLiteral("Flow limitation")));
+    QVERIFY(find(nasal.data(), QStringLiteral("Hypopnea")));
     QScopedPointer<QMenu> range(ScoringMenus::forSpo2Range(40000, nullptr));
     QCOMPARE(texts(range.data()), QStringList({ QStringLiteral("Desaturation"), QStringLiteral("Artifact"), QStringLiteral("Not an artifact") }));
     QAction *desat = find(range.data(), QStringLiteral("Desaturation"));

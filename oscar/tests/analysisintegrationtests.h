@@ -105,6 +105,8 @@ private slots:
     void testScreenerScoringBase();
     void testScreenerIndex();
     void testSessionForEdit();
+    void testScreenerEditsStayOffCpap();
+    void testDesatUndoAllCopies();
     void testAnalysisColoursMatchDevice();
     void testDisplayLowPass();
     void testDesatFillShape();

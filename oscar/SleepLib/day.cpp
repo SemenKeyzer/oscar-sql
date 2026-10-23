@@ -1147,7 +1147,8 @@ EventDataType Day::count(ChannelID code)
     for (auto & sess : sessions) {
 //        qDebug() << "Day::count session" << numsess++;
 
-        if (sess->enabled() && sess->hasManualScoring() && !deviceFiguresOnly()) {
+        // a CPAP's manual scoring; a screener's has its own REI (ManualScoring::screenerIndex)
+        if (sess->enabled() && sess->type() == MT_CPAP && sess->hasManualScoring() && !deviceFiguresOnly()) {
             total += sess->manualDelta().value(code);   // also for a type the device did not record
         }
         if (sess->enabled() && sess->m_cnt.contains(code)) {
@@ -1765,7 +1766,7 @@ double Day::ahiHours()
 bool Day::hasManualScoring()
 {
     for (Session *sess : sessions) {
-        if (sess->enabled() && sess->hasManualScoring()) return true;
+        if (sess->enabled() && sess->type() == MT_CPAP && sess->hasManualScoring()) return true;   // the CPAP's figures
     }
     return false;
 }

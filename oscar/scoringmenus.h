@@ -27,7 +27,7 @@ class ScoringMenus
     Q_DECLARE_TR_FUNCTIONS(ScoringMenus)
   public:
     //! After a stretch of \a durationMs was selected on the flow graph.
-    static QMenu *forRange(qint64 durationMs, QWidget *parent);
+    static QMenu *forRange(qint64 durationMs, QWidget *parent, bool flowLimitation = true);
     //! For an event right-clicked on the graphs.
     //! \a countOfType: how many events of its type the night counts; with more than one, the menu
     //! also offers to change or remove all of them.

@@ -101,7 +101,7 @@ QString ScoringMenus::typeName(ChannelID channel)
     return schema::channel[channel].label();
 }
 
-QMenu *ScoringMenus::forRange(qint64 durationMs, QWidget *parent)
+QMenu *ScoringMenus::forRange(qint64 durationMs, QWidget *parent, bool flowLimitation)
 {
     auto *menu = new QMenu(parent);
     menu->setAttribute(Qt::WA_NoMouseReplay);   // the click that closes it must not zoom the graph (Windows)
@@ -113,7 +113,7 @@ QMenu *ScoringMenus::forRange(qint64 durationMs, QWidget *parent)
         keyed(menu, text, keyOf(c))->setData(data("add", c));
     }
     menu->addSeparator();
-    keyed(menu, tr("Flow limitation"), QLatin1Char('F'))->setData(data("mark", CPAP_ManualFlowLimit));
+    if (flowLimitation) keyed(menu, tr("Flow limitation"), QLatin1Char('F'))->setData(data("mark", CPAP_ManualFlowLimit));   // not on a nasal cannula
     keyed(menu, tr("Artifact"), QLatin1Char('X'))->setData(data("exclude"));
     keyed(menu, tr("Not an artifact"), QLatin1Char('K'))->setData(data("keep"));   // the oximetry's own calls
     installLetterKeys(menu);

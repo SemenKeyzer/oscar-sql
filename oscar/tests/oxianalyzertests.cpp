@@ -510,6 +510,19 @@ void OxiAnalyzerTests::testManualDesaturations()
     for (const Desaturation &d : r2.desaturations) manual += d.manual ? 1 : 0;
     QCOMPARE(manual, 1);
 
+    // a stretch with no SpO2 at all gives no desaturation, and takes none away (review 2026-10-24)
+    Grid gap = synth::flat(1800, 96);
+    for (int k = 1418; k <= 1423; ++k) gap.v[k] = NAN;
+    QVector<Desaturation> kept { r.desaturations.first() };
+    kept.first().start = s.timeAt(1400);
+    kept.first().end = s.timeAt(1430);
+    kept.first().manual = false;
+    OxiOverrides noData;
+    noData.addDesat.append(seconds(s, 1418, 1423));
+    applyManualDesaturations(kept, gap, noData);
+    QCOMPARE(kept.size(), 1);
+    QVERIFY(!kept.first().manual);
+
     // «Артефакт» over the same seconds: no SpO2 there, nothing added
     OxiOverrides art;
     art.addDesat.append(seconds(s, 895, 935));

@@ -2553,6 +2553,87 @@ void AnalysisIntegrationTests::testSessionForEdit()
     delete ns;
 }
 
+// A screener's edits stay with the screener (review 2026-10-24): a CPAP night's AHI, its "corrected
+// by hand" and its counts do not move; each event knows whose it is, and edits to it go there.
+void AnalysisIntegrationTests::testScreenerEditsStayOffCpap()
+{
+    Machine cpap(p_profile, 124);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Machine rs01(p_profile, 125);
+    rs01.info.type = MT_OXIMETER;
+    rs01.info.serial = QStringLiteral("RS01T4");
+    Session *cs = scoredSession(&cpap, 1241, m_machineRow);
+    Session *ns = screenerSession(&rs01, 1251);
+    ns->really_set_first(synth::kStart - 3600000);
+    Day day;
+    day.addSession(cs);
+    day.addSession(ns);
+    const EventDataType apneas = day.count(CPAP_Apnea);
+    ManualScoring::Edit remove;
+    remove.kind = ManualScoring::Kind::Remove;
+    remove.channel = CPAP_Apnea;
+    remove.startMs = remove.endMs = synth::kStart + 600000;
+    QVERIFY(ManualScoring::addEdit(ns, remove));
+    QCOMPARE(day.count(CPAP_Apnea), apneas);       // the CPAP's figures as they were
+    QVERIFY(!day.hasManualScoring());
+    QVERIFY(ManualScoring::screenerIndex(&day, 3600).valid);
+    QVERIFY(ManualScoring::hasBreathingEdits(&day));
+    // the screener's events say so; edits to an existing event go to its own kind of session
+    for (const ManualScoring::EffectiveEvent &e : ManualScoring::resultFor(ns).events) QVERIFY(e.screener);
+    for (const ManualScoring::EffectiveEvent &e : ManualScoring::resultFor(cs).events) QVERIFY(!e.screener);
+    QCOMPARE(ManualScoring::sessionOfKind(&day, synth::kStart + 600000, true), ns);   // under the mask, still the screener's
+    QCOMPARE(ManualScoring::sessionOfKind(&day, synth::kStart + 600000, false), cs);
+    ManualScoringRepository::removeAllForSession(ManualScoring::keyOf(ns));
+    QVERIFY(!ManualScoring::hasBreathingEdits(&day));
+    // SpO2 edits alone are no breathing edits (no REI by hand from them)
+    ManualScoring::Edit desat;
+    desat.kind = ManualScoring::Kind::Desat;
+    desat.startMs = synth::kStart + 100000;
+    desat.endMs = synth::kStart + 140000;
+    QVERIFY(ManualScoring::addEdit(ns, desat));
+    QVERIFY(!ManualScoring::hasBreathingEdits(&day));
+    ManualScoringRepository::removeAllForSession(ManualScoring::keyOf(ns));
+    day.removeSession(cs);
+    day.removeSession(ns);
+    delete cs;
+    delete ns;
+}
+
+// A desaturation scored by hand stored with two sessions goes with one undo (review 2026-10-24).
+void AnalysisIntegrationTests::testDesatUndoAllCopies()
+{
+    Machine cpap(p_profile, 126);
+    cpap.info.type = MT_CPAP;
+    cpap.setDatabaseId(m_machineRow);
+    Machine oxi(p_profile, 127);
+    oxi.info.type = MT_OXIMETER;
+    oxi.info.serial = QStringLiteral("OXIT5");
+    Session *cs = scoredSession(&cpap, 1261, m_machineRow);
+    Session *os = new Session(&oxi, 1271);
+    os->really_set_first(synth::kStart);
+    os->really_set_last(synth::kStart + 3600000);
+    os->setOpened(true);
+    Day day;
+    day.addSession(cs);
+    day.addSession(os);
+    ManualScoring::Edit e;
+    e.kind = ManualScoring::Kind::Desat;
+    e.startMs = synth::kStart + 600000;
+    e.endMs = synth::kStart + 640000;
+    QVERIFY(ManualScoring::addEdit(cs, e));
+    QVERIFY(ManualScoring::addEdit(os, e));
+    QCOMPARE(ManualScoring::oximetryOverrides(&day).addDesat.size(), 1);
+    const qint64 id = ManualScoringRepository::editsForSession(ManualScoring::keyOf(cs)).first().id;
+    QVERIFY(ManualScoring::undoEdit(&day, id));
+    QVERIFY(ManualScoring::oximetryOverrides(&day).addDesat.isEmpty());   // both copies gone
+    ManualScoring::clearDay(&day);
+    day.removeSession(cs);
+    day.removeSession(os);
+    delete cs;
+    delete os;
+}
+
 // An event added by hand gets another type: the same edit, its span kept; the counts follow.
 void AnalysisIntegrationTests::testRetypeAdded()
 {

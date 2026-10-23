@@ -317,6 +317,7 @@ Result resultFor(Session *s)
     if (spans.isEmpty()) spans.append({ s->realFirst(), s->realLast() });
     Result r = apply(device, edits, spans);
     r.baseIsAnalysis = screener;
+    for (EffectiveEvent &e : r.events) e.screener = screener;
 
     // shown on the graphs with the device's time correction
     const qint64 c = s->correctionMs();
@@ -541,7 +542,8 @@ bool undoEdit(Day *day, qint64 id)
         for (const Edit &e : ManualScoringRepository::editsForSession(keyOf(s))) {
             // a stretch (excluded, marked, «не артефакт») is stored once per session it touches, each in
             // its own device time: all copies go
-            const bool stretch = target.kind == Kind::Exclude || target.kind == Kind::Mark || target.kind == Kind::Keep;
+            const bool stretch = target.kind == Kind::Exclude || target.kind == Kind::Mark || target.kind == Kind::Keep
+                                 || target.kind == Kind::Desat;
             const bool same = e.id == id
                               || (stretch && e.kind == target.kind && e.startMs + c == target.startMs + targetC
                                   && e.endMs + c == target.endMs + targetC);
@@ -640,6 +642,32 @@ ScreenerIndex screenerIndex(Day *day)
         if (s->enabled() && isScreenerSession(s)) seconds += analysis::SessionStamp::read(s).flowSeconds;
     }
     return screenerIndex(day, seconds);
+}
+
+Session *sessionOfKind(Day *day, qint64 t, bool screener)
+{
+    Session *best = nullptr;
+    qint64 bestGap = std::numeric_limits<qint64>::max();
+    for (Session *s : day ? day->sessions : QList<Session *>()) {
+        if (!s->enabled() || (screener ? !isScreenerSession(s) : s->type() != MT_CPAP)) continue;
+        const qint64 gap = t < s->first() ? s->first() - t : (t > s->last() ? t - s->last() : 0);
+        if (gap < bestGap) {
+            best = s;
+            bestGap = gap;
+        }
+    }
+    return best;
+}
+
+bool hasBreathingEdits(Day *day)
+{
+    for (Session *s : day ? day->sessions : QList<Session *>()) {
+        if (!s->enabled() || !isScreenerSession(s)) continue;
+        for (const Edit &e : ManualScoringRepository::editsForSession(keyOf(s))) {
+            if (e.kind != Kind::Keep && e.kind != Kind::Desat && e.kind != Kind::RemoveDesat && e.kind != Kind::Mark) return true;
+        }
+    }
+    return false;
 }
 
 qint64 flowLimitedMs(Day *day)

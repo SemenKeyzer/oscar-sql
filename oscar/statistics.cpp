@@ -2952,7 +2952,7 @@ QString Statistics::manualAnalysisTable(const QDate &from, const QDate &to)
                 n.base[c] = cpap->deviceCount(c);
             }
             n.flMs = ManualScoring::flowLimitedMs(cpap);
-        } else if (Day *any = p_profile->GetDay(date); any && any->hours(MT_CPAP) <= 0 && ManualScoring::hasEdits(any)) {
+        } else if (Day *any = p_profile->GetDay(date); any && any->hours(MT_CPAP) <= 0 && ManualScoring::hasBreathingEdits(any)) {
             const ManualScoring::ScreenerIndex idx = ManualScoring::screenerIndex(any);
             if (!idx.valid) continue;
             n.day = any;

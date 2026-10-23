@@ -37,7 +37,11 @@ class gManualScoringLayer : public Layer
 
     //! \a result is shared by the layers of all graphs of the day.
     //! \a drawsBoxes: zoomed in to kBoxRangeMs or less, every counted event is a labelled box (flow graph).
-    gManualScoringLayer(QSharedPointer<ManualScoring::Result> result, bool drawsMarkers, bool drawsBoxes = false);
+    //! Whose events a layer draws: all, the CPAP's (flow rate) or a sleep screener's (nasal flow).
+    enum class Source { Any, Cpap, Screener };
+    gManualScoringLayer(QSharedPointer<ManualScoring::Result> result, bool drawsMarkers, bool drawsBoxes = false, Source source = Source::Any);
+    //! \a result with only the events of \a source.
+    static ManualScoring::Result forSource(const ManualScoring::Result &result, Source source);
     static constexpr qint64 kBoxRangeMs = 20 * 60000;
     //! Whether a layer that draws boxes shows them now.
     static bool showsBoxes(bool drawsBoxes, bool scoringMode, bool blockZoom);
@@ -58,6 +62,7 @@ class gManualScoringLayer : public Layer
     QSharedPointer<ManualScoring::Result> m_result;
     bool m_markers;
     bool m_boxes;
+    Source m_source = Source::Any;
 };
 
 #endif // GMANUALSCORINGLAYER_H

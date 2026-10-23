@@ -20,9 +20,20 @@
 using ManualScoring::EffectiveEvent;
 using ManualScoring::Origin;
 
-gManualScoringLayer::gManualScoringLayer(QSharedPointer<ManualScoring::Result> result, bool drawsMarkers, bool drawsBoxes)
-    : Layer(NoChannel), m_result(result), m_markers(drawsMarkers), m_boxes(drawsBoxes)
+gManualScoringLayer::gManualScoringLayer(QSharedPointer<ManualScoring::Result> result, bool drawsMarkers, bool drawsBoxes, Source source)
+    : Layer(NoChannel), m_result(result), m_markers(drawsMarkers), m_boxes(drawsBoxes), m_source(source)
 {
+}
+
+ManualScoring::Result gManualScoringLayer::forSource(const ManualScoring::Result &result, Source source)
+{
+    if (source == Source::Any) return result;
+    ManualScoring::Result out = result;
+    out.events.clear();
+    for (const ManualScoring::EffectiveEvent &e : result.events) {
+        if (e.screener == (source == Source::Screener)) out.events.append(e);
+    }
+    return out;
 }
 
 QList<gManualScoringLayer::Item> gManualScoringLayer::items(const ManualScoring::Result &result, qint64 minX, qint64 maxX,
@@ -84,7 +95,8 @@ void gManualScoringLayer::paint(QPainter &painter, gGraph &w, const QRegion &reg
     auto px = [&](qint64 t) { return r.left() + (t - range.first) / span * r.width(); };
 
     // an edge being dragged: drawn where it is now
-    const ManualScoring::Result shown = w.graphView() ? withDrag(*m_result, *w.graphView()) : *m_result;
+    // the drag names an event by its index in the whole result: filter after it
+    const ManualScoring::Result shown = forSource(w.graphView() ? withDrag(*m_result, *w.graphView()) : *m_result, m_source);
     // the type at the top left, the length at the top right; a box too narrow for both has them in a row
     auto labels = [&painter, &r](const QRectF &box, const QString &label, const QString &duration, double inset, double down) {
         const QFontMetrics fm = painter.fontMetrics();

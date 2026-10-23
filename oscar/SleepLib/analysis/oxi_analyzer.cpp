@@ -160,56 +160,6 @@ QVector<Desaturation> findDesaturations(const Grid &s, const OxiParams &p)
     return out;
 }
 
-// The doctor's own desaturations (doctor 2026-10-23): those of the analysis taken out by hand
-// (matched by their end within 2 s) go; each stretch scored by hand becomes one, measured from
-// the highest SpO2 in the 30 s before it, and replaces any found desaturation it overlaps. Seconds
-// without SpO2 (artefacts) give none.
-void applyManualDesaturations(QVector<Desaturation> &desats, const Grid &s, const OxiOverrides &o)
-{
-    if (o.addDesat.isEmpty() && o.removeDesat.isEmpty()) return;
-    desats.erase(std::remove_if(desats.begin(), desats.end(), [&](const Desaturation &d) {
-        for (qint64 t : o.removeDesat) {
-            if (qAbs(d.end - t) <= 2000) return true;
-        }
-        for (const Span &sp : o.addDesat) {
-            if (d.start < sp.end && d.end > sp.start) return true;
-        }
-        return false;
-    }), desats.end());
-    const QVector<float> &v = s.v;
-    for (const Span &sp : o.addDesat) {
-        const int st = qMax(0, s.indexOf(sp.start)), et = qMin(s.size() - 1, s.indexOf(sp.end));
-        if (et <= st) continue;
-        float peak = NAN;
-        for (int k = qMax(0, st - 30); k <= st; ++k) {
-            if (hasData(v[k]) && (!hasData(peak) || v[k] > peak)) peak = v[k];
-        }
-        float nadir = NAN;
-        int nt = st;
-        for (int k = st; k <= et; ++k) {
-            if (hasData(v[k]) && (!hasData(nadir) || v[k] < nadir)) {
-                nadir = v[k];
-                nt = k;
-            }
-        }
-        if (!hasData(peak) || !hasData(nadir) || nadir >= peak) continue;
-        Desaturation d;
-        d.start = s.timeAt(st);
-        d.nadirTime = s.timeAt(nt);
-        d.end = s.timeAt(et);
-        d.peak = peak;
-        d.nadir = nadir;
-        d.manual = true;
-        const int from = qMax(st, nt - kBurdenWindowSec / 2);
-        const int to = qMin(et, from + kBurdenWindowSec);
-        for (int k = from; k < to; ++k) {
-            if (hasData(v[k]) && v[k] < peak) d.area += peak - v[k];
-        }
-        desats.append(d);
-    }
-    std::sort(desats.begin(), desats.end(), [](const Desaturation &a, const Desaturation &b) { return a.start < b.start; });
-}
-
 // Three or more desaturations in a row with nadirs 20-120 s apart (spec §3.2.3).
 QVector<Span> findCyclic(const QVector<Desaturation> &desats, double minDepth)
 {
@@ -416,6 +366,61 @@ int spanSeconds(const QVector<Span> &spans)
 }
 
 } // namespace
+
+// The doctor's own desaturations (doctor 2026-10-23): those of the analysis taken out by hand
+// (matched by their end within 2 s) go; each stretch scored by hand becomes one, measured from
+// the highest SpO2 in the 30 s before it, and replaces any found desaturation it overlaps. Seconds
+// without SpO2 (artefacts) give none.
+void applyManualDesaturations(QVector<Desaturation> &desats, const Grid &s, const OxiOverrides &o)
+{
+    if (o.addDesat.isEmpty() && o.removeDesat.isEmpty()) return;
+    // the doctor's own first: a stretch without SpO2, or without a fall, gives none and takes none away
+    QVector<Desaturation> added;
+    const QVector<float> &v = s.v;
+    for (const Span &sp : o.addDesat) {
+        const int st = qMax(0, s.indexOf(sp.start)), et = qMin(s.size() - 1, s.indexOf(sp.end));
+        if (et <= st) continue;
+        float peak = NAN;
+        for (int k = qMax(0, st - 30); k <= st; ++k) {
+            if (hasData(v[k]) && (!hasData(peak) || v[k] > peak)) peak = v[k];
+        }
+        float nadir = NAN;
+        int nt = st;
+        for (int k = st; k <= et; ++k) {
+            if (hasData(v[k]) && (!hasData(nadir) || v[k] < nadir)) {
+                nadir = v[k];
+                nt = k;
+            }
+        }
+        if (!hasData(peak) || !hasData(nadir) || nadir >= peak) continue;
+        Desaturation d;
+        d.start = s.timeAt(st);
+        d.nadirTime = s.timeAt(nt);
+        d.end = s.timeAt(et);
+        d.peak = peak;
+        d.nadir = nadir;
+        d.manual = true;
+        const int from = qMax(st, nt - kBurdenWindowSec / 2);
+        const int to = qMin(et, from + kBurdenWindowSec);
+        for (int k = from; k < to; ++k) {
+            if (hasData(v[k]) && v[k] < peak) d.area += peak - v[k];
+        }
+        added.append(d);
+    }
+    // the analysis' ones taken out by hand (by their end, within 2 s), and those an added one replaces
+    desats.erase(std::remove_if(desats.begin(), desats.end(), [&](const Desaturation &d) {
+        for (qint64 t : o.removeDesat) {
+            if (qAbs(d.end - t) <= 2000) return true;
+        }
+        for (const Desaturation &a : added) {
+            if (d.start < a.end && d.end > a.start) return true;
+        }
+        return false;
+    }), desats.end());
+    desats += added;
+    std::sort(desats.begin(), desats.end(), [](const Desaturation &a, const Desaturation &b) { return a.start < b.start; });
+}
+
 
 int OxiResult::countDesaturations(double minDepth) const
 {
