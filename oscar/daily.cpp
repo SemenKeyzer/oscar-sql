@@ -4952,6 +4952,8 @@ QString Daily::getManualScoring(Day *day)
             case Kind::Resize: ++resized; break;
             case Kind::Mark: break;   // listed with the edits; its total is on the page above
             case Kind::Keep: break;   // listed with the edits; it changes only the oximetry
+            case Kind::Desat: break;         // the oximetry's too
+            case Kind::RemoveDesat: break;
             }
         }
     }

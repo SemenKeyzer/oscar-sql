@@ -45,6 +45,7 @@ struct Desaturation {
     float peak = 0;
     float nadir = 0;
     double area = 0;        //!< sum of (peak - SpO2) within kBurdenWindowSec around the nadir, %·s
+    bool manual = false;    //!< scored by hand on the SpO2 graph
     float depth() const { return peak - nadir; }
 };
 
@@ -124,6 +125,8 @@ struct OxiResult {
 struct OxiOverrides {
     QVector<Span> exclude;
     QVector<Span> keep;
+    QVector<Span> addDesat;        //!< desaturations scored by hand
+    QVector<qint64> removeDesat;   //!< the ends of the analysis' desaturations taken out by hand
 };
 QVector<OxiArtifact> findOxiArtifacts(const Grid &spo2Raw, const Grid &pulseRaw, const OxiOverrides &overrides = OxiOverrides());
 //! Sets the seconds \a artifacts cover to no data.

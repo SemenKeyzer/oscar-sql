@@ -22,7 +22,7 @@
 //! events added, removed or retyped, and stretches excluded from scoring (noise, awake).
 namespace ManualScoring {
 
-enum class Kind { Add, Remove, Retype, Exclude, Resize, Mark, Keep };   //!< Mark: a stretch of a span type (flow limitation); Keep: «Не артефакт» over the oximetry
+enum class Kind { Add, Remove, Retype, Exclude, Resize, Mark, Keep, Desat, RemoveDesat };   //!< Desat: a desaturation scored by hand on SpO2; RemoveDesat: one of the analysis' taken out (by its end)   //!< Mark: a stretch of a span type (flow limitation); Keep: «Не артефакт» over the oximetry
 
 //! Which session an edit belongs to. Kept by what survives a rebuild of the device's data
 //! (which deletes and re-creates the database rows): the profile, the device's serial number and

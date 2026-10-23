@@ -237,6 +237,17 @@ QList<ScoringMenus::EditRow> ScoringMenus::editRows(Day *day)
                 text = keptText(e.endMs - e.startMs);
                 break;
             }
+            case Kind::Desat: {   // one row however many sessions it is on
+                const QPair<qint64, qint64> span(e.startMs + c + 1, e.endMs + c + 1);   // apart from the other stretches
+                if (stretches.contains(span)) continue;
+                stretches.insert(span);
+                at = e.startMs + c;
+                text = tr("desaturation scored by hand, %1 s").arg((e.endMs - e.startMs) / 1000);
+                break;
+            }
+            case Kind::RemoveDesat:
+                text = tr("desaturation removed");
+                break;
             case Kind::Mark: {   // a stretch across sessions is one row
                 const QPair<qint64, qint64> span(-e.startMs, -e.endMs);   // apart from the excluded ones
                 if (stretches.contains(span)) continue;

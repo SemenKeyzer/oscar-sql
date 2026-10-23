@@ -36,6 +36,8 @@ QString kindName(Kind k)
     case Kind::Resize: return QStringLiteral("resize");
     case Kind::Mark: return QStringLiteral("mark");
     case Kind::Keep: return QStringLiteral("keep");
+    case Kind::Desat: return QStringLiteral("desat");
+    case Kind::RemoveDesat: return QStringLiteral("removedesat");
     }
     return QString();
 }
@@ -48,6 +50,8 @@ Kind kindOf(const QString &name)
     if (name == QLatin1String("resize")) return Kind::Resize;
     if (name == QLatin1String("mark")) return Kind::Mark;
     if (name == QLatin1String("keep")) return Kind::Keep;
+    if (name == QLatin1String("desat")) return Kind::Desat;
+    if (name == QLatin1String("removedesat")) return Kind::RemoveDesat;
     return Kind::Add;
 }
 

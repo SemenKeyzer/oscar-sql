@@ -469,3 +469,50 @@ void OxiAnalyzerTests::testDisturbedFallEndsAtRecovery()
     QCOMPARE(a.size(), 1);
     QVERIFY2(secondsOf(s.start, a[0].end) <= 320, qPrintable(QString::number(secondsOf(s.start, a[0].end))));
 }
+
+// Desaturations scored by hand (doctor 2026-10-23): one the analysis found deleted, one it missed
+// added (its peak from the 30 s before, its nadir inside); a found one under an added one gives way;
+// «Артефакт» wins over an added one.
+void OxiAnalyzerTests::testManualDesaturations()
+{
+    Grid s = synth::flat(1800, 96);
+    synth::dip(s, 300, 5, 10, 10, 10);    // found: 96 → 91
+    synth::dip(s, 900, 2, 10, 20, 10);    // too shallow to be found: 96 → 94
+    synth::dip(s, 1400, 5, 10, 10, 10);   // found
+    const OxiResult plain = analyzeOximetry(s, livePulse(1800), OxiParams());
+    QCOMPARE(plain.countDesaturations(3), 2);
+    const qint64 firstEnd = plain.desaturations.first().end;
+
+    OxiOverrides o;
+    o.removeDesat.append(firstEnd + 1000);                  // within 2 s
+    o.addDesat.append(seconds(s, 895, 935));
+    const OxiResult r = analyzeOximetry(s, livePulse(1800), OxiParams(), o);
+    QCOMPARE(r.desaturations.size(), 2);                     // the 1400 one and the added one
+    const Desaturation *added = nullptr;
+    for (const Desaturation &d : r.desaturations) {
+        if (d.manual) added = &d;
+    }
+    QVERIFY(added);
+    QCOMPARE(added->start, s.timeAt(895));
+    QCOMPARE(added->end, s.timeAt(935));
+    QCOMPARE(added->peak, 96.0f);
+    QCOMPARE(added->nadir, 94.0f);
+    QVERIFY(added->area > 0);
+    QCOMPARE(r.countDesaturations(3), 1);   // a 2 % dip added by hand: in the area, not in ODI 3 %
+    QVERIFY(r.desaturationArea() > plain.desaturationArea() - plain.desaturations.first().area);
+
+    // an added one over a found one: the found one gives way
+    OxiOverrides over;
+    over.addDesat.append(seconds(s, 1395, 1440));
+    const OxiResult r2 = analyzeOximetry(s, livePulse(1800), OxiParams(), over);
+    QCOMPARE(r2.desaturations.size(), 2);
+    int manual = 0;
+    for (const Desaturation &d : r2.desaturations) manual += d.manual ? 1 : 0;
+    QCOMPARE(manual, 1);
+
+    // «Артефакт» over the same seconds: no SpO2 there, nothing added
+    OxiOverrides art;
+    art.addDesat.append(seconds(s, 895, 935));
+    art.exclude.append(seconds(s, 880, 950));
+    QCOMPARE(analyzeOximetry(s, livePulse(1800), OxiParams(), art).desaturations.size(), 2);
+}

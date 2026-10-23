@@ -124,6 +124,9 @@ Result apply(const QList<DeviceEvent> &device, const QList<Edit> &edits, const Q
         case Kind::Keep:   // for the oximetry analysis; only drawn here
             r.keptSpans.append({ e.startMs, e.endMs });
             break;
+        case Kind::Desat:         // desaturations scored by hand: the oximetry analysis takes them
+        case Kind::RemoveDesat:
+            break;
         case Kind::Remove:
         case Kind::Retype:
         case Kind::Resize: {
@@ -351,7 +354,9 @@ void refresh(Session *s)
     // session: such a session is not corrected by hand
     bool counts = false;
     if ((s->type() == MT_CPAP || isScreenerSession(s)) && ManualScoringRepository::hasScoring(key)) {
-        for (const Edit &e : ManualScoringRepository::editsForSession(key)) counts = counts || (e.kind != Kind::Mark && e.kind != Kind::Keep);
+        for (const Edit &e : ManualScoringRepository::editsForSession(key)) {
+            counts = counts || (e.kind != Kind::Mark && e.kind != Kind::Keep && e.kind != Kind::Desat && e.kind != Kind::RemoveDesat);
+        }
     }
     if (!counts) {
         ManualScoringRepository::removeSummary(key);
@@ -682,9 +687,26 @@ bool isStretchSession(Session *s)
 analysis::OxiOverrides oximetryOverrides(const QList<QPair<QList<Edit>, qint64>> &sessions)
 {
     analysis::OxiOverrides o;
-    QSet<QPair<qint64, qint64>> excluded, kept;
+    QSet<QPair<qint64, qint64>> excluded, kept, desats;
+    QSet<qint64> removed;
     for (const auto &s : sessions) {
         for (const Edit &e : s.first) {
+            // desaturations scored by hand on SpO2 (doctor 2026-10-23), in graph time
+            if (e.kind == Kind::Desat) {
+                const QPair<qint64, qint64> span(e.startMs + s.second, e.endMs + s.second);
+                if (!desats.contains(span)) {
+                    desats.insert(span);
+                    o.addDesat.append(analysis::Span { span.first, span.second, 0 });
+                }
+                continue;
+            }
+            if (e.kind == Kind::RemoveDesat) {
+                if (!removed.contains(e.endMs + s.second)) {
+                    removed.insert(e.endMs + s.second);
+                    o.removeDesat.append(e.endMs + s.second);
+                }
+                continue;
+            }
             if (e.kind != Kind::Exclude && e.kind != Kind::Keep) continue;
             const QPair<qint64, qint64> span(e.startMs + s.second, e.endMs + s.second);
             QSet<QPair<qint64, qint64>> &seen = e.kind == Kind::Exclude ? excluded : kept;

@@ -340,9 +340,21 @@ void AnalysisIntegrationTests::testOverridesOnOximeterOnlyNight()
     e.endMs = synth::kStart + 500000;
     QVERIFY(ManualScoring::addEdit(sess, e));
 
+    // desaturations scored by hand on SpO2 (doctor 2026-10-23)
+    e.kind = ManualScoring::Kind::Desat;
+    e.startMs = synth::kStart + 600000;
+    e.endMs = synth::kStart + 640000;
+    QVERIFY(ManualScoring::addEdit(sess, e));
+    e.kind = ManualScoring::Kind::RemoveDesat;
+    e.startMs = e.endMs = synth::kStart + 700000;
+    QVERIFY(ManualScoring::addEdit(sess, e));
+
     const OxiOverrides o = ManualScoring::oximetryOverrides(&day);
     QCOMPARE(o.exclude.size(), 1);
     QCOMPARE(o.keep.size(), 1);
+    QCOMPARE(o.addDesat.size(), 1);
+    QCOMPARE(o.addDesat.first().start, synth::kStart + 600000);
+    QCOMPARE(o.removeDesat, QVector<qint64>({ synth::kStart + 700000 }));
     QVERIFY(dayInputsHash(&day, params) != before);
     ManualScoringRepository::removeAllForSession(ManualScoring::keyOf(sess));
 }
@@ -3517,8 +3529,19 @@ void AnalysisIntegrationTests::testDesatArea4Stored()
     AnalysisDailyRepository repo;
     QVERIFY(repo.upsert(d));
     QCOMPARE(repo.find(m_profileId, d.date).desatArea4, 100.0);
+    QCOMPARE(repo.find(m_profileId, d.date).manualDesats, 0);
     repo.remove(m_profileId, d.date);
     QVERIFY(AnalysisDailyData().desatArea4 < 0);
+    // desaturations scored by hand are counted with the night
+    deep.manual = true;
+    r.oxi.desaturations = { small, deep };
+    AnalysisDailyData m = toDailyRow(r, AnalysisParams(), QStringLiteral("h"), QString());
+    QCOMPARE(m.manualDesats, 1);
+    m.profileId = m_profileId;
+    m.date = QDate(2026, 4, 3);
+    QVERIFY(repo.upsert(m));
+    QCOMPARE(repo.find(m_profileId, m.date).manualDesats, 1);
+    repo.remove(m_profileId, m.date);
 }
 
 // The nasal flow's display smoothing (doctor 2026-10-23, as Neurosoft's low-pass): a zero-phase

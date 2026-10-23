@@ -44,6 +44,7 @@ private slots:
     void testArtifactsLeaveTheFigures();
     void testManualExcludeRemovesDesaturation();
     void testKeepCancelsAutomaticArtifact();
+    void testManualDesaturations();
     void testKeepDoesNotCancelSpike();
     void testFourSecondDataHasNoFastFall();
     void testPulseGapOnlyInsideRecordedPulse();
