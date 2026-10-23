@@ -340,7 +340,8 @@ void AnalysisIntegrationTests::testOverridesOnOximeterOnlyNight()
     e.endMs = synth::kStart + 500000;
     QVERIFY(ManualScoring::addEdit(sess, e));
 
-    // desaturations scored by hand on SpO2 (doctor 2026-10-23)
+    // desaturations scored by hand on SpO2 (doctor 2026-10-23): the night is scored again
+    const QString beforeDesat = dayInputsHash(&day, params);
     e.kind = ManualScoring::Kind::Desat;
     e.startMs = synth::kStart + 600000;
     e.endMs = synth::kStart + 640000;
@@ -355,6 +356,7 @@ void AnalysisIntegrationTests::testOverridesOnOximeterOnlyNight()
     QCOMPARE(o.addDesat.size(), 1);
     QCOMPARE(o.addDesat.first().start, synth::kStart + 600000);
     QCOMPARE(o.removeDesat, QVector<qint64>({ synth::kStart + 700000 }));
+    QVERIFY(dayInputsHash(&day, params) != beforeDesat);
     QVERIFY(dayInputsHash(&day, params) != before);
     ManualScoringRepository::removeAllForSession(ManualScoring::keyOf(sess));
 }
@@ -3608,4 +3610,7 @@ void AnalysisIntegrationTests::testDesatFillShape()
     QCOMPARE(qint64(minT), at(70));
     QCOMPARE(qint64(maxT), at(130));
     QVERIFY(gDesatFill::shape([](qint64) { return 96.0f; }, at(10), at(10), at(10), 96, 1000).isEmpty());
+    // a desaturation scored by hand shades in the manual green, the analysis' in its own colour
+    QVERIFY(gDesatFill::fillColor(true) != gDesatFill::fillColor(false));
+    QCOMPARE(gDesatFill::fillColor(true).rgb(), QColor(QStringLiteral("#2E8B57")).rgb());
 }

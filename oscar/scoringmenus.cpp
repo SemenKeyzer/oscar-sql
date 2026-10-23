@@ -195,6 +195,32 @@ QMenu *ScoringMenus::forKept(qint64 editId, QWidget *parent)
     return menu;
 }
 
+QMenu *ScoringMenus::forSpo2Range(qint64 durationMs, QWidget *parent)
+{
+    auto *menu = new QMenu(parent);
+    menu->setAttribute(Qt::WA_NoMouseReplay);   // the click that closes it must not zoom the graph (Windows)
+    menu->setObjectName(QStringLiteral("scoringSpo2Menu"));
+    menu->setTitle(tr("Selected: %1 s").arg(QLocale().toString(durationMs / 1000.0, 'g', 3)));
+    keyed(menu, tr("Desaturation"), QLatin1Char('D'))->setData(data("desat"));   // doctor 2026-10-23
+    menu->addSeparator();
+    keyed(menu, tr("Artifact"), QLatin1Char('X'))->setData(data("exclude"));
+    keyed(menu, tr("Not an artifact"), QLatin1Char('K'))->setData(data("keep"));
+    installLetterKeys(menu);
+    return menu;
+}
+
+QMenu *ScoringMenus::forDesat(qint64 endMs, qint64 manualEditId, QWidget *parent)
+{
+    auto *menu = new QMenu(parent);
+    menu->setAttribute(Qt::WA_NoMouseReplay);   // the click that closes it must not zoom the graph (Windows)
+    menu->setObjectName(QStringLiteral("scoringDesatMenu"));
+    // the analysis' one is taken out; one scored by hand is undone
+    keyed(menu, tr("Delete desaturation"), QLatin1Char('R'))
+        ->setData(manualEditId > 0 ? data("undo", 0, 0, 0, manualEditId) : data("removedesat", 0, 0, endMs));
+    installLetterKeys(menu);
+    return menu;
+}
+
 QList<ScoringMenus::EditRow> ScoringMenus::editRows(Day *day)
 {
     using ManualScoring::Kind;
@@ -288,6 +314,7 @@ QAction *ScoringMenus::actionForKey(QMenu *menu, const QString &text)
         { QChar(0x042C), QLatin1Char('M') }, { QChar(0x041D), QLatin1Char('Y') }, { QChar(0x0410), QLatin1Char('F') },
         { QChar(0x0420), QLatin1Char('H') }, { QChar(0x0427), QLatin1Char('X') }, { QChar(0x041A), QLatin1Char('R') },
         { QChar(0x0415), QLatin1Char('T') }, { QChar(0x0413), QLatin1Char('U') }, { QChar(0x041B), QLatin1Char('K') }, { QChar(0x041F), QLatin1Char('G') },
+        { QChar(0x0412), QLatin1Char('D') },   // В: a desaturation on SpO2
     };
     key = russian.value(key, key);
     for (QAction *a : menu->actions()) {

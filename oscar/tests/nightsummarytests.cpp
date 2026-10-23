@@ -179,6 +179,10 @@ void NightSummaryTests::testViewShowsTheNight()
                                                       + QStringLiteral("), 3%: 2.2")), qPrintable(text(QStringLiteral("nsNote"))));
     // the doctor's SpO2 tile: ODI 3 % and 4 %, T90 in minutes and the hypoxic burden with its grade
     QVERIFY(text(QStringLiteral("nsNote")).contains(QStringLiteral("T90: 2 min")));
+    QVERIFY(!text(QStringLiteral("nsNote")).contains(ManualMark::pill()));
+    s.oxi.manualDesats = 2;   // desaturations scored by hand: the figures carry the mark
+    view.setSummary(s);
+    QVERIFY(text(QStringLiteral("nsNote")).contains(ManualMark::pill()));
     QVERIFY(text(QStringLiteral("nsNote")).contains(QStringLiteral("Hypoxic burden: 10.0 %·min/h (") + oxiGradeHtml(OxiGrade::Normal)
                                                      + QStringLiteral("), all desaturations 20.0")));
     QVERIFY(text(QStringLiteral("nsNote")).contains(QStringLiteral("pulse 61 (52 to 96)")));   // in the SpO2 tile

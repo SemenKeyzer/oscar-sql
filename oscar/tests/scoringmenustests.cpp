@@ -334,3 +334,27 @@ void ScoringMenusTests::testAddedEventChangeType()
     QCOMPARE(d.value(QStringLiteral("newChannel")).toUInt(), CPAP_Hypopnea);
     QVERIFY(find(m.data(), QStringLiteral("Delete episode")));
 }
+
+// On SpO2 (doctor 2026-10-23): a stretch becomes a desaturation, an artefact or "not an artefact";
+// a desaturation of the analysis is deleted, one scored by hand undone.
+void ScoringMenusTests::testSpo2Menus()
+{
+    QScopedPointer<QMenu> range(ScoringMenus::forSpo2Range(40000, nullptr));
+    QCOMPARE(texts(range.data()), QStringList({ QStringLiteral("Desaturation"), QStringLiteral("Artifact"), QStringLiteral("Not an artifact") }));
+    QAction *desat = find(range.data(), QStringLiteral("Desaturation"));
+    QCOMPARE(desat->data().toMap().value(QStringLiteral("action")).toString(), QStringLiteral("desat"));
+    QCOMPARE(ScoringMenus::actionForKey(range.data(), QStringLiteral("d")), desat);
+    QCOMPARE(ScoringMenus::actionForKey(range.data(), QStringLiteral("в")), desat);   // D on the Russian layout
+    QCOMPARE(ScoringMenus::repeatableType(desat->data().toMap()), ChannelID(0));     // never repeated
+
+    QScopedPointer<QMenu> found(ScoringMenus::forDesat(1234567, 0, nullptr));
+    QAction *del = find(found.data(), QStringLiteral("Delete desaturation"));
+    QVERIFY(del);
+    QCOMPARE(del->data().toMap().value(QStringLiteral("action")).toString(), QStringLiteral("removedesat"));
+    QCOMPARE(del->data().toMap().value(QStringLiteral("timeMs")).toLongLong(), qint64(1234567));
+    QScopedPointer<QMenu> manual(ScoringMenus::forDesat(1234567, 77, nullptr));
+    QAction *undo = find(manual.data(), QStringLiteral("Delete desaturation"));
+    QVERIFY(undo);
+    QCOMPARE(undo->data().toMap().value(QStringLiteral("action")).toString(), QStringLiteral("undo"));
+    QCOMPARE(undo->data().toMap().value(QStringLiteral("editId")).toLongLong(), qint64(77));
+}

@@ -36,6 +36,10 @@ class ScoringMenus
     static QMenu *forExcluded(qint64 editId, QWidget *parent);
     //! The menu inside a «Не артефакт» stretch: undo it.
     static QMenu *forKept(qint64 editId, QWidget *parent);
+    //! A stretch chosen on SpO2: a desaturation scored by hand, an artefact, or "not an artefact".
+    static QMenu *forSpo2Range(qint64 durationMs, QWidget *parent);
+    //! A desaturation on SpO2 ending at \a endMs: deleted (the analysis'), or undone (\a manualEditId, scored by hand).
+    static QMenu *forDesat(qint64 endMs, qint64 manualEditId, QWidget *parent);
     //! The menu of a marked flow limitation stretch: undo it.
     static QMenu *forMark(qint64 editId, QWidget *parent);
     //! The name of a scored channel in the menus: "Obstructive apnea", …

@@ -679,6 +679,7 @@ void NightSummaryView::setSummary(const NightSummary &s)
                                                           oxiGradeHtml(odiGrade(s.oxi.desaturations4 / s.oxi.hours)),
                                                           num(s.oxi.desaturations / s.oxi.hours))
                   + QStringLiteral(" ") + AnalysisMark::pill()
+                  + (s.oxi.manualDesats > 0 ? QStringLiteral(" ") + ManualMark::pill() : QString())   // desaturations scored by hand
             : tr("SpO2 drops (classic): %1 per hour").arg(num(s.oxi.desaturations / s.oxi.hours));
         note += QStringLiteral("<br/>") + tr("T90: %1 min").arg(qRound(s.oxi.minutesBelow90)) + QStringLiteral(", ")
                 + tr("lowest %1%, average %2%").arg(num(s.oxi.spo2Min, 0), num(s.oxi.spo2Avg));

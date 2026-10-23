@@ -7,6 +7,7 @@
  * for more details. */
 
 #include "analysispanel.h"
+#include "analysismark.h"
 #include "helptips.h"
 #include "SleepLib/profiles.h"
 
@@ -271,7 +272,11 @@ QString AnalysisPanel::sidebarHtml(Day *day, const DayResult &r, const QString &
 
         // graded as on Braebon's MediOX report: the grade in its colour, the scale under it
         html += kTable;
-        html += wide(QStringLiteral("<b>%1</b>").arg(tr("Severity (MediOX scales)")));
+        bool manualDesats = false;
+        for (const Desaturation &d : o.desaturations) manualDesats = manualDesats || d.manual;
+        // desaturations scored by hand on SpO2: the figures below include them
+        html += wide(QStringLiteral("<b>%1</b>%2").arg(tr("Severity (MediOX scales)"),
+                                                       manualDesats ? QStringLiteral(" ") + ManualMark::pill() : QString()));
         const auto graded = [&html](const QString &label, const QString &value, OxiGrade grade, const double (&bounds)[3]) {
             html += row(label, value + QStringLiteral(" ") + oxiGradeHtml(grade));
             html += wide(QStringLiteral("<small>%1</small>").arg(oxiGradeScaleHtml(bounds, grade)));

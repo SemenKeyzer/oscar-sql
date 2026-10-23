@@ -32,6 +32,7 @@ private slots:
     void testEventMenu();
     void testUndoOnlyForEdited();
     void testAddedEventChangeType();
+    void testSpo2Menus();
     void testExcludedMenu();
     void testTreeNode();
     void testLetterKeys();

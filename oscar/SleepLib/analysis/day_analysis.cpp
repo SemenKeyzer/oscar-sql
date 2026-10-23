@@ -294,6 +294,8 @@ QString dayInputsHash(Day *day, const AnalysisParams &params)
     const OxiOverrides o = ManualScoring::oximetryOverrides(day);
     for (const Span &sp : o.exclude) parts << QStringLiteral("x=%1-%2").arg(sp.start).arg(sp.end);
     for (const Span &sp : o.keep) parts << QStringLiteral("k=%1-%2").arg(sp.start).arg(sp.end);
+    for (const Span &sp : o.addDesat) parts << QStringLiteral("d=%1-%2").arg(sp.start).arg(sp.end);   // desaturations by hand
+    for (qint64 t : o.removeDesat) parts << QStringLiteral("rd=%1").arg(t);
     const QByteArray text = parts.join(QLatin1Char(';')).toUtf8();
     return QString::fromLatin1(QCryptographicHash::hash(text, QCryptographicHash::Sha1).toHex().left(16));
 }

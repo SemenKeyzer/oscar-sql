@@ -659,7 +659,8 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     }
     if (auto *g = graphlist.value(schema::channel[OXI_SPO2].code())) {
         auto *spo2 = new gLineChart(OXI_SPO2, true);
-        g->AddLayer(new gDesatFill(spo2));   // the desaturations' areas under the line
+        m_desatFill = new gDesatFill(spo2);   // the desaturations' areas under the line
+        g->AddLayer(m_desatFill);
         g->AddLayer(spo2);
         g->AddLayer(new gSessionBarLayer());
     }
@@ -4673,6 +4674,13 @@ void Daily::loadAnalysis(Day *day)
         m_analysisShown = m_analysisResult.hasAnalysis();   // a screener without SpO2 has its flow's
     }
     updateDifferenceOverlay();
+    if (m_desatFill) {   // the shading follows the desaturations as scored, the doctor's own included
+        if (m_analysisShown && m_analysisResult.hasOximetry) {
+            m_desatFill->setDesaturations(m_analysisResult.oxi.desaturations, ManualScoring::oximetryOverrides(day).removeDesat);
+        } else {
+            m_desatFill->clearDesaturations();
+        }
+    }
     if (!m_analysisTab) return;
     if (m_analysisShown) m_analysisTab->setResult(m_analysisResult);
     else m_analysisTab->clear();
@@ -4841,6 +4849,22 @@ void Daily::applyScoring(const QVariantMap &choice, qint64 startMs, qint64 endMs
         }
     } else if (action == QLatin1String("undo")) {
         ManualScoring::undoEdit(day, choice.value(QStringLiteral("editId")).toLongLong());
+    } else if (action == QLatin1String("desat")) {   // a desaturation scored by hand on SpO2 (doctor 2026-10-23)
+        e.kind = Kind::Desat;
+        e.startMs = startMs;
+        e.endMs = endMs;
+        for (Session *s : day->sessions) {
+            if (ManualScoring::isStretchSession(s) && s->first() < endMs && s->last() > startMs) ManualScoring::addEdit(s, e);
+        }
+    } else if (action == QLatin1String("removedesat")) {   // one of the analysis' taken out, by its end
+        e.kind = Kind::RemoveDesat;
+        e.startMs = e.endMs = timeMs;
+        for (Session *s : day->sessions) {
+            if (ManualScoring::isStretchSession(s) && timeMs >= s->first() - 2000 && timeMs <= s->last() + 2000) {
+                ManualScoring::addEdit(s, e);
+                break;
+            }
+        }
     } else if (action == QLatin1String("retypeAdded")) {   // only this event added by hand
         ManualScoring::retypeEdit(day, choice.value(QStringLiteral("editId")).toLongLong(),
                                   choice.value(QStringLiteral("newChannel")).toUInt());
@@ -4866,7 +4890,16 @@ void Daily::scoringChanged()
 void Daily::onScoringRange(gGraph *graph, qint64 startMs, qint64 endMs, QPoint globalPos)
 {
     m_scoringNasal = graph && graph->name() == STR_GRAPH_Oxi_NasalFlow;   // a screener's events (doctor 2026-10-23)
-    if (graph && graph->name() == STR_GRAPH_Oxi_SPO2) return;   // desaturations: their own menu
+    if (graph && graph->name() == STR_GRAPH_Oxi_SPO2) {   // desaturations scored by hand, artefacts
+        QScopedPointer<QMenu> menu(ScoringMenus::forSpo2Range(endMs - startMs, this));
+        QAction *title = new QAction(menu->title(), menu.data());
+        title->setEnabled(false);
+        menu->insertAction(menu->actions().value(0), title);
+        QAction *chosen = menu->exec(globalPos);
+        GraphView->ignoreMouseFor(400);   // the click that closed it must not zoom (Windows)
+        if (chosen) applyScoring(chosen->data().toMap(), startMs, endMs);
+        return;
+    }
     if (m_repeatType) {   // the type chosen last is put at once; right-click the event (or T) to change it
         applyScoring(ScoringMenus::repeatChoice(m_repeatType), startMs, endMs);
         return;
@@ -4909,7 +4942,26 @@ void Daily::onScoringContext(gGraph *graph, qint64 timeMs, QPoint globalPos)
         }
     }
     QScopedPointer<QMenu> menu;
-    if (best) {
+    if (graph->name() == STR_GRAPH_Oxi_SPO2) {
+        // a desaturation under the pointer, as scored (the doctor's own too): deleted or undone
+        best = nullptr;
+        for (const analysis::Desaturation &d : m_analysisResult.oxi.desaturations) {
+            if (timeMs < d.start - slack || timeMs > d.end + slack) continue;
+            qint64 editId = 0;
+            if (d.manual) {
+                for (Session *s : day->sessions) {
+                    const qint64 c = s->correctionMs();
+                    for (const ManualScoring::Edit &e : ManualScoringRepository::editsForSession(ManualScoring::keyOf(s))) {
+                        if (e.kind == ManualScoring::Kind::Desat && qAbs(e.startMs + c - d.start) <= 1500 && qAbs(e.endMs + c - d.end) <= 1500) editId = e.id;
+                    }
+                }
+            }
+            menu.reset(ScoringMenus::forDesat(d.end, editId, this));
+            break;
+        }
+    }
+    if (menu) {
+    } else if (best) {
         menu.reset(ScoringMenus::forEvent(*best, this, ManualScoring::countOf(events, best->channel)));
     } else {
         // inside an excluded or a marked stretch? (stored in device time, the graph shows it corrected)

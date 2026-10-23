@@ -34,6 +34,7 @@ struct OximetryNight {
     //! analysis: desaturations of >= 3 % (ODI 3 %); classic: OSCAR's SpO2 drop events
     int desaturations = 0;
     int desaturations4 = 0;      //!< analysis: desaturations of >= 4 %
+    int manualDesats = 0;        //!< analysis: of them scored by hand
     int zones = 0;               //!< analysis: problem zones
     double zoneMinutes = 0;
     double dropPercent = 0, dropSeconds = 0;   //!< classic: the SpO2 drop thresholds

@@ -7,6 +7,7 @@
  * for more details. */
 
 #include "analysispaneltests.h"
+#include "analysismark.h"
 
 #include <cmath>
 
@@ -145,6 +146,10 @@ void AnalysisPanelTests::testSidebarForOximetryOnlyNight()
     QVERIFY(html.contains(oxiGradeScaleHtml(kHypoxicGradeBounds, hb)));
     QVERIFY(html.contains(oxiGradeScaleHtml(kOdiGradeBounds, odiGrade(r.oxi.countDesaturations(4) / (r.oxi.spo2Seconds / 3600.0)))));
     QVERIFY(html.contains(QStringLiteral("all desaturations")));   // OSCAR's own figure from every one, under it
+    QVERIFY(!html.contains(ManualMark::pill()));
+    DayResult manual = r;   // a desaturation scored by hand: the oximetry carries the mark
+    manual.oxi.desaturations.first().manual = true;
+    QVERIFY(AnalysisPanel::sidebarHtml(nullptr, manual, QStringLiteral("CMS50F"), { 94, 90, 85 }).contains(ManualMark::pill()));
     QVERIFY(html.contains(QStringLiteral("Hypoxic load (Linz)")));   // the area below 100 % (Parekh 2024 review)
     QVERIFY(html.contains(QStringLiteral("Problem zones")));
     QVERIFY(html.contains(QStringLiteral("below 85 %")));

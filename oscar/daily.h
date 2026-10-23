@@ -425,6 +425,7 @@ private:
     void refreshAnalysis();
     AnalysisTab *m_analysisTab = nullptr;
     gDifferenceOverlay *m_differenceOverlay = nullptr;   //!< owned by the flow graph
+    class gDesatFill *m_desatFill = nullptr;              //!< owned by the SpO2 graph
     //! Gives the flow graph the day's differences from the device, if they are to be shown.
     void updateDifferenceOverlay();
     analysis::DayResult m_analysisResult;

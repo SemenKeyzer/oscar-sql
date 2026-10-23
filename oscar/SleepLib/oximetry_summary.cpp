@@ -124,6 +124,7 @@ OximetryNight summarizeOximetry(const AnalysisDailyData &row)
     n.percentBelow90 = 100.0 * below / row.oxiSeconds;
     n.desaturations = row.nDesat3;
     n.desaturations4 = row.nDesat4;
+    n.manualDesats = row.manualDesats;
     n.zones = row.nZones;
     n.zoneMinutes = row.zoneSeconds / 60.0;
     n.hypoxicBurden = hypoxicBurden(row.desatArea, row.oxiSeconds);

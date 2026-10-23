@@ -12,6 +12,7 @@
 #include <QPolygonF>
 #include <functional>
 #include "Graphs/layer.h"
+#include "SleepLib/analysis/oxi_analyzer.h"
 
 class gLineChart;
 
@@ -37,8 +38,18 @@ class gDesatFill : public Layer
     //! Empty when nothing is below the peak.
     static QPolygonF shape(const std::function<float(qint64)> &spo2, qint64 start, qint64 end, qint64 nadir, float peak, int stepMs);
 
+    //! The day's desaturations as the analysis scored them with the doctor's own (\a removed: the ends
+    //! of the analysis' ones taken out by hand, drawn struck out); without them the stored ones are shaded.
+    void setDesaturations(const QVector<analysis::Desaturation> &desats, const QVector<qint64> &removed);
+    void clearDesaturations();
+    //! The shading of a desaturation: the analysis' colour, or the manual green for one scored by hand.
+    static QColor fillColor(bool manual);
+
   private:
     gLineChart *m_spo2;
+    bool m_supplied = false;
+    QVector<analysis::Desaturation> m_desats;
+    QVector<qint64> m_removed;
 };
 
 #endif // GDESATFILL_H

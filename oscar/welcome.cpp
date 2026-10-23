@@ -16,6 +16,7 @@
 #include <QTextBrowser>
 
 #include "welcome.h"
+#include "analysismark.h"
 #include "helptips.h"
 #include "SleepLib/oximetry_summary.h"
 #include "nightsummary.h"
@@ -437,7 +438,8 @@ static QString oximetryNightHtml(const OximetryNight &n)
             if (n.fromAnalysis) {
                 // graded on the desaturations of 4 % or more, as MediOX does
                 html += QObject::tr("ODI 4%: %1 per hour (%2 desaturations), %3.").arg(n.desaturations4 / n.hours, 0, 'f', 1).arg(n.desaturations4)
-                            .arg(oxiGradeHtml(odiGrade(n.desaturations4 / n.hours))) + "<br/>";
+                            .arg(oxiGradeHtml(odiGrade(n.desaturations4 / n.hours)))
+                        + (n.manualDesats > 0 ? QStringLiteral(" ") + ManualMark::pill() : QString()) + "<br/>";
                 html += QObject::tr("ODI 3%: %1 per hour.").arg(n.desaturations / n.hours, 0, 'f', 1) + "<br/>";
                 if (!std::isnan(n.hypoxicBurden4)) {
                     html += QObject::tr("Hypoxic burden: %1 %·min/h (%2), all desaturations %3.").arg(n.hypoxicBurden4, 0, 'f', 1)
