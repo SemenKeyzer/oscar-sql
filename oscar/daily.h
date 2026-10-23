@@ -579,6 +579,10 @@ private:
     MyTextBrowser * webView;
     //! Remembers where the Details page is scrolled, for the reload after a session is switched.
     void keepSidebarScroll();
+    //! Scrolls the sidebar to \a at, now or once the page is laid out that far.
+    void restoreSidebarScroll(int at);
+    //! Shows \a html in the sidebar where it was scrolled to (the same night drawn again).
+    void setSidebarHtml(const QString &html);
     int m_keepSidebarScroll = -1;
     class QSpinBox *m_eventWindowBox = nullptr;   //!< the event window's minutes, to type in
     QDate m_keepSidebarDate;

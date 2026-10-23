@@ -1198,7 +1198,7 @@ void Daily::ReloadGraphs()
 
 void Daily::updateLeftSidebar() {
     if (webView && !htmlLeftHeader.isEmpty())
-        webView->setHtml(getLeftSidebar(true));
+        setSidebarHtml(getLeftSidebar(true));
 }
 
 void Daily::hideSpaceHogs()
@@ -1207,7 +1207,7 @@ void Daily::hideSpaceHogs()
         ui->calendarFrame->setVisible(false);
     }
     if (AppSetting->showPieChart()) {
-        webView->setHtml(getLeftSidebar(false));
+        setSidebarHtml(getLeftSidebar(false));
     }
 }
 void Daily::showSpaceHogs()
@@ -1216,7 +1216,7 @@ void Daily::showSpaceHogs()
         ui->calendarFrame->setVisible(true);
     }
     if (AppSetting->showPieChart()) {
-        webView->setHtml(getLeftSidebar(true));
+        setSidebarHtml(getLeftSidebar(true));
     }
 }
 
@@ -3140,21 +3140,7 @@ void Daily::Load(QDate date)
     // Note: Outputs to local file if debugging
     QString html = getLeftSidebar(true);
     webView->setHtml(html);
-    if (m_keepSidebarScroll >= 0 && m_keepSidebarDate == date) {   // a session switched on or off: stay put
-        const int at = m_keepSidebarScroll;
-        QScrollBar *bar = webView->verticalScrollBar();
-        if (bar->maximum() >= at) {
-            bar->setValue(at);
-        } else {   // a long page is laid out bit by bit: once it reaches that far
-            auto *once = new QMetaObject::Connection;
-            *once = connect(bar, &QScrollBar::rangeChanged, this, [bar, at, once](int, int max) {
-                if (max < at) return;
-                bar->setValue(at);
-                QObject::disconnect(*once);
-                delete once;
-            });
-        }
-    }
+    if (m_keepSidebarScroll >= 0 && m_keepSidebarDate == date) restoreSidebarScroll(m_keepSidebarScroll);   // a session switched on or off: stay put
     m_keepSidebarScroll = -1;
     
 #if defined(DEBUG_DAILY_HTML) || defined(UNITTEST_MODE)
@@ -4702,7 +4688,7 @@ void Daily::refreshAnalysis()
     Day *day = p_profile ? p_profile->GetDay(previous_date) : nullptr;
     loadAnalysis(day);
     htmlLeftAnalysis = getAnalysisInformation(day);
-    if (webView && !htmlLeftHeader.isEmpty()) webView->setHtml(getLeftSidebar(true));
+    if (webView && !htmlLeftHeader.isEmpty()) setSidebarHtml(getLeftSidebar(true));
 
     // The graphs pick up the new channels with the day; keep the zoom.
     const QPair<qint64, qint64> shown = shownRange();
@@ -4721,6 +4707,31 @@ QPair<qint64, qint64> Daily::shownRange() const
 }
 
 // ---- Manual scoring
+
+void Daily::restoreSidebarScroll(int at)
+{
+    QScrollBar *bar = webView->verticalScrollBar();
+    if (bar->maximum() >= at) {
+        bar->setValue(at);
+    } else {   // a long page is laid out bit by bit: once it reaches that far
+        auto *once = new QMetaObject::Connection;
+        *once = connect(bar, &QScrollBar::rangeChanged, this, [bar, at, once](int, int max) {
+            if (max < at) return;
+            bar->setValue(at);
+            QObject::disconnect(*once);
+            delete once;
+        });
+    }
+}
+
+void Daily::setSidebarHtml(const QString &html)
+{
+    // the same night drawn again (its analysis came in, a session switched): the list stays where
+    // it was, not back at the top (doctor 2026-10-16, again 2026-10-23)
+    const int at = webView->verticalScrollBar()->value();
+    webView->setHtml(html);
+    if (at > 0) restoreSidebarScroll(at);
+}
 
 void Daily::keepSidebarScroll()
 {
