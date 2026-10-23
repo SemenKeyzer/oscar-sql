@@ -913,6 +913,13 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     }
     // always the first row above the graphs: the Align and scoring bars open under it
     ui->verticalLayout_3->insertWidget(ui->verticalLayout_3->indexOf(m_alignBar), eventWindowBar);
+    // the rows either side line up (doctor 2026-10-23): the event window as tall as the date row on
+    // the left, the session bar under the sidebar as tall as the bar under the graphs
+    eventWindowBar->setFixedHeight(qMax(ui->calNavWidget->height(), eventWindowBar->sizeHint().height()));
+    ui->calNavWidget->setFixedHeight(eventWindowBar->height());
+    const int bottom = qMax(sessionbar->minimumHeight(), ui->frame->sizeHint().height());
+    sessionbar->setFixedHeight(bottom);
+    ui->frame->setFixedHeight(bottom);
     connect(scoringButton, &QPushButton::toggled, this, &Daily::onScoringButtonToggled);
     // the switches under the graphs: blue with white text while on, like the Overview's sets (doctor 2026-10-23)
     for (QPushButton *b : { alignButton, analysisButton, scoringButton }) b->setStyleSheet(OverviewPresets::buttonStyle(QStringLiteral("QPushButton")));
