@@ -573,6 +573,15 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
 //                     originX + m_selection.x(), originY + height - bottom, col.rgba());
     }
 
+    // the graph being dragged to another place stands out (doctor 2026-10-23: easy to miss otherwise)
+    if (!printing() && m_graphview && m_graphview->draggedGraph() == this) {
+        painter.save();
+        painter.setPen(QPen(QColor(0x2f, 0x6f, 0xd0), 3));
+        painter.setBrush(QColor(0x2f, 0x6f, 0xd0, 40));
+        painter.drawRect(QRectF(originX + 1.5, originY + 1.5, width - 3, height - 3));
+        painter.restore();
+    }
+
     if (isPinned() && !printing()) {
         painter.drawPixmap(-5, originY-10, m_graphview->pin_icon);
     }

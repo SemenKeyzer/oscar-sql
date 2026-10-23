@@ -3040,6 +3040,7 @@ void gGraphView::mousePressEvent(QMouseEvent *event)
                     // Note: reorder has to be limited to pinned graphs.
                     m_graph_dragging = true;
                     m_tooltip->cancel();
+                    setCursor(Qt::ClosedHandCursor);
 
                     timedRedraw(50);
                     m_graph_index = i;

@@ -750,6 +750,10 @@ class gGraphView
 
     bool m_graph_dragging;
     int m_graph_index;
+  public:
+    //! The graph being dragged by its title to another place, or null.
+    gGraph *draggedGraph() const { return m_graph_dragging && m_graph_index >= 0 && m_graph_index < m_graphs.size() ? m_graphs[m_graph_index] : nullptr; }
+  protected:
 
     // Time-alignment mode (see setAlignMode())
     gGraph *alignGraphAt(const QPoint &pos) const;
