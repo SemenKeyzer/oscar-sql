@@ -55,7 +55,8 @@ QString row(const QString &label, const QString &value)
 
 QString row3(const QString &label, const QString &device, const QString &analysisValue)
 {
-    return QStringLiteral("<tr><td>%1</td><td align=right>%2</td><td align=right>%3</td></tr>").arg(label, device, analysisValue);
+    // fixed widths: the columns keep their place from one table to the next
+    return QStringLiteral("<tr><td>%1</td><td align=right width=22%>%2</td><td align=right width=22%>%3</td></tr>").arg(label, device, analysisValue);
 }
 
 QString wide(const QString &text)

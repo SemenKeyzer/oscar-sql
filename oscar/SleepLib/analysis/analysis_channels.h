@@ -9,6 +9,7 @@
 #ifndef ANALYSIS_CHANNELS_H
 #define ANALYSIS_CHANNELS_H
 
+#include <QColor>
 #include <QList>
 #include <QString>
 
@@ -30,6 +31,9 @@ namespace analysis {
 void registerChannels();
 //! An analysis channel's name without " · analysis" (e.g. "Obstructive Apnea"); empty for other channels.
 QString channelBaseName(ChannelID code);
+//! The colour of \a code as a profile stored it: an analysis channel's former default colour becomes
+//! today's (the device's colour for the same event); any other colour is the user's and stays.
+QColor storedColour(ChannelID code, const QColor &stored);
 
 //! Stage 1 flow channels of a CPAP session (events, spans and the per-breath score).
 QList<ChannelID> flowChannels();

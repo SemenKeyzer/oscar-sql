@@ -52,6 +52,35 @@ Channel *add(ChannelID &id, ChannelID value, schema::ChanType type, MachineType 
 
 } // namespace
 
+namespace {
+
+// The analysis' events take the colour of the device's same event (doctor 2026-10-23: one type,
+// one colour); the colours they had before, which saved profiles still hold.
+struct SameColour { ChannelID *analysis; ChannelID *device; QRgb former; };
+const QList<SameColour> &sameColours()
+{
+    static const QList<SameColour> list {
+        { &AN_ObstructiveApnea, &CPAP_Obstructive, qRgb(0x20, 0x70, 0xa0) },
+        { &AN_CentralApnea, &CPAP_ClearAirway, qRgb(0x90, 0x40, 0xb0) },
+        { &AN_Apnea, &CPAP_Apnea, qRgb(0x20, 0x70, 0x20) },
+        { &AN_RERA, &CPAP_RERA, qRgb(0xc0, 0xa0, 0x00) },
+        { &AN_ObstructiveHypopnea, &CPAP_ObstructiveHypopnea, qRgb(0x20, 0x60, 0xc0) },
+        { &AN_CentralHypopnea, &CPAP_CentralHypopnea, qRgb(0xb0, 0x50, 0xb0) },
+        { &AN_Hypopnea, &CPAP_Hypopnea, qRgb(0x30, 0x30, 0xd0) },
+    };
+    return list;
+}
+
+} // namespace
+
+QColor storedColour(ChannelID code, const QColor &stored)
+{
+    for (const SameColour &c : sameColours()) {
+        if (*c.analysis == code && stored.rgb() == c.former) return schema::channel[*c.device].defaultColor();
+    }
+    return stored;
+}
+
 QString channelBaseName(ChannelID code)
 {
     return baseNames().value(code);
@@ -132,6 +161,8 @@ void registerChannels()
     add(AN_OxiArtifact, 0x1A26, SPAN, MT_OXIMETER, "AnOxiArtifact",
         QObject::tr("Oximeter Artifact"), QObject::tr("A stretch of SpO2 the analysis leaves out: the probe moved, slipped, froze or was being put on"),
         QObject::tr("aAR"), STR_UNIT_Percentage, QColor(0x90, 0x90, 0x90));
+
+    for (const SameColour &c : sameColours()) schema::channel[*c.analysis].setDefaultColor(schema::channel[*c.device].defaultColor());
 
     // stage 1 bookkeeping: which parameters and algorithm version produced the session's channels
     add(AN_Stamp, 0x1A30, SETTING, MT_UNKNOWN, "AnStamp",

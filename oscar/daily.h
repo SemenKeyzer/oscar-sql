@@ -139,6 +139,8 @@ public:
     static QString indicesHtml(Day *day, bool analysisShown, QHash<ChannelID, EventDataType> &values, double analysedHours = 0);
     //! A sleep screener's night: the REI (OSCAR's analysis of its nasal flow) large, its apneas and hypopneas beneath.
     static QString reiFiguresHtml(double rei, int apneas, int hypopneas);
+    //! An empty white row of \a columns that sets one block of the index table apart from the next.
+    static QString blockSeparatorRow(int columns);
     //! A left-sidebar section heading: \a name links to folding the section; \a afterLink (e.g. a mark) follows it.
     //! The long slider above the graphs, in seconds from the start of the night.
     struct NightScroll {

@@ -30,6 +30,7 @@
 
 #include "preferences.h"
 #include "profiles.h"
+#include "SleepLib/analysis/analysis_channels.h"
 #include "machine.h"
 #include "machine_common.h"
 #include "journal.h"
@@ -2840,7 +2841,7 @@ bool Profile::loadChannelsFromDatabase()
         }
         
         chan->setEnabled(data.enabled);
-        chan->setDefaultColor(data.defaultColor);
+        chan->setDefaultColor(analysis::storedColour(chan->id(), data.defaultColor));   // an old default updated
         
         // The user's own names (an empty text is the registered one); not after a change
         // of language, when they would be in the old one.

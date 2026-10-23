@@ -2257,6 +2257,11 @@ QString Daily::ahiFiguresHtml(const QString &name, double deviceAhi, double anal
     return html;
 }
 
+QString Daily::blockSeparatorRow(int columns)
+{
+    return QStringLiteral("<tr><td colspan=%1 bgcolor='white' height=10>&nbsp;</td></tr>").arg(columns);
+}
+
 QString Daily::reiFiguresHtml(double rei, int apneas, int hypopneas)
 {
     QString html = QString("<tr><td colspan=5 bgcolor='%1' align=center><div title='%5' style='white-space: nowrap;'><font size=+3 color='%2'><b>%3</b></font>"
@@ -2628,8 +2633,9 @@ QString Daily::indicesHtml(Day *day, bool analysisShown, QHash<ChannelID, EventD
                           .arg(chan.defaultColor().name(), altcolor.name(), chan.fullname().toHtmlEscaped(),
                                QString::number(day->perHour(code), 'f', 2), ManualMark::barMark());
     }
-    if (!manualHtml.isEmpty()) html += ManualMark::headingRow(tr("Manual analysis"), 2) + manualHtml;
-    if (analysisShown && !analysisHtml.isEmpty()) html += AnalysisMark::headingRow(tr("OSCAR analysis"), 2) + analysisHtml;
+    // the device's, the manual and the analysis' figures as three blocks, an empty row between them
+    if (!manualHtml.isEmpty()) html += blockSeparatorRow(2) + ManualMark::headingRow(tr("Manual analysis"), 2) + manualHtml;
+    if (analysisShown && !analysisHtml.isEmpty()) html += blockSeparatorRow(2) + AnalysisMark::headingRow(tr("OSCAR analysis"), 2) + analysisHtml;
     html+="</table><hr/>";
     return html;
 }

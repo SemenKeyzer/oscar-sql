@@ -2370,6 +2370,24 @@ void AnalysisIntegrationTests::testPinnedAnalysisGraphKeepsColour()
     QCOMPARE(gGraph::plotBackground(true, true, true), QColor(Qt::white));   // printed: plain
 }
 
+// One type of event, one colour: the analysis' obstructive apnea as the device's (doctor 2026-10-23);
+// a profile that saved the old default colour gets the new one, a colour chosen by hand stays.
+void AnalysisIntegrationTests::testAnalysisColoursMatchDevice()
+{
+    const QPair<ChannelID, ChannelID> pairs[] = {
+        { AN_ObstructiveApnea, CPAP_Obstructive }, { AN_CentralApnea, CPAP_ClearAirway }, { AN_Apnea, CPAP_Apnea },
+        { AN_Hypopnea, CPAP_Hypopnea }, { AN_ObstructiveHypopnea, CPAP_ObstructiveHypopnea },
+        { AN_CentralHypopnea, CPAP_CentralHypopnea }, { AN_RERA, CPAP_RERA },
+    };
+    for (const auto &p : pairs) {
+        QCOMPARE(schema::channel[p.first].defaultColor(), schema::channel[p.second].defaultColor());
+    }
+    const QColor oldDefault(0x20, 0x70, 0xa0);   // the analysis' obstructive apnea before
+    QCOMPARE(analysis::storedColour(AN_ObstructiveApnea, oldDefault), schema::channel[CPAP_Obstructive].defaultColor());
+    QCOMPARE(analysis::storedColour(AN_ObstructiveApnea, QColor(Qt::red)), QColor(Qt::red));
+    QCOMPARE(analysis::storedColour(CPAP_Obstructive, oldDefault), oldDefault);   // not an analysis channel
+}
+
 // An event added by hand gets another type: the same edit, its span kept; the counts follow.
 void AnalysisIntegrationTests::testRetypeAdded()
 {
@@ -2669,6 +2687,9 @@ void AnalysisIntegrationTests::testIndicesDeviceThenAnalysis()
     QVERIFY(html.contains(QString::number(2.0 / day.hours(MT_CPAP), 'f', 2)));
     QVERIFY(html.contains(QStringLiteral("#7F77DD"), Qt::CaseInsensitive));
     QVERIFY(!html.contains(QStringLiteral("· analysis")));
+    // an empty row sets the analysis block apart from the device's (doctor 2026-10-23)
+    QVERIFY(Daily::blockSeparatorRow(2).contains(QStringLiteral("colspan=2")));
+    QVERIFY(html.contains(Daily::blockSeparatorRow(2) + AnalysisMark::headingRow(QStringLiteral("OSCAR analysis"), 2)));
 
     const QString hidden = Daily::indicesHtml(&day, false, values);
     QVERIFY(!hidden.contains(QStringLiteral("OSCAR analysis")));
@@ -2693,6 +2714,7 @@ void AnalysisIntegrationTests::testIndicesManualGroup()
     const QString html = Daily::indicesHtml(&day, false, values);
     const int heading = html.indexOf(QStringLiteral("Manual analysis"));
     QVERIFY2(heading > 0, qPrintable(html));
+    QVERIFY(html.contains(Daily::blockSeparatorRow(2) + ManualMark::headingRow(QStringLiteral("Manual analysis"), 2)));
     QVERIFY(html.contains(ManualMark::pill()));
     const QString oh = schema::channel[CPAP_ObstructiveHypopnea].fullname();
     QVERIFY2(html.indexOf(oh) > heading, qPrintable(html));   // OH only under the heading: the device records none

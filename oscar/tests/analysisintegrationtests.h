@@ -102,6 +102,7 @@ private slots:
     void testUpdateExcludeAcrossSessions();
     void testUpdateAdded();
     void testRetypeAdded();
+    void testAnalysisColoursMatchDevice();
     void testOverviewTitleWraps();
     void testPinnedAnalysisGraphKeepsColour();
     void testEditRowResize();

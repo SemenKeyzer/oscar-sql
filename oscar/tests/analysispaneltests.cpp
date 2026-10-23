@@ -148,6 +148,8 @@ void AnalysisPanelTests::testSidebarForOximetryOnlyNight()
     QVERIFY(html.contains(QStringLiteral("Hypoxic load (Linz)")));   // the area below 100 % (Parekh 2024 review)
     QVERIFY(html.contains(QStringLiteral("Problem zones")));
     QVERIFY(html.contains(QStringLiteral("below 85 %")));
+    // the minutes and % columns keep their place, whatever the numbers (doctor 2026-10-23: "съехала")
+    QVERIFY(html.contains(QStringLiteral("<td align=right width=22%>")));
     QVERIFY(html.contains(QStringLiteral("&lt; 85 %")));
     QVERIFY(html.contains(QStringLiteral("Pulse")));
 }
