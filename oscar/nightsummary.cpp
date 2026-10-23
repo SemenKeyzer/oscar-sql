@@ -7,6 +7,7 @@
  * for more details. */
 
 #include "analysismark.h"
+#include "SleepLib/manual_scoring.h"
 #include "nightsummary.h"
 #include "helptips.h"
 
@@ -306,7 +307,15 @@ NightSummary buildNightSummaryFor(Profile *profile, analysis::AnalysisService *s
         }
     }
 
-    if (!s.hasCpap) s.takeScreener(row);
+    if (!s.hasCpap) {
+        s.takeScreener(row);
+        // scored by hand on the nasal flow: the REI after manual scoring (doctor 2026-10-23)
+        Day *any = s.screener ? profile->GetDay(s.date) : nullptr;
+        if (any && ManualScoring::hasEdits(any)) {
+            const ManualScoring::ScreenerIndex idx = ManualScoring::screenerIndex(any);
+            if (idx.valid) s.reiManual = idx.rei;
+        }
+    }
 
     // That night's oximetry: the analysis' figures where it ran, else the classic count.
     s.oxi = summarizeOximetry(row);
@@ -656,7 +665,9 @@ void NightSummaryView::setSummary(const NightSummary &s)
     }
     if (s.screener) {   // a sleep screener's night: OSCAR's analysis of its nasal flow
         const QString note = tr("target under %1").arg(NightSummary::kAhiTarget) + QStringLiteral("<br/>")
-            + tr("apneas %1, hypopneas %2").arg(s.reiApneas).arg(s.reiHypopneas) + QStringLiteral(" ") + AnalysisMark::pill();
+            + tr("apneas %1, hypopneas %2").arg(s.reiApneas).arg(s.reiHypopneas) + QStringLiteral(" ") + AnalysisMark::pill()
+            + (std::isnan(s.reiManual) ? QString()
+                                       : QStringLiteral("<br/>") + tr("manual scoring — %1").arg(num(s.reiManual)) + QStringLiteral(" ") + ManualMark::pill());
         HelpTips::attach(addTile(col++, tr("REI"), num(s.analysisAhi), note,
                                  s.analysisAhi >= NightSummary::kAhiTarget ? NightSummary::Attention : NightSummary::Good,
                                  tr("Apneas and hypopneas per hour of the analysed recording, by OSCAR's analysis of the screener's nasal flow.")),

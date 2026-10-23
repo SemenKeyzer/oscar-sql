@@ -64,6 +64,7 @@ struct NightSummary {
     int reiApneas = 0;
     int reiHypopneas = 0;
     double reiHours = 0;            //!< the analysed recording's hours
+    double reiManual = std::numeric_limits<double>::quiet_NaN();   //!< after manual scoring; NaN if not scored
     //! Takes a sleep screener's REI from the analysis' row (a night without CPAP).
     void takeScreener(const AnalysisDailyData &row);
     bool hasLeak = false;

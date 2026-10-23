@@ -129,7 +129,7 @@ public:
     //! The Manual analysis page: the AHI after manual scoring and \a scoringBlock (the edits), or a
     //! hint how to start when there are none.
     static QString manualAnalysisHtml(const QString &scoringBlock, double correctedAhi, double deviceAhi, const QString &name,
-                                      bool cpapData = true, const QString &countsTable = QString());
+                                      bool cpapData = true, const QString &countsTable = QString(), bool baseIsAnalysis = false);
     //! "type: device → after manual scoring" per hour, for the event types manual scoring changed; empty if none.
     static QString manualCountsHtml(Day *day);
     //! "Flow limitation (manual scoring): X% of the night, Y min" when stretches are marked; else empty.
@@ -138,7 +138,7 @@ public:
     //! On a night without CPAP hours the analysis' rows are per \a analysedHours (a sleep screener's recording).
     static QString indicesHtml(Day *day, bool analysisShown, QHash<ChannelID, EventDataType> &values, double analysedHours = 0);
     //! A sleep screener's night: the REI (OSCAR's analysis of its nasal flow) large, its apneas and hypopneas beneath.
-    static QString reiFiguresHtml(double rei, int apneas, int hypopneas);
+    static QString reiFiguresHtml(double rei, int apneas, int hypopneas, double manualRei = std::numeric_limits<double>::quiet_NaN());
     //! An empty white row of \a columns that sets one block of the index table apart from the next.
     static QString blockSeparatorRow(int columns);
     //! A left-sidebar section heading: \a name links to folding the section; \a afterLink (e.g. a mark) follows it.
@@ -579,6 +579,7 @@ private:
     MyTextBrowser * webView;
     //! Remembers where the Details page is scrolled, for the reload after a session is switched.
     void keepSidebarScroll();
+    bool m_scoringNasal = false;   //!< the last stretch was chosen on a screener's nasal flow
     //! Scrolls the sidebar to \a at, now or once the page is laid out that far.
     void restoreSidebarScroll(int at);
     //! Shows \a html in the sidebar where it was scrolled to (the same night drawn again).

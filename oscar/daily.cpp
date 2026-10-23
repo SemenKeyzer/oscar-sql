@@ -745,8 +745,10 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     m_scoringDrawn = QSharedPointer<ManualScoring::Result>::create();
     for (auto it = graphlist.cbegin(); it != graphlist.cend(); ++it) {
         if (it.key() == STR_GRAPH_EventBreakdown) continue;   // not a time graph
-        const bool markers = it.key() == STR_GRAPH_FlowRate || it.key() == STR_GRAPH_SleepFlags;
-        it.value()->AddLayer(new gManualScoringLayer(m_scoringDrawn, markers, it.key() == STR_GRAPH_FlowRate));
+        // the boxes on the flows scored by hand: the CPAP's and a sleep screener's nasal flow
+        const bool flow = it.key() == STR_GRAPH_FlowRate || it.key() == STR_GRAPH_Oxi_NasalFlow;
+        const bool markers = flow || it.key() == STR_GRAPH_SleepFlags;
+        it.value()->AddLayer(new gManualScoringLayer(m_scoringDrawn, markers, flow));
     }
     GraphView->setScoringResult(m_scoringDrawn);
     GraphView->setScoringLimits([this](const ScoringResize::Target &t) { return scoringLimits(t); });
@@ -2288,28 +2290,34 @@ QString Daily::blockSeparatorRow(int columns)
     return QStringLiteral("<tr><td colspan=%1 bgcolor='white' height=10>&nbsp;</td></tr>").arg(columns);
 }
 
-QString Daily::reiFiguresHtml(double rei, int apneas, int hypopneas)
+QString Daily::reiFiguresHtml(double rei, int apneas, int hypopneas, double manualRei)
 {
     QString html = QString("<tr><td colspan=5 bgcolor='%1' align=center><div title='%5' style='white-space: nowrap;'><font size=+3 color='%2'><b>%3</b></font>"
                            "&nbsp;&nbsp;&nbsp;&nbsp; <font size=+3 color='%2'><b>%4</b></font></div></td></tr>\n")
                        .arg("#F88017", COLOR_Text.name(), tr("REI").toHtmlEscaped(), QString::number(rei, 'f', 1),
                             tr("Apneas and hypopneas per hour of the analysed recording, by OSCAR's analysis of the screener's nasal flow.").toHtmlEscaped());
-    const QString parts = HelpTips::term(tr("apneas %1, hypopneas %2").arg(apneas).arg(hypopneas).toHtmlEscaped(), QStringLiteral("rei"))
-                        + QStringLiteral(" ") + AnalysisMark::pill();
+    QString parts = HelpTips::term(tr("apneas %1, hypopneas %2").arg(apneas).arg(hypopneas).toHtmlEscaped(), QStringLiteral("rei"))
+                  + QStringLiteral(" ") + AnalysisMark::pill();
+    if (!std::isnan(manualRei)) {   // scored by hand on the nasal flow (doctor 2026-10-23)
+        parts += QStringLiteral(" | ") + HelpTips::term(tr("manual scoring — %1").arg(QString::number(manualRei, 'f', 2)).toHtmlEscaped(),
+                                                          QStringLiteral("manual_scoring"))
+                 + QStringLiteral(" ") + ManualMark::pill();
+    }
     html += QString("<tr><td colspan=5 bgcolor='%1' align=center><font color='%2'>%3</font></td></tr>\n")
                 .arg("#F88017", COLOR_Text.name(), parts);
     return html;
 }
 
 QString Daily::manualAnalysisHtml(const QString &scoringBlock, double correctedAhi, double deviceAhi, const QString &name,
-                                  bool cpapData, const QString &countsTable)
+                                  bool cpapData, const QString &countsTable, bool baseIsAnalysis)
 {
     if (!cpapData) return QStringLiteral("<p><i>%1</i></p>").arg(tr("No CPAP data this night.").toHtmlEscaped());
     if (scoringBlock.isEmpty()) {
         return QStringLiteral("<p><i>%1</i></p>").arg(tr("No manual scoring this night: switch Scoring on below to correct the events.").toHtmlEscaped());
     }
     return QStringLiteral("<p align=center><b>%1</b></p>")
-               .arg(tr("%1 after manual scoring: %2 (device %3)").arg(name, QString::number(correctedAhi, 'f', 2), QString::number(deviceAhi, 'f', 2))
+               .arg((baseIsAnalysis ? tr("%1 after manual scoring: %2 (analysis %3)") : tr("%1 after manual scoring: %2 (device %3)"))
+                        .arg(name, QString::number(correctedAhi, 'f', 2), QString::number(deviceAhi, 'f', 2))
                         .toHtmlEscaped())
         + countsTable + scoringBlock;
 }
@@ -2357,6 +2365,14 @@ void Daily::updateManualPage(Day *day)
 {
     if (!m_manualView) return;
     const QString name = p_profile && p_profile->general->calculateRDI() ? STR_TR_RDI : STR_TR_AHI;
+    if (day && day->hours(MT_CPAP) <= 0) {
+        // a sleep screener's night: its REI after manual scoring beside the analysis' (doctor 2026-10-23)
+        const ManualScoring::ScreenerIndex rei = ManualScoring::screenerIndex(day);
+        if (rei.valid) {
+            m_manualView->setHtml(manualAnalysisHtml(getManualScoring(day), rei.rei, rei.analysisRei, tr("REI"), true, QString(), true));
+            return;
+        }
+    }
     if (!day || day->hours(MT_CPAP) <= 0) {
         m_manualView->setHtml(manualAnalysisHtml(QString(), 0, 0, name, false));
         return;
@@ -3093,7 +3109,7 @@ void Daily::Load(QDate date)
             if (figures.screener && analysis::analysisShown()) {
                 // a sleep screener's night: OSCAR's analysis of its nasal flow, per hour of the recording
                 htmlLeftAHI += QStringLiteral("<table cellspacing=0 cellpadding=0 border=0 width='100%'>\n")
-                             + reiFiguresHtml(figures.analysisAhi, figures.reiApneas, figures.reiHypopneas) + QStringLiteral("</table>\n");
+                             + reiFiguresHtml(figures.analysisAhi, figures.reiApneas, figures.reiHypopneas, figures.reiManual) + QStringLiteral("</table>\n");
                 QHash<ChannelID, EventDataType> values;
                 htmlLeftIndices = getIndices(day, values, figures.reiHours);
             }
@@ -4765,20 +4781,10 @@ void Daily::onScoringButtonToggled(bool on)
 
 namespace {
 
-//! The enabled CPAP session of \a day that holds \a t, or the nearest one.
-Session *scoringSessionAt(Day *day, qint64 t)
+//! The session of \a day an edit at \a t goes to (the CPAP's, or a screener's: ManualScoring::sessionForEdit).
+Session *scoringSessionAt(Day *day, qint64 t, bool nasalFlow)
 {
-    Session *best = nullptr;
-    qint64 bestGap = std::numeric_limits<qint64>::max();
-    for (Session *s : day->sessions) {
-        if (s->type() != MT_CPAP || !s->enabled()) continue;
-        const qint64 gap = t < s->first() ? s->first() - t : (t > s->last() ? t - s->last() : 0);
-        if (gap < bestGap) {
-            best = s;
-            bestGap = gap;
-        }
-    }
-    return best;
+    return ManualScoring::sessionForEdit(day, t, nasalFlow);
 }
 
 QString scoringTime(qint64 ms) { return QDateTime::fromMSecsSinceEpoch(ms).time().toString(QStringLiteral("HH:mm:ss")); }
@@ -4799,7 +4805,7 @@ void Daily::applyScoring(const QVariantMap &choice, qint64 startMs, qint64 endMs
         e.kind = Kind::Add;
         e.startMs = startMs;
         e.endMs = endMs;
-        if (Session *s = scoringSessionAt(day, endMs)) ManualScoring::addEdit(s, e);
+        if (Session *s = scoringSessionAt(day, endMs, m_scoringNasal)) ManualScoring::addEdit(s, e);
     } else if (action == QLatin1String("exclude") || action == QLatin1String("mark") || action == QLatin1String("keep")) {
         e.kind = action == QLatin1String("mark") ? Kind::Mark : action == QLatin1String("keep") ? Kind::Keep : Kind::Exclude;
         e.startMs = startMs;
@@ -4815,7 +4821,7 @@ void Daily::applyScoring(const QVariantMap &choice, qint64 startMs, qint64 endMs
         e.newChannel = choice.value(QStringLiteral("newChannel")).toUInt();
         e.startMs = timeMs;
         e.endMs = timeMs;
-        if (Session *s = scoringSessionAt(day, timeMs)) ManualScoring::addEdit(s, e);
+        if (Session *s = scoringSessionAt(day, timeMs, true)) ManualScoring::addEdit(s, e);   // the event's own session
     } else if (action == QLatin1String("retypeAll") || action == QLatin1String("removeAll")) {
         const ChannelID to = action == QLatin1String("retypeAll") ? choice.value(QStringLiteral("newChannel")).toUInt() : 0;
         // plan first: the question names the events that will actually change
@@ -4859,7 +4865,8 @@ void Daily::scoringChanged()
 
 void Daily::onScoringRange(gGraph *graph, qint64 startMs, qint64 endMs, QPoint globalPos)
 {
-    Q_UNUSED(graph)
+    m_scoringNasal = graph && graph->name() == STR_GRAPH_Oxi_NasalFlow;   // a screener's events (doctor 2026-10-23)
+    if (graph && graph->name() == STR_GRAPH_Oxi_SPO2) return;   // desaturations: their own menu
     if (m_repeatType) {   // the type chosen last is put at once; right-click the event (or T) to change it
         applyScoring(ScoringMenus::repeatChoice(m_repeatType), startMs, endMs);
         return;
@@ -4887,7 +4894,7 @@ void Daily::onScoringContext(gGraph *graph, qint64 timeMs, QPoint globalPos)
     const ManualScoring::EffectiveEvent *best = nullptr;
     QList<ManualScoring::EffectiveEvent> events;
     for (Session *s : day->sessions) {
-        if (s->type() != MT_CPAP || !s->enabled()) continue;
+        if ((s->type() != MT_CPAP && !ManualScoring::isScreenerSession(s)) || !s->enabled()) continue;
         events += ManualScoring::resultFor(s).events;
     }
     qint64 bestGap = slack + 1;
@@ -4933,7 +4940,7 @@ QString Daily::getManualScoring(Day *day)
     qint64 excludedMs = 0;
     QSet<QPair<qint64, qint64>> stretches;
     for (Session *s : day->sessions) {
-        if (s->type() != MT_CPAP || !s->enabled()) continue;   // as the AHI: only sessions that count
+        if ((s->type() != MT_CPAP && !ManualScoring::isScreenerSession(s)) || !s->enabled()) continue;   // the sessions that count
         excludedMs += s->manualExcludedMs();
         notFound += s->manualNotFound();
         for (const ManualScoring::Edit &e : ManualScoringRepository::editsForSession(ManualScoring::keyOf(s))) {
@@ -4979,7 +4986,7 @@ QPair<qint64, qint64> Daily::scoringLimits(const ScoringResize::Target &t)
     // on the graphs' clock: the device time plus its correction
     auto span = [](Session *s) { return qMakePair(s->first() + s->correctionMs(), s->last() + s->correctionMs()); };
     if (t.kind == ScoringResize::Target::Event && t.eventIndex >= 0 && t.eventIndex < m_scoringDrawn->events.size()) {
-        if (Session *s = scoringSessionAt(day, m_scoringDrawn->events.at(t.eventIndex).originalEndMs)) return span(s);
+        if (Session *s = scoringSessionAt(day, m_scoringDrawn->events.at(t.eventIndex).originalEndMs, true)) return span(s);
         return out;
     }
     bool any = false;
@@ -5003,7 +5010,7 @@ void Daily::onScoringResized(const ScoringResize::Target &t, qint64 startMs, qin
         const ManualScoring::EffectiveEvent ev = m_scoringDrawn->events.at(t.eventIndex);
         if (ev.origin == ManualScoring::Origin::Added) {
             ManualScoring::updateEdit(day, ev.editId, startMs, endMs);
-        } else if (Session *s = scoringSessionAt(day, ev.originalEndMs)) {
+        } else if (Session *s = scoringSessionAt(day, ev.originalEndMs, true)) {
             ManualScoring::resizeEvent(s, ev, startMs, endMs);
         }
     } else {
@@ -5023,7 +5030,7 @@ void Daily::updateScoringLayer(Day *day)
     for (Session *s : day ? day->sessions : QList<Session *>()) {
         if (!ManualScoring::isStretchSession(s)) continue;
         const ManualScoring::Result r = ManualScoring::resultFor(s);
-        if (s->type() == MT_CPAP) {
+        if (s->type() == MT_CPAP || ManualScoring::isScreenerSession(s)) {   // a screener's events on its nasal flow
             m_scoringDrawn->events += r.events;
             m_scoringDrawn->markEdits += r.markEdits;
             m_scoringDrawn->flowLimitedSpans += r.flowLimitedSpans;

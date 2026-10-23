@@ -174,6 +174,8 @@ struct ScreenerIndex {
 };
 //! The REI of \a day's screener sessions after manual scoring, over \a analysedSeconds of flow.
 ScreenerIndex screenerIndex(Day *day, double analysedSeconds);
+//! The same over the analysed flow its screener sessions' stamps record.
+ScreenerIndex screenerIndex(Day *day);
 //! The event added by hand \a id of \a day's sessions becomes \a newChannel (its span kept).
 bool retypeEdit(Day *day, qint64 id, ChannelID newChannel);
 //! The flow limitation marked by hand in the day's enabled CPAP sessions, less excluded time.

@@ -35,6 +35,7 @@ server= red 30+
 #include "mainwindow.h"
 #include "statistics.h"
 #include "SleepLib/manual_scoring.h"
+#include "SleepLib/analysis/session_analysis.h"
 #include "glossary.h"
 #include "helptips.h"
 #include "translation.h"
@@ -2928,75 +2929,114 @@ QString Statistics::manualAnalysisTable(const QDate &from, const QDate &to)
 {
     if (!p_profile || !from.isValid() || !to.isValid()) return QString();
     constexpr int kMaxNights = 12;   // as many columns as the monthly table
-    QList<Day *> days;
-    for (QDate date = to; date >= from && days.size() < kMaxNights; date = date.addDays(-1)) {
-        Day *day = p_profile->GetDay(date, MT_CPAP);
-        if (day && day->hasManualScoring() && day->hours(MT_CPAP) > 0) days.prepend(day);
-    }
-    if (days.isEmpty()) return QString();
 
-    // a row per figure: "after manual scoring (the device's)" per night, then the average weighted by hours
-    struct Figure { QString name; std::function<double(Day *, bool)> perHour; };
-    auto index = [](const QList<ChannelID> &codes) {
-        return [codes](Day *d, bool manual) {
-            double n = 0;
-            for (ChannelID c : codes) n += manual ? d->count(c) : d->deviceCount(c);
-            const double h = manual ? d->ahiHours() : d->hours(MT_CPAP);
-            return h > 0 ? n / h : 0.0;
-        };
+    // each night scored by hand: per type the count after manual scoring and the base's (the device's,
+    // or on a sleep screener the analysis'), and the hours each is over
+    struct Night {
+        Day *day = nullptr;
+        bool screener = false;
+        double hours = 0, baseHours = 0;
+        QHash<ChannelID, double> manual, base;
+        qint64 flMs = 0;
     };
-    QList<Figure> figures { { STR_TR_AHI, index(ahiChannels) } };
+    QList<Night> nights;
+    for (QDate date = to; date >= from && nights.size() < kMaxNights; date = date.addDays(-1)) {
+        Night n;
+        Day *cpap = p_profile->GetDay(date, MT_CPAP);
+        if (cpap && cpap->hasManualScoring() && cpap->hours(MT_CPAP) > 0) {
+            n.day = cpap;
+            n.hours = cpap->ahiHours();
+            n.baseHours = cpap->hours(MT_CPAP);
+            for (ChannelID c : ManualScoring::countedChannels()) {
+                n.manual[c] = cpap->count(c);
+                n.base[c] = cpap->deviceCount(c);
+            }
+            n.flMs = ManualScoring::flowLimitedMs(cpap);
+        } else if (Day *any = p_profile->GetDay(date); any && any->hours(MT_CPAP) <= 0 && ManualScoring::hasEdits(any)) {
+            const ManualScoring::ScreenerIndex idx = ManualScoring::screenerIndex(any);
+            if (!idx.valid) continue;
+            n.day = any;
+            n.screener = true;
+            n.hours = idx.hours;
+            double analysed = 0;
+            for (Session *s : any->sessions) {
+                if (!s->enabled() || !ManualScoring::isScreenerSession(s)) continue;
+                analysed += analysis::SessionStamp::read(s).flowSeconds;
+                for (const ManualScoring::EffectiveEvent &e : ManualScoring::resultFor(s).events) {
+                    if (e.origin != ManualScoring::Origin::Added) n.base[e.originalChannel] += 1;
+                    if (e.origin != ManualScoring::Origin::Removed && !e.excluded) n.manual[e.channel] += 1;
+                }
+            }
+            n.baseHours = analysed / 3600.0;
+        } else {
+            continue;
+        }
+        nights.prepend(n);
+    }
+    if (nights.isEmpty()) return QString();
+    bool anyScreener = false;
+    for (const Night &n : nights) anyScreener = anyScreener || n.screener;
+
+    struct Figure { QString name; QList<ChannelID> codes; };
+    QList<Figure> figures { { anyScreener ? tr("AHI / REI") : STR_TR_AHI, *ahiChannelGroup(AllAhiChannels) } };
     for (ChannelID c : { CPAP_Obstructive, CPAP_ClearAirway, CPAP_MixedApnea, CPAP_Apnea, CPAP_AllApnea,
                          CPAP_Hypopnea, CPAP_ObstructiveHypopnea, CPAP_CentralHypopnea, CPAP_RERA }) {
         bool any = false;
-        for (Day *d : days) any = any || d->count(c) > 0 || d->deviceCount(c) > 0;
-        if (any) figures.append({ QStringLiteral("&nbsp;&nbsp;") + schema::channel[c].fullname().toHtmlEscaped(), index({ c }) });
+        for (const Night &n : nights) any = any || n.manual.value(c) > 0 || n.base.value(c) > 0;
+        if (any) figures.append({ QStringLiteral("&nbsp;&nbsp;") + schema::channel[c].fullname().toHtmlEscaped(), { c } });
     }
 
     const QString cell = QStringLiteral("<td align=right>%1</td>");
     QString html = QStringLiteral("<div align=center><table cellpadding=3 cellspacing=0 style='border:1px solid #81C784;'>");
     html += QStringLiteral("<tr><td colspan=%1>%2<b>%3</b> %4</td></tr>")
-                .arg(days.size() + 2).arg(ManualMark::barMark(), tr("Manual analysis").toHtmlEscaped(), ManualMark::pill());
+                .arg(nights.size() + 2).arg(ManualMark::barMark(), tr("Manual analysis").toHtmlEscaped(), ManualMark::pill());
     html += QStringLiteral("<tr><td><i>%1</i></td>").arg(tr("manual scoring (device)").toHtmlEscaped());
-    for (Day *d : days) html += cell.arg(QStringLiteral("<b>%1</b>").arg(QLocale().toString(d->date(), QLocale::ShortFormat)));
-    html += cell.arg(QStringLiteral("<b>%1</b>").arg(tr("Average (%n night(s))", nullptr, int(days.size())).toHtmlEscaped()));
+    for (const Night &n : nights) {
+        // a screener's night: the analysis is its base, the index an REI
+        html += cell.arg(QStringLiteral("<b>%1</b>%2").arg(QLocale().toString(n.day->date(), QLocale::ShortFormat),
+                                                          n.screener ? QStringLiteral("<br/><small>%1</small>").arg(tr("REI · (analysis)").toHtmlEscaped())
+                                                                     : QString()));
+    }
+    html += cell.arg(QStringLiteral("<b>%1</b>").arg(tr("Average (%n night(s))", nullptr, int(nights.size())).toHtmlEscaped()));
     html += QStringLiteral("</tr>");
-    auto pair = [](double manual, double device) {
-        return QStringLiteral("%1 (%2)").arg(manual, 0, 'f', 2).arg(device, 0, 'f', 2);
-    };
-    double hours = 0, ahiHours = 0;
-    for (Day *d : days) {
-        hours += d->hours(MT_CPAP);
-        ahiHours += d->ahiHours();
+    auto pair = [](double manual, double base) { return QStringLiteral("%1 (%2)").arg(manual, 0, 'f', 2).arg(base, 0, 'f', 2); };
+    double hours = 0, baseHours = 0;
+    for (const Night &n : nights) {
+        hours += n.hours;
+        baseHours += n.baseHours;
     }
     int line = 0;
     for (const Figure &f : figures) {
         html += QStringLiteral("<tr%1><td>%2</td>").arg(line++ % 2 ? QStringLiteral(" bgcolor='#F1F8F3'") : QString(), f.name);
-        double manualSum = 0, deviceSum = 0;
-        for (Day *d : days) {
-            const double m = f.perHour(d, true), dv = f.perHour(d, false);
-            manualSum += m * d->ahiHours();
-            deviceSum += dv * d->hours(MT_CPAP);
-            html += cell.arg(pair(m, dv));
+        double manualSum = 0, baseSum = 0;
+        for (const Night &n : nights) {
+            double m = 0, b = 0;
+            for (ChannelID c : f.codes) {
+                m += n.manual.value(c);
+                b += n.base.value(c);
+            }
+            manualSum += m;
+            baseSum += b;
+            html += cell.arg(pair(n.hours > 0 ? m / n.hours : 0, n.baseHours > 0 ? b / n.baseHours : 0));
         }
-        html += cell.arg(QStringLiteral("<b>%1</b>").arg(pair(ahiHours > 0 ? manualSum / ahiHours : 0, hours > 0 ? deviceSum / hours : 0)));
+        html += cell.arg(QStringLiteral("<b>%1</b>").arg(pair(hours > 0 ? manualSum / hours : 0, baseHours > 0 ? baseSum / baseHours : 0)));
         html += QStringLiteral("</tr>");
     }
     // flow limitation marked by hand: % of the night and minutes
     qint64 flTotal = 0;
-    for (Day *d : days) flTotal += ManualScoring::flowLimitedMs(d);
+    for (const Night &n : nights) flTotal += n.flMs;
     if (flTotal > 0) {
         html += QStringLiteral("<tr><td>%1</td>").arg(tr("Flow limitation marked by hand, % (min)").toHtmlEscaped());
-        for (Day *d : days) {
-            const qint64 ms = ManualScoring::flowLimitedMs(d);
-            html += cell.arg(QStringLiteral("%1 (%2)").arg(100.0 * ms / 3600000.0 / d->hours(MT_CPAP), 0, 'f', 1).arg(ms / 60000.0, 0, 'f', 0));
+        for (const Night &n : nights) {
+            html += cell.arg(n.baseHours > 0 ? QStringLiteral("%1 (%2)").arg(100.0 * n.flMs / 3600000.0 / n.baseHours, 0, 'f', 1).arg(n.flMs / 60000.0, 0, 'f', 0)
+                                             : QStringLiteral("&mdash;"));
         }
-        html += cell.arg(QStringLiteral("<b>%1 (%2)</b>").arg(100.0 * flTotal / 3600000.0 / hours, 0, 'f', 1).arg(flTotal / 60000.0 / days.size(), 0, 'f', 0));
+        html += cell.arg(QStringLiteral("<b>%1 (%2)</b>").arg(100.0 * flTotal / 3600000.0 / baseHours, 0, 'f', 1).arg(flTotal / 60000.0 / nights.size(), 0, 'f', 0));
         html += QStringLiteral("</tr>");
     }
     html += QStringLiteral("<tr><td>%1</td>").arg(tr("Hours").toHtmlEscaped());
-    for (Day *d : days) html += cell.arg(QString::number(d->hours(MT_CPAP), 'f', 2));
-    html += cell.arg(QStringLiteral("<b>%1</b>").arg(hours / days.size(), 0, 'f', 2));
+    for (const Night &n : nights) html += cell.arg(QString::number(n.baseHours, 'f', 2));
+    html += cell.arg(QStringLiteral("<b>%1</b>").arg(baseHours / nights.size(), 0, 'f', 2));
     html += QStringLiteral("</tr></table></div><br/>");
     return html;
 }

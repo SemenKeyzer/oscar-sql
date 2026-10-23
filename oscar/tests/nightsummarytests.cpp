@@ -635,6 +635,11 @@ void NightSummaryTests::testScreenerTile()
     QVERIFY2(note.contains(QStringLiteral("apneas 4, hypopneas 8")), qPrintable(note));
     QVERIFY(note.contains(AnalysisMark::pill()));
     QVERIFY(s.concerns().join(QLatin1Char(' ')).contains(QStringLiteral("REI 6.0")));
+    QVERIFY(!note.contains(QStringLiteral("manual scoring")));
+    s.reiManual = 5.5;   // scored by hand
+    view.setSummary(s);
+    QVERIFY2(tileTexts(view, QStringLiteral("REI"), QStringLiteral("nsNote")).contains(QStringLiteral("manual scoring — 5.5")),
+             qPrintable(tileTexts(view, QStringLiteral("REI"), QStringLiteral("nsNote"))));
 
     NightSummary cms50;
     cms50.date = s.date;

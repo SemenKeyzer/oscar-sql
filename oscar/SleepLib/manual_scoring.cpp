@@ -18,6 +18,7 @@
 #include "SleepLib/profiles.h"
 #include "SleepLib/schema.h"
 #include "SleepLib/analysis/analysis_channels.h"
+#include "SleepLib/analysis/session_analysis.h"
 #include "SleepLib/session.h"
 #include "database/manual_scoring_repository.h"
 #include "database/daily_summary_repository.h"
@@ -625,6 +626,15 @@ ScreenerIndex screenerIndex(Day *day, double analysedSeconds)
     out.rei = out.hours > 0 ? out.events / out.hours : 0;
     out.valid = true;
     return out;
+}
+
+ScreenerIndex screenerIndex(Day *day)
+{
+    double seconds = 0;
+    for (Session *s : day ? day->sessions : QList<Session *>()) {
+        if (s->enabled() && isScreenerSession(s)) seconds += analysis::SessionStamp::read(s).flowSeconds;
+    }
+    return screenerIndex(day, seconds);
 }
 
 qint64 flowLimitedMs(Day *day)

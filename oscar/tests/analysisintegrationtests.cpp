@@ -1901,6 +1901,8 @@ void AnalysisIntegrationTests::testPdfShowsDeviceAhi()
     delete day;
 }
 
+namespace { Session *screenerSession(Machine *mach, SessionID id); }
+
 void AnalysisIntegrationTests::testStatisticsFootnote()
 {
     Machine cpap(p_profile, 80);
@@ -1935,6 +1937,33 @@ void AnalysisIntegrationTests::testStatisticsFootnote()
     QVERIFY(table.contains(Statistics::tr("Average (%n night(s))", nullptr, 1)));
     QVERIFY(!table.contains(schema::channel[CPAP_MixedApnea].fullname().toHtmlEscaped()));   // no such events: no row
     QVERIFY(Statistics::manualAnalysisTable(date.addDays(-30), date.addDays(-20)).isEmpty());
+
+    // a screener's night scored by hand: its column shows the REI after manual scoring and the analysis'
+    Machine rs01(p_profile, 81);
+    rs01.info.type = MT_OXIMETER;
+    rs01.info.serial = QStringLiteral("RS01T3");
+    const QDate night = date.addDays(1);
+    Day *sday = new Day();
+    sday->setDate(night);
+    Session *ns = screenerSession(&rs01, 811);
+    SessionStamp st;
+    st.flowVersion = kAnalysisAlgoVersion;
+    st.flowAnalyzed = true;
+    st.flowSeconds = 3600;
+    st.source = QStringLiteral("nasal");
+    st.write(ns);
+    sday->addSession(ns);
+    p_profile->daylist.insert(night, sday);
+    QVERIFY(ManualScoring::addEdit(ns, scoringEdit(ManualScoring::Kind::Add, CPAP_Hypopnea, 2400, 2420)));
+    const QString both = Statistics::manualAnalysisTable(date, night);
+    QVERIFY2(both.contains(QLocale().toString(night, QLocale::ShortFormat)), qPrintable(both));
+    QVERIFY2(both.contains(QStringLiteral("4.00 (3.00)")), qPrintable(both));   // REI by hand 4, analysis 3
+    QVERIFY(both.contains(Statistics::tr("REI")));
+    p_profile->daylist.remove(night);
+    ManualScoringRepository::removeAllForSession(ManualScoring::keyOf(ns));
+    sday->removeSession(ns);
+    delete ns;
+    delete sday;
     p_profile->daylist.remove(date);
     ManualScoring::clearDay(day);
     delete day;
@@ -2470,6 +2499,14 @@ void AnalysisIntegrationTests::testScreenerIndex()
     QVERIFY(qAbs(i.rei - 3 / (3400.0 / 3600)) < 1e-6);
     QCOMPARE(i.analysisRei, 3.0);
     QVERIFY(!ManualScoring::screenerIndex(&day, 0).valid);
+    // the analysed time from the session's own stamp
+    SessionStamp st;
+    st.flowVersion = kAnalysisAlgoVersion;
+    st.flowAnalyzed = true;
+    st.flowSeconds = 3600;
+    st.source = QStringLiteral("nasal");
+    st.write(s);
+    QVERIFY(qAbs(ManualScoring::screenerIndex(&day).rei - i.rei) < 1e-9);
     ManualScoringRepository::removeAllForSession(ManualScoring::keyOf(s));
     day.removeSession(s);
     delete s;
@@ -3365,6 +3402,14 @@ void AnalysisIntegrationTests::testScreenerStored()
 // A screener's night in the Daily panel: the REI large, apneas and hypopneas beneath it, marked as the analysis'.
 void AnalysisIntegrationTests::testReiFrame()
 {
+    // scored by hand: its REI beside the analysis' (doctor 2026-10-23)
+    const QString manual = Daily::reiFiguresHtml(6.0, 4, 8, 5.5);
+    QVERIFY2(manual.contains(QStringLiteral("manual scoring — 5.50")), qPrintable(manual));
+    QVERIFY(manual.contains(ManualMark::pill()));
+    QVERIFY(!Daily::reiFiguresHtml(6.0, 4, 8).contains(QStringLiteral("manual scoring")));
+    // the manual analysis page of a screener night names the analysis, not a device
+    const QString page = Daily::manualAnalysisHtml(QStringLiteral("<p>edits</p>"), 5.5, 6.0, QStringLiteral("REI"), true, QString(), true);
+    QVERIFY2(page.contains(QStringLiteral("REI after manual scoring: 5.50 (analysis 6.00)")), qPrintable(page));
     const QString html = Daily::reiFiguresHtml(6.0, 4, 8);
     QVERIFY2(html.contains(QStringLiteral(">REI<")), qPrintable(html));
     QVERIFY(html.contains(QStringLiteral("6.0")));
