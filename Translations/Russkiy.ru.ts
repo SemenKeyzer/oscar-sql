@@ -16731,6 +16731,7 @@ Mainly affects the importer.</source>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="2051"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="502"/>
         <source>Events</source>
         <translation>События</translation>
     </message>
@@ -17147,6 +17148,7 @@ Intended for support staff and developers.</source>
         <location filename="../oscar/preferencesdialog.ui" line="2588"/>
         <location filename="../oscar/preferencesdialog.ui" line="2627"/>
         <location filename="../oscar/preferencesdialog.ui" line="3152"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="513"/>
         <source>Statistics</source>
         <translation>Статистика</translation>
     </message>
@@ -17497,8 +17499,8 @@ OSCAR может импортировать из этого сжатого ка�
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="3588"/>
-        <location filename="../oscar/preferencesdialog.cpp" line="667"/>
-        <location filename="../oscar/preferencesdialog.cpp" line="801"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="687"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="821"/>
         <source>Details</source>
         <translation>Назначение</translation>
     </message>
@@ -17513,201 +17515,197 @@ OSCAR может импортировать из этого сжатого ка�
         <translation>ОК</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="662"/>
-        <location filename="../oscar/preferencesdialog.cpp" line="795"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="682"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="815"/>
         <source>Name</source>
         <translation>Название</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="663"/>
-        <location filename="../oscar/preferencesdialog.cpp" line="796"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="683"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="816"/>
         <source>Color</source>
         <translation>Цвет</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="665"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="685"/>
         <source>Flag Type</source>
         <translation>Тип события</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="666"/>
-        <location filename="../oscar/preferencesdialog.cpp" line="800"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="686"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="820"/>
         <source>Label</source>
         <translation>Ярлык</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="683"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="703"/>
         <source>CPAP Events</source>
         <translation>События CPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="684"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="704"/>
         <source>Oximeter Events</source>
         <translation>События оксиметрии</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="685"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="705"/>
         <source>Positional Events</source>
         <translation>Позиционные события</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="686"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="706"/>
         <source>Sleep Stage Events</source>
         <translation>События стадий сна</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="687"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="707"/>
         <source>Unknown Events</source>
         <translation>Неизвестные события</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="861"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="881"/>
         <source>Double click to change the descriptive name this channel.</source>
         <translation>Дважды щелкните, чтобы изменить описание этого канала.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="737"/>
-        <location filename="../oscar/preferencesdialog.cpp" line="868"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="757"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="888"/>
         <source>Double click to change the default color for this channel plot/flag/data.</source>
         <translation>Дважды щелкните, чтобы изменить цвет по умолчанию для данных этого канала.</translation>
     </message>
     <message>
         <location filename="../oscar/preferencesdialog.ui" line="2583"/>
         <location filename="../oscar/preferencesdialog.ui" line="2622"/>
-        <location filename="../oscar/preferencesdialog.cpp" line="664"/>
-        <location filename="../oscar/preferencesdialog.cpp" line="797"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="684"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="817"/>
         <source>Overview</source>
         <translation>Сводка</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="100"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="102"/>
         <source>No CPAP devices detected</source>
         <translation>CPAP аппараты не найдены</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="101"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="103"/>
         <source>Will you be using a ResMed brand device?</source>
         <translation>Будете ли вы использовать аппарат ResMed?</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="108"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="110"/>
         <source>&lt;p&gt;&lt;b&gt;Please Note:&lt;/b&gt; OSCAR&apos;s advanced session splitting capabilities are not possible with &lt;b&gt;ResMed&lt;/b&gt; devices due to a limitation in the way their settings and summary data is stored, and therefore they have been disabled for this profile.&lt;/p&gt;&lt;p&gt;On ResMed devices, days will &lt;b&gt;split at noon&lt;/b&gt; like in ResMed&apos;s commercial software.&lt;/p&gt;</source>
         <translation>&lt;p&gt;&lt;b&gt;Обратите внимание:&lt;/b&gt; расширенные возможности разделения сеансов OSCAR невозможны с аппаратом &lt;b&gt;ResMed&lt;/b&gt; из-за ограниченых возможностей хранения их данных и настроек, поэтому они отключены для этого профиля.&lt;/p&gt;&lt;p&gt;На аппаратах ResMed дни &lt;b&gt; разделяются в полдень&lt;/b&gt;, как и в программном обеспечении Resmed.&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="172"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="178"/>
         <source>Search settings...</source>
         <translation>Поиск настройки…</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="308"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="314"/>
         <source>Must enable Permissive Mode (see Clinical Tab)</source>
         <translation>Необходимо включить расширенный режим (см. вкладку «Клинический»)</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="466"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="472"/>
         <source>Default (Calculated from Hour 1)</source>
         <translation>По умолчанию (по первому часу)</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="482"/>
         <source>Show all</source>
-        <translation>Показывать все</translation>
+        <translation type="vanished">Показывать все</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="482"/>
         <source>Show none</source>
-        <translation>Скрыть все</translation>
+        <translation type="vanished">Скрыть все</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="483"/>
         <source>Overview: all</source>
-        <translation>Сводка: все</translation>
+        <translation type="vanished">Сводка: все</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="483"/>
         <source>Overview: none</source>
-        <translation>Сводка: ни одного</translation>
+        <translation type="vanished">Сводка: ни одного</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="729"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="749"/>
         <source>Double click to change the descriptive name the &apos;%1&apos; channel.</source>
         <translation>Дважды щелкните, чтобы изменить описание канала &apos;%1&apos;.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="742"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="762"/>
         <source>Whether this flag has a dedicated overview chart.</source>
         <translation>Имеет ли этот канал свою обзорную диаграмму.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="752"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="772"/>
         <source>Here you can change the type of flag shown for this event</source>
         <translation>Тип отметки, используемой для этого события</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="757"/>
-        <location filename="../oscar/preferencesdialog.cpp" line="892"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="777"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="912"/>
         <source>This is the short-form label to indicate this channel on screen.</source>
         <translation>Короткое название этого канала для отображения.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="763"/>
-        <location filename="../oscar/preferencesdialog.cpp" line="898"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="783"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="918"/>
         <source>This is a description of what this channel does.</source>
         <translation>Описание того, что делает этот канал.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="798"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="818"/>
         <source>Lower</source>
         <translation>Нижний</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="799"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="819"/>
         <source>Upper</source>
         <translation>Верхний</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="818"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="838"/>
         <source>CPAP Waveforms</source>
         <translation>Графики CPAP</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="819"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="839"/>
         <source>Oximeter Waveforms</source>
         <translation>Графики оксиметрии</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="820"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="840"/>
         <source>Positional Waveforms</source>
         <translation>Графики позиции сна</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="821"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="841"/>
         <source>Sleep Stage Waveforms</source>
         <translation>Графики стадий сна</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="877"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="897"/>
         <source>Whether a breakdown of this waveform displays in overview.</source>
         <translation>Показывать ли разбор этого графика в обзоре.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="882"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="902"/>
         <source>Here you can set the &lt;b&gt;lower&lt;/b&gt; threshold used for certain calculations on the %1 waveform</source>
         <translation>Здесь вы можете установить &lt;b&gt;нижний&lt;/b&gt; порог, используемый для расчетов формы графика %1</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="887"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="907"/>
         <source>Here you can set the &lt;b&gt;upper&lt;/b&gt; threshold used for certain calculations on the %1 waveform</source>
         <translation>Здесь вы можете установить &lt;b&gt;верхний&lt;/b&gt; порог, используемый для расчетов формы графика %1</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="998"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1018"/>
         <source>Data Processing Required</source>
         <translation>Необходима обработка данных</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="999"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1019"/>
         <source>A data re/decompression proceedure is required to apply these changes. This operation may take a couple of minutes to complete.
 
 Are you sure you want to make these changes?</source>
@@ -17716,12 +17714,12 @@ Are you sure you want to make these changes?</source>
 Вы уверены, что хотите сделать эти изменения?</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1007"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1027"/>
         <source>Data Reindex Required</source>
         <translation>Необходима переиндексация данных</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1008"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1028"/>
         <source>A data reindexing proceedure is required to apply these changes. This operation may take a couple of minutes to complete.
 
 Are you sure you want to make these changes?</source>
@@ -17730,12 +17728,12 @@ Are you sure you want to make these changes?</source>
 Вы уверены, что хотите сделать эти изменения?</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1014"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1034"/>
         <source>Restart Required</source>
         <translation>Необходим перезапуск</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1015"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1035"/>
         <source>One or more of the changes you have made will require this application to be restarted, in order for these changes to come into effect.
 
 Would you like do this now?</source>
@@ -17744,27 +17742,27 @@ Would you like do this now?</source>
 Хотите сделать это сейчас?</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1458"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1478"/>
         <source>ResMed S9 devices routinely delete certain data from your SD card older than 7 and 30 days (depending on resolution).</source>
         <translation>Аппараты ResMed S9 регулярно удаляют с SD-карты данные, записанные больше 7 и 30 дней назад (в зависимости от точности).</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1459"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1479"/>
         <source> If you ever need to reimport this data again (whether in OSCAR or ResScan) this data won&apos;t come back.</source>
         <translation> Если вам когда-нибудь понадобится заново импортировать эти данные (в OSCAR или ResScan), их нельзя будет вернуть.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1460"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1480"/>
         <source> If you need to conserve disk space, please remember to carry out manual backups.</source>
         <translation> Если вам нужно свободное место на диске, не забывайте делать резервные копии вручную.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1461"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1481"/>
         <source> Are you sure you want to disable these backups?</source>
         <translation> Вы уверены, что хотите отключить эти резервные копии?</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1583"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1603"/>
         <source>Switching off backups is not a good idea, because OSCAR needs these to rebuild the database if errors are found.
 
 </source>
@@ -17773,97 +17771,127 @@ Would you like do this now?</source>
 </translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1584"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1604"/>
         <source>Are you really sure you want to do this?</source>
         <translation>Вы действительно уверены, что хотите это сделать?</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1690"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1710"/>
         <source>Nothing found</source>
         <translation>Ничего не найдено</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="84"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="86"/>
         <source>Flag</source>
         <translation>Событие</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="61"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="63"/>
         <source>Clinical Mode:</source>
         <translation>Стандартный режим:</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="62"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="64"/>
         <source>Reports what is on the data card, all of it including any and all data deselected in the Permissive mode.</source>
         <translation>Отображает все данные с карты памяти аппарата, включая любые данные, исключённые в расширенном режиме.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="63"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="65"/>
         <source>Basically replicates the reports and data stored on the devices data card.</source>
         <translation>По существу воспроизводит отчёты и данные, хранящиеся на карте памяти аппарата.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="64"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="66"/>
         <source>This includes pap devices, oximeters, etc. Compliance reports fall under this mode.</source>
         <translation>Сюда входят аппараты PAP, оксиметры и т. д. Отчёты о соответствии относятся к этому режиму.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="65"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="67"/>
         <source>Compliance reports always include all data within the chosen Compliance period, even if otherwise deselected.</source>
         <translation>Отчёты о соответствии всегда включают все данные за выбранный период соответствия, даже если они были исключены.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="67"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="69"/>
         <source>Permissive Mode:</source>
         <translation>Расширенный режим:</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="68"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="70"/>
         <source>Allows user to select which data sets/ sessions to be used for calculations and display.</source>
         <translation>Позволяет пользователю выбирать наборы данных/сеансы для использования в расчётах и отображении.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="69"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="71"/>
         <source>Additional charts and calculations may be available that are not available from the vendor data.</source>
         <translation>Могут быть доступны дополнительные графики и расчёты, недоступные в данных производителя.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="70"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="72"/>
         <source>Enables Custom UserFlags displayed in the statistics Therapy Efficacy section</source>
         <translation>Включает пользовательские отметки событий (UserFlags), отображаемые в разделе «Эффективность терапии» на вкладке «Статистика»</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="71"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="73"/>
         <source>Enables Steady Breathing Event Flags and Waveform (see CPAP tab)</source>
         <translation>Включает отметки событий и график равномерного дыхания (см. вкладку CPAP)</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="85"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="87"/>
         <source>Minor Flag</source>
         <translation>Незначительное событие</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="86"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="88"/>
         <source>Span</source>
         <translation>Период</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="87"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="89"/>
         <source>Always Minor</source>
         <translation>Всегда незначительное событие</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="393"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="399"/>
         <source>Never</source>
         <translation>Никогда</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1457"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="489"/>
+        <source>%1: select all</source>
+        <translation>%1: выделить все</translation>
+    </message>
+    <message>
+        <location filename="../oscar/preferencesdialog.cpp" line="489"/>
+        <source>%1: clear all</source>
+        <translation>%1: снять все</translation>
+    </message>
+    <message>
+        <location filename="../oscar/preferencesdialog.cpp" line="490"/>
+        <source>Overview: select all</source>
+        <translation>Сводка: выделить все</translation>
+    </message>
+    <message>
+        <location filename="../oscar/preferencesdialog.cpp" line="490"/>
+        <source>Overview: clear all</source>
+        <translation>Сводка: снять все</translation>
+    </message>
+    <message>
+        <location filename="../oscar/preferencesdialog.cpp" line="503"/>
+        <source>Graphs</source>
+        <translation>Графики</translation>
+    </message>
+    <message>
+        <location filename="../oscar/preferencesdialog.cpp" line="511"/>
+        <source>Enable Steady Breathing — experimental</source>
+        <translation>Включить определение равномерного дыхания — экспериментально</translation>
+    </message>
+    <message>
+        <location filename="../oscar/preferencesdialog.cpp" line="1477"/>
         <source>This may not be a good idea</source>
         <translation>Скорей всего это плохая идея</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="167"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="173"/>
         <source>Analysis</source>
         <translation>Анализ</translation>
     </message>
@@ -23029,27 +23057,27 @@ You may continue, but some data may be incomplete or incorrect.</source>
         <translation>Невозможно создать zip!</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1504"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1524"/>
         <source>Names only puts back the channel names and descriptions of this version and language, and keeps your colours and settings.</source>
         <translation>«Только названия» возвращает названия и описания каналов из этой версии и языка, а ваши цвета и настройки сохраняет.</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1507"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1527"/>
         <source>Names Only</source>
         <translation>Только названия</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1519"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1539"/>
         <source>Are you sure you want to reset all your channel colors and settings to defaults?</source>
         <translation>Точно сбросить все настройки и цвета каналов?</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1546"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1566"/>
         <source>Are you sure you want to reset all your oximetry settings to defaults?</source>
         <translation>Точно сбросить все настройки оксиметрии к начальным?</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1626"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1646"/>
         <source>Are you sure you want to reset all your waveform channel colors and settings to defaults?</source>
         <translation>Точно сбросить все цвета и настройки графиков?</translation>
     </message>
@@ -24293,7 +24321,7 @@ popout window, delete it, then pop out this graph again.</source>
         <translation>Статистика использования</translation>
     </message>
     <message>
-        <location filename="../oscar/preferencesdialog.cpp" line="1508"/>
+        <location filename="../oscar/preferencesdialog.cpp" line="1528"/>
         <location filename="../oscar/statistics.cpp" line="1487"/>
         <source>Everything</source>
         <translation>Всё</translation>

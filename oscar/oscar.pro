@@ -994,6 +994,7 @@ test {
         tests/rs01readertests.cpp \
         tests/rs01importtests.cpp \
         tests/rs01clocktests.cpp \
+        tests/uishotstests.cpp \
         tests/analysismarktests.cpp \
         tests/htmlpagestests.cpp \
         tests/channelstoretests.cpp \
@@ -1059,6 +1060,7 @@ test {
         tests/rs01readertests.h \
         tests/rs01importtests.h \
         tests/rs01clocktests.h \
+        tests/uishotstests.h \
         tests/rs01_synth.h \
         tests/analysismarktests.h \
         tests/htmlpagestests.h \

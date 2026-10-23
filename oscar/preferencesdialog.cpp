@@ -33,6 +33,8 @@
 #include "preferencesdialog.h"
 #include <QScreen>
 #include "helptips.h"
+#include <QBoxLayout>
+#include <QGroupBox>
 #include <QScrollArea>
 #include "analysisprefs.h"
 #include "SleepLib/analysis/analysis_service.h"
@@ -164,6 +166,10 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
     analysisScroll->setWidget(m_analysisPage);
     analysisScroll->setWidgetResizable(true);
     analysisScroll->setFrameShape(QFrame::NoFrame);
+    // the tab's own background, not the scroll area's grey (Windows; doctor 2026-10-23)
+    analysisScroll->setStyleSheet(QStringLiteral("QScrollArea { background: transparent; }"));
+    analysisScroll->viewport()->setAutoFillBackground(false);
+    m_analysisPage->setAutoFillBackground(false);
     ui->tabWidget->addTab(analysisScroll, tr("Analysis"));
 
     // search across every tab: type a word, pick the setting from the list
@@ -477,10 +483,11 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
         ui->baseSpO2Option->setCurrentIndex(100-baseoption_data);
 
     // "all" / "none" for the two check box columns of the Events and Signals tables
-    auto addCheckButtons = [this](QHBoxLayout *row, QStandardItemModel *model, const QString &prefix) {
+    // each says which column it sets (doctor 2026-10-23): "Events: select all", "Overview: clear all"
+    auto addCheckButtons = [this](QHBoxLayout *row, QStandardItemModel *model, const QString &prefix, const QString &what) {
         const struct { const char *name; int column; bool on; QString text; } buttons[] = {
-            { "ShowAll", 0, true, tr("Show all") }, { "ShowNone", 0, false, tr("Show none") },
-            { "OverviewAll", 2, true, tr("Overview: all") }, { "OverviewNone", 2, false, tr("Overview: none") },
+            { "ShowAll", 0, true, tr("%1: select all").arg(what) }, { "ShowNone", 0, false, tr("%1: clear all").arg(what) },
+            { "OverviewAll", 2, true, tr("Overview: select all") }, { "OverviewNone", 2, false, tr("Overview: clear all") },
         };
         int at = 1;   // after the reset button
         for (const auto &b : buttons) {
@@ -492,8 +499,21 @@ PreferencesDialog::PreferencesDialog(QWidget *parent, Profile *_profile) :
             row->insertWidget(at++, button);
         }
     };
-    addCheckButtons(ui->horizontalLayout_20, chanModel, QStringLiteral("channels"));
-    addCheckButtons(ui->horizontalLayout_22, waveModel, QStringLiteral("waveforms"));
+    addCheckButtons(ui->horizontalLayout_20, chanModel, QStringLiteral("channels"), tr("Events"));
+    addCheckButtons(ui->horizontalLayout_22, waveModel, QStringLiteral("waveforms"), tr("Graphs"));
+
+    // no frame inside a frame (doctor 2026-10-23): the outer boxes around a single group lose
+    // their border and title; the groups inside keep theirs
+    for (QGroupBox *outer : { ui->steadyBreathingOverview, ui->clinicalGroupBox, ui->oximetryGroupBox }) {
+        outer->setTitle(QString());
+        outer->setStyleSheet(QStringLiteral("QGroupBox#%1 { border: none; margin: 0px; padding: 0px; }").arg(outer->objectName()));
+    }
+    ui->steadyBreathing->setTitle(tr("Enable Steady Breathing — experimental"));
+    ui->groupBox_Statistics->setStyleSheet(QString());   // framed like the other groups
+    ui->groupBox_Statistics->setTitle(tr("Statistics"));
+    // the Memory and Startup group as tall as its check boxes, the rest of the tab left empty
+    ui->groupBox_8->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
+    if (auto *box = qobject_cast<QBoxLayout *>(ui->groupBox_8->parentWidget()->layout())) box->addStretch(1);
 
     // hover explanations: the strip at the bottom shows what the setting under the mouse does
     // the OK/Cancel row leaves the scrolled page, so the strip can sit between the page and the buttons
