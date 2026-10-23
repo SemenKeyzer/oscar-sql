@@ -356,6 +356,16 @@ class Day
     void updateCPAPCache();
 
     inline QDate date() const { return d_date; }
+
+    //! While one lives, counts and AHI hours are the devices' own, without manual scoring (the
+    //! Statistics' device table; the manual analysis has a table of its own).
+    struct DeviceFiguresOnly {
+        DeviceFiguresOnly() { ++s_deviceFiguresOnly; }
+        ~DeviceFiguresOnly() { --s_deviceFiguresOnly; }
+        DeviceFiguresOnly(const DeviceFiguresOnly &) = delete;
+        DeviceFiguresOnly &operator=(const DeviceFiguresOnly &) = delete;
+    };
+    static bool deviceFiguresOnly() { return s_deviceFiguresOnly > 0; }
     void setDate(QDate date) { d_date = date; }
   protected:
 
@@ -374,6 +384,7 @@ class Day
     QHash<ChannelID, double> d_sum;
     bool d_invalidate;
     QDate d_date;
+    static inline int s_deviceFiguresOnly = 0;
 };
 
 

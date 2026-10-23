@@ -2368,12 +2368,13 @@ QString Statistics::GenerateHTML()
         return htmlReportHeader + htmlUsage + htmlReportFooter;
     }
 
-    htmlUsage = GenerateCPAPUsage();
-    if (!htmlUsage.isEmpty()) {
-        const QString note = manualScoringNote(p_profile->FirstDay(MT_CPAP), p_profile->LastDay(MT_CPAP));
-        htmlUsage = manualScoringBanner(note) + manualScoringTable(p_profile->FirstDay(MT_CPAP), p_profile->LastDay(MT_CPAP))
-                    + htmlUsage;   // above the tables, where it is seen
+    {
+        // the device's figures as the device gave them; the manual analysis has a table of its own
+        // under the others (doctor 2026-10-23)
+        Day::DeviceFiguresOnly deviceOnly;
+        htmlUsage = GenerateCPAPUsage();
     }
+    if (!htmlUsage.isEmpty()) htmlUsage += manualAnalysisTable(p_profile->FirstDay(MT_CPAP), p_profile->LastDay(MT_CPAP));
 
     if (htmlUsage == "") {
         return htmlReportHeader + htmlNoData() + htmlReportFooter;
@@ -2923,54 +2924,80 @@ void Statistics::updateReportDate() {
     }
 }
 
-QString Statistics::manualScoringNote(const QDate &from, const QDate &to)
+QString Statistics::manualAnalysisTable(const QDate &from, const QDate &to)
 {
     if (!p_profile || !from.isValid() || !to.isValid()) return QString();
-    int nights = 0;
-    for (QDate date = from; date <= to; date = date.addDays(1)) {
+    constexpr int kMaxNights = 12;   // as many columns as the monthly table
+    QList<Day *> days;
+    for (QDate date = to; date >= from && days.size() < kMaxNights; date = date.addDays(-1)) {
         Day *day = p_profile->GetDay(date, MT_CPAP);
-        if (day && day->hasManualScoring()) ++nights;
+        if (day && day->hasManualScoring() && day->hours(MT_CPAP) > 0) days.prepend(day);
     }
-    if (nights == 0) return QString();
-    return tr("* %n night(s) corrected by hand: the AHI and the event indices count the corrected events.", nullptr, nights);
-}
+    if (days.isEmpty()) return QString();
 
-QString Statistics::manualScoringBanner(const QString &note)
-{
-    if (note.isEmpty()) return QString();
-    return QStringLiteral("<div align=center><table cellpadding=6 cellspacing=0 style='background-color:#FFF3CD;"
-                          " border:1px solid #E0B252;'><tr><td><font size='+1' color='#B26A00'>&#9888;</font></td>"
-                          "<td><b>%1</b></td></tr></table></div><br/>").arg(note.toHtmlEscaped());
-}
-
-QString Statistics::manualScoringTable(const QDate &from, const QDate &to)
-{
-    if (!p_profile || !from.isValid() || !to.isValid()) return QString();
-    int nights = 0;
-    double hours = 0, ahiHours = 0, deviceEvents = 0, events = 0;
-    qint64 flMs = 0;
-    for (QDate date = from; date <= to; date = date.addDays(1)) {
-        Day *day = p_profile->GetDay(date, MT_CPAP);
-        if (!day || !day->hasManualScoring()) continue;
-        ++nights;
-        const double h = day->hours(MT_CPAP), ah = day->ahiHours();
-        hours += h;
-        ahiHours += ah;
-        deviceEvents += day->deviceAHI() * h;           // the device's own AHI, weighted by its hours
-        events += day->count(AllAhiChannels);           // after manual scoring, over the hours left
-        flMs += ManualScoring::flowLimitedMs(day);
-    }
-    if (nights == 0) return QString();
-    auto row = [](const QString &label, const QString &value) {
-        return QStringLiteral("<tr><td>%1</td><td align=right><b>%2</b></td></tr>").arg(label.toHtmlEscaped(), value);
+    // a row per figure: "after manual scoring (the device's)" per night, then the average weighted by hours
+    struct Figure { QString name; std::function<double(Day *, bool)> perHour; };
+    auto index = [](const QList<ChannelID> &codes) {
+        return [codes](Day *d, bool manual) {
+            double n = 0;
+            for (ChannelID c : codes) n += manual ? d->count(c) : d->deviceCount(c);
+            const double h = manual ? d->ahiHours() : d->hours(MT_CPAP);
+            return h > 0 ? n / h : 0.0;
+        };
     };
+    QList<Figure> figures { { STR_TR_AHI, index(ahiChannels) } };
+    for (ChannelID c : { CPAP_Obstructive, CPAP_ClearAirway, CPAP_MixedApnea, CPAP_Apnea, CPAP_AllApnea,
+                         CPAP_Hypopnea, CPAP_ObstructiveHypopnea, CPAP_CentralHypopnea, CPAP_RERA }) {
+        bool any = false;
+        for (Day *d : days) any = any || d->count(c) > 0 || d->deviceCount(c) > 0;
+        if (any) figures.append({ QStringLiteral("&nbsp;&nbsp;") + schema::channel[c].fullname().toHtmlEscaped(), index({ c }) });
+    }
+
+    const QString cell = QStringLiteral("<td align=right>%1</td>");
     QString html = QStringLiteral("<div align=center><table cellpadding=3 cellspacing=0 style='border:1px solid #81C784;'>");
-    html += QStringLiteral("<tr><td colspan=2>%1<b>%2</b> %3</td></tr>").arg(ManualMark::barMark(), tr("Manual analysis").toHtmlEscaped(), ManualMark::pill());
-    html += row(tr("Nights scored by hand"), QString::number(nights));
-    html += row(tr("AHI by the device on those nights"), QString::number(hours > 0 ? deviceEvents / hours : 0, 'f', 2));
-    html += row(tr("AHI after manual scoring"), QString::number(ahiHours > 0 ? events / ahiHours : 0, 'f', 2));
-    if (flMs > 0) html += row(tr("Flow limitation marked by hand, % time"), QString::number(hours > 0 ? 100.0 * flMs / 3600000.0 / hours : 0, 'f', 1));
-    html += QStringLiteral("</table></div><br/>");
+    html += QStringLiteral("<tr><td colspan=%1>%2<b>%3</b> %4</td></tr>")
+                .arg(days.size() + 2).arg(ManualMark::barMark(), tr("Manual analysis").toHtmlEscaped(), ManualMark::pill());
+    html += QStringLiteral("<tr><td><i>%1</i></td>").arg(tr("manual scoring (device)").toHtmlEscaped());
+    for (Day *d : days) html += cell.arg(QStringLiteral("<b>%1</b>").arg(QLocale().toString(d->date(), QLocale::ShortFormat)));
+    html += cell.arg(QStringLiteral("<b>%1</b>").arg(tr("Average (%n night(s))", nullptr, int(days.size())).toHtmlEscaped()));
+    html += QStringLiteral("</tr>");
+    auto pair = [](double manual, double device) {
+        return QStringLiteral("%1 (%2)").arg(manual, 0, 'f', 2).arg(device, 0, 'f', 2);
+    };
+    double hours = 0, ahiHours = 0;
+    for (Day *d : days) {
+        hours += d->hours(MT_CPAP);
+        ahiHours += d->ahiHours();
+    }
+    int line = 0;
+    for (const Figure &f : figures) {
+        html += QStringLiteral("<tr%1><td>%2</td>").arg(line++ % 2 ? QStringLiteral(" bgcolor='#F1F8F3'") : QString(), f.name);
+        double manualSum = 0, deviceSum = 0;
+        for (Day *d : days) {
+            const double m = f.perHour(d, true), dv = f.perHour(d, false);
+            manualSum += m * d->ahiHours();
+            deviceSum += dv * d->hours(MT_CPAP);
+            html += cell.arg(pair(m, dv));
+        }
+        html += cell.arg(QStringLiteral("<b>%1</b>").arg(pair(ahiHours > 0 ? manualSum / ahiHours : 0, hours > 0 ? deviceSum / hours : 0)));
+        html += QStringLiteral("</tr>");
+    }
+    // flow limitation marked by hand: % of the night and minutes
+    qint64 flTotal = 0;
+    for (Day *d : days) flTotal += ManualScoring::flowLimitedMs(d);
+    if (flTotal > 0) {
+        html += QStringLiteral("<tr><td>%1</td>").arg(tr("Flow limitation marked by hand, % (min)").toHtmlEscaped());
+        for (Day *d : days) {
+            const qint64 ms = ManualScoring::flowLimitedMs(d);
+            html += cell.arg(QStringLiteral("%1 (%2)").arg(100.0 * ms / 3600000.0 / d->hours(MT_CPAP), 0, 'f', 1).arg(ms / 60000.0, 0, 'f', 0));
+        }
+        html += cell.arg(QStringLiteral("<b>%1 (%2)</b>").arg(100.0 * flTotal / 3600000.0 / hours, 0, 'f', 1).arg(flTotal / 60000.0 / days.size(), 0, 'f', 0));
+        html += QStringLiteral("</tr>");
+    }
+    html += QStringLiteral("<tr><td>%1</td>").arg(tr("Hours").toHtmlEscaped());
+    for (Day *d : days) html += cell.arg(QString::number(d->hours(MT_CPAP), 'f', 2));
+    html += cell.arg(QStringLiteral("<b>%1</b>").arg(hours / days.size(), 0, 'f', 2));
+    html += QStringLiteral("</tr></table></div><br/>");
     return html;
 }
 

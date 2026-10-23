@@ -240,13 +240,9 @@ class Statistics : public QObject
     explicit Statistics(QObject *parent = 0);
 
     QString GenerateHTML();
-    //! A note that \a from – \a to holds nights with manual scoring; empty when none.
-    static QString manualScoringNote(const QDate &from, const QDate &to);
-    //! \a note as a bar that catches the eye: yellow, bordered, a warning sign; empty for no note.
-    static QString manualScoringBanner(const QString &note);
-    //! The nights scored by hand from \a from to \a to: how many, the AHI by the device and after
-    //! manual scoring over those nights, the flow limitation marked by hand; empty without any.
-    static QString manualScoringTable(const QDate &from, const QDate &to);
+    //! The manual analysis of \a from to \a to: a column per night scored by hand (the latest 12),
+    //! each figure "manual (device)", then their average; empty without such nights.
+    static QString manualAnalysisTable(const QDate &from, const QDate &to);
 
     QString UpdateRecordsBox();
 

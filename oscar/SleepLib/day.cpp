@@ -1147,7 +1147,7 @@ EventDataType Day::count(ChannelID code)
     for (auto & sess : sessions) {
 //        qDebug() << "Day::count session" << numsess++;
 
-        if (sess->enabled() && sess->hasManualScoring()) {
+        if (sess->enabled() && sess->hasManualScoring() && !deviceFiguresOnly()) {
             total += sess->manualDelta().value(code);   // also for a type the device did not record
         }
         if (sess->enabled() && sess->m_cnt.contains(code)) {
@@ -1756,7 +1756,7 @@ double Day::ahiHours()
 {
     double excludedMs = 0;
     for (Session *sess : sessions) {
-        if (sess->enabled() && sess->type() == MT_CPAP) excludedMs += sess->manualExcludedMs();
+        if (sess->enabled() && sess->type() == MT_CPAP && !deviceFiguresOnly()) excludedMs += sess->manualExcludedMs();
     }
     const double h = double(hours(MT_CPAP)) - excludedMs / 3600000.0;
     return h < 1.0 / 3600 ? 0.0 : h;   // under a second left: nothing to count over (float rounding)

@@ -1910,22 +1910,29 @@ void AnalysisIntegrationTests::testStatisticsFootnote()
     Session *s = scoredSession(&cpap, 801, m_machineRow);
     day->addSession(s);
     p_profile->daylist.insert(date, day);
-    QVERIFY(Statistics::manualScoringNote(date, date).isEmpty());
+    QVERIFY(Statistics::manualAnalysisTable(date, date).isEmpty());
     QVERIFY(ManualScoring::addEdit(s, scoringEdit(ManualScoring::Kind::Add, CPAP_Hypopnea, 2480, 2500)));
-    const QString note = Statistics::manualScoringNote(date.addDays(-3), date);
-    QVERIFY2(note.contains(QStringLiteral("1 night")) && note.contains(QStringLiteral("corrected by hand")), qPrintable(note));
-    // shown so it catches the eye: a yellow bar with a warning sign, above the tables (doctor 2026-10-16)
-    const QString banner = Statistics::manualScoringBanner(note);
-    QVERIFY(banner.contains(QStringLiteral("&#9888;")));
-    QVERIFY(banner.contains(QStringLiteral("#FFF3CD"), Qt::CaseInsensitive));
-    QVERIFY(banner.contains(note.toHtmlEscaped()));
-    QVERIFY(Statistics::manualScoringBanner(QString()).isEmpty());
-    // and the period's totals for the nights scored by hand (doctor 2026-10-09)
-    const QString table = Statistics::manualScoringTable(date.addDays(-3), date);
-    QVERIFY2(table.contains(Statistics::tr("Nights scored by hand")), qPrintable(table));
-    QVERIFY(table.contains(QString::number(day->deviceAHI(), 'f', 2)));
-    QVERIFY(table.contains(ManualMark::pill()));
-    QVERIFY(Statistics::manualScoringTable(date.addDays(-30), date.addDays(-20)).isEmpty());
+
+    // the device's table shows the device's own figures (doctor 2026-10-23): manual scoring aside
+    const EventDataType corrected = day->count(CPAP_Hypopnea);
+    {
+        Day::DeviceFiguresOnly deviceOnly;
+        QCOMPARE(day->count(CPAP_Hypopnea), day->deviceCount(CPAP_Hypopnea));
+        QCOMPARE(day->ahiHours(), double(day->hours(MT_CPAP)));
+    }
+    QCOMPARE(day->count(CPAP_Hypopnea), corrected);   // and back after it
+
+    // the manual analysis a table of its own: a column per night scored by hand, "manual (device)",
+    // then the average of those nights
+    const QString table = Statistics::manualAnalysisTable(date.addDays(-3), date);
+    QVERIFY2(table.contains(ManualMark::pill()), qPrintable(table));
+    QVERIFY(table.contains(QLocale().toString(date, QLocale::ShortFormat)));
+    const double ahi = day->count(AllAhiChannels) / day->ahiHours();
+    QVERIFY2(table.contains(QStringLiteral("%1 (%2)").arg(ahi, 0, 'f', 2).arg(day->deviceAHI(), 0, 'f', 2)), qPrintable(table));
+    QVERIFY(table.contains(schema::channel[CPAP_Hypopnea].fullname().toHtmlEscaped()));
+    QVERIFY(table.contains(Statistics::tr("Average (%n night(s))", nullptr, 1)));
+    QVERIFY(!table.contains(schema::channel[CPAP_MixedApnea].fullname().toHtmlEscaped()));   // no such events: no row
+    QVERIFY(Statistics::manualAnalysisTable(date.addDays(-30), date.addDays(-20)).isEmpty());
     p_profile->daylist.remove(date);
     ManualScoring::clearDay(day);
     delete day;
